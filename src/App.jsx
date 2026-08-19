@@ -3,7 +3,7 @@ import Home from "./pages/Home";
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
 import AgentSignIn from "./pages/AgentSignIn";
-
+import SMEDashboard from "./pages/SMEDashboard";
 
 function App() {
   return (
@@ -13,6 +13,7 @@ function App() {
         <Route path="/signUp" element={<SignUp />} />
         <Route path="/signIn" element={<SignIn />} />
         <Route path="/agent-signin" element={<AgentSignIn />} />
+        <Route path="/dashboard" element={<SMEDashboard />} />
       </Routes>
     </BrowserRouter>
   );
