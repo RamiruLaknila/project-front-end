@@ -4,6 +4,7 @@ import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
 import AgentSignIn from "./pages/AgentSignIn";
 import SMEDashboard from "./pages/SMEDashboard";
+import HSCodeSearch from "./pages/HSCodeSearch";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/signIn" element={<SignIn />} />
         <Route path="/agent-signin" element={<AgentSignIn />} />
         <Route path="/dashboard" element={<SMEDashboard />} />
+        <Route path="/hs-search" element={<HSCodeSearch />} />
       </Routes>
     </BrowserRouter>
   );

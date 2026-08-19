@@ -150,6 +150,7 @@ function SMEDashboard() {
           />
 
           <NavItem
+            to="/hs-search"
             icon={<Search size={17} />}
             label="HS Code Search"
           />
@@ -163,6 +164,7 @@ function SMEDashboard() {
             icon={<Users size={17} />}
             label="Find Clearing Agent"
           />
+          
 
           <NavItem
             icon={<Ship size={17} />}
@@ -819,19 +821,20 @@ function SMEDashboard() {
 ============================================================= */
 
 function NavItem({
+  to,
   icon,
   label,
   active = false,
 }) {
   return (
-    <button
+    <Link
+      to={to || "#"}
       className={`group mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-medium transition-all duration-200 ${
         active
           ? "bg-[#173563] text-white shadow-sm"
           : "text-slate-500 hover:translate-x-0.5 hover:bg-slate-50 hover:text-slate-900"
       }`}
     >
-
       <span className="transition-transform duration-200 group-hover:scale-105">
         {icon}
       </span>
@@ -843,8 +846,7 @@ function NavItem({
       {active && (
         <span className="ml-auto h-1.5 w-1.5 rounded-full bg-white" />
       )}
-
-    </button>
+    </Link>
   );
 }
 
