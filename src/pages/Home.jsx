@@ -238,7 +238,7 @@ function Home() {
                 }}
               >
                 <Link
-                  to="/signup"
+                  to="/signin"
                   className="group flex min-h-[76px] items-center gap-4 rounded-xl border border-gray-200/80 bg-white px-5 py-4 shadow-sm transition-all duration-200 hover:border-blue-300 hover:shadow-md"
                 >
                   {/* Icon */}
@@ -291,7 +291,7 @@ function Home() {
                 }}
               >
                 <Link
-                  to="/agent-signup"
+                  to="/agent-signin"
                   className="group flex min-h-[76px] items-center gap-4 rounded-xl border border-gray-200/80 bg-white px-5 py-4 shadow-sm transition-all duration-200 hover:border-emerald-300 hover:shadow-md"
                 >
                   {/* Icon */}
