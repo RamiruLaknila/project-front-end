@@ -129,3 +129,117 @@
     @apply font-sans;
     }
 }
+/* =========================================================
+   IMPORTEASE DASHBOARD ANIMATIONS
+========================================================= */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes progressGrow {
+  from {
+    width: 0;
+  }
+}
+
+.dashboard-fade-up {
+  animation: fadeUp 0.5s ease-out both;
+}
+
+.dashboard-fade-in {
+  animation: fadeIn 0.4s ease-out both;
+}
+
+.dashboard-progress {
+  animation: progressGrow 1s ease-out both;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-fade-up,
+  .dashboard-fade-in,
+  .dashboard-progress {
+    animation: none;
+  }
+}
+/* =========================================================
+   IMPORTEASE DASHBOARD ANIMATIONS
+========================================================= */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+
+@keyframes progressGrow {
+  from {
+    width: 0;
+  }
+}
+
+
+.dashboard-fade-up {
+  animation: fadeUp 0.5s ease-out both;
+}
+
+
+.dashboard-fade-in {
+  animation: fadeIn 0.4s ease-out both;
+}
+
+
+.dashboard-progress {
+  animation: progressGrow 1s ease-out both;
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
+   Respect users who prefer reduced motion
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-fade-up,
+  .dashboard-fade-in,
+  .dashboard-progress {
+    animation: none;
+  }
+}
