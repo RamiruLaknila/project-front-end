@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
+import {
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  Mail,
+} from "lucide-react";
 
 function SignIn() {
   const navigate = useNavigate();
@@ -35,30 +41,24 @@ function SignIn() {
 
     console.log("Sign in data:", formData);
 
-    // Temporary login behavior
-    alert("Sign in successful");
-
-    // Change this later to your real dashboard route
+    // Login successful
     navigate("/dashboard");
   };
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#F8FAFC] px-4 py-8 sm:py-10">
 
-      {/* ===================== BACKGROUND DECORATION ===================== */}
+      {/* BACKGROUND DECORATION */}
       <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-blue-100/50 blur-3xl" />
 
       <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-slate-200/50 blur-3xl" />
 
-      {/* ===================== MAIN CONTAINER ===================== */}
+      {/* MAIN CONTAINER */}
       <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-lg flex-col justify-center">
 
-        {/* ===================== LOGO ===================== */}
+        {/* LOGO */}
         <div className="mb-7 flex justify-center">
-          <Link
-            to="/"
-            className="flex items-center gap-3"
-          >
+          <Link to="/" className="flex items-center gap-3">
             <img
               src="/logo.jpeg"
               alt="ImportEase"
@@ -72,10 +72,10 @@ function SignIn() {
           </Link>
         </div>
 
-        {/* ===================== MAIN CARD ===================== */}
+        {/* MAIN CARD */}
         <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.15)] sm:p-8">
 
-          {/* ===================== HEADING ===================== */}
+          {/* HEADING */}
           <div className="mb-7 text-center">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
               Welcome back
@@ -86,17 +86,17 @@ function SignIn() {
             </p>
           </div>
 
-          {/* ===================== ERROR ===================== */}
+          {/* ERROR */}
           {error && (
             <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
               {error}
             </div>
           )}
 
-          {/* ===================== FORM ===================== */}
+          {/* FORM */}
           <form onSubmit={handleSubmit} className="space-y-5">
 
-            {/* ===================== EMAIL ===================== */}
+            {/* EMAIL */}
             <div>
               <label
                 htmlFor="email"
@@ -124,7 +124,7 @@ function SignIn() {
               </div>
             </div>
 
-            {/* ===================== PASSWORD ===================== */}
+            {/* PASSWORD */}
             <div>
               <div className="mb-1.5 flex items-center justify-between">
                 <label
@@ -162,7 +162,9 @@ function SignIn() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={
+                    showPassword ? "Hide password" : "Show password"
+                  }
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-700"
                 >
                   {showPassword ? (
@@ -174,7 +176,7 @@ function SignIn() {
               </div>
             </div>
 
-            {/* ===================== REMEMBER ME ===================== */}
+            {/* REMEMBER ME */}
             <div className="flex items-center justify-between pt-1">
               <label className="flex cursor-pointer items-center gap-2">
                 <input
@@ -192,7 +194,7 @@ function SignIn() {
               </label>
             </div>
 
-            {/* ===================== SIGN IN BUTTON ===================== */}
+            {/* SIGN IN BUTTON */}
             <button
               type="submit"
               className="w-full rounded-xl bg-[#173563] py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#102547] hover:shadow-xl hover:shadow-[#173563]/20 active:translate-y-0 active:scale-[0.99]"
@@ -201,7 +203,7 @@ function SignIn() {
             </button>
           </form>
 
-          {/* ===================== SIGN UP ===================== */}
+          {/* SIGN UP */}
           <div className="mt-6 border-t border-slate-100 pt-5 text-center">
             <p className="text-sm text-slate-500">
               Don't have an account?{" "}
@@ -215,7 +217,7 @@ function SignIn() {
           </div>
         </div>
 
-        {/* ===================== BACK HOME ===================== */}
+        {/* BACK HOME */}
         <div className="mt-5 flex justify-center">
           <Link
             to="/"
