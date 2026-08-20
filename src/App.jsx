@@ -10,6 +10,9 @@ import Calculator from "./pages/Calculator";
 import FindAgent from "./pages/FindAgent";
 import ShipmentConfirmation from "./pages/ShipmentConfirmation";
 import Shipments from "./pages/Shipments";
+import TrackShipment from "./pages/TrackShipment";
+import Documents from "./pages/Documents";
+
 
 function App() {
   return (
@@ -38,6 +41,15 @@ function App() {
         <Route
   path="/shipment-confirmation"
   element={<ShipmentConfirmation />}
+  
+/>
+<Route
+  path="/track-shipment"
+  element={<TrackShipment />}
+/>
+<Route
+  path="/documents"
+  element={<Documents />}
 />
       </Routes>
     </BrowserRouter>

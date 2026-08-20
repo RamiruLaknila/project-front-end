@@ -4,9 +4,7 @@ import {
   ArrowLeft,
   ArrowUpRight,
   BadgeCheck,
-  Bell,
   Check,
-  CheckCircle2,
   ChevronRight,
   Clock3,
   FileText,
@@ -17,6 +15,8 @@ import {
   Truck,
   UserRound,
 } from "lucide-react";
+
+import AppNavbar from "../components/ui/AppNavbar";
 
 function Shipments() {
   const [shipment, setShipment] = useState(null);
@@ -48,81 +48,37 @@ function Shipments() {
   const status =
     shipment?.status || "Submitted";
 
+  const handleRefresh = () => {
+    const savedImport = localStorage.getItem("currentImport");
+
+    if (savedImport) {
+      try {
+        setShipment(JSON.parse(savedImport));
+      } catch (error) {
+        console.error("Unable to refresh shipment:", error);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
 
       {/* =====================================================
-          NAVBAR
+          SHARED NAVBAR
       ===================================================== */}
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
 
-        <div className="mx-auto flex h-[68px] max-w-[1280px] items-center justify-between px-5 sm:px-8">
-
-          {/* Logo */}
-          <Link
-            to="/dashboard"
-            className="flex items-center gap-3"
-          >
-            <img
-              src="/logo.jpeg"
-              alt="ImportEase"
-              className="h-11 w-11 object-contain mix-blend-multiply"
-            />
-
-            <div>
-              <div className="text-[18px] font-bold tracking-tight text-[#173563]">
-                Import<span className="text-slate-900">Ease</span>
-              </div>
-
-              <div className="hidden text-[9px] font-semibold uppercase tracking-[0.13em] text-slate-400 sm:block">
-                SME Import Platform
-              </div>
-            </div>
-          </Link>
-
-          {/* Right */}
-          <div className="flex items-center gap-3">
-
-            <button
-              className="relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100"
-              aria-label="Notifications"
-            >
-              <Bell size={17} />
-
-              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-blue-600 ring-2 ring-white" />
-            </button>
-
-            <div className="hidden h-7 w-px bg-slate-200 sm:block" />
-
-            <div className="flex items-center gap-2.5">
-
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#173563] text-[10px] font-bold text-white">
-                MB
-              </div>
-
-              <div className="hidden sm:block">
-                <p className="text-xs font-semibold text-slate-800">
-                  My Business
-                </p>
-
-                <p className="text-[9px] text-slate-400">
-                  SME Account
-                </p>
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-      </header>
+      <AppNavbar />
 
       {/* =====================================================
           MAIN
       ===================================================== */}
+
       <main className="mx-auto max-w-[1280px] px-5 py-8 sm:px-8 lg:py-10">
 
-        {/* Breadcrumb */}
+        {/* ===================================================
+            BREADCRUMB
+        =================================================== */}
+
         <div className="mb-6 flex items-center gap-2 text-xs text-slate-400">
 
           <Link
@@ -143,6 +99,7 @@ function Shipments() {
         {/* ===================================================
             PAGE HEADER
         =================================================== */}
+
         <section className="mb-7">
 
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
@@ -174,11 +131,15 @@ function Shipments() {
             </div>
 
             <button
-              onClick={() => window.location.reload()}
+              type="button"
+              onClick={handleRefresh}
               className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
             >
+
               <RefreshCw size={14} />
+
               Refresh status
+
             </button>
 
           </div>
@@ -188,6 +149,7 @@ function Shipments() {
         {/* ===================================================
             SHIPMENT HEADER CARD
         =================================================== */}
+
         <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_6px_25px_rgba(15,23,42,0.03)]">
 
           <div className="border-b border-slate-100 px-5 py-5 sm:px-7">
@@ -218,6 +180,7 @@ function Shipments() {
 
                     <span>
                       Reference:
+
                       <strong className="ml-1 font-mono text-slate-600">
                         {reference}
                       </strong>
@@ -225,6 +188,7 @@ function Shipments() {
 
                     <span>
                       HS Code:
+
                       <strong className="ml-1 font-mono text-slate-600">
                         {hsCode}
                       </strong>
@@ -244,6 +208,7 @@ function Shipments() {
                 />
 
                 <div>
+
                   <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                     Current status
                   </p>
@@ -251,6 +216,7 @@ function Shipments() {
                   <p className="mt-0.5 text-xs font-bold text-slate-700">
                     Request submitted
                   </p>
+
                 </div>
 
               </div>
@@ -262,11 +228,13 @@ function Shipments() {
           {/* =================================================
               PROGRESS
           ================================================= */}
+
           <div className="px-5 py-7 sm:px-7">
 
             <div className="mb-6 flex items-center justify-between">
 
               <div>
+
                 <h3 className="text-sm font-bold text-slate-900">
                   Import progress
                 </h3>
@@ -274,6 +242,7 @@ function Shipments() {
                 <p className="mt-1 text-[10px] text-slate-400">
                   Your shipment journey
                 </p>
+
               </div>
 
               <span className="text-xs font-bold text-blue-700">
@@ -332,14 +301,19 @@ function Shipments() {
         {/* ===================================================
             LOWER GRID
         =================================================== */}
+
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_370px]">
 
           {/* =================================================
               LEFT
           ================================================= */}
+
           <div className="space-y-6">
 
-            {/* AGENT */}
+            {/* =================================================
+                AGENT
+            ================================================= */}
+
             <section className="rounded-2xl border border-slate-200 bg-white">
 
               <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
@@ -365,6 +339,7 @@ function Shipments() {
               <div className="p-5">
 
                 {agent ? (
+
                   <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
 
                     <div className="flex items-center gap-4">
@@ -374,10 +349,12 @@ function Shipments() {
                         {agent.initials || "AG"}
 
                         <span className="absolute -bottom-1 -right-1 rounded-full bg-white">
+
                           <BadgeCheck
                             size={16}
                             className="fill-emerald-500 text-white"
                           />
+
                         </span>
 
                       </div>
@@ -391,8 +368,11 @@ function Shipments() {
                         <div className="mt-1 flex flex-wrap items-center gap-3 text-[10px] text-slate-400">
 
                           <span className="flex items-center gap-1">
+
                             <MapPin size={11} />
+
                             {agent.location || "Sri Lanka"}
+
                           </span>
 
                           <span>
@@ -406,23 +386,30 @@ function Shipments() {
                     </div>
 
                     <button
+                      type="button"
                       className="rounded-lg border border-slate-200 px-4 py-2 text-[10px] font-semibold text-slate-600 transition hover:bg-slate-50"
                     >
                       Contact agent
                     </button>
 
                   </div>
+
                 ) : (
+
                   <p className="text-xs text-slate-500">
                     No clearing agent information available.
                   </p>
+
                 )}
 
               </div>
 
             </section>
 
-            {/* DOCUMENTS */}
+            {/* =================================================
+                DOCUMENTS
+            ================================================= */}
+
             <section className="rounded-2xl border border-slate-200 bg-white">
 
               <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
@@ -434,6 +421,7 @@ function Shipments() {
                   </div>
 
                   <div>
+
                     <h2 className="text-sm font-bold text-slate-900">
                       Import documents
                     </h2>
@@ -441,6 +429,7 @@ function Shipments() {
                     <p className="mt-0.5 text-[9px] text-slate-400">
                       Documents required for clearance
                     </p>
+
                   </div>
 
                 </div>
@@ -478,9 +467,13 @@ function Shipments() {
           {/* =================================================
               RIGHT
           ================================================= */}
+
           <aside className="space-y-6">
 
-            {/* SUMMARY */}
+            {/* =================================================
+                SUMMARY
+            ================================================= */}
+
             <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
 
               <div className="bg-[#173563] px-5 py-5 text-white">
@@ -516,7 +509,7 @@ function Shipments() {
 
                 <InfoRow
                   label="Status"
-                  value="Submitted"
+                  value={status}
                 />
 
                 <div className="border-t border-slate-100 pt-4">
@@ -546,7 +539,10 @@ function Shipments() {
 
             </section>
 
-            {/* HELP */}
+            {/* =================================================
+                HELP
+            ================================================= */}
+
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
 
               <div className="flex items-start gap-3">
@@ -566,9 +562,15 @@ function Shipments() {
                     customs requirements, and shipment questions.
                   </p>
 
-                  <button className="mt-3 flex items-center gap-1 text-[10px] font-bold text-blue-700 hover:text-blue-800">
+                  <button
+                    type="button"
+                    className="mt-3 flex items-center gap-1 text-[10px] font-bold text-blue-700 hover:text-blue-800"
+                  >
+
                     Get support
+
                     <ArrowUpRight size={12} />
+
                   </button>
 
                 </div>
@@ -581,20 +583,27 @@ function Shipments() {
 
         </div>
 
-        {/* BACK */}
+        {/* ===================================================
+            BACK
+        =================================================== */}
+
         <div className="mt-7 flex justify-center">
 
           <Link
             to="/dashboard"
             className="flex items-center gap-2 text-xs font-medium text-slate-400 transition hover:text-slate-700"
           >
+
             <ArrowLeft size={14} />
+
             Back to dashboard
+
           </Link>
 
         </div>
 
       </main>
+
     </div>
   );
 }
@@ -623,11 +632,13 @@ function TimelineItem({
               : "bg-slate-100 text-slate-400"
         }`}
       >
+
         {complete ? (
           <Check size={14} strokeWidth={3} />
         ) : (
           number
         )}
+
       </div>
 
       <div className="min-w-0 flex-1 pt-0.5">
