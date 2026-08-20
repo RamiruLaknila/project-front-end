@@ -8,6 +8,9 @@ import NewImport from "./pages/NewImport";
 import HSCodeSearch from "./pages/HSCodeSearch";
 import Calculator from "./pages/Calculator";
 import FindAgent from "./pages/FindAgent";
+import ShipmentConfirmation from "./pages/ShipmentConfirmation";
+import Shipments from "./pages/Shipments";
+
 function App() {
   return (
     <BrowserRouter>
@@ -28,6 +31,14 @@ function App() {
 />
         <Route path="/calculator" element={<Calculator />} />
         <Route path="/find-agent" element={<FindAgent />} />
+        <Route
+  path="/shipments"
+  element={<Shipments />}
+/>
+        <Route
+  path="/shipment-confirmation"
+  element={<ShipmentConfirmation />}
+/>
       </Routes>
     </BrowserRouter>
   );
