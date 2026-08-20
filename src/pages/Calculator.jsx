@@ -23,7 +23,6 @@ function ImportCalculator() {
   const [form, setForm] = useState({
     productValue: "",
     freight: "",
-    insurance: "",
     dutyRate: "10",
     vatRate: "18",
     otherCharges: "",
@@ -38,12 +37,11 @@ function ImportCalculator() {
   const values = useMemo(() => {
     const product = Number(form.productValue) || 0;
     const freight = Number(form.freight) || 0;
-    const insurance = Number(form.insurance) || 0;
     const dutyRate = Number(form.dutyRate) || 0;
     const vatRate = Number(form.vatRate) || 0;
     const other = Number(form.otherCharges) || 0;
 
-    const customsValue = product + freight + insurance;
+    const customsValue = product + freight;
 
     const customsDuty = customsValue * (dutyRate / 100);
 
@@ -58,7 +56,6 @@ function ImportCalculator() {
     return {
       product,
       freight,
-      insurance,
       customsValue,
       customsDuty,
       vat,
@@ -137,7 +134,6 @@ function ImportCalculator() {
     setForm({
       productValue: "",
       freight: "",
-      insurance: "",
       dutyRate: "10",
       vatRate: "18",
       otherCharges: "",
@@ -189,7 +185,7 @@ function ImportCalculator() {
     <div className="min-h-screen bg-[#F7F9FC] text-slate-900">
 
       {/* =====================================================
-          SHARED APPLICATION NAVBAR
+          NAVBAR
       ===================================================== */}
 
       <AppNavbar />
@@ -440,18 +436,6 @@ function ImportCalculator() {
                 help="Estimated cost of transporting the goods."
               />
 
-              {/* INSURANCE */}
-
-              <InputField
-                label="Insurance"
-                name="insurance"
-                value={form.insurance}
-                onChange={handleChange}
-                placeholder="e.g. 100"
-                suffix="LKR"
-                help="Estimated insurance cost."
-              />
-
               {/* TAX ASSUMPTIONS */}
 
               <div className="border-t border-slate-100 pt-5">
@@ -471,6 +455,8 @@ function ImportCalculator() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
 
+                  {/* DUTY */}
+
                   <InputField
                     label="Customs duty"
                     name="dutyRate"
@@ -480,6 +466,8 @@ function ImportCalculator() {
                     suffix="%"
                     help="Estimated customs duty rate."
                   />
+
+                  {/* VAT */}
 
                   <InputField
                     label="VAT"
@@ -604,11 +592,6 @@ function ImportCalculator() {
                     value={values.freight}
                   />
 
-                  <ResultRow
-                    label="Insurance"
-                    value={values.insurance}
-                  />
-
                   <div className="my-3 border-t border-slate-100" />
 
                   <ResultRow
@@ -706,7 +689,7 @@ function ImportCalculator() {
                 <Formula
                   number="01"
                   title="Customs value"
-                  text="Product + freight + insurance"
+                  text="Product + freight"
                 />
 
                 <Formula
