@@ -13,11 +13,19 @@ import Shipments from "./pages/Shipments";
 import TrackShipment from "./pages/TrackShipment";
 import Documents from "./pages/Documents";
 
+// Profile & Settings
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+
+        {/* =========================
+            MAIN PAGES
+        ========================= */}
+
         <Route path="/" element={<Home />} />
 
         <Route path="/signin" element={<SignIn />} />
@@ -26,31 +34,80 @@ function App() {
 
         <Route path="/dashboard" element={<Dashboard />} />
 
-        <Route path="/new-import" element={<NewImport />} />
+        {/* =========================
+            IMPORT
+        ========================= */}
+
         <Route
-                  path="/hs-code-search"
-                  element={<HSCodeSearch />}
-        
-/>
-        <Route path="/calculator" element={<Calculator />} />
-        <Route path="/find-agent" element={<FindAgent />} />
+          path="/new-import"
+          element={<NewImport />}
+        />
+
         <Route
-  path="/shipments"
-  element={<Shipments />}
-/>
+          path="/hs-code-search"
+          element={<HSCodeSearch />}
+        />
+
         <Route
-  path="/shipment-confirmation"
-  element={<ShipmentConfirmation />}
-  
-/>
-<Route
-  path="/track-shipment"
-  element={<TrackShipment />}
-/>
-<Route
-  path="/documents"
-  element={<Documents />}
-/>
+          path="/calculator"
+          element={<Calculator />}
+        />
+
+        {/* =========================
+            AGENTS
+        ========================= */}
+
+        <Route
+          path="/find-agent"
+          element={<FindAgent />}
+        />
+
+        <Route
+          path="/shipment-confirmation"
+          element={<ShipmentConfirmation />}
+        />
+
+        {/* =========================
+            SHIPMENTS
+        ========================= */}
+
+        <Route
+          path="/shipments"
+          element={<Shipments />}
+        />
+
+        <Route
+          path="/track-shipment"
+          element={<TrackShipment />}
+        />
+
+        {/* =========================
+            DOCUMENTS
+        ========================= */}
+
+        <Route
+          path="/documents"
+          element={<Documents />}
+        />
+
+        {/* =========================
+            PROFILE
+        ========================= */}
+
+        <Route
+          path="/profile"
+          element={<Profile />}
+        />
+
+        {/* =========================
+            SETTINGS
+        ========================= */}
+
+        <Route
+          path="/settings"
+          element={<Settings />}
+        />
+
       </Routes>
     </BrowserRouter>
   );
