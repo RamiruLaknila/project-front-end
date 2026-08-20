@@ -24,13 +24,15 @@ function Dashboard() {
 
           {/* Logo */}
           <Link to="/dashboard" className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#183A6B] text-sm font-bold text-white shadow-sm">
-              IE
-            </div>
+              <img
+              src="/public/logo.jpeg"
+              alt="ImportEase"
+              className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
+            />
 
             <div>
               <div className="text-[18px] font-bold tracking-tight text-[#183A6B]">
-                Import<span className="text-blue-600">Ease</span>
+                Import<span className="text-[#173563]">Ease</span>
               </div>
               <div className="hidden text-[10px] font-medium uppercase tracking-wider text-slate-400 sm:block">
                 SME Import Assistant

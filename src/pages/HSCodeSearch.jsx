@@ -1,609 +1,767 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  Search,
   ArrowLeft,
-  PackageSearch,
-  Sparkles,
-  Clock3,
-  ChevronRight,
-  X,
-  History,
-  ShieldCheck,
+  ArrowRight,
+  Search,
+  Package,
+  CheckCircle2,
   Info,
-  Copy,
-  Check,
-  ArrowUpRight,
+  ShieldCheck,
+  ChevronRight,
+  Sparkles,
+  FileText,
 } from "lucide-react";
 
 function HSCodeSearch() {
+  const navigate = useNavigate();
+
+  const [importData, setImportData] = useState(null);
   const [search, setSearch] = useState("");
-  const [searched, setSearched] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [selectedCode, setSelectedCode] = useState(null);
 
-  const recentSearches = [
-    "Laptop computers",
-    "Solar panels",
-    "Cotton fabric",
-    "Mobile phones",
-  ];
+  useEffect(() => {
+    const savedImport = localStorage.getItem("currentImport");
 
-  const results = [
+    if (savedImport) {
+      try {
+        setImportData(JSON.parse(savedImport));
+      } catch (error) {
+        console.error("Unable to read import data:", error);
+      }
+    }
+  }, []);
+
+  /*
+   * Demo HS code database.
+   *
+   * IMPORTANT:
+   * These are example records for the UI flow.
+   * Connect this section to your real tariff/customs data later.
+   */
+  const hsCodes = [
     {
-      code: "8471.30.00",
-      title: "Portable automatic data processing machines",
+      code: "8541.43",
+      title: "Photovoltaic cells assembled in modules or made up into panels",
+      category: "Solar & Renewable Energy",
+      keywords: [
+        "solar",
+        "solar panel",
+        "solar panels",
+        "photovoltaic",
+        "pv",
+        "panel",
+      ],
+      confidence: "High",
       description:
-        "Portable computers, including laptops and notebook computers.",
-      duty: "0%",
-      vat: "18%",
-      confidence: "High match",
+        "Classification commonly associated with photovoltaic cells assembled in modules or panels.",
+    },
+
+    {
+      code: "8471.30",
+      title:
+        "Portable automatic data processing machines, weighing not more than 10 kg",
+      category: "Electronics & Computers",
+      keywords: [
+        "laptop",
+        "computer",
+        "notebook",
+        "portable computer",
+      ],
+      confidence: "High",
+      description:
+        "Example classification for certain portable computers and related devices.",
+    },
+
+    {
+      code: "8471.49",
+      title: "Other automatic data processing machines presented in the form of systems",
+      category: "Electronics & Computers",
+      keywords: [
+        "desktop",
+        "computer",
+        "pc",
+        "server",
+        "computer system",
+      ],
+      confidence: "Medium",
+      description:
+        "Example classification for certain computer systems.",
+    },
+
+    {
+      code: "6109.10",
+      title: "T-shirts, singlets and other vests of cotton",
+      category: "Textiles & Apparel",
+      keywords: [
+        "shirt",
+        "t-shirt",
+        "tshirt",
+        "cotton shirt",
+        "clothing",
+      ],
+      confidence: "High",
+      description:
+        "Example classification for certain cotton knitted garments.",
+    },
+
+    {
+      code: "8703.23",
+      title:
+        "Motor cars and other motor vehicles principally designed for transport of persons",
+      category: "Motor Vehicles & Parts",
+      keywords: [
+        "car",
+        "vehicle",
+        "motor car",
+        "automobile",
+      ],
+      confidence: "Medium",
+      description:
+        "Example classification for certain passenger motor vehicles.",
+    },
+
+    {
+      code: "8504.40",
+      title: "Electrical static converters",
+      category: "Electrical Equipment",
+      keywords: [
+        "inverter",
+        "converter",
+        "power converter",
+        "solar inverter",
+      ],
+      confidence: "Medium",
+      description:
+        "Example classification for electrical static converters.",
     },
   ];
 
-  const handleSearch = () => {
-    if (!search.trim()) return;
-    setSearched(true);
+  /*
+   * Determine the initial search term from the New Import page.
+   */
+  useEffect(() => {
+    if (importData?.productName) {
+      setSearch(importData.productName);
+    }
+  }, [importData]);
+
+  /*
+   * Search and rank matching results.
+   */
+  const results = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    if (!query) {
+      return hsCodes;
+    }
+
+    const words = query
+      .split(/\s+/)
+      .filter(Boolean);
+
+    return hsCodes
+      .map((item) => {
+        let score = 0;
+
+        const title = item.title.toLowerCase();
+        const category = item.category.toLowerCase();
+        const keywords = item.keywords.map((keyword) =>
+          keyword.toLowerCase()
+        );
+
+        if (title.includes(query)) {
+          score += 10;
+        }
+
+        if (category.includes(query)) {
+          score += 6;
+        }
+
+        words.forEach((word) => {
+          if (title.includes(word)) score += 4;
+          if (category.includes(word)) score += 3;
+
+          if (
+            keywords.some((keyword) =>
+              keyword.includes(word)
+            )
+          ) {
+            score += 7;
+          }
+        });
+
+        return {
+          ...item,
+          score,
+        };
+      })
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score);
+  }, [search]);
+
+  const handleSelectCode = (item) => {
+    setSelectedCode(item);
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText("8471.30.00");
-    setCopied(true);
+  const handleContinue = () => {
+    if (!selectedCode) {
+      return;
+    }
 
-    setTimeout(() => {
-      setCopied(false);
-    }, 1800);
-  };
+    const updatedImport = {
+      ...(importData || {}),
+      hsCode: selectedCode.code,
+      hsCodeTitle: selectedCode.title,
+      hsCodeCategory: selectedCode.category,
+      hsCodeConfidence: selectedCode.confidence,
+      hsCodeDescription: selectedCode.description,
+      status: "HS Code Selected",
+    };
 
-  const clearSearch = () => {
-    setSearch("");
-    setSearched(false);
+    localStorage.setItem(
+      "currentImport",
+      JSON.stringify(updatedImport)
+    );
+
+    navigate("/calculator");
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] text-slate-900">
+    <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
 
       {/* =====================================================
-          TOP NAVIGATION
+          HEADER
       ===================================================== */}
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
 
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+        <div className="mx-auto flex h-[70px] max-w-[1180px] items-center justify-between px-5 sm:px-7">
 
-        <div className="mx-auto flex h-[72px] max-w-[1500px] items-center justify-between px-4 sm:px-6 lg:px-8">
-
-          <div className="flex items-center gap-4">
-
-            <Link
-              to="/dashboard"
-              className="group flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all duration-200 hover:-translate-x-0.5 hover:border-slate-300 hover:text-[#173563]"
-            >
-              <ArrowLeft
-                size={17}
-                className="transition-transform duration-200 group-hover:-translate-x-0.5"
-              />
-            </Link>
-
-            <div className="h-6 w-px bg-slate-200" />
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-3"
+          >
+            <img
+              src="/logo.jpeg"
+              alt="ImportEase"
+              className="h-10 w-10 object-contain mix-blend-multiply"
+            />
 
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                ImportEase
+              <div className="text-[17px] font-bold tracking-tight text-[#173563]">
+                Import<span className="text-slate-900">Ease</span>
+              </div>
+
+              <div className="hidden text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400 sm:block">
+                SME Import Platform
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            to="/new-import"
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+          >
+            <ArrowLeft size={16} />
+
+            <span className="hidden sm:inline">
+              Back to Import
+            </span>
+          </Link>
+
+        </div>
+      </header>
+
+      {/* =====================================================
+          MAIN
+      ===================================================== */}
+      <main className="mx-auto max-w-[1050px] px-5 py-8 sm:px-7 lg:py-12">
+
+        {/* ===================================================
+            BREADCRUMB
+        =================================================== */}
+        <div className="mb-4 flex items-center gap-2 text-xs font-medium text-slate-400">
+
+          <Link
+            to="/dashboard"
+            className="transition hover:text-slate-700"
+          >
+            Dashboard
+          </Link>
+
+          <ChevronRight size={13} />
+
+          <Link
+            to="/new-import"
+            className="transition hover:text-slate-700"
+          >
+            New Import
+          </Link>
+
+          <ChevronRight size={13} />
+
+          <span className="text-slate-600">
+            HS Code
+          </span>
+
+        </div>
+
+        {/* ===================================================
+            TITLE
+        =================================================== */}
+        <div className="mb-7">
+
+          <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+
+            <div>
+
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5">
+
+                <Sparkles
+                  size={13}
+                  className="text-blue-600"
+                />
+
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700">
+                  Classification assistant
+                </span>
+
+              </div>
+
+              <h1 className="text-2xl font-bold tracking-tight text-[#14213D] sm:text-3xl">
+                Find your HS code
+              </h1>
+
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                Search for your product and select the most appropriate
+                HS code from the available classifications.
               </p>
 
-              <h1 className="text-sm font-bold text-slate-900">
-                HS Code Search
-              </h1>
-            </div>
-
-          </div>
-
-          <div className="hidden items-center gap-2 sm:flex">
-
-            <div className="flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-
-              <span className="text-[10px] font-semibold text-emerald-700">
-                Customs data available
-              </span>
             </div>
 
           </div>
 
         </div>
 
-      </header>
-
-
-      {/* =====================================================
-          MAIN
-      ===================================================== */}
-
-      <main className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-
         {/* ===================================================
-            HERO
+            PROGRESS
         =================================================== */}
+        <div className="mb-7 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
 
-        <section className="hs-fade-up text-center">
+          <div className="flex items-center">
 
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#173563] text-white shadow-lg shadow-[#173563]/20">
+            {/* STEP 1 */}
+            <div className="flex items-center gap-2">
 
-            <PackageSearch size={22} />
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white">
+                <CheckCircle2 size={16} />
+              </div>
+
+              <span className="hidden text-xs font-semibold text-emerald-700 sm:block">
+                Import details
+              </span>
+
+            </div>
+
+            <div className="mx-2 h-px flex-1 bg-emerald-200" />
+
+            {/* STEP 2 */}
+            <div className="flex items-center gap-2">
+
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#173563] text-xs font-bold text-white">
+                2
+              </div>
+
+              <span className="hidden text-xs font-semibold text-[#173563] sm:block">
+                HS Code
+              </span>
+
+            </div>
+
+            <div className="mx-2 h-px flex-1 bg-slate-200" />
+
+            {/* STEP 3 */}
+            <div className="flex items-center gap-2">
+
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-400">
+                3
+              </div>
+
+              <span className="hidden text-xs text-slate-400 sm:block">
+                Costs
+              </span>
+
+            </div>
+
+            <div className="mx-2 h-px flex-1 bg-slate-200" />
+
+            {/* STEP 4 */}
+            <div className="flex items-center gap-2">
+
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-400">
+                4
+              </div>
+
+              <span className="hidden text-xs text-slate-400 sm:block">
+                Agent
+              </span>
+
+            </div>
 
           </div>
+        </div>
 
-          <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-[#173563]">
-            Import Classification
-          </p>
+        {/* ===================================================
+            IMPORT SUMMARY
+        =================================================== */}
+        {importData && (
+          <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-5">
 
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-            Find the HS Code
-          </h2>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
-            Search for your product and discover the most relevant
-            Harmonized System code, import duty and tax information.
-          </p>
+              <div className="flex items-start gap-3">
 
-        </section>
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+                  <Package size={19} />
+                </div>
 
+                <div>
+
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                    Current import
+                  </p>
+
+                  <h2 className="mt-0.5 text-sm font-bold text-slate-800">
+                    {importData.productName || "Unnamed product"}
+                  </h2>
+
+                  <p className="mt-1 text-xs text-slate-500">
+                    {importData.quantity || "—"}{" "}
+                    {importData.unit || "units"}
+                    {importData.country
+                      ? ` • ${importData.country}`
+                      : ""}
+                  </p>
+
+                </div>
+              </div>
+
+              <Link
+                to="/new-import"
+                className="text-xs font-semibold text-blue-700 hover:text-blue-800"
+              >
+                Edit details
+              </Link>
+
+            </div>
+
+          </section>
+        )}
 
         {/* ===================================================
             SEARCH CARD
         =================================================== */}
+        <section className="rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,0.025)]">
 
-        <section
-          className="hs-fade-up mx-auto mt-8 max-w-3xl"
-          style={{ animationDelay: "100ms" }}
-        >
+          <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-2 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.25)] transition-all duration-300 focus-within:border-[#173563]/30 focus-within:shadow-[0_25px_70px_-30px_rgba(23,53,99,0.25)]">
+            <h2 className="text-sm font-bold text-slate-900">
+              Product classification
+            </h2>
 
-            <div className="flex items-center gap-2">
+            <p className="mt-1 text-xs text-slate-500">
+              Search using the product name, material, or main purpose.
+            </p>
 
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F0F4F9] text-[#173563]">
+          </div>
 
-                <Search size={20} />
+          <div className="p-5 sm:p-6">
 
-              </div>
+            {/* SEARCH */}
+            <div className="relative">
+
+              <Search
+                size={19}
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              />
 
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSearch();
-                  }
-                }}
-                placeholder="Search a product, e.g. laptop computers"
-                className="h-12 min-w-0 flex-1 bg-transparent px-2 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
+                placeholder="Search your product..."
+                className="h-13 w-full rounded-xl border border-slate-300 bg-white pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-4 focus:ring-[#173563]/10"
               />
 
-              {search && (
-                <button
-                  onClick={clearSearch}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                >
-                  <X size={16} />
-                </button>
-              )}
+            </div>
 
-              <button
-                onClick={handleSearch}
-                disabled={!search.trim()}
-                className="flex h-12 shrink-0 items-center gap-2 rounded-2xl bg-[#173563] px-5 text-xs font-bold text-white shadow-lg shadow-[#173563]/15"              >
-                Search
+            {/* SEARCH HELP */}
+            <div className="mt-3 flex items-start gap-2">
 
-                <ArrowUpRight
-                  size={15}
-                  className="transition-transform duration-200 group-hover:translate-x-0.5 translatey-0.5"
-                />
-              </button>
+              <Info
+                size={14}
+                className="mt-0.5 shrink-0 text-slate-400"
+              />
+
+              <p className="text-[11px] leading-5 text-slate-400">
+                Example searches: solar panels, laptop computer,
+                cotton t-shirt, motor car, inverter.
+              </p>
 
             </div>
 
           </div>
-
-          <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-2 text-[10px] text-slate-400">
-
-            <span>Try:</span>
-
-            {recentSearches.slice(0, 3).map((item) => (
-              <button
-                key={item}
-                onClick={() => {
-                  setSearch(item);
-                  setSearched(true);
-                }}
-                className="font-medium text-slate-500 transition hover:text-[#173563]"
-              >
-                {item}
-              </button>
-            ))}
-
-          </div>
-
         </section>
-
 
         {/* ===================================================
             RESULTS
         =================================================== */}
+        <section className="mt-6">
 
-        {searched ? (
+          <div className="mb-4 flex items-center justify-between">
 
-          <section
-            className="hs-fade-up mx-auto mt-10 max-w-5xl"
-            style={{ animationDelay: "150ms" }}
-          >
+            <div>
+              <h2 className="text-sm font-bold text-slate-900">
+                Matching classifications
+              </h2>
 
-            {/* Result header */}
-
-            <div className="mb-4 flex items-end justify-between">
-
-              <div>
-
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                  Search results
-                </p>
-
-                <h3 className="mt-1 text-lg font-bold text-slate-900">
-                  Matching HS classifications
-                </h3>
-
-              </div>
-
-              <span className="rounded-full bg-slate-100 px-3 py-1.5 text-[10px] font-semibold text-slate-500">
-                1 result found
-              </span>
-
+              <p className="mt-1 text-xs text-slate-500">
+                {results.length}{" "}
+                {results.length === 1
+                  ? "possible match"
+                  : "possible matches"}{" "}
+                found
+              </p>
             </div>
 
+          </div>
 
-            {/* Main result */}
+          <div className="space-y-3">
 
-            {results.map((result) => (
+            {results.length > 0 ? (
+              results.map((item, index) => {
+                const selected =
+                  selectedCode?.code === item.code;
 
-              <div
-                key={result.code}
-                className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_20px_50px_-25px_rgba(15,23,42,0.3)]"
-              >
+                return (
+                  <button
+                    key={item.code}
+                    type="button"
+                    onClick={() => handleSelectCode(item)}
+                    className={`group w-full rounded-2xl border bg-white p-5 text-left transition-all duration-200 ${
+                      selected
+                        ? "border-[#173563] bg-blue-50/30 shadow-[0_6px_24px_rgba(23,53,99,0.08)]"
+                        : "border-slate-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+                    }`}
+                  >
 
-                <div className="p-5 sm:p-7">
+                    <div className="flex items-start gap-4">
 
-                  <div className="flex flex-col justify-between gap-6 sm:flex-row">
-
-                    <div className="flex gap-4">
-
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EEF3F9] text-[#173563] transition-transform duration-300 group-hover:scale-105">
-                        <PackageSearch size={21} />
+                      {/* NUMBER */}
+                      <div
+                        className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold sm:flex ${
+                          selected
+                            ? "bg-[#173563] text-white"
+                            : "bg-slate-100 text-slate-500"
+                        }`}
+                      >
+                        {index + 1}
                       </div>
 
-                      <div>
+                      <div className="min-w-0 flex-1">
 
                         <div className="flex flex-wrap items-center gap-2">
 
-                          <span className="font-mono text-xl font-bold tracking-tight text-[#173563]">
-                            {result.code}
+                          <span className="rounded-md bg-slate-100 px-2 py-1 font-mono text-xs font-bold text-slate-700">
+                            HS {item.code}
                           </span>
 
-                          <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[9px] font-bold text-emerald-600">
-                            <Check size={11} />
-                            {result.confidence}
+                          <span
+                            className={`rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-wide ${
+                              item.confidence === "High"
+                                ? "bg-emerald-50 text-emerald-700"
+                                : "bg-amber-50 text-amber-700"
+                            }`}
+                          >
+                            {item.confidence} confidence
                           </span>
 
                         </div>
 
-                        <h4 className="mt-2 max-w-2xl text-sm font-bold leading-6 text-slate-900">
-                          {result.title}
-                        </h4>
+                        <h3 className="mt-3 text-sm font-semibold leading-5 text-slate-800">
+                          {item.title}
+                        </h3>
 
-                        <p className="mt-1.5 max-w-2xl text-xs leading-5 text-slate-500">
-                          {result.description}
+                        <p className="mt-1.5 text-xs leading-5 text-slate-500">
+                          {item.description}
                         </p>
 
+                        <div className="mt-3 flex items-center gap-2">
+
+                          <span className="text-[10px] font-medium text-slate-400">
+                            Category
+                          </span>
+
+                          <span className="text-[10px] font-semibold text-slate-600">
+                            {item.category}
+                          </span>
+
+                        </div>
+
+                      </div>
+
+                      {/* SELECT */}
+                      <div
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition ${
+                          selected
+                            ? "border-[#173563] bg-[#173563] text-white"
+                            : "border-slate-200 text-transparent group-hover:border-blue-300"
+                        }`}
+                      >
+                        <CheckCircle2 size={17} />
                       </div>
 
                     </div>
 
-                    <button
-                      onClick={handleCopy}
-                      className="flex h-9 shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 text-[10px] font-semibold text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
-                    >
-                      {copied ? (
-                        <>
-                          <Check size={13} />
-                          Copied
-                        </>
-                      ) : (
-                        <>
-                          <Copy size={13} />
-                          Copy code
-                        </>
-                      )}
-                    </button>
-
-                  </div>
-
-
-                  {/* Data cards */}
-
-                  <div className="mt-7 grid gap-3 sm:grid-cols-3">
-
-                    <InfoCard
-                      label="HS Code"
-                      value={result.code}
-                    />
-
-                    <InfoCard
-                      label="Import Duty"
-                      value={result.duty}
-                    />
-
-                    <InfoCard
-                      label="VAT"
-                      value={result.vat}
-                    />
-
-                  </div>
-
-                </div>
-
-
-                {/* Footer */}
-
-                <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/60 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-
-                  <div className="flex items-center gap-2 text-[10px] text-slate-500">
-
-                    <ShieldCheck
-                      size={14}
-                      className="text-emerald-500"
-                    />
-
-                    Classification based on available customs information
-
-                  </div>
-
-                  <button className="flex items-center gap-1 text-[10px] font-bold text-[#173563] transition hover:gap-2">
-                    View classification details
-                    <ChevronRight size={13} />
                   </button>
+                );
+              })
+            ) : (
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
 
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                  <Search size={21} />
                 </div>
 
-              </div>
+                <h3 className="mt-4 text-sm font-semibold text-slate-800">
+                  No matching classifications
+                </h3>
 
-            ))}
-
-          </section>
-
-        ) : (
-
-          /* ===================================================
-             EMPTY / INITIAL STATE
-          =================================================== */
-
-          <section
-            className="hs-fade-up mx-auto mt-12 max-w-5xl"
-            style={{ animationDelay: "200ms" }}
-          >
-
-            <div className="grid gap-4 md:grid-cols-3">
-
-              <FeatureCard
-                icon={<Sparkles size={18} />}
-                title="Smart classification"
-                description="Search using simple product names instead of complicated tariff terminology."
-              />
-
-              <FeatureCard
-                icon={<ShieldCheck size={18} />}
-                title="Reliable information"
-                description="Designed to present customs and tariff information in a clear format."
-              />
-
-              <FeatureCard
-                icon={<Clock3 size={18} />}
-                title="Save time"
-                description="Quickly narrow down possible classifications before starting your import."
-              />
-
-            </div>
-
-
-            {/* Recent searches */}
-
-            <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-
-              <div className="flex items-center gap-2">
-
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-                  <History size={15} />
-                </div>
-
-                <div>
-
-                  <h3 className="text-xs font-bold text-slate-800">
-                    Recent searches
-                  </h3>
-
-                  <p className="text-[10px] text-slate-400">
-                    Quickly search something you looked up before
-                  </p>
-
-                </div>
+                <p className="mx-auto mt-1.5 max-w-md text-xs leading-5 text-slate-500">
+                  Try using a broader product name or include the material
+                  and purpose of the product.
+                </p>
 
               </div>
-
-
-              <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-
-                {recentSearches.map((item, index) => (
-
-                  <button
-                    key={item}
-                    onClick={() => {
-                      setSearch(item);
-                      setSearched(true);
-                    }}
-                    className="group flex items-center justify-between rounded-xl border border-slate-100 px-3 py-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-200 hover:bg-slate-50"
-                  >
-
-                    <div className="flex items-center gap-2">
-
-                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-[9px] font-bold text-slate-400">
-                        0{index + 1}
-                      </span>
-
-                      <span className="text-[11px] font-medium text-slate-600">
-                        {item}
-                      </span>
-
-                    </div>
-
-                    <ChevronRight
-                      size={13}
-                      className="text-slate-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-[#173563]"
-                    />
-
-                  </button>
-
-                ))}
-
-              </div>
-
-            </div>
-
-          </section>
-
-        )}
-
-
-        {/* ===================================================
-            INFORMATION
-        =================================================== */}
-
-        <section className="mx-auto mt-8 max-w-5xl">
-
-          <div className="flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
-
-            <Info
-              size={16}
-              className="mt-0.5 shrink-0 text-[#173563]"
-            />
-
-            <p className="text-[10px] leading-5 text-slate-500">
-              HS codes can depend on the exact specifications, material,
-              intended use and other characteristics of a product.
-              Always verify the final classification with the relevant
-              customs authority or your clearing agent before importing.
-            </p>
+            )}
 
           </div>
-
         </section>
 
+        {/* ===================================================
+            SELECTED CODE
+        =================================================== */}
+        {selectedCode && (
+          <section className="mt-6 rounded-2xl border border-blue-200 bg-blue-50/50 p-5 sm:p-6">
+
+            <div className="flex items-start gap-4">
+
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#173563] text-white">
+                <CheckCircle2 size={19} />
+              </div>
+
+              <div className="min-w-0 flex-1">
+
+                <p className="text-[10px] font-bold uppercase tracking-wider text-blue-700">
+                  Selected HS Code
+                </p>
+
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+
+                  <span className="font-mono text-lg font-bold text-[#173563]">
+                    {selectedCode.code}
+                  </span>
+
+                  <span className="text-xs text-blue-700">
+                    {selectedCode.title}
+                  </span>
+
+                </div>
+
+                <p className="mt-2 text-xs leading-5 text-blue-700/80">
+                  This classification will be used for the next step,
+                  where ImportEase will estimate your import-related costs.
+                </p>
+
+              </div>
+
+            </div>
+
+          </section>
+        )}
 
         {/* ===================================================
-            FOOTER
+            IMPORTANT NOTICE
         =================================================== */}
+        <div className="mt-6 flex items-start gap-3 rounded-xl border border-amber-100 bg-amber-50/60 px-4 py-3.5">
 
-        <footer className="mx-auto mt-12 max-w-5xl border-t border-slate-200 pt-5 text-center text-[10px] text-slate-400">
+          <ShieldCheck
+            size={16}
+            className="mt-0.5 shrink-0 text-amber-600"
+          />
 
-          ImportEase · Import classification made simpler
+          <p className="text-[11px] leading-5 text-amber-800">
+            HS code suggestions are intended to assist with classification.
+            The final classification should be verified against the
+            applicable official tariff and customs information before
+            completing an import.
+          </p>
 
-        </footer>
+        </div>
+
+        {/* ===================================================
+            ACTIONS
+        =================================================== */}
+        <div className="mt-7 flex flex-col-reverse items-stretch justify-between gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center">
+
+          <Link
+            to="/new-import"
+            className="flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 sm:justify-start"
+          >
+            <ArrowLeft size={16} />
+            Back
+          </Link>
+
+          <button
+            type="button"
+            disabled={!selectedCode}
+            onClick={handleContinue}
+            className={`group flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all ${
+              selectedCode
+                ? "bg-[#173563] text-white shadow-lg shadow-[#173563]/10 hover:-translate-y-0.5 hover:bg-[#102A50] hover:shadow-xl"
+                : "cursor-not-allowed bg-slate-200 text-slate-400"
+            }`}
+          >
+            Continue to Calculator
+
+            <ArrowRight
+              size={17}
+              className={`transition-transform ${
+                selectedCode
+                  ? "group-hover:translate-x-0.5"
+                  : ""
+              }`}
+            />
+          </button>
+
+        </div>
+
+        {/* ===================================================
+            FOOTER INFO
+        =================================================== */}
+        <div className="mt-6 flex items-center justify-center gap-2 text-center text-[10px] text-slate-400">
+
+          <FileText size={13} />
+
+          <span>
+            Your selected classification will be saved to this import.
+          </span>
+
+        </div>
 
       </main>
-
-
-      {/* =====================================================
-          ANIMATION CSS
-      ===================================================== */}
-
-      <style>{`
-
-        @keyframes hsFadeUp {
-          from {
-            opacity: 0;
-            transform: translateY(18px);
-          }
-
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .hs-fade-up {
-          animation: hsFadeUp 0.65s cubic-bezier(.22,1,.36,1) both;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .hs-fade-up {
-            animation: none;
-          }
-        }
-
-      `}</style>
-
     </div>
   );
 }
-
-
-/* =============================================================
-   FEATURE CARD
-============================================================= */
-
-function FeatureCard({
-  icon,
-  title,
-  description,
-}) {
-  return (
-    <div className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-md">
-
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#EEF3F9] text-[#173563] transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
-        {icon}
-      </div>
-
-      <h3 className="mt-4 text-xs font-bold text-slate-900">
-        {title}
-      </h3>
-
-      <p className="mt-1.5 text-[10px] leading-5 text-slate-400">
-        {description}
-      </p>
-
-    </div>
-  );
-}
-
-
-/* =============================================================
-   INFO CARD
-============================================================= */
-
-function InfoCard({
-  label,
-  value,
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 transition-all duration-200 hover:border-slate-200 hover:bg-slate-50">
-
-      <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-        {label}
-      </p>
-
-      <p className="mt-1.5 font-mono text-sm font-bold text-slate-800">
-        {value}
-      </p>
-
-    </div>
-  );
-}
-
 
 export default HSCodeSearch;
