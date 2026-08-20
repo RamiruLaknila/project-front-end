@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import NewImport from "./pages/NewImport";
 import HSCodeSearch from "./pages/HSCodeSearch";
 import Calculator from "./pages/Calculator";
+import FindAgent from "./pages/FindAgent";
 function App() {
   return (
     <BrowserRouter>
@@ -26,6 +27,7 @@ function App() {
         
 />
         <Route path="/calculator" element={<Calculator />} />
+        <Route path="/find-agent" element={<FindAgent />} />
       </Routes>
     </BrowserRouter>
   );
