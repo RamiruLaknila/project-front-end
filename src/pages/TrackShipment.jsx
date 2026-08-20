@@ -15,6 +15,8 @@ import {
   Truck,
 } from "lucide-react";
 
+import BackButton from "../components/ui/BackButton";
+
 /* =========================================================
    SHIPMENT STAGES
 ========================================================= */
@@ -88,93 +90,126 @@ function TrackShipment() {
   const shipmentId = shipment?.id || "IMP-204821";
 
   const createdDate = shipment?.createdAt
-    ? new Date(shipment.createdAt).toLocaleDateString(
-        "en-GB",
-        {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }
-      )
+    ? new Date(shipment.createdAt).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
     : "20 Aug 2026";
 
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
 
       {/* =====================================================
+          ANIMATIONS
+      ====================================================== */}
+
+      <style>{`
+        @keyframes fadeUp {
+          from {
+            opacity: 0;
+            transform: translateY(12px);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.96);
+          }
+
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .fade-up,
+          .scale-in {
+            animation: none;
+          }
+        }
+
+        .fade-up {
+          animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .scale-in {
+          animation: scaleIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+      `}</style>
+
+      {/* =====================================================
           NAVBAR
-          SAME STRUCTURE AS AppNavbar
-      ===================================================== */}
+      ====================================================== */}
 
       <AppNavbar />
 
       {/* =====================================================
-          MAIN
-      ===================================================== */}
+          MAIN CONTENT
+      ====================================================== */}
 
-      <main className="mx-auto max-w-[1120px] px-5 py-8 sm:px-8 lg:py-10">
+      <main className="mx-auto w-full max-w-[980px] px-5 py-8 sm:px-8 lg:py-10">
 
         {/* ===================================================
-            BREADCRUMB
-        =================================================== */}
+            BACK BUTTON
+        ==================================================== */}
 
-        <div className="mb-7 flex items-center gap-2 text-xs text-slate-400">
-
-          <Link
-            to="/dashboard"
-            className="transition hover:text-slate-700"
-          >
-            Dashboard
-          </Link>
-
-          <ChevronRight size={13} />
-
-          <span className="font-medium text-slate-600">
-            Track Shipment
-          </span>
-
+        <div className="mb-6">
+          <BackButton current="Track Shipment" />
         </div>
 
         {/* ===================================================
-            HEADER
-        =================================================== */}
+            PAGE HEADER
+        ==================================================== */}
 
-        <section className="mb-7">
+        <section className="fade-up mb-8">
 
-          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+          <div className="flex flex-col items-center justify-center text-center">
 
-            <div>
+            {/* BADGE */}
 
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5">
 
-                <Truck
-                  size={13}
-                  className="text-blue-700"
-                />
+              <Truck
+                size={13}
+                className="text-blue-700"
+              />
 
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700">
-                  Shipment tracking
-                </span>
-
-              </div>
-
-              <h1 className="text-2xl font-bold tracking-tight text-[#14213D] sm:text-3xl">
-                Track your import
-              </h1>
-
-              <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-                Follow your import and customs clearance progress
-                from one place.
-              </p>
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-700">
+                Shipment tracking
+              </span>
 
             </div>
+
+            {/* TITLE */}
+
+            <h1 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[40px]">
+              Track your Shipment
+            </h1>
+
+            {/* DESCRIPTION */}
+
+            <p className="mx-auto mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
+              Follow your import and customs clearance progress
+              from one place.
+            </p>
+
+            {/* REFRESH */}
 
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[10px] font-bold text-slate-600 transition hover:bg-slate-50"
+              className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[10px] font-bold text-slate-600 transition hover:bg-slate-50"
             >
               <RefreshCw size={13} />
+
               Refresh status
             </button>
 
@@ -184,13 +219,13 @@ function TrackShipment() {
 
         {/* ===================================================
             SHIPMENT HEADER CARD
-        =================================================== */}
+        ==================================================== */}
 
-        <section className="mb-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_5px_25px_rgba(15,23,42,0.03)]">
+        <section className="fade-up mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_5px_25px_rgba(15,23,42,0.03)]">
 
           <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
 
-            {/* Shipment information */}
+            {/* SHIPMENT INFORMATION */}
 
             <div className="flex items-center gap-4">
 
@@ -198,13 +233,13 @@ function TrackShipment() {
                 <Package size={21} />
               </div>
 
-              <div>
+              <div className="min-w-0">
 
                 <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                   Shipment ID
                 </p>
 
-                <div className="mt-1 flex items-center gap-2">
+                <div className="mt-1 flex flex-wrap items-center gap-2">
 
                   <h2 className="text-base font-bold tracking-tight text-slate-900">
                     {shipmentId}
@@ -224,7 +259,7 @@ function TrackShipment() {
 
             </div>
 
-            {/* Current stage */}
+            {/* CURRENT STAGE */}
 
             <div className="flex items-center gap-3">
 
@@ -250,15 +285,17 @@ function TrackShipment() {
 
         {/* ===================================================
             CONTENT GRID
-        =================================================== */}
+        ==================================================== */}
 
-        <div className="grid gap-5 lg:grid-cols-[1fr_350px]">
+        <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
 
           {/* =================================================
               LEFT - TIMELINE
           ================================================= */}
 
-          <section className="rounded-2xl border border-slate-200 bg-white shadow-[0_5px_25px_rgba(15,23,42,0.03)]">
+          <section className="fade-up rounded-2xl border border-slate-200 bg-white shadow-[0_5px_25px_rgba(15,23,42,0.03)]">
+
+            {/* HEADER */}
 
             <div className="border-b border-slate-100 px-5 py-4">
 
@@ -272,6 +309,8 @@ function TrackShipment() {
               </p>
 
             </div>
+
+            {/* TIMELINE */}
 
             <div className="p-5 sm:p-7">
 
@@ -310,7 +349,7 @@ function TrackShipment() {
                 CLEARING AGENT
             ================================================= */}
 
-            <section className="rounded-2xl border border-slate-200 bg-white shadow-[0_5px_25px_rgba(15,23,42,0.03)]">
+            <section className="fade-up rounded-2xl border border-slate-200 bg-white shadow-[0_5px_25px_rgba(15,23,42,0.03)]">
 
               <div className="border-b border-slate-100 px-5 py-4">
 
@@ -327,7 +366,7 @@ function TrackShipment() {
 
                     <div className="flex items-center gap-3">
 
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#173563] text-xs font-bold text-white">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#173563] text-xs font-bold text-white">
                         {agent.initials || "AG"}
                       </div>
 
@@ -420,7 +459,7 @@ function TrackShipment() {
                 IMPORT SUMMARY
             ================================================= */}
 
-            <section className="rounded-2xl border border-slate-200 bg-white shadow-[0_5px_25px_rgba(15,23,42,0.03)]">
+            <section className="fade-up rounded-2xl border border-slate-200 bg-white shadow-[0_5px_25px_rgba(15,23,42,0.03)]">
 
               <div className="border-b border-slate-100 px-5 py-4">
 
@@ -477,11 +516,11 @@ function TrackShipment() {
 
         {/* ===================================================
             DOCUMENTS / ACTIONS
-        =================================================== */}
+        ==================================================== */}
 
-        <section className="mt-5 grid gap-4 sm:grid-cols-2">
+        <section className="fade-up mt-5 grid gap-4 sm:grid-cols-2">
 
-          {/* Documents */}
+          {/* DOCUMENTS */}
 
           <Link
             to="/documents"
@@ -511,7 +550,7 @@ function TrackShipment() {
 
           </Link>
 
-          {/* Dashboard */}
+          {/* DASHBOARD */}
 
           <Link
             to="/dashboard"
@@ -545,16 +584,18 @@ function TrackShipment() {
 
         {/* ===================================================
             SECURITY
-        =================================================== */}
+        ==================================================== */}
 
-        <div className="mt-7 flex items-center justify-center gap-2 text-[9px] text-slate-400">
+        <div className="mt-7 flex items-center justify-center gap-2 text-center text-[10px] text-slate-400">
 
           <ShieldCheck
             size={13}
             className="text-emerald-600"
           />
 
-          Your import information is securely managed by ImportEase.
+          <span>
+            Your import information is securely managed by ImportEase.
+          </span>
 
         </div>
 
@@ -566,7 +607,6 @@ function TrackShipment() {
 
 /* =========================================================
    APP NAVBAR
-   EXACT STANDARD NAVBAR
 ========================================================= */
 
 function AppNavbar() {
@@ -605,14 +645,12 @@ function AppNavbar() {
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
 
       {/* ===================================================
-          DESKTOP / MAIN NAVBAR
-      =================================================== */}
+          DESKTOP NAVBAR
+      ==================================================== */}
 
       <div className="relative mx-auto flex h-[68px] max-w-[1280px] items-center px-5 sm:px-8">
 
-        {/* =================================================
-            LOGO
-        ================================================= */}
+        {/* LOGO */}
 
         <Link
           to="/dashboard"
@@ -639,9 +677,7 @@ function AppNavbar() {
 
         </Link>
 
-        {/* =================================================
-            CENTER NAVIGATION
-        ================================================= */}
+        {/* CENTER NAVIGATION */}
 
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex">
 
@@ -656,13 +692,9 @@ function AppNavbar() {
 
         </nav>
 
-        {/* =================================================
-            RIGHT SIDE
-        ================================================= */}
+        {/* RIGHT SIDE */}
 
         <div className="ml-auto flex items-center gap-3">
-
-          {/* Notifications */}
 
           <button
             type="button"
@@ -677,8 +709,6 @@ function AppNavbar() {
           </button>
 
           <div className="hidden h-7 w-px bg-slate-200 sm:block" />
-
-          {/* Profile */}
 
           <div className="flex items-center gap-2.5">
 
@@ -704,9 +734,9 @@ function AppNavbar() {
 
       </div>
 
-      {/* =================================================
+      {/* ===================================================
           MOBILE NAVIGATION
-      ================================================= */}
+      ==================================================== */}
 
       <div className="border-t border-slate-100 bg-white px-4 py-2 md:hidden">
 
@@ -797,7 +827,7 @@ function TimelineItem({
   return (
     <div className="relative flex gap-4">
 
-      {/* Timeline connector */}
+      {/* CONNECTOR */}
 
       {!last && (
         <div
@@ -809,7 +839,7 @@ function TimelineItem({
         />
       )}
 
-      {/* Circle */}
+      {/* CIRCLE */}
 
       <div
         className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 ${
@@ -840,7 +870,7 @@ function TimelineItem({
 
       </div>
 
-      {/* Content */}
+      {/* CONTENT */}
 
       <div
         className={`min-w-0 flex-1 ${

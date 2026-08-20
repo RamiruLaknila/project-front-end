@@ -18,11 +18,9 @@ function Dashboard() {
 
   const [shipments, setShipments] = useState([]);
 
-  /*
-  =========================================================
-  LOAD SHIPMENTS
-  =========================================================
-  */
+  /* =========================================================
+     LOAD SHIPMENTS
+  ========================================================= */
 
   const loadShipments = () => {
     try {
@@ -50,11 +48,9 @@ function Dashboard() {
     loadShipments();
   }, [location.key]);
 
-  /*
-  =========================================================
-  STORAGE LISTENER
-  =========================================================
-  */
+  /* =========================================================
+     STORAGE LISTENER
+  ========================================================= */
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -68,11 +64,9 @@ function Dashboard() {
     };
   }, []);
 
-  /*
-  =========================================================
-  DASHBOARD DATA
-  =========================================================
-  */
+  /* =========================================================
+     DASHBOARD DATA
+  ========================================================= */
 
   const activeShipments = useMemo(() => {
     return shipments.filter((shipment) => {
@@ -82,11 +76,9 @@ function Dashboard() {
     });
   }, [shipments]);
 
-  /*
-  =========================================================
-  QUICK TOOLS
-  =========================================================
-  */
+  /* =========================================================
+     QUICK TOOLS
+  ========================================================= */
 
   const quickTools = [
     {
@@ -186,7 +178,7 @@ function Dashboard() {
 
               </div>
 
-              <h1 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[32px]">
+              <h1 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[40px]">
                 Welcome back, My Business.
               </h1>
 
@@ -226,10 +218,12 @@ function Dashboard() {
               <div className="flex min-w-0 items-start gap-3">
 
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+
                   <Ship
                     size={18}
                     strokeWidth={1.8}
                   />
+
                 </div>
 
                 <div className="min-w-0">
@@ -311,10 +305,12 @@ function Dashboard() {
                   <div
                     className={`flex h-10 w-10 items-center justify-center rounded-xl ${tool.iconStyle} transition-all duration-300 group-hover:scale-105`}
                   >
+
                     <Icon
                       size={17}
                       strokeWidth={1.8}
                     />
+
                   </div>
 
                   <h3 className="mt-3 text-[13px] font-bold leading-5 text-slate-800 transition-colors group-hover:text-[#173B6C]">
@@ -354,7 +350,9 @@ function Dashboard() {
 
           <Info size={12} />
 
-          <span>ImportEase · SME Import Platform</span>
+          <span>
+            ImportEase · SME Import Platform
+          </span>
 
         </div>
 

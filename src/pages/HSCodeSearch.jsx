@@ -39,10 +39,7 @@ function HSCodeSearch() {
 
   /*
    * Demo HS code database.
-   *
-   * IMPORTANT:
-   * These are example records for the UI flow.
-   * Connect this section to your real tariff/customs data later.
+   * Replace these records with real tariff/customs data later.
    */
   const hsCodes = [
     {
@@ -140,7 +137,7 @@ function HSCodeSearch() {
   ];
 
   /*
-   * Use the product name from the previous step.
+   * Load product name from previous import step.
    */
   useEffect(() => {
     if (importData?.productName) {
@@ -166,6 +163,7 @@ function HSCodeSearch() {
 
         const title = item.title.toLowerCase();
         const category = item.category.toLowerCase();
+
         const keywords = item.keywords.map((keyword) =>
           keyword.toLowerCase()
         );
@@ -308,10 +306,10 @@ function HSCodeSearch() {
       <AppNavbar />
 
       {/* =====================================================
-          MAIN
+          MAIN CONTENT
       ====================================================== */}
 
-      <main className="mx-auto w-full max-w-[1120px] px-5 py-8 sm:px-8 lg:py-10">
+      <main className="mx-auto w-full max-w-[980px] px-5 py-8 sm:px-8 lg:py-10">
 
         {/* ===================================================
             BACK BUTTON
@@ -327,37 +325,33 @@ function HSCodeSearch() {
 
         <section className="fade-up mb-8">
 
-          <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+          <div className="flex flex-col items-center justify-center text-center">
 
-            <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5">
 
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5">
+              <Sparkles
+                size={13}
+                className="text-blue-600"
+                strokeWidth={2}
+              />
 
-                <Sparkles
-                  size={13}
-                  className="text-blue-600"
-                  strokeWidth={2}
-                />
-
-                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-700">
-                  Classification assistant
-                </span>
-
-              </div>
-
-              <h1 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[32px]">
-                Find your HS code
-              </h1>
-
-              <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
-                Search for your product and select the most appropriate
-                classification. ImportEase will use this information to
-                estimate your import costs.
-              </p>
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-700">
+                Classification assistant
+              </span>
 
             </div>
 
-            <div className="hidden items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 md:flex">
+            <h1 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[40px]">
+              Find your HS code
+            </h1>
+
+            <p className="mx-auto mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
+              Search for your product and select the most appropriate
+              classification. ImportEase will use this information to
+              estimate your import costs.
+            </p>
+
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
 
               <ShieldCheck
                 size={14}
@@ -375,10 +369,10 @@ function HSCodeSearch() {
         </section>
 
         {/* ===================================================
-            PROGRESS
+            SMALL CENTERED PROGRESS BAR
         ==================================================== */}
 
-        <section className="fade-up mb-7 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_2px_10px_rgba(15,23,42,.02)] sm:p-5">
+        <section className="fade-up mx-auto mb-7 w-full max-w-[760px] rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-[0_2px_8px_rgba(15,23,42,.02)]">
 
           <div className="flex items-center">
 
@@ -386,11 +380,11 @@ function HSCodeSearch() {
 
             <div className="flex shrink-0 items-center gap-2">
 
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
-                <CheckCircle2 size={16} />
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
+                <CheckCircle2 size={14} />
               </div>
 
-              <span className="hidden text-xs font-semibold text-emerald-700 sm:block">
+              <span className="hidden text-[11px] font-semibold text-emerald-700 sm:block">
                 Import details
               </span>
 
@@ -402,11 +396,11 @@ function HSCodeSearch() {
 
             <div className="flex shrink-0 items-center gap-2">
 
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#173B6C] text-xs font-bold text-white shadow-sm">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#173B6C] text-[11px] font-bold text-white shadow-sm">
                 2
               </div>
 
-              <span className="hidden text-xs font-semibold text-[#173B6C] sm:block">
+              <span className="hidden text-[11px] font-semibold text-[#173B6C] sm:block">
                 HS Code
               </span>
 
@@ -418,11 +412,11 @@ function HSCodeSearch() {
 
             <div className="flex shrink-0 items-center gap-2">
 
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-400">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-400">
                 3
               </div>
 
-              <span className="hidden text-xs font-medium text-slate-400 sm:block">
+              <span className="hidden text-[11px] font-medium text-slate-400 sm:block">
                 Costs
               </span>
 
@@ -434,11 +428,11 @@ function HSCodeSearch() {
 
             <div className="flex shrink-0 items-center gap-2">
 
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-400">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-400">
                 4
               </div>
 
-              <span className="hidden text-xs font-medium text-slate-400 sm:block">
+              <span className="hidden text-[11px] font-medium text-slate-400 sm:block">
                 Agent
               </span>
 
@@ -485,7 +479,9 @@ function HSCodeSearch() {
 
                     {importData.country && (
                       <>
-                        <span className="text-slate-300">•</span>
+                        <span className="text-slate-300">
+                          •
+                        </span>
 
                         <span>
                           {importData.country}
@@ -495,7 +491,9 @@ function HSCodeSearch() {
 
                     {importData.category && (
                       <>
-                        <span className="text-slate-300">•</span>
+                        <span className="text-slate-300">
+                          •
+                        </span>
 
                         <span>
                           {importData.category}
@@ -515,10 +513,7 @@ function HSCodeSearch() {
               >
                 Edit details
 
-                <ChevronRight
-                  size={13}
-                  className="transition-transform group-hover:translate-x-0.5"
-                />
+                <ChevronRight size={13} />
               </Link>
 
             </div>
@@ -530,8 +525,7 @@ function HSCodeSearch() {
             SEARCH CARD
         ==================================================== */}
 
-        <section className="fade-up rounded-2xl border border-slate-200 bg-white shadow-[0_2px_14px_rgba(15,23,42,.025)]">
-
+<section className="fade-up rounded-2xl border border-slate-200 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.06)]">
           {/* CARD HEADER */}
 
           <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
@@ -560,10 +554,12 @@ function HSCodeSearch() {
               </div>
 
               <div className="hidden h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600 sm:flex">
+
                 <Search
                   size={15}
                   strokeWidth={1.8}
                 />
+
               </div>
 
             </div>
@@ -679,9 +675,7 @@ function HSCodeSearch() {
 
           </div>
 
-          {/* =================================================
-              RESULTS
-          ================================================== */}
+          {/* RESULTS */}
 
           <div className="space-y-3">
 
@@ -692,13 +686,16 @@ function HSCodeSearch() {
                   selectedCode?.code === item.code;
 
                 const recommended =
-                  index === 0 && search.trim().length > 0;
+                  index === 0 &&
+                  search.trim().length > 0;
 
                 return (
                   <button
                     key={item.code}
                     type="button"
-                    onClick={() => handleSelectCode(item)}
+                    onClick={() =>
+                      handleSelectCode(item)
+                    }
                     className={`group relative w-full overflow-hidden rounded-2xl border bg-white p-5 text-left transition-all duration-300 sm:p-6 ${
                       selected
                         ? "border-[#173B6C] bg-[#173B6C]/[0.025] shadow-[0_8px_30px_rgba(23,59,108,.09)]"
@@ -706,7 +703,7 @@ function HSCodeSearch() {
                     }`}
                   >
 
-                    {/* RECOMMENDED INDICATOR */}
+                    {/* BEST MATCH */}
 
                     {recommended && (
                       <div className="absolute right-0 top-0">
@@ -744,8 +741,6 @@ function HSCodeSearch() {
 
                       <div className="min-w-0 flex-1">
 
-                        {/* BADGES */}
-
                         <div className="flex flex-wrap items-center gap-2 pr-16 sm:pr-20">
 
                           <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[11px] font-bold text-slate-700">
@@ -764,19 +759,13 @@ function HSCodeSearch() {
 
                         </div>
 
-                        {/* TITLE */}
-
                         <h3 className="mt-3 text-[13px] font-bold leading-5 text-slate-800 transition-colors group-hover:text-[#173B6C] sm:text-sm">
                           {item.title}
                         </h3>
 
-                        {/* DESCRIPTION */}
-
                         <p className="mt-1.5 max-w-3xl text-[11px] leading-5 text-slate-500 sm:text-xs">
                           {item.description}
                         </p>
-
-                        {/* CATEGORY */}
 
                         <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1">
 
@@ -797,7 +786,7 @@ function HSCodeSearch() {
                       <div
                         className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-all duration-200 ${
                           selected
-                            ? "border-[#173B6C] bg-[#173B6C] text-white scale-105"
+                            ? "scale-105 border-[#173B6C] bg-[#173B6C] text-white"
                             : "border-slate-200 text-transparent group-hover:border-blue-300 group-hover:text-blue-300"
                         }`}
                       >
@@ -813,6 +802,7 @@ function HSCodeSearch() {
                 );
               })
             ) : (
+
               <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center shadow-[0_2px_10px_rgba(15,23,42,.015)]">
 
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
@@ -837,6 +827,7 @@ function HSCodeSearch() {
                 </button>
 
               </div>
+
             )}
 
           </div>
@@ -872,10 +863,12 @@ function HSCodeSearch() {
               <div className="flex items-start gap-4">
 
                 <div className="pulse-soft flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#173B6C] text-white shadow-sm">
+
                   <FileText
                     size={19}
                     strokeWidth={1.8}
                   />
+
                 </div>
 
                 <div className="min-w-0 flex-1">

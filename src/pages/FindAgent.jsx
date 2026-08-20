@@ -118,7 +118,7 @@ function FindAgent() {
 
           </div>
 
-          <h1 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[32px]">
+          <h1 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[32px] text-center">
             Find a Clearing Agent
           </h1>
 

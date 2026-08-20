@@ -87,14 +87,18 @@ function ImportCalculator() {
   const calculate = (e) => {
     e.preventDefault();
 
-    if (!form.productValue || Number(form.productValue) <= 0) {
+    if (
+      !form.productValue ||
+      Number(form.productValue) <= 0
+    ) {
       setCalculated(false);
       return;
     }
 
     setCalculated(true);
 
-    const savedImport = localStorage.getItem("currentImport");
+    const savedImport =
+      localStorage.getItem("currentImport");
 
     if (savedImport) {
       try {
@@ -147,7 +151,8 @@ function ImportCalculator() {
   ========================================================= */
 
   const continueToAgent = () => {
-    const savedImport = localStorage.getItem("currentImport");
+    const savedImport =
+      localStorage.getItem("currentImport");
 
     if (savedImport) {
       try {
@@ -182,7 +187,7 @@ function ImportCalculator() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] text-slate-900">
+    <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
 
       {/* =====================================================
           NAVBAR
@@ -191,14 +196,14 @@ function ImportCalculator() {
       <AppNavbar />
 
       {/* =====================================================
-          MAIN
+          MAIN CONTENT
       ===================================================== */}
 
-      <main className="mx-auto w-full max-w-[1120px] px-5 py-8 sm:px-8 lg:py-10">
+      <main className="mx-auto w-full max-w-[980px] px-5 py-8 sm:px-8 lg:py-10">
 
         {/* ===================================================
             BACK BUTTON
-        =================================================== */}
+        ==================================================== */}
 
         <div className="mb-6">
           <BackButton current="Import Calculator" />
@@ -206,46 +211,51 @@ function ImportCalculator() {
 
         {/* ===================================================
             PAGE HEADER
-        =================================================== */}
+        ==================================================== */}
 
         <section className="mb-8">
 
-          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+          <div className="flex flex-col items-center justify-center text-center">
 
-            <div>
+            {/* BADGE */}
 
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-100 bg-amber-50 px-3 py-1.5">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-100 bg-amber-50 px-3 py-1.5">
 
-                <Calculator
-                  size={13}
-                  className="text-amber-700"
-                />
+              <Calculator
+                size={13}
+                className="text-amber-700"
+                strokeWidth={2}
+              />
 
-                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700">
-                  Import cost estimator
-                </span>
-
-              </div>
-
-              <h1 className="text-2xl font-bold tracking-[-0.03em] text-[#14213D] sm:text-3xl">
-                Estimate your import cost
-              </h1>
-
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                Estimate customs duty, VAT, freight, and other
-                import costs before placing your order.
-              </p>
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700">
+                Import cost estimator
+              </span>
 
             </div>
 
-            <div className="hidden items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 sm:flex">
+            {/* TITLE */}
+
+            <h1 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[40px]">
+              Estimate your import cost
+            </h1>
+
+            {/* DESCRIPTION */}
+
+            <p className="mx-auto mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
+              Estimate customs duty, VAT, freight, and other
+              import costs before placing your order.
+            </p>
+
+            {/* STATUS BADGE */}
+
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
 
               <CheckCircle2
                 size={14}
                 className="text-emerald-600"
               />
 
-              <span className="text-[11px] font-semibold text-emerald-700">
+              <span className="text-[10px] font-semibold text-emerald-700">
                 Planning estimate
               </span>
 
@@ -256,24 +266,24 @@ function ImportCalculator() {
         </section>
 
         {/* ===================================================
-            PROGRESS
-        =================================================== */}
+            SMALL CENTERED PROGRESS BAR
+        ==================================================== */}
 
-        <div className="mb-7 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+        <section className="mx-auto mb-7 w-full max-w-[760px] rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-[0_2px_8px_rgba(15,23,42,.02)]">
 
           <div className="flex items-center">
 
             {/* STEP 1 */}
 
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
 
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
 
-                <CheckCircle2 size={16} />
+                <CheckCircle2 size={14} />
 
               </div>
 
-              <span className="hidden text-xs font-semibold text-emerald-700 sm:block">
+              <span className="hidden text-[11px] font-semibold text-emerald-700 sm:block">
                 Import details
               </span>
 
@@ -283,15 +293,15 @@ function ImportCalculator() {
 
             {/* STEP 2 */}
 
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
 
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
 
-                <CheckCircle2 size={16} />
+                <CheckCircle2 size={14} />
 
               </div>
 
-              <span className="hidden text-xs font-semibold text-emerald-700 sm:block">
+              <span className="hidden text-[11px] font-semibold text-emerald-700 sm:block">
                 HS Code
               </span>
 
@@ -301,13 +311,13 @@ function ImportCalculator() {
 
             {/* STEP 3 */}
 
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
 
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#173B6C] text-xs font-bold text-white">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#173B6C] text-[11px] font-bold text-white shadow-sm">
                 3
               </div>
 
-              <span className="hidden text-xs font-semibold text-[#173B6C] sm:block">
+              <span className="hidden text-[11px] font-semibold text-[#173B6C] sm:block">
                 Costs
               </span>
 
@@ -317,13 +327,13 @@ function ImportCalculator() {
 
             {/* STEP 4 */}
 
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
 
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-400">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-400">
                 4
               </div>
 
-              <span className="hidden text-xs font-medium text-slate-400 sm:block">
+              <span className="hidden text-[11px] font-medium text-slate-400 sm:block">
                 Agent
               </span>
 
@@ -331,11 +341,11 @@ function ImportCalculator() {
 
           </div>
 
-        </div>
+        </section>
 
         {/* ===================================================
             INFO BANNER
-        =================================================== */}
+        ==================================================== */}
 
         <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3.5">
 
@@ -363,7 +373,7 @@ function ImportCalculator() {
 
         {/* ===================================================
             MAIN GRID
-        =================================================== */}
+        ==================================================== */}
 
         <div className="grid gap-5 lg:grid-cols-[1fr_380px]">
 
@@ -749,7 +759,7 @@ function ImportCalculator() {
 
         {/* ===================================================
             ACTIONS
-        =================================================== */}
+        ==================================================== */}
 
         <div className="mt-7 flex flex-col-reverse items-stretch justify-between gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center">
 
@@ -792,7 +802,7 @@ function ImportCalculator() {
 
         {/* ===================================================
             FOOTER NOTE
-        =================================================== */}
+        ==================================================== */}
 
         <div className="mt-6 flex items-center justify-center gap-2 text-center text-[10px] text-slate-400">
 
