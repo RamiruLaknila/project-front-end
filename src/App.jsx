@@ -23,6 +23,8 @@ import AgencyCreate from "./pages/AgencyCreate";
 import AgentSignIn from "./pages/AgentSignIn";
 import AgencyChoice from "./pages/AgencyChoice";
 import AgentSignUp from "./pages/AgentSignUp";
+import AgencyCreated from "./pages/AgencyCreated";
+import AgentAdminDashboard from "./pages/AgentAdminDashboard";
 
 function App() {
   return (
@@ -89,7 +91,10 @@ function App() {
   path="/agency-create"
   element={<AgencyCreate />}
 />
-
+<Route
+  path="/agency-created"
+  element={<AgencyCreated />}
+/>
         {/* =========================
             SHIPMENTS
         ========================= */}
@@ -145,6 +150,10 @@ function App() {
           path="/agent-signup"
           element={<AgentSignUp />}
         />
+        <Route
+          path="/agent-admin-dashboard"
+          element={<AgentAdminDashboard />}
+/>
 
       </Routes>
     </BrowserRouter>

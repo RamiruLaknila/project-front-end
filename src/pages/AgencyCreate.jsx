@@ -2,13 +2,15 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  ArrowRight,
   Building2,
   CheckCircle2,
   FileText,
+  Globe2,
+  Mail,
   MapPin,
   Phone,
   ShieldCheck,
+  User,
 } from "lucide-react";
 
 function AgencyCreate() {
@@ -18,17 +20,14 @@ function AgencyCreate() {
     agencyName: "",
     registrationNumber: "",
     licenseNumber: "",
+    contactEmail: "",
     phone: "",
-    email: "",
     address: "",
     city: "",
+    website: "",
   });
 
   const [error, setError] = useState("");
-
-  /* =========================================================
-     HANDLE INPUT
-  ========================================================= */
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,42 +38,6 @@ function AgencyCreate() {
     }));
   };
 
-  /* =========================================================
-     GENERATE AGENCY CODE
-  ========================================================= */
-
-  const generateAgencyCode = () => {
-    const randomPart = Math.random()
-      .toString(36)
-      .substring(2, 6)
-      .toUpperCase();
-
-    return `IMP-AG-${randomPart}`;
-  };
-
-  /* =========================================================
-     GET AGENT
-  ========================================================= */
-
-  const getAgent = () => {
-    try {
-      const stored = localStorage.getItem("clearingAgent");
-
-      if (!stored) {
-        return null;
-      }
-
-      return JSON.parse(stored);
-    } catch (error) {
-      console.error("Failed to load agent:", error);
-      return null;
-    }
-  };
-
-  /* =========================================================
-     SUBMIT
-  ========================================================= */
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
@@ -83,8 +46,8 @@ function AgencyCreate() {
       agencyName,
       registrationNumber,
       licenseNumber,
+      contactEmail,
       phone,
-      email,
       address,
       city,
     } = formData;
@@ -93,8 +56,8 @@ function AgencyCreate() {
       !agencyName.trim() ||
       !registrationNumber.trim() ||
       !licenseNumber.trim() ||
+      !contactEmail.trim() ||
       !phone.trim() ||
-      !email.trim() ||
       !address.trim() ||
       !city.trim()
     ) {
@@ -102,78 +65,64 @@ function AgencyCreate() {
       return;
     }
 
-    const agent = getAgent();
-
-    if (!agent) {
-      setError(
-        "Your agent account could not be found. Please sign in again."
-      );
-      return;
-    }
-
-    /* =======================================================
-       CREATE AGENCY
-    ======================================================= */
-
-    const agencyCode = generateAgencyCode();
+    /*
+     * =========================================================
+     * FRONTEND DEMO AGENCY
+     * =========================================================
+     *
+     * This will later be replaced with the real backend/Firebase.
+     */
 
     const agency = {
-      id: `agency-${Date.now()}`,
-      agencyCode,
-
-      name: agencyName.trim(),
+      id: `AG-${Date.now()}`,
+      agencyName: agencyName.trim(),
       registrationNumber: registrationNumber.trim(),
       licenseNumber: licenseNumber.trim(),
-
+      contactEmail: contactEmail.trim(),
       phone: phone.trim(),
-      email: email.trim(),
-
       address: address.trim(),
       city: city.trim(),
+      website: formData.website.trim(),
+
+      role: "admin",
+      status: "active",
 
       createdAt: new Date().toISOString(),
-
-      admin: {
-        name: agent.name,
-        email: agent.email,
-      },
-
-      members: [
-        {
-          name: agent.name,
-          email: agent.email,
-          role: "admin",
-          status: "active",
-        },
-      ],
     };
-
-    /* =======================================================
-       SAVE AGENCY
-    ======================================================= */
 
     localStorage.setItem(
       "clearingAgency",
       JSON.stringify(agency)
     );
 
-    /* =======================================================
-       UPDATE AGENT
-    ======================================================= */
+    /*
+     * Update the current clearing-agent account.
+     */
+
+    const storedAgent =
+      localStorage.getItem("clearingAgent");
+
+    let agent = {};
+
+    try {
+      agent = storedAgent
+        ? JSON.parse(storedAgent)
+        : {};
+    } catch {
+      agent = {};
+    }
 
     const updatedAgent = {
       ...agent,
 
-      profileStatus: "incomplete",
-
       agencyId: agency.id,
-      agencyName: agency.name,
-
-      agencyType: "company",
+      agencyName: agency.agencyName,
 
       role: "admin",
 
       agentStatus: "active",
+
+      profileStatus: "complete",
     };
 
     localStorage.setItem(
@@ -181,20 +130,20 @@ function AgencyCreate() {
       JSON.stringify(updatedAgent)
     );
 
-    /* =======================================================
-       AGENCY CREATED
-    ======================================================= */
+    /*
+     * Mark onboarding as completed.
+     */
 
     localStorage.setItem(
-      "agencyCreated",
+      "agentOnboardingComplete",
       "true"
     );
 
-    /* =======================================================
-       NEXT STEP
-    ======================================================= */
+    /*
+     * Go to the future Agency Admin Dashboard.
+     */
 
-    navigate("/agency-created");
+    navigate("/agent-admin-dashboard");
   };
 
   return (
@@ -208,15 +157,16 @@ function AgencyCreate() {
 
       <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-slate-200/50 blur-3xl" />
 
+
       {/* =====================================================
-          MAIN CONTAINER
+          CONTAINER
       ===================================================== */}
 
-      <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-2xl flex-col justify-center">
+      <div className="relative mx-auto w-full max-w-2xl">
 
-        {/* ===================================================
+        {/* =====================================================
             LOGO
-        =================================================== */}
+        ===================================================== */}
 
         <div className="mb-7 flex justify-center">
 
@@ -242,9 +192,10 @@ function AgencyCreate() {
 
         </div>
 
-        {/* ===================================================
-            CARD
-        =================================================== */}
+
+        {/* =====================================================
+            MAIN CARD
+        ===================================================== */}
 
         <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.15)] sm:p-8">
 
@@ -263,46 +214,37 @@ function AgencyCreate() {
 
             </div>
 
-            <div>
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
 
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
-                Create your agency
-              </h1>
+              <div>
 
-              <p className="mt-1.5 max-w-xl text-sm leading-6 text-slate-500">
-                Register your clearing agency to become the
-                agency administrator on ImportEase.
-              </p>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[27px]">
+                  Create your clearing agency
+                </h1>
 
-            </div>
+                <p className="mt-1.5 text-sm leading-6 text-slate-500">
+                  Register your agency and become its administrator.
+                </p>
 
-          </div>
+              </div>
 
-          {/* =================================================
-              INFO
-          ================================================= */}
+              <div className="inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5">
 
-          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+                <ShieldCheck
+                  size={13}
+                  className="text-emerald-600"
+                />
 
-            <ShieldCheck
-              size={19}
-              className="mt-0.5 shrink-0 text-blue-600"
-            />
+                <span className="text-[10px] font-semibold text-emerald-700">
+                  Agency Admin
+                </span>
 
-            <div>
-
-              <p className="text-xs font-bold text-blue-800">
-                You will become the Agency Admin
-              </p>
-
-              <p className="mt-1 text-[11px] leading-5 text-blue-700/80">
-                After creating the agency, you can invite your
-                clearing agents and manage their access.
-              </p>
+              </div>
 
             </div>
 
           </div>
+
 
           {/* =================================================
               ERROR
@@ -313,6 +255,7 @@ function AgencyCreate() {
               {error}
             </div>
           )}
+
 
           {/* =================================================
               FORM
@@ -327,72 +270,189 @@ function AgencyCreate() {
                 AGENCY NAME
             ================================================= */}
 
-            <InputField
-              id="agencyName"
-              name="agencyName"
-              label="Agency / Company name"
-              placeholder="Enter your agency name"
-              value={formData.agencyName}
-              onChange={handleChange}
-              icon={Building2}
-            />
+            <div>
+
+              <label
+                htmlFor="agencyName"
+                className="mb-1.5 block text-sm font-medium text-slate-700"
+              >
+                Agency / Company name
+                <span className="ml-1 text-red-500">*</span>
+              </label>
+
+              <div className="relative">
+
+                <Building2
+                  size={17}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
+                <input
+                  id="agencyName"
+                  name="agencyName"
+                  type="text"
+                  value={formData.agencyName}
+                  onChange={handleChange}
+                  placeholder="Enter your registered agency name"
+                  className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                />
+
+              </div>
+
+            </div>
+
 
             {/* =================================================
-                REGISTRATION NUMBER
-            ================================================= */}
-
-            <InputField
-              id="registrationNumber"
-              name="registrationNumber"
-              label="Business registration number"
-              placeholder="Enter company registration number"
-              value={formData.registrationNumber}
-              onChange={handleChange}
-              icon={FileText}
-            />
-
-            {/* =================================================
-                LICENSE NUMBER
-            ================================================= */}
-
-            <InputField
-              id="licenseNumber"
-              name="licenseNumber"
-              label="Clearing agent license number"
-              placeholder="Enter agency license number"
-              value={formData.licenseNumber}
-              onChange={handleChange}
-              icon={ShieldCheck}
-            />
-
-            {/* =================================================
-                PHONE + EMAIL
+                REGISTRATION + LICENSE
             ================================================= */}
 
             <div className="grid gap-5 sm:grid-cols-2">
 
-              <InputField
-                id="phone"
-                name="phone"
-                label="Agency phone number"
-                placeholder="+94 7X XXX XXXX"
-                value={formData.phone}
-                onChange={handleChange}
-                icon={Phone}
-              />
+              {/* REGISTRATION */}
 
-              <InputField
-                id="email"
-                name="email"
-                type="email"
-                label="Agency email"
-                placeholder="agency@company.com"
-                value={formData.email}
-                onChange={handleChange}
-                icon={FileText}
-              />
+              <div>
+
+                <label
+                  htmlFor="registrationNumber"
+                  className="mb-1.5 block text-sm font-medium text-slate-700"
+                >
+                  Business registration number
+                  <span className="ml-1 text-red-500">*</span>
+                </label>
+
+                <div className="relative">
+
+                  <FileText
+                    size={17}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    id="registrationNumber"
+                    name="registrationNumber"
+                    type="text"
+                    value={formData.registrationNumber}
+                    onChange={handleChange}
+                    placeholder="e.g. BR-123456"
+                    className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                  />
+
+                </div>
+
+              </div>
+
+
+              {/* LICENSE */}
+
+              <div>
+
+                <label
+                  htmlFor="licenseNumber"
+                  className="mb-1.5 block text-sm font-medium text-slate-700"
+                >
+                  Clearing license number
+                  <span className="ml-1 text-red-500">*</span>
+                </label>
+
+                <div className="relative">
+
+                  <FileText
+                    size={17}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    id="licenseNumber"
+                    name="licenseNumber"
+                    type="text"
+                    value={formData.licenseNumber}
+                    onChange={handleChange}
+                    placeholder="Enter license number"
+                    className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                  />
+
+                </div>
+
+              </div>
 
             </div>
+
+
+            {/* =================================================
+                EMAIL + PHONE
+            ================================================= */}
+
+            <div className="grid gap-5 sm:grid-cols-2">
+
+              {/* EMAIL */}
+
+              <div>
+
+                <label
+                  htmlFor="contactEmail"
+                  className="mb-1.5 block text-sm font-medium text-slate-700"
+                >
+                  Agency email
+                  <span className="ml-1 text-red-500">*</span>
+                </label>
+
+                <div className="relative">
+
+                  <Mail
+                    size={17}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    id="contactEmail"
+                    name="contactEmail"
+                    type="email"
+                    value={formData.contactEmail}
+                    onChange={handleChange}
+                    placeholder="agency@company.com"
+                    className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                  />
+
+                </div>
+
+              </div>
+
+
+              {/* PHONE */}
+
+              <div>
+
+                <label
+                  htmlFor="phone"
+                  className="mb-1.5 block text-sm font-medium text-slate-700"
+                >
+                  Contact phone
+                  <span className="ml-1 text-red-500">*</span>
+                </label>
+
+                <div className="relative">
+
+                  <Phone
+                    size={17}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="+94 77 123 4567"
+                    className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                  />
+
+                </div>
+
+              </div>
+
+            </div>
+
 
             {/* =================================================
                 ADDRESS
@@ -405,6 +465,7 @@ function AgencyCreate() {
                 className="mb-1.5 block text-sm font-medium text-slate-700"
               >
                 Agency address
+                <span className="ml-1 text-red-500">*</span>
               </label>
 
               <div className="relative">
@@ -420,27 +481,124 @@ function AgencyCreate() {
                   rows={3}
                   value={formData.address}
                   onChange={handleChange}
-                  placeholder="Enter your registered agency address"
-                  className="w-full resize-none rounded-xl border border-slate-300 bg-white px-10 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                  placeholder="Enter your registered business address"
+                  className="w-full resize-none rounded-xl border border-slate-300 bg-white py-3 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
                 />
 
               </div>
 
             </div>
 
+
             {/* =================================================
-                CITY
+                CITY + WEBSITE
             ================================================= */}
 
-            <InputField
-              id="city"
-              name="city"
-              label="City"
-              placeholder="Colombo"
-              value={formData.city}
-              onChange={handleChange}
-              icon={MapPin}
-            />
+            <div className="grid gap-5 sm:grid-cols-2">
+
+              {/* CITY */}
+
+              <div>
+
+                <label
+                  htmlFor="city"
+                  className="mb-1.5 block text-sm font-medium text-slate-700"
+                >
+                  City
+                  <span className="ml-1 text-red-500">*</span>
+                </label>
+
+                <div className="relative">
+
+                  <MapPin
+                    size={17}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    id="city"
+                    name="city"
+                    type="text"
+                    value={formData.city}
+                    onChange={handleChange}
+                    placeholder="e.g. Colombo"
+                    className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                  />
+
+                </div>
+
+              </div>
+
+
+              {/* WEBSITE */}
+
+              <div>
+
+                <label
+                  htmlFor="website"
+                  className="mb-1.5 block text-sm font-medium text-slate-700"
+                >
+                  Website
+                  <span className="ml-1 text-[10px] font-normal text-slate-400">
+                    Optional
+                  </span>
+                </label>
+
+                <div className="relative">
+
+                  <Globe2
+                    size={17}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    id="website"
+                    name="website"
+                    type="url"
+                    value={formData.website}
+                    onChange={handleChange}
+                    placeholder="https://yourcompany.com"
+                    className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                  />
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            {/* =================================================
+                ADMIN NOTICE
+            ================================================= */}
+
+            <div className="rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3">
+
+              <div className="flex items-start gap-3">
+
+                <CheckCircle2
+                  size={17}
+                  className="mt-0.5 shrink-0 text-blue-600"
+                />
+
+                <div>
+
+                  <p className="text-xs font-semibold text-blue-800">
+                    You will become the Agency Admin
+                  </p>
+
+                  <p className="mt-1 text-[11px] leading-5 text-blue-700">
+                    As the agency owner, you will be able to
+                    manage agents, review join requests, and
+                    send invitation codes to your team.
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
 
             {/* =================================================
                 SUBMIT
@@ -448,97 +606,37 @@ function AgencyCreate() {
 
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#173563] py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#102547] hover:shadow-xl hover:shadow-[#173563]/20 active:translate-y-0 active:scale-[0.99]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#173563] py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#102547] hover:shadow-xl hover:shadow-[#173563]/20 active:translate-y-0 active:scale-[0.99]"
             >
               Create Agency
 
-              <ArrowRight size={16} />
+              <Building2 size={17} />
+
             </button>
 
           </form>
 
-          {/* =================================================
-              FOOTNOTE
-          ================================================= */}
-
-          <div className="mt-6 flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
-
-            <CheckCircle2
-              size={17}
-              className="mt-0.5 shrink-0 text-emerald-600"
-            />
-
-            <p className="text-xs leading-5 text-slate-500">
-              Your agency information can be updated later from
-              the agency administration area.
-            </p>
-
-          </div>
-
         </div>
 
-        {/* ===================================================
+
+        {/* =====================================================
             BACK
-        =================================================== */}
+        ===================================================== */}
 
         <div className="mt-5 flex justify-center">
 
-          <Link
-            to="/agency-choice"
+          <button
+            type="button"
+            onClick={() => navigate("/agency-choice")}
             className="flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-slate-800"
           >
             <ArrowLeft size={16} />
+
             Back to Agency Choice
-          </Link>
+
+          </button>
 
         </div>
-
-      </div>
-
-    </div>
-  );
-}
-
-/* =========================================================
-   INPUT FIELD
-========================================================= */
-
-function InputField({
-  id,
-  name,
-  label,
-  placeholder,
-  value,
-  onChange,
-  icon: Icon,
-  type = "text",
-}) {
-  return (
-    <div>
-
-      <label
-        htmlFor={id}
-        className="mb-1.5 block text-sm font-medium text-slate-700"
-      >
-        {label}
-      </label>
-
-      <div className="relative">
-
-        <Icon
-          size={17}
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-        />
-
-        <input
-          id={id}
-          name={name}
-          type={type}
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
-        />
 
       </div>
 
