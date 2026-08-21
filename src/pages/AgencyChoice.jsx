@@ -1,192 +1,511 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
+  ArrowLeft,
   ArrowRight,
   Building2,
+  CheckCircle2,
+  FileBadge2,
+  KeyRound,
   Users,
-  ShieldCheck,
 } from "lucide-react";
 
 function AgencyChoice() {
+  const navigate = useNavigate();
+
+  const [selectedType, setSelectedType] = useState("");
+  const [agencyCode, setAgencyCode] = useState("");
+  const [licenseNumber, setLicenseNumber] = useState("");
+  const [error, setError] = useState("");
+
+  /* =========================================================
+     GET REGISTERED AGENT
+  ========================================================= */
+
+  const getAgent = () => {
+    try {
+      const stored = localStorage.getItem("clearingAgent");
+
+      if (!stored) {
+        return null;
+      }
+
+      return JSON.parse(stored);
+    } catch (error) {
+      console.error("Failed to load clearing agent:", error);
+      return null;
+    }
+  };
+
+  /* =========================================================
+     SELECT ACCOUNT TYPE
+  ========================================================= */
+
+  const handleSelect = (type) => {
+    setSelectedType(type);
+    setError("");
+  };
+
+  /* =========================================================
+     CONTINUE
+  ========================================================= */
+
+  const handleContinue = () => {
+    setError("");
+
+    if (!selectedType) {
+      setError("Please choose how you want to use ImportEase.");
+      return;
+    }
+
+    const agent = getAgent();
+
+    if (!agent) {
+      setError(
+        "Your agent account could not be found. Please sign up again."
+      );
+      return;
+    }
+
+    /* =======================================================
+       CREATE AGENCY
+    ======================================================= */
+
+    if (selectedType === "create") {
+      localStorage.setItem(
+        "clearingAgent",
+        JSON.stringify({
+          ...agent,
+          profileStatus: "incomplete",
+          agencyType: "company",
+          agencyId: null,
+          agencyName: "",
+          role: "admin",
+          agentStatus: "active",
+        })
+      );
+
+      navigate("/agency-create");
+      return;
+    }
+
+    /* =======================================================
+       JOIN EXISTING AGENCY
+    ======================================================= */
+
+    if (selectedType === "join") {
+      if (!agencyCode.trim()) {
+        setError("Please enter your agency invitation code.");
+        return;
+      }
+
+      localStorage.setItem(
+        "clearingAgent",
+        JSON.stringify({
+          ...agent,
+          profileStatus: "incomplete",
+          agencyType: "company",
+          agencyId: agencyCode.trim().toUpperCase(),
+          agencyName: "",
+          role: "agent",
+          agentStatus: "pending",
+        })
+      );
+
+      navigate("/agent-pending");
+      return;
+    }
+
+    /* =======================================================
+       INDIVIDUAL AGENT
+    ======================================================= */
+
+    if (selectedType === "individual") {
+      if (!licenseNumber.trim()) {
+        setError("Please enter your clearing agent license number.");
+        return;
+      }
+
+      localStorage.setItem(
+        "clearingAgent",
+        JSON.stringify({
+          ...agent,
+          profileStatus: "incomplete",
+          agencyType: "individual",
+          agencyId: null,
+          agencyName: "",
+          licenseNumber: licenseNumber.trim().toUpperCase(),
+          role: "individual",
+          agentStatus: "active",
+        })
+      );
+
+      navigate("/agent-profile");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#F6F8FB] text-[#173563]">
+    <div className="relative min-h-screen overflow-hidden bg-[#F8FAFC] px-4 py-8 sm:py-10">
 
-      {/* HEADER */}
+      {/* =====================================================
+          BACKGROUND
+      ===================================================== */}
 
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex h-20 max-w-7xl items-center px-6 lg:px-8">
+      <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-blue-100/50 blur-3xl" />
+
+      <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-slate-200/50 blur-3xl" />
+
+      {/* =====================================================
+          MAIN CONTAINER
+      ===================================================== */}
+
+      <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-4xl flex-col justify-center">
+
+        {/* ===================================================
+            LOGO
+        =================================================== */}
+
+        <div className="mb-8 flex justify-center">
 
           <Link
             to="/"
             className="flex items-center gap-3"
           >
+
             <img
               src="/logo.jpeg"
               alt="ImportEase"
-              className="h-12 w-12 object-contain mix-blend-multiply"
+              className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
             />
 
-            <div>
-              <div className="text-lg font-bold tracking-tight text-[#173563]">
-                ImportEase
-              </div>
+            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
+              Import
+              <span className="text-[#173563]">
+                Ease
+              </span>
+            </span>
 
-              <div className="text-xs font-medium text-slate-500">
-                Clearing Agency Portal
-              </div>
-            </div>
           </Link>
 
         </div>
-      </header>
 
+        {/* ===================================================
+            MAIN CARD
+        =================================================== */}
 
-      {/* MAIN */}
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.15)] sm:p-8">
 
-      <main className="mx-auto flex min-h-[calc(100vh-80px)] max-w-6xl items-center px-6 py-12 lg:px-8">
+          {/* =================================================
+              HEADER
+          ================================================= */}
 
-        <div className="w-full">
+          <div className="mx-auto mb-8 max-w-2xl text-center">
 
-          {/* HEADING */}
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#173563] shadow-md shadow-[#173563]/15">
 
-          <div className="mx-auto max-w-2xl text-center">
-
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50">
-              <ShieldCheck
-                size={28}
-                className="text-[#2563EB]"
+              <Building2
+                size={23}
+                className="text-white"
               />
+
             </div>
 
-            <h1 className="text-3xl font-bold tracking-tight text-[#173563] sm:text-4xl">
-              Welcome to ImportEase
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
+              How will you operate?
             </h1>
 
-            <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-slate-500 sm:text-lg">
-              Get started by creating your clearing agency
-              or joining an existing agency.
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Choose how you want to work with ImportEase as a
+              clearing agent.
             </p>
 
           </div>
 
+          {/* =================================================
+              ERROR
+          ================================================= */}
 
-          {/* OPTIONS */}
+          {error && (
+            <div className="mx-auto mb-6 max-w-2xl rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+              {error}
+            </div>
+          )}
 
-          <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
+          {/* =================================================
+              OPTIONS
+          ================================================= */}
 
+          <div className="grid gap-4 md:grid-cols-3">
 
-            {/* CREATE AGENCY */}
+            {/* =================================================
+                CREATE AGENCY
+            ================================================= */}
 
-            <Link
-              to="/create-agency"
-              className="group rounded-3xl border border-slate-200 bg-white p-8 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
-            >
+            <ChoiceCard
+              selected={selectedType === "create"}
+              onClick={() => handleSelect("create")}
+              icon={Building2}
+              title="Create an Agency"
+              description="Register your clearing agency and become its administrator."
+              badge="Agency Admin"
+            />
 
-              <div className="flex items-start justify-between">
+            {/* =================================================
+                JOIN AGENCY
+            ================================================= */}
 
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50">
-                  <Building2
-                    size={28}
-                    className="text-[#2563EB]"
-                  />
-                </div>
+            <ChoiceCard
+              selected={selectedType === "join"}
+              onClick={() => handleSelect("join")}
+              icon={Users}
+              title="Join an Agency"
+              description="Join an existing clearing agency using an invitation code."
+              badge="Agency Agent"
+            />
 
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 transition-colors group-hover:bg-blue-50">
+            {/* =================================================
+                INDIVIDUAL
+            ================================================= */}
 
-                  <ArrowRight
-                    size={19}
-                    className="text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-[#2563EB]"
-                  />
-
-                </div>
-
-              </div>
-
-
-              <div className="mt-8">
-
-                <h2 className="text-2xl font-bold text-[#173563]">
-                  Register your Agency
-                </h2>
-
-                <p className="mt-3 leading-7 text-slate-500">
-                  Set up your clearing agency, manage your
-                  business profile, and manage your team.
-                </p>
-
-              </div>
-
-
-              <div className="mt-8 flex items-center gap-2 text-sm font-semibold text-[#2563EB]">
-                Register your agency
-                <ArrowRight size={16} />
-              </div>
-
-            </Link>
-
-
-            {/* JOIN AGENCY */}
-
-            <Link
-              to="/join-agency"
-              className="group rounded-3xl border border-slate-200 bg-white p-8 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
-            >
-
-              <div className="flex items-start justify-between">
-
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50">
-                  <Users
-                    size={28}
-                    className="text-indigo-600"
-                  />
-                </div>
-
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 transition-colors group-hover:bg-blue-50">
-
-                  <ArrowRight
-                    size={19}
-                    className="text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-[#2563EB]"
-                  />
-
-                </div>
-
-              </div>
-
-
-              <div className="mt-8">
-
-                <h2 className="text-2xl font-bold text-[#173563]">
-                  Join an Agency
-                </h2>
-
-                <p className="mt-3 leading-7 text-slate-500">
-                  Already work with a clearing agency?
-                  Enter your agency code and request access
-                  to its workspace.
-                </p>
-
-              </div>
-
-
-              <div className="mt-8 flex items-center gap-2 text-sm font-semibold text-[#2563EB]">
-                Join an existing agency
-                <ArrowRight size={16} />
-              </div>
-
-            </Link>
+            <ChoiceCard
+              selected={selectedType === "individual"}
+              onClick={() => handleSelect("individual")}
+              icon={FileBadge2}
+              title="Individual Agent"
+              description="Operate independently using your clearing agent license."
+              badge="Independent"
+            />
 
           </div>
 
+          {/* =================================================
+              EXTRA INPUT
+          ================================================= */}
 
-          <p className="mt-10 text-center text-sm text-slate-400">
-            Your agency workspace keeps your team and
-            import operations organized in one place.
-          </p>
+          {selectedType === "join" && (
+            <div className="mx-auto mt-6 max-w-xl">
+
+              <label
+                htmlFor="agencyCode"
+                className="mb-2 block text-sm font-semibold text-slate-700"
+              >
+                Agency invitation code
+              </label>
+
+              <div className="relative">
+
+                <KeyRound
+                  size={17}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
+                <input
+                  id="agencyCode"
+                  type="text"
+                  value={agencyCode}
+                  onChange={(e) =>
+                    setAgencyCode(e.target.value.toUpperCase())
+                  }
+                  placeholder="Example: IMP-AG-82F4"
+                  className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm font-medium tracking-wide text-slate-900 outline-none transition placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                />
+
+              </div>
+
+              <p className="mt-2 text-xs text-slate-400">
+                Ask your agency administrator for the invitation
+                code.
+              </p>
+
+            </div>
+          )}
+
+          {selectedType === "individual" && (
+            <div className="mx-auto mt-6 max-w-xl">
+
+              <label
+                htmlFor="licenseNumber"
+                className="mb-2 block text-sm font-semibold text-slate-700"
+              >
+                Clearing agent license number
+              </label>
+
+              <div className="relative">
+
+                <FileBadge2
+                  size={17}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
+                <input
+                  id="licenseNumber"
+                  type="text"
+                  value={licenseNumber}
+                  onChange={(e) =>
+                    setLicenseNumber(e.target.value.toUpperCase())
+                  }
+                  placeholder="Enter your license number"
+                  className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm font-medium tracking-wide text-slate-900 outline-none transition placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                />
+
+              </div>
+
+              <p className="mt-2 text-xs text-slate-400">
+                Your license will later be verified before
+                marketplace access.
+              </p>
+
+            </div>
+          )}
+
+          {/* =================================================
+              CONTINUE BUTTON
+          ================================================= */}
+
+          <div className="mx-auto mt-8 max-w-xl">
+
+            <button
+              type="button"
+              onClick={handleContinue}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#173563] py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#102547] hover:shadow-xl hover:shadow-[#173563]/20 active:translate-y-0 active:scale-[0.99]"
+            >
+
+              Continue
+
+              <ArrowRight size={16} />
+
+            </button>
+
+          </div>
+
+          {/* =================================================
+              SECURITY NOTE
+          ================================================= */}
+
+          <div className="mx-auto mt-6 flex max-w-xl items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
+
+            <CheckCircle2
+              size={17}
+              className="mt-0.5 shrink-0 text-emerald-600"
+            />
+
+            <p className="text-xs leading-5 text-slate-500">
+              Your account type determines which features you can
+              access. Marketplace and client-management features
+              require the appropriate agent or agency status.
+            </p>
+
+          </div>
 
         </div>
 
-      </main>
+        {/* ===================================================
+            BACK
+        =================================================== */}
+
+        <div className="mt-5 flex justify-center">
+
+          <Link
+            to="/agent-signin"
+            className="flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-slate-800"
+          >
+
+            <ArrowLeft size={16} />
+
+            Back to Agent Sign In
+
+          </Link>
+
+        </div>
+
+      </div>
 
     </div>
+  );
+}
+
+/* =========================================================
+   CHOICE CARD
+========================================================= */
+
+function ChoiceCard({
+  selected,
+  onClick,
+  icon: Icon,
+  title,
+  description,
+  badge,
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`relative rounded-2xl border-2 p-5 text-left transition-all duration-200 ${
+        selected
+          ? "border-blue-600 bg-blue-50/60 shadow-md shadow-blue-600/10"
+          : "border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/30 hover:shadow-sm"
+      }`}
+    >
+
+      {/* SELECTED */}
+
+      {selected && (
+        <div className="absolute right-4 top-4 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white">
+
+          <CheckCircle2
+            size={14}
+            strokeWidth={2.5}
+          />
+
+        </div>
+      )}
+
+      {/* ICON */}
+
+      <div
+        className={`flex h-11 w-11 items-center justify-center rounded-xl transition ${
+          selected
+            ? "bg-blue-600 text-white"
+            : "bg-blue-50 text-blue-600"
+        }`}
+      >
+
+        <Icon
+          size={20}
+          strokeWidth={1.8}
+        />
+
+      </div>
+
+      {/* BADGE */}
+
+      <div className="mt-4">
+
+        <span
+          className={`rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-[0.1em] ${
+            selected
+              ? "bg-blue-100 text-blue-700"
+              : "bg-slate-100 text-slate-500"
+          }`}
+        >
+          {badge}
+        </span>
+
+      </div>
+
+      {/* TITLE */}
+
+      <h2 className="mt-3 text-sm font-bold text-slate-900">
+        {title}
+      </h2>
+
+      {/* DESCRIPTION */}
+
+      <p className="mt-2 text-[11px] leading-5 text-slate-500">
+        {description}
+      </p>
+
+    </button>
   );
 }
 
