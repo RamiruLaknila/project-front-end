@@ -17,6 +17,7 @@ import CompleteProfile from "./pages/CompleteProfile";
 
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import AgencyCreate from "./pages/AgencyCreate";
 
 // Clearing Agent
 import AgentSignIn from "./pages/AgentSignIn";
@@ -84,6 +85,10 @@ function App() {
           path="/shipment-confirmation"
           element={<ShipmentConfirmation />}
         />
+        <Route
+  path="/agency-create"
+  element={<AgencyCreate />}
+/>
 
         {/* =========================
             SHIPMENTS
