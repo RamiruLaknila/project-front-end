@@ -7,27 +7,30 @@ import {
   LockKeyhole,
   Mail,
   ShieldCheck,
+  User,
 } from "lucide-react";
 
-function AgentSignIn() {
+function AgentSignUp() {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
-    remember: false,
+    confirmPassword: "",
   });
 
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
 
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
   };
 
@@ -35,34 +38,48 @@ function AgentSignIn() {
     e.preventDefault();
     setError("");
 
-    if (!formData.email || !formData.password) {
-      setError("Please enter your email and password.");
+    const {
+      name,
+      email,
+      password,
+      confirmPassword,
+    } = formData;
+
+    // Basic validation
+    if (!name || !email || !password || !confirmPassword) {
+      setError("Please complete all fields.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
       return;
     }
 
     /*
       =========================================================
-      FRONTEND DEMO AUTHENTICATION
+      FRONTEND DEMO ACCOUNT
       =========================================================
 
-      There is no backend yet, so we store the signed-in
-      clearing agent locally.
+      There is no backend yet.
 
-      Later this will be replaced by your real authentication.
+      We store the new clearing agent locally so that the
+      onboarding flow can work while we build the frontend.
     */
 
-    const existingAgent = JSON.parse(
-      localStorage.getItem("clearingAgent") || "null"
-    );
-
     const agent = {
-      name: existingAgent?.name || "Clearing Agent",
-      email: formData.email,
-      profileStatus: existingAgent?.profileStatus || "incomplete",
-      agencyId: existingAgent?.agencyId || null,
-      agencyName: existingAgent?.agencyName || null,
-      role: existingAgent?.role || null,
-      agentStatus: existingAgent?.agentStatus || null,
+      name,
+      email,
+      profileStatus: "incomplete",
+      agencyId: null,
+      agencyName: null,
+      role: null,
+      agentStatus: null,
     };
 
     localStorage.setItem(
@@ -70,53 +87,20 @@ function AgentSignIn() {
       JSON.stringify(agent)
     );
 
+    // Sign-up completed
     localStorage.setItem(
-      "agentAuthenticated",
+      "agentRegistered",
       "true"
     );
 
-    console.log("Clearing Agent Sign In:", formData);
-
     /*
-      =========================================================
-      FRONTEND ROUTING LOGIC
-      =========================================================
+      After registration, send the user to SIGN IN.
 
-      If the user already belongs to an agency, restore
-      their previous state.
-
-      Otherwise send them to Agency Choice.
+      The user should not create/join an agency directly
+      from the sign-up form.
     */
 
-    if (agent.role === "admin") {
-      if (agent.profileStatus === "incomplete") {
-        navigate("/agent-admin-dashboard");
-      } else {
-        navigate("/agent-admin-dashboard");
-      }
-
-      return;
-    }
-
-    if (agent.role === "agent") {
-      if (agent.agentStatus === "pending") {
-        navigate("/waiting-for-approval");
-        return;
-      }
-
-      if (agent.agentStatus === "rejected") {
-        navigate("/agent-rejected");
-        return;
-      }
-
-      if (agent.agentStatus === "approved") {
-        navigate("/agent-dashboard");
-        return;
-      }
-    }
-
-    // New clearing agent
-    navigate("/agency-choice");
+    navigate("/agent-signin");
   };
 
   return (
@@ -175,7 +159,7 @@ function AgentSignIn() {
 
 
           {/* =====================================================
-              AGENT ICON
+              ICON
           ===================================================== */}
 
           <div className="mb-4 flex justify-center">
@@ -199,11 +183,11 @@ function AgentSignIn() {
           <div className="mb-7 text-center">
 
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
-              Welcome back, Agent
+              Create your Agent Account
             </h1>
 
             <p className="mt-1.5 text-sm text-slate-500">
-              Sign in to manage your bids and clearances
+              Join ImportEase as a clearing agent
             </p>
 
           </div>
@@ -228,6 +212,42 @@ function AgentSignIn() {
             onSubmit={handleSubmit}
             className="space-y-5"
           >
+
+            {/* =================================================
+                FULL NAME
+            ================================================= */}
+
+            <div>
+
+              <label
+                htmlFor="name"
+                className="mb-1.5 block text-sm font-medium text-slate-700"
+              >
+                Full name
+              </label>
+
+              <div className="relative">
+
+                <User
+                  size={17}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Enter your full name"
+                  autoComplete="name"
+                  className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                />
+
+              </div>
+
+            </div>
+
 
             {/* =================================================
                 EMAIL
@@ -271,23 +291,12 @@ function AgentSignIn() {
 
             <div>
 
-              <div className="mb-1.5 flex items-center justify-between">
-
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-slate-700"
-                >
-                  Password
-                </label>
-
-                <Link
-                  to="/agent-forgot-password"
-                  className="text-xs font-medium text-[#173563] transition-colors hover:text-blue-700 hover:underline"
-                >
-                  Forgot password?
-                </Link>
-
-              </div>
+              <label
+                htmlFor="password"
+                className="mb-1.5 block text-sm font-medium text-slate-700"
+              >
+                Password
+              </label>
 
               <div className="relative">
 
@@ -302,8 +311,8 @@ function AgentSignIn() {
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Enter your password"
-                  autoComplete="current-password"
+                  placeholder="Create a password"
+                  autoComplete="new-password"
                   className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
                 />
 
@@ -328,64 +337,103 @@ function AgentSignIn() {
 
               </div>
 
+              <p className="mt-1.5 text-xs text-slate-400">
+                Use at least 6 characters.
+              </p>
+
             </div>
 
 
             {/* =================================================
-                REMEMBER ME
+                CONFIRM PASSWORD
             ================================================= */}
 
-            <div className="flex items-center pt-1">
+            <div>
 
-              <label className="flex cursor-pointer items-center gap-2">
+              <label
+                htmlFor="confirmPassword"
+                className="mb-1.5 block text-sm font-medium text-slate-700"
+              >
+                Confirm password
+              </label>
 
-                <input
-                  id="remember"
-                  name="remember"
-                  type="checkbox"
-                  checked={formData.remember}
-                  onChange={handleChange}
-                  className="h-4 w-4 rounded border-slate-300 text-[#173563] focus:ring-[#173563]"
+              <div className="relative">
+
+                <LockKeyhole
+                  size={17}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                 />
 
-                <span className="text-xs text-slate-500">
-                  Remember me
-                </span>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={
+                    showConfirmPassword
+                      ? "text"
+                      : "password"
+                  }
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm your password"
+                  autoComplete="new-password"
+                  className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                />
 
-              </label>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowConfirmPassword(
+                      (prev) => !prev
+                    )
+                  }
+                  aria-label={
+                    showConfirmPassword
+                      ? "Hide password"
+                      : "Show password"
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-700"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={17} />
+                  ) : (
+                    <Eye size={17} />
+                  )}
+                </button>
+
+              </div>
 
             </div>
 
 
             {/* =================================================
-                SIGN IN BUTTON
+                CREATE ACCOUNT
             ================================================= */}
 
             <button
               type="submit"
               className="w-full rounded-xl bg-[#173563] py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#102547] hover:shadow-xl hover:shadow-[#173563]/20 active:translate-y-0 active:scale-[0.99]"
             >
-              Sign In as Clearing Agent
+              Create Agent Account
             </button>
 
           </form>
 
 
           {/* =====================================================
-              SIGN UP
+              SIGN IN
           ===================================================== */}
 
           <div className="mt-6 border-t border-slate-100 pt-5 text-center">
 
             <p className="text-sm text-slate-500">
 
-              New to ImportEase?{" "}
+              Already have an account?{" "}
 
               <Link
-                to="/agent-signup"
+                to="/agent-signin"
                 className="font-semibold text-[#173563] transition-colors hover:text-blue-700"
               >
-                Register as an Agent
+                Sign in
               </Link>
 
             </p>
@@ -417,4 +465,4 @@ function AgentSignIn() {
   );
 }
 
-export default AgentSignIn;
+export default AgentSignUp;

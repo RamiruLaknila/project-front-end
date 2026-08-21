@@ -134,12 +134,12 @@ function SignIn() {
                   Password
                 </label>
 
-                <Link
-                  to="/forgot-password"
-                  className="text-xs font-medium text-[#173563] transition-colors hover:text-blue-700 hover:underline"
-                >
-                  Forgot password?
-                </Link>
+              <Link
+  to="/forgot-password"
+  className="text-sm font-semibold text-[#2563EB] hover:text-[#1D4ED8]"
+>
+  Forgot password?
+</Link>
               </div>
 
               <div className="relative">
