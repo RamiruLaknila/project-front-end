@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Building2,
   BriefcaseBusiness,
@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 
 function SignUp() {
+  const navigate = useNavigate();
+
   const [userType, setUserType] = useState("");
 
   const [formData, setFormData] = useState({
@@ -24,10 +26,10 @@ function SignUp() {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: type === "checkbox" ? checked : value,
-    });
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -40,9 +42,9 @@ function SignUp() {
     }
 
     if (
-      !formData.fullName ||
-      !formData.businessName ||
-      !formData.email ||
+      !formData.fullName.trim() ||
+      !formData.businessName.trim() ||
+      !formData.email.trim() ||
       !formData.password ||
       !formData.confirmPassword
     ) {
@@ -55,21 +57,49 @@ function SignUp() {
       return;
     }
 
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
     if (!formData.terms) {
       setError("Please agree to the Terms of Service and Privacy Policy.");
       return;
     }
 
-    console.log("Registration data:", {
-      ...formData,
+    /*
+     * Frontend-only account storage for now.
+     * This will later be replaced by the real backend/Firebase.
+     */
+    const newUser = {
+      fullName: formData.fullName.trim(),
+      businessName: formData.businessName.trim(),
+      email: formData.email.trim(),
+      password: formData.password,
       userType,
-    });
+      profileComplete: false,
+    };
 
-    alert(
-      `Account ready to be created as ${
-        userType === "sme" ? "SME / Importer" : "Clearing Agent"
-      }`
+    localStorage.setItem(
+      "importease_user",
+      JSON.stringify(newUser)
     );
+
+    /*
+     * SME users must complete their profile
+     * before accessing the SME application.
+     */
+    if (userType === "sme") {
+      navigate("/complete-profile");
+      return;
+    }
+
+    /*
+     * Clearing Agent flow is handled separately.
+     */
+    if (userType === "agent") {
+      navigate("/agent-signup");
+    }
   };
 
   return (
@@ -100,7 +130,6 @@ function SignUp() {
           </Link>
         </div>
 
-
         {/* MAIN CARD */}
         <div className="rounded-3xl border border-blue-100 bg-white p-6 shadow-xl shadow-blue-900/5 sm:p-7">
 
@@ -116,7 +145,6 @@ function SignUp() {
             </p>
 
           </div>
-
 
           {/* ACCOUNT TYPE */}
           <div className="mb-6">
@@ -141,14 +169,12 @@ function SignUp() {
                 }`}
               >
 
-                {/* CHECK */}
                 {userType === "sme" && (
                   <div className="absolute right-2.5 top-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-white">
                     <Check size={10} strokeWidth={3} />
                   </div>
                 )}
 
-                {/* ICON */}
                 <div
                   className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${
                     userType === "sme"
@@ -169,7 +195,6 @@ function SignUp() {
 
               </button>
 
-
               {/* CLEARING AGENT */}
               <button
                 type="button"
@@ -184,14 +209,12 @@ function SignUp() {
                 }`}
               >
 
-                {/* CHECK */}
                 {userType === "agent" && (
                   <div className="absolute right-2.5 top-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-white">
                     <Check size={10} strokeWidth={3} />
                   </div>
                 )}
 
-                {/* ICON */}
                 <div
                   className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${
                     userType === "agent"
@@ -216,14 +239,12 @@ function SignUp() {
 
           </div>
 
-
           {/* ERROR */}
           {error && (
             <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
               {error}
             </div>
           )}
-
 
           {/* FORM */}
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -245,11 +266,11 @@ function SignUp() {
                 value={formData.fullName}
                 onChange={handleChange}
                 placeholder="Enter your full name"
+                autoComplete="name"
                 className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
               />
 
             </div>
-
 
             {/* BUSINESS NAME */}
             <div>
@@ -268,11 +289,11 @@ function SignUp() {
                 value={formData.businessName}
                 onChange={handleChange}
                 placeholder="Enter your business name"
+                autoComplete="organization"
                 className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
               />
 
             </div>
-
 
             {/* EMAIL */}
             <div>
@@ -291,11 +312,11 @@ function SignUp() {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="you@company.com"
+                autoComplete="email"
                 className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
               />
 
             </div>
-
 
             {/* PASSWORD */}
             <div>
@@ -314,11 +335,11 @@ function SignUp() {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Create a password"
+                autoComplete="new-password"
                 className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
               />
 
             </div>
-
 
             {/* CONFIRM PASSWORD */}
             <div>
@@ -337,11 +358,11 @@ function SignUp() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Confirm your password"
+                autoComplete="new-password"
                 className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
               />
 
             </div>
-
 
             {/* TERMS */}
             <div className="flex items-start gap-3 pt-1">
@@ -381,16 +402,15 @@ function SignUp() {
 
             </div>
 
-
             {/* CREATE ACCOUNT */}
-           <button 
-  className="w-full rounded-xl bg-[#173563] py-3 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#102547]"
->
-  Create Account
-</button>
+            <button
+              type="submit"
+              className="w-full rounded-xl bg-[#173563] py-3 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#102547]"
+            >
+              Create Account
+            </button>
 
           </form>
-
 
           {/* SIGN IN */}
           <div className="mt-6 border-t border-slate-100 pt-5 text-center">
@@ -409,7 +429,6 @@ function SignUp() {
           </div>
 
         </div>
-
 
         {/* BACK HOME */}
         <div className="mt-5 flex justify-center">

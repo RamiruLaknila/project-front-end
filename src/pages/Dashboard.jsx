@@ -8,6 +8,8 @@ import {
   Sparkles,
   Users,
   Info,
+  UserRound,
+  ArrowRight,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -17,6 +19,31 @@ function Dashboard() {
   const location = useLocation();
 
   const [shipments, setShipments] = useState([]);
+  const [user, setUser] = useState(null);
+
+  /* =========================================================
+     LOAD USER
+  ========================================================= */
+
+  const loadUser = () => {
+    try {
+      const storedUser = localStorage.getItem(
+        "importease_user"
+      );
+
+      if (!storedUser) {
+        setUser(null);
+        return;
+      }
+
+      const parsedUser = JSON.parse(storedUser);
+
+      setUser(parsedUser);
+    } catch (error) {
+      console.error("Failed to load user:", error);
+      setUser(null);
+    }
+  };
 
   /* =========================================================
      LOAD SHIPMENTS
@@ -44,9 +71,23 @@ function Dashboard() {
     }
   };
 
+  /* =========================================================
+     INITIAL LOAD
+  ========================================================= */
+
   useEffect(() => {
+    loadUser();
     loadShipments();
   }, [location.key]);
+
+  /* =========================================================
+     REFRESH USER + SHIPMENTS WHEN PAGE CHANGES
+  ========================================================= */
+
+  useEffect(() => {
+    loadUser();
+    loadShipments();
+  }, [location.pathname]);
 
   /* =========================================================
      STORAGE LISTENER
@@ -54,25 +95,57 @@ function Dashboard() {
 
   useEffect(() => {
     const handleStorageChange = () => {
+      loadUser();
       loadShipments();
     };
 
-    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener(
+      "storage",
+      handleStorageChange
+    );
 
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener(
+        "storage",
+        handleStorageChange
+      );
     };
   }, []);
 
   /* =========================================================
-     DASHBOARD DATA
+     PROFILE INFORMATION
+  ========================================================= */
+
+  const fullName =
+    user?.fullName?.trim() || "there";
+
+  const businessName =
+    user?.business?.name ||
+    user?.businessName ||
+    "";
+
+  const profileComplete =
+    user?.profileComplete === true;
+
+  /* =========================================================
+     DASHBOARD GREETING
+  ========================================================= */
+
+  const dashboardName =
+    businessName || fullName;
+
+  /* =========================================================
+     ACTIVE SHIPMENTS
   ========================================================= */
 
   const activeShipments = useMemo(() => {
     return shipments.filter((shipment) => {
       const status = shipment?.status;
 
-      return status !== "Completed" && status !== "Cancelled";
+      return (
+        status !== "Completed" &&
+        status !== "Cancelled"
+      );
     });
   }, [shipments]);
 
@@ -83,31 +156,39 @@ function Dashboard() {
   const quickTools = [
     {
       title: "HS Code Search",
-      description: "Find your tariff code and duty rates",
+      description:
+        "Find your tariff code and duty rates",
       icon: Search,
       to: "/hs-code-search",
-      iconStyle: "bg-blue-50 text-blue-600",
+      iconStyle:
+        "bg-blue-50 text-blue-600",
     },
     {
       title: "Cost Calculator",
-      description: "Calculate duties, VAT, and landed cost",
+      description:
+        "Calculate duties, VAT, and landed cost",
       icon: Calculator,
       to: "/calculator",
-      iconStyle: "bg-amber-50 text-amber-700",
+      iconStyle:
+        "bg-amber-50 text-amber-700",
     },
     {
       title: "Find an Agent",
-      description: "Compare clearing agents and get bids",
+      description:
+        "Compare clearing agents and get bids",
       icon: Users,
       to: "/find-agent",
-      iconStyle: "bg-emerald-50 text-emerald-700",
+      iconStyle:
+        "bg-emerald-50 text-emerald-700",
     },
     {
       title: "Track Shipment",
-      description: "Follow your clearing process live",
+      description:
+        "Follow your clearing process live",
       icon: Ship,
       to: "/track-shipment",
-      iconStyle: "bg-indigo-50 text-indigo-600",
+      iconStyle:
+        "bg-indigo-50 text-indigo-600",
     },
   ];
 
@@ -179,25 +260,52 @@ function Dashboard() {
               </div>
 
               <h1 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[40px]">
-                Welcome back, My Business.
+
+                Welcome back,{" "}
+
+                <span>
+                  {dashboardName}.
+                </span>
+
               </h1>
 
               <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
-                Manage your imports, track clearances, and connect with
-                agents, all from one workspace.
+                Manage your imports, track clearances,
+                and connect with agents, all from one
+                workspace.
               </p>
 
             </div>
 
-            <div className="hidden items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 md:flex">
+            {/* ACCOUNT STATUS */}
+
+            <div
+              className={`hidden items-center gap-2 rounded-full px-3 py-1.5 md:flex ${
+                profileComplete
+                  ? "border border-emerald-100 bg-emerald-50"
+                  : "border border-amber-100 bg-amber-50"
+              }`}
+            >
 
               <CheckCircle2
                 size={14}
-                className="text-emerald-600"
+                className={
+                  profileComplete
+                    ? "text-emerald-600"
+                    : "text-amber-600"
+                }
               />
 
-              <span className="text-[10px] font-semibold text-emerald-700">
-                Account in good standing
+              <span
+                className={`text-[10px] font-semibold ${
+                  profileComplete
+                    ? "text-emerald-700"
+                    : "text-amber-700"
+                }`}
+              >
+                {profileComplete
+                  ? "Profile complete"
+                  : "Profile incomplete"}
               </span>
 
             </div>
@@ -205,6 +313,78 @@ function Dashboard() {
           </div>
 
         </section>
+
+        {/* ===================================================
+            COMPLETE PROFILE BANNER
+        ==================================================== */}
+
+        {!profileComplete && (
+          <section className="fade-up mb-6">
+
+            <div className="relative overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-[0_4px_20px_rgba(37,99,235,.06)]">
+
+              {/* DECORATION */}
+
+              <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-blue-100/50 blur-3xl" />
+
+              <div className="relative flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+
+                {/* LEFT */}
+
+                <div className="flex min-w-0 items-start gap-4">
+
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+
+                    <UserRound
+                      size={20}
+                      strokeWidth={1.8}
+                    />
+
+                  </div>
+
+                  <div className="min-w-0">
+
+                    <div className="flex flex-wrap items-center gap-2">
+
+                      <h2 className="text-sm font-bold text-slate-800">
+                        Complete your profile
+                      </h2>
+
+                      <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-700">
+                        Recommended
+                      </span>
+
+                    </div>
+
+                    <p className="mt-1 max-w-2xl text-[11px] leading-5 text-slate-500 sm:text-xs">
+                      Add your phone number and business
+                      information so you can get the full
+                      ImportEase experience, including
+                      finding agents, marketplace access,
+                      bidding, and shipment management.
+                    </p>
+
+                  </div>
+
+                </div>
+
+                {/* ACTION */}
+
+                <Link
+                  to="/complete-profile"
+                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#173563] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#102547]"
+                >
+                  Complete Profile
+
+                  <ArrowRight size={14} />
+                </Link>
+
+              </div>
+
+            </div>
+
+          </section>
+        )}
 
         {/* ===================================================
             ACTIVE SHIPMENTS
@@ -234,11 +414,14 @@ function Dashboard() {
 
                   <h2 className="mt-1 text-sm font-bold text-slate-800">
                     {activeShipments.length} active shipment
-                    {activeShipments.length !== 1 ? "s" : ""}
+                    {activeShipments.length !== 1
+                      ? "s"
+                      : ""}
                   </h2>
 
                   <p className="mt-1 text-[11px] text-slate-500">
-                    Follow your clearing process in real time.
+                    Follow your clearing process in
+                    real time.
                   </p>
 
                 </div>
@@ -282,7 +465,8 @@ function Dashboard() {
               </div>
 
               <p className="mt-1 text-[11px] text-slate-500">
-                Jump straight into the tools you use most.
+                Jump straight into the tools you use
+                most.
               </p>
 
             </div>

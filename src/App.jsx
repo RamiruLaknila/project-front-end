@@ -13,6 +13,7 @@ import ShipmentConfirmation from "./pages/ShipmentConfirmation";
 import Shipments from "./pages/Shipments";
 import TrackShipment from "./pages/TrackShipment";
 import Documents from "./pages/Documents";
+import CompleteProfile from "./pages/CompleteProfile";
 
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
@@ -41,6 +42,10 @@ function App() {
           path="/forgot-password"
           element={<ForgotPassword />}
         />
+        <Route
+  path="/complete-profile"
+  element={<CompleteProfile />}
+/>
 
         <Route
           path="/dashboard"

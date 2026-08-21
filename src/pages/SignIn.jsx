@@ -60,7 +60,7 @@ function SignIn() {
         <div className="mb-7 flex justify-center">
           <Link to="/" className="flex items-center gap-3">
             <img
-              src="/public/logo.jpeg"
+              src="/logo.jpeg"
               alt="ImportEase"
               className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
             />
