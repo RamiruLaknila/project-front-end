@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Bell,
   Building2,
+  CheckCircle2,
   ChevronRight,
   ClipboardList,
   Copy,
@@ -10,12 +11,11 @@ import {
   LogOut,
   Menu,
   Settings,
-CheckCircle2,
-
   ShieldCheck,
   UserPlus,
   Users,
   X,
+  XCircle,
 } from "lucide-react";
 
 function AgentAdminDashboard() {
@@ -23,20 +23,19 @@ function AgentAdminDashboard() {
 
   const [agency, setAgency] = useState(null);
   const [agent, setAgent] = useState(null);
+  const [agencyAgents, setAgencyAgents] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   /* =========================================================
-     LOAD AGENCY
+     LOAD AGENCY + ADMIN + AGENTS
   ========================================================= */
 
   useEffect(() => {
     try {
-      const storedAgency =
-        localStorage.getItem("clearingAgency");
-
-      const storedAgent =
-        localStorage.getItem("clearingAgent");
+      const storedAgency = localStorage.getItem("clearingAgency");
+      const storedAgent = localStorage.getItem("clearingAgent");
+      const storedAgents = localStorage.getItem("agencyAgents");
 
       if (storedAgency) {
         setAgency(JSON.parse(storedAgency));
@@ -45,11 +44,16 @@ function AgentAdminDashboard() {
       if (storedAgent) {
         setAgent(JSON.parse(storedAgent));
       }
+
+      if (storedAgents) {
+        const parsedAgents = JSON.parse(storedAgents);
+
+        if (Array.isArray(parsedAgents)) {
+          setAgencyAgents(parsedAgents);
+        }
+      }
     } catch (error) {
-      console.error(
-        "Failed to load agency information:",
-        error
-      );
+      console.error("Failed to load agency information:", error);
     }
   }, []);
 
@@ -58,11 +62,8 @@ function AgentAdminDashboard() {
   ========================================================= */
 
   useEffect(() => {
-    const storedAgent =
-      localStorage.getItem("clearingAgent");
-
-    const storedAgency =
-      localStorage.getItem("clearingAgency");
+    const storedAgent = localStorage.getItem("clearingAgent");
+    const storedAgency = localStorage.getItem("clearingAgency");
 
     if (!storedAgent || !storedAgency) {
       navigate("/agent-signin");
@@ -93,6 +94,32 @@ function AgentAdminDashboard() {
   }, [agency]);
 
   /* =========================================================
+     FILTER AGENTS FOR THIS AGENCY
+  ========================================================= */
+
+  const agencyMembers = useMemo(() => {
+    if (!agency?.id) {
+      return [];
+    }
+
+    return agencyAgents.filter(
+      (member) => member.agencyId === agency.id
+    );
+  }, [agencyAgents, agency]);
+
+  const pendingAgents = useMemo(() => {
+    return agencyMembers.filter(
+      (member) => member.status === "pending"
+    );
+  }, [agencyMembers]);
+
+  const approvedAgents = useMemo(() => {
+    return agencyMembers.filter(
+      (member) => member.status === "approved"
+    );
+  }, [agencyMembers]);
+
+  /* =========================================================
      COPY AGENCY CODE
   ========================================================= */
 
@@ -106,10 +133,120 @@ function AgentAdminDashboard() {
         setCopied(false);
       }, 2000);
     } catch (error) {
-      console.error(
-        "Failed to copy agency code:",
-        error
-      );
+      console.error("Failed to copy agency code:", error);
+    }
+  };
+
+  /* =========================================================
+     APPROVE AGENT
+  ========================================================= */
+
+  const handleApproveAgent = (agentId) => {
+    const updatedAgents = agencyAgents.map((member) => {
+      if (member.id !== agentId) {
+        return member;
+      }
+
+      return {
+        ...member,
+        status: "approved",
+        agencyId: agency?.id,
+        agencyName: agency?.agencyName,
+        approvedAt: new Date().toISOString(),
+      };
+    });
+
+    setAgencyAgents(updatedAgents);
+
+    localStorage.setItem(
+      "agencyAgents",
+      JSON.stringify(updatedAgents)
+    );
+
+    try {
+      const storedAgent = localStorage.getItem("clearingAgent");
+
+      if (storedAgent) {
+        const currentAgent = JSON.parse(storedAgent);
+
+        const approvedAgent = updatedAgents.find(
+          (item) => item.id === agentId
+        );
+
+        if (
+          approvedAgent &&
+          (currentAgent.id === agentId ||
+            currentAgent.email === approvedAgent.email)
+        ) {
+          localStorage.setItem(
+            "clearingAgent",
+            JSON.stringify({
+              ...currentAgent,
+              ...approvedAgent,
+              role: "agent",
+              status: "approved",
+            })
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Failed to update clearing agent:", error);
+    }
+  };
+
+  /* =========================================================
+     REJECT AGENT
+  ========================================================= */
+
+  const handleRejectAgent = (agentId) => {
+    const updatedAgents = agencyAgents.map((member) => {
+      if (member.id !== agentId) {
+        return member;
+      }
+
+      return {
+        ...member,
+        status: "rejected",
+        agencyId: agency?.id,
+        agencyName: agency?.agencyName,
+        rejectedAt: new Date().toISOString(),
+      };
+    });
+
+    setAgencyAgents(updatedAgents);
+
+    localStorage.setItem(
+      "agencyAgents",
+      JSON.stringify(updatedAgents)
+    );
+
+    try {
+      const storedAgent = localStorage.getItem("clearingAgent");
+
+      if (storedAgent) {
+        const currentAgent = JSON.parse(storedAgent);
+
+        const rejectedAgent = updatedAgents.find(
+          (item) => item.id === agentId
+        );
+
+        if (
+          rejectedAgent &&
+          (currentAgent.id === agentId ||
+            currentAgent.email === rejectedAgent.email)
+        ) {
+          localStorage.setItem(
+            "clearingAgent",
+            JSON.stringify({
+              ...currentAgent,
+              ...rejectedAgent,
+              status: "rejected",
+            })
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Failed to update rejected agent:", error);
     }
   };
 
@@ -132,14 +269,14 @@ function AgentAdminDashboard() {
   const stats = [
     {
       title: "Total Agents",
-      value: "1",
+      value: agencyMembers.length + 1,
       description: "Currently registered",
       icon: Users,
       iconStyle: "bg-blue-50 text-blue-600",
     },
     {
       title: "Pending Requests",
-      value: "0",
+      value: pendingAgents.length,
       description: "Agents waiting for approval",
       icon: UserPlus,
       iconStyle: "bg-amber-50 text-amber-700",
@@ -194,7 +331,10 @@ function AgentAdminDashboard() {
       description:
         "Manage your agency shipments.",
       icon: FileText,
-      to: "/agent-shipments",
+
+      // FIXED ROUTE
+      to: "/agency-shipments",
+
       iconStyle: "bg-indigo-50 text-indigo-600",
     },
   ];
@@ -212,7 +352,6 @@ function AgentAdminDashboard() {
           onClick={() => setSidebarOpen(false)}
         />
       )}
-
 
       {/* =====================================================
           SIDEBAR
@@ -235,7 +374,6 @@ function AgentAdminDashboard() {
             className="flex items-center gap-3"
             onClick={() => setSidebarOpen(false)}
           >
-
             <img
               src="/logo.jpeg"
               alt="ImportEase"
@@ -243,7 +381,6 @@ function AgentAdminDashboard() {
             />
 
             <div>
-
               <p className="text-[16px] font-bold tracking-tight text-[#173563]">
                 Import
                 <span className="text-slate-900">
@@ -254,9 +391,7 @@ function AgentAdminDashboard() {
               <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                 Agent Platform
               </p>
-
             </div>
-
           </Link>
 
           {/* MOBILE CLOSE */}
@@ -270,7 +405,6 @@ function AgentAdminDashboard() {
           </button>
 
         </div>
-
 
         {/* AGENCY */}
 
@@ -302,7 +436,6 @@ function AgentAdminDashboard() {
           </div>
 
         </div>
-
 
         {/* NAVIGATION */}
 
@@ -340,12 +473,14 @@ function AgentAdminDashboard() {
           <SidebarItem
             icon={FileText}
             label="Shipments"
-            to="/agent-shipments"
+
+            // FIXED ROUTE
+            to="/agency-shipments"
+
             onClick={() => setSidebarOpen(false)}
           />
 
         </nav>
-
 
         {/* BOTTOM */}
 
@@ -363,17 +498,13 @@ function AgentAdminDashboard() {
             onClick={handleLogout}
             className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-red-600 transition hover:bg-red-50"
           >
-
             <LogOut size={17} />
-
             Logout
-
           </button>
 
         </div>
 
       </aside>
-
 
       {/* =====================================================
           MAIN AREA
@@ -386,8 +517,6 @@ function AgentAdminDashboard() {
         ================================================= */}
 
         <header className="sticky top-0 z-30 flex h-[70px] items-center border-b border-slate-200 bg-white/95 px-5 backdrop-blur-xl sm:px-8">
-
-          {/* MOBILE MENU */}
 
           <button
             type="button"
@@ -409,7 +538,6 @@ function AgentAdminDashboard() {
 
           </div>
 
-
           <div className="ml-auto flex items-center gap-3">
 
             {/* NOTIFICATION */}
@@ -418,29 +546,30 @@ function AgentAdminDashboard() {
               type="button"
               className="relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100"
             >
-
               <Bell size={17} />
 
-              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-blue-600 ring-2 ring-white" />
-
+              {pendingAgents.length > 0 && (
+                <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-blue-600 ring-2 ring-white" />
+              )}
             </button>
 
-
             <div className="hidden h-7 w-px bg-slate-200 sm:block" />
-
 
             {/* ADMIN */}
 
             <div className="flex items-center gap-2">
 
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#173563] text-[10px] font-bold text-white">
-                {getInitials(agent?.name || "Admin")}
+                {getInitials(
+                  agent?.name || "Admin"
+                )}
               </div>
 
               <div className="hidden sm:block">
 
                 <p className="text-xs font-semibold text-slate-800">
-                  {agent?.name || "Agency Admin"}
+                  {agent?.name ||
+                    "Agency Admin"}
                 </p>
 
                 <p className="text-[9px] text-slate-400">
@@ -455,16 +584,13 @@ function AgentAdminDashboard() {
 
         </header>
 
-
         {/* =================================================
             CONTENT
         ================================================= */}
 
         <main className="mx-auto w-full max-w-[1180px] px-5 py-7 sm:px-8 lg:py-9">
 
-          {/* =================================================
-              HEADER
-          ================================================= */}
+          {/* HEADER */}
 
           <section className="mb-7">
 
@@ -491,13 +617,12 @@ function AgentAdminDashboard() {
                 </h2>
 
                 <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
-                  Manage your clearing agency, agents,
-                  SME requests, and shipments from one
-                  workspace.
+                  Manage your clearing agency,
+                  agents, SME requests, and
+                  shipments from one workspace.
                 </p>
 
               </div>
-
 
               <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
 
@@ -516,10 +641,7 @@ function AgentAdminDashboard() {
 
           </section>
 
-
-          {/* =================================================
-              AGENCY CODE CARD
-          ================================================= */}
+          {/* AGENCY CODE CARD */}
 
           <section className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_10px_rgba(15,23,42,.02)]">
 
@@ -547,15 +669,14 @@ function AgentAdminDashboard() {
                   </h3>
 
                   <p className="mt-1 max-w-lg text-[11px] leading-5 text-slate-500">
-                    Share this code with agents you trust.
-                    They can use it to request access to
-                    your agency.
+                    Share this code with agents you
+                    trust. They can use it to
+                    request access to your agency.
                   </p>
 
                 </div>
 
               </div>
-
 
               <div className="flex items-center gap-2">
 
@@ -576,7 +697,9 @@ function AgentAdminDashboard() {
                   <Copy size={14} />
 
                   <span className="hidden sm:inline">
-                    {copied ? "Copied" : "Copy"}
+                    {copied
+                      ? "Copied"
+                      : "Copy"}
                   </span>
 
                 </button>
@@ -587,10 +710,7 @@ function AgentAdminDashboard() {
 
           </section>
 
-
-          {/* =================================================
-              STATS
-          ================================================= */}
+          {/* STATS */}
 
           <section className="mb-7 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
 
@@ -621,12 +741,10 @@ function AgentAdminDashboard() {
                     <div
                       className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.iconStyle}`}
                     >
-
                       <Icon
                         size={18}
                         strokeWidth={1.8}
                       />
-
                     </div>
 
                   </div>
@@ -641,10 +759,235 @@ function AgentAdminDashboard() {
 
           </section>
 
+          {/* PENDING AGENT REQUESTS */}
 
-          {/* =================================================
-              QUICK ACTIONS
-          ================================================= */}
+          <section className="mb-7 rounded-2xl border border-slate-200 bg-white shadow-[0_2px_10px_rgba(15,23,42,.02)]">
+
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-5 sm:px-6">
+
+              <div>
+
+                <div className="flex items-center gap-2">
+
+                  <h2 className="text-sm font-bold text-[#14213D]">
+                    Pending agent requests
+                  </h2>
+
+                  {pendingAgents.length > 0 && (
+                    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-700">
+                      {pendingAgents.length}
+                    </span>
+                  )}
+
+                </div>
+
+                <p className="mt-1 text-[11px] text-slate-500">
+                  Review agents requesting access
+                  to your agency.
+                </p>
+
+              </div>
+
+              <Link
+                to="/agency-agents"
+                className="hidden items-center gap-1 text-[10px] font-semibold text-[#173B6C] sm:flex"
+              >
+                Manage agents
+                <ChevronRight size={12} />
+              </Link>
+
+            </div>
+
+            {pendingAgents.length === 0 ? (
+
+              <div className="px-5 py-10 text-center sm:px-6">
+
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+
+                  <CheckCircle2 size={22} />
+
+                </div>
+
+                <h3 className="mt-3 text-sm font-bold text-slate-700">
+                  No pending requests
+                </h3>
+
+                <p className="mx-auto mt-1 max-w-sm text-[11px] leading-5 text-slate-400">
+                  New agents who join your agency
+                  using your invitation code will
+                  appear here.
+                </p>
+
+              </div>
+
+            ) : (
+
+              <div className="divide-y divide-slate-100">
+
+                {pendingAgents.map((member) => (
+
+                  <div
+                    key={member.id}
+                    className="flex flex-col gap-4 px-5 py-5 sm:px-6 md:flex-row md:items-center md:justify-between"
+                  >
+
+                    <div className="flex min-w-0 items-center gap-3">
+
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#173563] text-xs font-bold text-white">
+                        {getInitials(
+                          member.name ||
+                            "Agent"
+                        )}
+                      </div>
+
+                      <div className="min-w-0">
+
+                        <div className="flex flex-wrap items-center gap-2">
+
+                          <p className="truncate text-xs font-bold text-slate-800">
+                            {member.name ||
+                              "Unnamed Agent"}
+                          </p>
+
+                          <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide text-amber-700">
+                            Pending
+                          </span>
+
+                        </div>
+
+                        <p className="mt-0.5 truncate text-[10px] text-slate-500">
+                          {member.email ||
+                            "No email provided"}
+                        </p>
+
+                        {member.requestedAt && (
+                          <p className="mt-1 text-[9px] text-slate-400">
+                            Requested{" "}
+                            {formatDate(
+                              member.requestedAt
+                            )}
+                          </p>
+                        )}
+
+                      </div>
+
+                    </div>
+
+                    <div className="flex items-center gap-2 md:shrink-0">
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleRejectAgent(
+                            member.id
+                          )
+                        }
+                        className="flex h-9 items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 text-[10px] font-semibold text-red-600 transition hover:bg-red-50"
+                      >
+                        <XCircle size={14} />
+                        Reject
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleApproveAgent(
+                            member.id
+                          )
+                        }
+                        className="flex h-9 items-center gap-1.5 rounded-lg bg-emerald-600 px-3 text-[10px] font-semibold text-white transition hover:bg-emerald-700"
+                      >
+                        <CheckCircle2 size={14} />
+                        Approve
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                ))}
+
+              </div>
+
+            )}
+
+          </section>
+
+          {/* ACTIVE AGENTS */}
+
+          {approvedAgents.length > 0 && (
+            <section className="mb-7 rounded-2xl border border-slate-200 bg-white shadow-[0_2px_10px_rgba(15,23,42,.02)]">
+
+              <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+
+                <h2 className="text-sm font-bold text-[#14213D]">
+                  Active agents
+                </h2>
+
+                <p className="mt-1 text-[11px] text-slate-500">
+                  Agents currently approved to
+                  work under your agency.
+                </p>
+
+              </div>
+
+              <div className="divide-y divide-slate-100">
+
+                {approvedAgents.map((member) => (
+
+                  <div
+                    key={member.id}
+                    className="flex items-center justify-between px-5 py-4 sm:px-6"
+                  >
+
+                    <div className="flex min-w-0 items-center gap-3">
+
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-blue-700">
+                        {getInitials(
+                          member.name ||
+                            "Agent"
+                        )}
+                      </div>
+
+                      <div className="min-w-0">
+
+                        <p className="truncate text-xs font-bold text-slate-800">
+                          {member.name ||
+                            "Agent"}
+                        </p>
+
+                        <p className="truncate text-[10px] text-slate-500">
+                          {member.email ||
+                            "No email provided"}
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                    <div className="flex items-center gap-2">
+
+                      <span className="hidden rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-semibold text-emerald-700 sm:inline-flex">
+                        Active
+                      </span>
+
+                      <CheckCircle2
+                        size={15}
+                        className="text-emerald-500"
+                      />
+
+                    </div>
+
+                  </div>
+
+                ))}
+
+              </div>
+
+            </section>
+          )}
+
+          {/* QUICK ACTIONS */}
 
           <section>
 
@@ -655,11 +998,11 @@ function AgentAdminDashboard() {
               </h2>
 
               <p className="mt-1 text-[11px] text-slate-500">
-                Manage your agency from these shortcuts.
+                Manage your agency from these
+                shortcuts.
               </p>
 
             </div>
-
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
 
@@ -677,12 +1020,10 @@ function AgentAdminDashboard() {
                     <div
                       className={`flex h-10 w-10 items-center justify-center rounded-xl ${action.iconStyle} transition group-hover:scale-105`}
                     >
-
                       <Icon
                         size={18}
                         strokeWidth={1.8}
                       />
-
                     </div>
 
                     <h3 className="mt-3 text-[13px] font-bold text-slate-800 group-hover:text-[#173B6C]">
@@ -714,19 +1055,14 @@ function AgentAdminDashboard() {
 
           </section>
 
-
-          {/* =================================================
-              AGENCY INFORMATION
-          ================================================= */}
+          {/* AGENCY INFORMATION */}
 
           <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
 
             <div className="mb-5 flex items-center gap-3">
 
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
-
                 <Building2 size={18} />
-
               </div>
 
               <div>
@@ -742,7 +1078,6 @@ function AgentAdminDashboard() {
               </div>
 
             </div>
-
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
@@ -784,15 +1119,10 @@ function AgentAdminDashboard() {
 
           </section>
 
-
-          {/* =================================================
-              FOOTER
-          ================================================= */}
+          {/* FOOTER */}
 
           <div className="mt-9 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-[10px] text-slate-400">
-
             ImportEase · Clearing Agency Platform
-
           </div>
 
         </main>
@@ -802,7 +1132,6 @@ function AgentAdminDashboard() {
     </div>
   );
 }
-
 
 /* =========================================================
    SIDEBAR ITEM
@@ -825,18 +1154,15 @@ function SidebarItem({
           : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
       }`}
     >
-
       <Icon
         size={17}
         strokeWidth={1.8}
       />
 
       <span>{label}</span>
-
     </Link>
   );
 }
-
 
 /* =========================================================
    INFO ITEM
@@ -861,7 +1187,6 @@ function InfoItem({
   );
 }
 
-
 /* =========================================================
    INITIALS
 ========================================================= */
@@ -877,11 +1202,33 @@ function getInitials(name) {
     .filter(Boolean);
 
   if (words.length === 1) {
-    return words[0].slice(0, 2).toUpperCase();
+    return words[0]
+      .slice(0, 2)
+      .toUpperCase();
   }
 
-  return `${words[0][0]}${words[words.length - 1][0]}`.toUpperCase();
+  return `${words[0][0]}${
+    words[words.length - 1][0]
+  }`.toUpperCase();
 }
 
+/* =========================================================
+   DATE FORMAT
+========================================================= */
+
+function formatDate(date) {
+  try {
+    return new Date(date).toLocaleDateString(
+      "en-US",
+      {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }
+    );
+  } catch {
+    return "Recently";
+  }
+}
 
 export default AgentAdminDashboard;

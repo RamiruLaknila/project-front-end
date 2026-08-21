@@ -14,7 +14,10 @@ import Shipments from "./pages/Shipments";
 import TrackShipment from "./pages/TrackShipment";
 import Documents from "./pages/Documents";
 import CompleteProfile from "./pages/CompleteProfile";
-
+import AgentPending from "./pages/AgentPending";
+import AgencyAgents from "./pages/AgencyAgents";
+import AgentDashboard from "./pages/AgentDashboard";
+import AgencyInvite from "./pages/AgencyInvite";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import AgencyCreate from "./pages/AgencyCreate";
@@ -25,7 +28,9 @@ import AgencyChoice from "./pages/AgencyChoice";
 import AgentSignUp from "./pages/AgentSignUp";
 import AgencyCreated from "./pages/AgencyCreated";
 import AgentAdminDashboard from "./pages/AgentAdminDashboard";
-
+import JoinAgency from "./pages/JoinAgency";
+import AgentMarketplace from "./pages/AgentMarketplace";
+import AgencyShipments from "./pages/AgencyShipments";
 function App() {
   return (
     <BrowserRouter>
@@ -45,6 +50,10 @@ function App() {
           path="/forgot-password"
           element={<ForgotPassword />}
         />
+        <Route
+  path="/agent-dashboard"
+  element={<AgentDashboard />}
+/>
         <Route
   path="/complete-profile"
   element={<CompleteProfile />}
@@ -153,8 +162,36 @@ function App() {
         <Route
           path="/agent-admin-dashboard"
           element={<AgentAdminDashboard />}
-/>
 
+/>
+<Route
+  path="/agency-agents"
+  element={<AgencyAgents />}
+/>
+<Route
+  path="/agent-pending"
+  element={<AgentPending />}
+/>
+<Route
+  path="/join-agency"
+  element={<JoinAgency />}
+/>
+<Route
+  path="/agency-invite"
+  element={<AgencyInvite />}
+/>
+<Route
+  path="/agent-marketplace"
+  element={<AgentMarketplace />}
+/>
+<Route
+  path="/agency-shipments"
+  element={<AgencyShipments />}
+/>
+<Route
+  path="/agent-shipments"
+  element={<AgencyShipments />}
+/>
       </Routes>
     </BrowserRouter>
   );
