@@ -1,1146 +1,1335 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  Building2,
-  CalendarDays,
-  CheckCircle2,
-  ClipboardList,
+  Search,
+  Filter,
+  Package,
+  MapPin,
   Clock3,
   DollarSign,
-  Eye,
-  FileText,
-  Filter,
-  LogOut,
-  Menu,
-  Package,
-  Search,
-  Send,
-  Settings,
-  Ship,
-  Users,
+  ChevronRight,
   X,
+  Send,
+  CheckCircle2,
 } from "lucide-react";
+
+const demoRequests = [
+  {
+    id: "REQ-1001",
+    product: "Electronic Components",
+    description:
+      "LED display modules and electronic control boards",
+    hsCode: "8531.20",
+    origin: "China",
+    destination: "Colombo, Sri Lanka",
+    shipmentValue: 1250000,
+    requestedDate: "2026-08-28",
+    urgency: "High",
+    status: "Open",
+    category: "Electronics",
+    createdAt: "2026-08-25T08:00:00.000Z",
+  },
+  {
+    id: "REQ-1002",
+    product: "Garment Accessories",
+    description:
+      "Buttons, zippers and garment finishing accessories",
+    hsCode: "9606.29",
+    origin: "India",
+    destination: "Colombo, Sri Lanka",
+    shipmentValue: 680000,
+    requestedDate: "2026-09-02",
+    urgency: "Medium",
+    status: "Open",
+    category: "Textiles",
+    createdAt: "2026-08-25T08:00:00.000Z",
+  },
+  {
+    id: "REQ-1003",
+    product: "Industrial Machinery Parts",
+    description:
+      "Replacement parts for industrial manufacturing equipment",
+    hsCode: "8483.90",
+    origin: "Japan",
+    destination: "Colombo, Sri Lanka",
+    shipmentValue: 2450000,
+    requestedDate: "2026-09-05",
+    urgency: "Medium",
+    status: "Open",
+    category: "Machinery",
+    createdAt: "2026-08-25T08:00:00.000Z",
+  },
+  {
+    id: "REQ-1004",
+    product: "Food Packaging Materials",
+    description:
+      "Food-grade plastic packaging containers",
+    hsCode: "3923.30",
+    origin: "Malaysia",
+    destination: "Colombo, Sri Lanka",
+    shipmentValue: 890000,
+    requestedDate: "2026-09-01",
+    urgency: "Low",
+    status: "Open",
+    category: "Packaging",
+    createdAt: "2026-08-25T08:00:00.000Z",
+  },
+];
 
 function AgentMarketplace() {
   const navigate = useNavigate();
 
-  const [agency, setAgency] = useState(null);
-  const [admin, setAdmin] = useState(null);
-  const [requests, setRequests] = useState([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-
   /* =========================================================
-     LOAD AGENCY
+     CURRENT AGENT
   ========================================================= */
 
-  useEffect(() => {
-    try {
-      const storedAgency =
-        localStorage.getItem("clearingAgency");
-
-      const storedAdmin =
-        localStorage.getItem("clearingAgent");
-
-      if (!storedAgency || !storedAdmin) {
-        navigate("/agent-signin");
-        return;
-      }
-
-      const parsedAgency = JSON.parse(storedAgency);
-      const parsedAdmin = JSON.parse(storedAdmin);
-
-      if (parsedAdmin.role !== "admin") {
-        navigate("/agent-signin");
-        return;
-      }
-
-      setAgency(parsedAgency);
-      setAdmin(parsedAdmin);
-
-      loadRequests(
-        parsedAgency.id || parsedAgency.code
-      );
-    } catch (error) {
-      console.error(
-        "Failed to load agency marketplace:",
-        error
-      );
-
-      navigate("/agent-signin");
-    }
-  }, [navigate]);
+  const currentAgent = useMemo(() => {
+    return JSON.parse(
+      localStorage.getItem("clearingAgent") || "{}"
+    );
+  }, []);
 
   /* =========================================================
-     LOAD REQUESTS
+     MARKETPLACE REQUESTS
   ========================================================= */
 
-  const loadRequests = (agencyId) => {
-    try {
-      const stored =
-        localStorage.getItem("smeRequests");
+  const [requests, setRequests] = useState(() => {
+    const saved = localStorage.getItem(
+      "marketplaceRequests"
+    );
 
-      if (stored) {
-        const parsed = JSON.parse(stored);
-
-        const agencyRequests = parsed.filter(
-          (request) =>
-            !request.agencyId ||
-            request.agencyId === agencyId
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        localStorage.setItem(
+          "marketplaceRequests",
+          JSON.stringify(demoRequests)
         );
 
-        setRequests(agencyRequests);
-        return;
+        return demoRequests;
       }
-
-      /*
-       * Demo data so the marketplace is visible
-       * while the frontend is being developed.
-       */
-
-      const demoRequests = [
-        {
-          id: "REQ-1001",
-          smeName: "Lanka Solar Solutions",
-          product: "Solar Panels",
-          hsCode: "8541.43",
-          origin: "China",
-          declaredValue: 12500,
-          currency: "USD",
-          quantity: 500,
-          requiredDate: "2026-08-28",
-          status: "new",
-          createdAt: "2026-08-20T09:30:00",
-          description:
-            "Import of residential solar panels for local distribution.",
-        },
-        {
-          id: "REQ-1002",
-          smeName: "TechWorld Lanka",
-          product: "Laptop Computers",
-          hsCode: "8471.30",
-          origin: "Singapore",
-          declaredValue: 18400,
-          currency: "USD",
-          quantity: 80,
-          requiredDate: "2026-09-02",
-          status: "pending",
-          createdAt: "2026-08-19T11:15:00",
-          description:
-            "Commercial laptop shipment requiring customs clearance.",
-        },
-        {
-          id: "REQ-1003",
-          smeName: "Ceylon Apparel",
-          product: "Cotton T-Shirts",
-          hsCode: "6109.10",
-          origin: "India",
-          declaredValue: 9200,
-          currency: "USD",
-          quantity: 2500,
-          requiredDate: "2026-08-30",
-          status: "in-progress",
-          createdAt: "2026-08-18T14:20:00",
-          description:
-            "Bulk apparel import for retail distribution.",
-        },
-        {
-          id: "REQ-1004",
-          smeName: "AutoParts Lanka",
-          product: "Motor Vehicle Parts",
-          hsCode: "8708.99",
-          origin: "Japan",
-          declaredValue: 15600,
-          currency: "USD",
-          quantity: 320,
-          requiredDate: "2026-09-05",
-          status: "completed",
-          createdAt: "2026-08-15T10:10:00",
-          description:
-            "Automotive spare parts shipment.",
-        },
-      ];
-
-      setRequests(demoRequests);
-    } catch (error) {
-      console.error(
-        "Failed to load requests:",
-        error
-      );
     }
-  };
+
+    localStorage.setItem(
+      "marketplaceRequests",
+      JSON.stringify(demoRequests)
+    );
+
+    return demoRequests;
+  });
 
   /* =========================================================
-     FILTER REQUESTS
+     AGENT BIDS
+  ========================================================= */
+
+  const [agentBids, setAgentBids] = useState(() => {
+    try {
+      return JSON.parse(
+        localStorage.getItem("agentBids") || "[]"
+      );
+    } catch {
+      return [];
+    }
+  });
+
+  /* =========================================================
+     FILTER STATE
+  ========================================================= */
+
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
+  const [urgency, setUrgency] = useState("All");
+
+  /* =========================================================
+     MODAL STATE
+  ========================================================= */
+
+  const [selectedRequest, setSelectedRequest] =
+    useState(null);
+
+  const [showBidModal, setShowBidModal] = useState(false);
+
+  /* =========================================================
+     BID FORM
+  ========================================================= */
+
+  const [bidForm, setBidForm] = useState({
+    clearanceFee: "",
+    processingTime: "",
+    additionalCharges: "",
+    message: "",
+  });
+
+  /* =========================================================
+     CATEGORIES
+  ========================================================= */
+
+  const categories = useMemo(() => {
+    const uniqueCategories = [
+      ...new Set(
+        requests
+          .map((request) => request.category)
+          .filter(Boolean)
+      ),
+    ];
+
+    return ["All", ...uniqueCategories];
+  }, [requests]);
+
+  /* =========================================================
+     FILTERED REQUESTS
   ========================================================= */
 
   const filteredRequests = useMemo(() => {
     return requests.filter((request) => {
-      const searchValue =
-        search.trim().toLowerCase();
+      const searchText = search.toLowerCase().trim();
 
       const matchesSearch =
-        !searchValue ||
-        request.id
-          ?.toLowerCase()
-          .includes(searchValue) ||
-        request.smeName
-          ?.toLowerCase()
-          .includes(searchValue) ||
-        request.product
-          ?.toLowerCase()
-          .includes(searchValue) ||
-        request.origin
-          ?.toLowerCase()
-          .includes(searchValue);
+        !searchText ||
+        String(request.product || "")
+          .toLowerCase()
+          .includes(searchText) ||
+        String(request.description || "")
+          .toLowerCase()
+          .includes(searchText) ||
+        String(request.hsCode || "")
+          .toLowerCase()
+          .includes(searchText) ||
+        String(request.origin || "")
+          .toLowerCase()
+          .includes(searchText);
 
+      const matchesCategory =
+        category === "All" ||
+        request.category === category;
+
+      const matchesUrgency =
+        urgency === "All" ||
+        request.urgency === urgency;
+
+      /*
+       * Only show open marketplace requests.
+       */
       const matchesStatus =
-        statusFilter === "all" ||
-        request.status === statusFilter;
+        !request.status ||
+        request.status === "Open";
 
-      return matchesSearch && matchesStatus;
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesUrgency &&
+        matchesStatus
+      );
     });
-  }, [requests, search, statusFilter]);
+  }, [
+    requests,
+    search,
+    category,
+    urgency,
+  ]);
 
   /* =========================================================
-     STATS
+     CHECK IF CURRENT AGENT ALREADY BID
   ========================================================= */
 
-  const stats = useMemo(() => {
-    return {
-      total: requests.length,
+  const hasAgentBid = (requestId) => {
+    return agentBids.some(
+      (bid) =>
+        bid.requestId === requestId &&
+        (
+          bid.agentId === currentAgent.id ||
+          (
+            !bid.agentId &&
+            bid.agentName === currentAgent.name
+          )
+        )
+    );
+  };
 
-      newRequests: requests.filter(
-        (request) => request.status === "new"
-      ).length,
+  /* =========================================================
+     FORMAT CURRENCY
+  ========================================================= */
 
-      pending: requests.filter(
-        (request) => request.status === "pending"
-      ).length,
+  const formatCurrency = (value) => {
+    return `LKR ${Number(value || 0).toLocaleString()}`;
+  };
 
-      inProgress: requests.filter(
-        (request) =>
-          request.status === "in-progress"
-      ).length,
+  /* =========================================================
+     OPEN REQUEST
+  ========================================================= */
 
-      completed: requests.filter(
-        (request) =>
-          request.status === "completed"
-      ).length,
+  const openRequest = (request) => {
+    setSelectedRequest(request);
+  };
+
+  /* =========================================================
+     OPEN BID FORM
+  ========================================================= */
+
+  const openBidForm = () => {
+    setBidForm({
+      clearanceFee: "",
+      processingTime: "",
+      additionalCharges: "",
+      message: "",
+    });
+
+    setShowBidModal(true);
+  };
+
+  /* =========================================================
+     CLOSE BID MODAL
+  ========================================================= */
+
+  const closeBidModal = () => {
+    setShowBidModal(false);
+  };
+
+  /* =========================================================
+     SUBMIT BID
+  ========================================================= */
+
+  const submitBid = (event) => {
+    event.preventDefault();
+
+    if (!selectedRequest) {
+      return;
+    }
+
+    /*
+     * Prevent the same agent from submitting
+     * multiple bids for the same request.
+     */
+
+    if (hasAgentBid(selectedRequest.id)) {
+      alert(
+        "You have already submitted a bid for this request."
+      );
+
+      setShowBidModal(false);
+
+      return;
+    }
+
+    /*
+     * Make sure the agent has a basic identity.
+     */
+
+    const agentId =
+      currentAgent.id ||
+      currentAgent.agentId ||
+      currentAgent.email ||
+      `AGENT-${Date.now()}`;
+
+    const agentName =
+      currentAgent.name ||
+      currentAgent.fullName ||
+      "Clearing Agent";
+
+    const agencyName =
+      currentAgent.agencyName ||
+      currentAgent.agency ||
+      currentAgent.companyName ||
+      "Clearing Agency";
+
+    /*
+     * Create the bid.
+     */
+
+    const newBid = {
+      id: `BID-${Date.now()}`,
+
+      requestId: selectedRequest.id,
+
+      product: selectedRequest.product,
+
+      description: selectedRequest.description,
+
+      hsCode: selectedRequest.hsCode,
+
+      origin: selectedRequest.origin,
+
+      destination: selectedRequest.destination,
+
+      shipmentValue: selectedRequest.shipmentValue,
+
+      /*
+       * Agent identity
+       */
+
+      agentId,
+
+      agentName,
+
+      agencyName,
+
+      /*
+       * Bid information
+       */
+
+      clearanceFee: Number(
+        bidForm.clearanceFee || 0
+      ),
+
+      processingTime:
+        bidForm.processingTime.trim(),
+
+      additionalCharges: Number(
+        bidForm.additionalCharges || 0
+      ),
+
+      message:
+        bidForm.message.trim(),
+
+      status: "Pending",
+
+      createdAt:
+        new Date().toISOString(),
     };
-  }, [requests]);
 
-  /* =========================================================
-     VIEW REQUEST
-  ========================================================= */
+    /*
+     * Add bid to existing bids.
+     */
 
-  const handleViewRequest = (request) => {
+    const updatedBids = [
+      ...agentBids,
+      newBid,
+    ];
+
+    setAgentBids(updatedBids);
+
     localStorage.setItem(
-      "selectedSMERequest",
-      JSON.stringify(request)
+      "agentBids",
+      JSON.stringify(updatedBids)
     );
 
-    navigate("/agent-request-details");
+    /*
+     * Update marketplace request.
+     */
+
+    const updatedRequests = requests.map(
+      (request) => {
+        if (
+          request.id === selectedRequest.id
+        ) {
+          return {
+            ...request,
+
+            hasBid: true,
+
+            bidCount:
+              Number(request.bidCount || 0) + 1,
+
+            lastBidAt:
+              new Date().toISOString(),
+          };
+        }
+
+        return request;
+      }
+    );
+
+    setRequests(updatedRequests);
+
+    localStorage.setItem(
+      "marketplaceRequests",
+      JSON.stringify(updatedRequests)
+    );
+
+    /*
+     * Save the last submitted bid.
+     */
+
+    localStorage.setItem(
+      "lastSubmittedBid",
+      JSON.stringify(newBid)
+    );
+
+    /*
+     * Close modals.
+     */
+
+    setShowBidModal(false);
+
+    setSelectedRequest(null);
+
+    /*
+     * Notify user.
+     */
+
+    alert(
+      "Your bid has been submitted successfully."
+    );
   };
 
   /* =========================================================
-     LOGOUT
+     URGENCY STYLE
   ========================================================= */
 
-  const handleLogout = () => {
-    localStorage.removeItem("clearingAgent");
-    localStorage.removeItem(
-      "agentOnboardingType"
-    );
-    localStorage.removeItem(
-      "agentOnboardingComplete"
-    );
+  const getUrgencyClass = (value) => {
+    if (value === "High") {
+      return "bg-red-50 text-red-600";
+    }
 
-    navigate("/agent-signin");
+    if (value === "Medium") {
+      return "bg-amber-50 text-amber-600";
+    }
+
+    return "bg-green-50 text-green-600";
   };
 
   /* =========================================================
-     LOADING
+     RENDER
   ========================================================= */
-
-  if (!agency || !admin) {
-    return null;
-  }
 
   return (
-    <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
-
-      {/* MOBILE OVERLAY */}
-
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-slate-900/30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+    <div className="min-h-screen bg-[#F6F8FB]">
 
       {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
+          HEADER
+      ====================================================== */}
 
-      <aside
-        className={`fixed left-0 top-0 z-50 flex h-screen w-[250px] flex-col border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen
-            ? "translate-x-0"
-            : "-translate-x-full"
-        }`}
-      >
+      <header className="bg-white border-b border-gray-200">
 
-        {/* LOGO */}
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 
-        <div className="flex h-[70px] items-center border-b border-slate-100 px-5">
+          <div className="flex items-center gap-4">
 
-          <Link
-            to="/agent-admin-dashboard"
-            className="flex items-center gap-3"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-          >
-
-            <img
-              src="/logo.jpeg"
-              alt="ImportEase"
-              className="h-9 w-9 object-contain mix-blend-multiply"
-            />
+            <button
+              onClick={() =>
+                navigate(
+                  "/agent-admin-dashboard"
+                )
+              }
+              className="p-2 rounded-lg hover:bg-gray-100 transition"
+            >
+              <ArrowLeft size={20} />
+            </button>
 
             <div>
-              <p className="text-[16px] font-bold tracking-tight text-[#173563]">
-                Import
-                <span className="text-slate-900">
-                  Ease
-                </span>
+
+              <h1 className="text-xl font-bold text-[#173563]">
+                Agent Marketplace
+              </h1>
+
+              <p className="text-sm text-gray-500">
+                Find SME import requests and submit your bids
               </p>
-
-              <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                Agent Platform
-              </p>
-            </div>
-
-          </Link>
-
-          <button
-            type="button"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-            className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 lg:hidden"
-          >
-            <X size={18} />
-          </button>
-
-        </div>
-
-        {/* AGENCY */}
-
-        <div className="border-b border-slate-100 p-4">
-
-          <div className="rounded-xl bg-slate-50 p-3">
-
-            <div className="flex items-center gap-3">
-
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#173563] text-white">
-                <Building2 size={17} />
-              </div>
-
-              <div className="min-w-0">
-
-                <p className="truncate text-xs font-bold text-slate-800">
-                  {agency.agencyName ||
-                    agency.name ||
-                    "Your Agency"}
-                </p>
-
-                <p className="mt-0.5 text-[9px] text-slate-400">
-                  Agency Admin
-                </p>
-
-              </div>
 
             </div>
 
           </div>
 
-        </div>
-
-        {/* NAVIGATION */}
-
-        <nav className="flex-1 space-y-1 p-3">
-
-          <SidebarItem
-            icon={Building2}
-            label="Dashboard"
-            to="/agent-admin-dashboard"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-          />
-
-          <SidebarItem
-            icon={Users}
-            label="Agents"
-            to="/agency-agents"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-          />
-
-          <SidebarItem
-            icon={Users}
-            label="Invite Agents"
-            to="/agency-invite"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-          />
-
-          <SidebarItem
-            icon={ClipboardList}
-            label="SME Requests"
-            active
-            to="/agent-marketplace"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-          />
-
-          <SidebarItem
-            icon={Ship}
-            label="Shipments"
-            to="/agent-shipments"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-          />
-
-        </nav>
-
-        {/* BOTTOM */}
-
-        <div className="border-t border-slate-100 p-3">
-
-          <SidebarItem
-            icon={Settings}
-            label="Settings"
-            to="/agent-settings"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-          />
-
           <button
-            type="button"
-            onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+            onClick={() =>
+              navigate(
+                "/agent-admin-dashboard"
+              )
+            }
+            className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50"
           >
-            <LogOut size={17} />
-            Logout
+            Dashboard
           </button>
 
         </div>
 
-      </aside>
+      </header>
 
       {/* =====================================================
           MAIN
-      ===================================================== */}
+      ====================================================== */}
 
-      <div className="lg:ml-[250px]">
+      <main className="max-w-7xl mx-auto px-6 py-8">
 
-        {/* TOP BAR */}
+        {/* ===================================================
+            STATS
+        ==================================================== */}
 
-        <header className="sticky top-0 z-30 flex h-[70px] items-center border-b border-slate-200 bg-white/95 px-5 backdrop-blur-xl sm:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
 
-          <button
-            type="button"
-            onClick={() =>
-              setSidebarOpen(true)
-            }
-            className="mr-3 flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 lg:hidden"
-          >
-            <Menu size={19} />
-          </button>
+          {/* AVAILABLE */}
 
-          <div>
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
 
-            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">
-              Agency workspace
-            </p>
-
-            <h1 className="text-sm font-bold text-slate-800">
-              SME Requests
-            </h1>
-
-          </div>
-
-          <div className="ml-auto flex items-center gap-3">
-
-            <div className="hidden h-7 w-px bg-slate-200 sm:block" />
-
-            <div className="flex items-center gap-2">
-
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#173563] text-[10px] font-bold text-white">
-                {getInitials(
-                  admin.name || "Admin"
-                )}
-              </div>
-
-              <div className="hidden sm:block">
-
-                <p className="text-xs font-semibold text-slate-800">
-                  {admin.name ||
-                    "Agency Admin"}
-                </p>
-
-                <p className="text-[9px] text-slate-400">
-                  Administrator
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </header>
-
-        {/* =====================================================
-            CONTENT
-        ===================================================== */}
-
-        <main className="mx-auto w-full max-w-[1180px] px-5 py-7 sm:px-8 lg:py-9">
-
-          {/* HEADER */}
-
-          <section className="mb-7">
-
-            <Link
-              to="/agent-admin-dashboard"
-              className="mb-4 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-800"
-            >
-              <ArrowLeft size={14} />
-              Back to Dashboard
-            </Link>
-
-            <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+            <div className="flex items-center justify-between">
 
               <div>
 
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5">
+                <p className="text-sm text-gray-500">
+                  Available Requests
+                </p>
 
-                  <ClipboardList
-                    size={13}
-                    className="text-blue-600"
-                  />
-
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-700">
-                    Import marketplace
-                  </span>
-
-                </div>
-
-                <h2 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[38px]">
-                  SME Requests
-                </h2>
-
-                <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
-                  Review import clearance requests
-                  from SMEs and manage the requests
-                  assigned to your agency.
+                <p className="text-2xl font-bold text-[#173563] mt-1">
+                  {requests.length}
                 </p>
 
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  loadRequests(
-                    agency.id ||
-                      agency.code
-                  )
-                }
-                className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-              >
-                Refresh Requests
-              </button>
+              <div className="p-3 bg-blue-50 rounded-xl">
+                <Package
+                  className="text-blue-600"
+                  size={22}
+                />
+              </div>
 
             </div>
 
-          </section>
+          </div>
 
-          {/* =================================================
-              SUMMARY
-          ================================================= */}
+          {/* FILTERED */}
 
-          <section className="mb-7 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
 
-            <SummaryCard
-              icon={ClipboardList}
-              label="New Requests"
-              value={stats.newRequests}
-              iconStyle="bg-blue-50 text-blue-600"
-            />
+            <div className="flex items-center justify-between">
 
-            <SummaryCard
-              icon={Clock3}
-              label="Pending"
-              value={stats.pending}
-              iconStyle="bg-amber-50 text-amber-700"
-            />
+              <div>
 
-            <SummaryCard
-              icon={Ship}
-              label="In Progress"
-              value={stats.inProgress}
-              iconStyle="bg-violet-50 text-violet-700"
-            />
+                <p className="text-sm text-gray-500">
+                  Filtered Requests
+                </p>
 
-            <SummaryCard
-              icon={CheckCircle2}
-              label="Completed"
-              value={stats.completed}
-              iconStyle="bg-emerald-50 text-emerald-700"
-            />
-
-          </section>
-
-          {/* =================================================
-              SEARCH / FILTER
-          ================================================= */}
-
-          <section className="mb-5 rounded-2xl border border-slate-200 bg-white p-4">
-
-            <div className="flex flex-col gap-3 md:flex-row">
-
-              <div className="relative flex-1">
-
-                <Search
-                  size={16}
-                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(event) =>
-                    setSearch(
-                      event.target.value
-                    )
-                  }
-                  placeholder="Search SME, product, request ID or origin..."
-                  className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#173563] focus:bg-white focus:ring-2 focus:ring-[#173563]/10"
-                />
+                <p className="text-2xl font-bold text-[#173563] mt-1">
+                  {filteredRequests.length}
+                </p>
 
               </div>
 
-              <div className="flex items-center gap-2">
-
+              <div className="p-3 bg-purple-50 rounded-xl">
                 <Filter
-                  size={15}
-                  className="text-slate-400"
+                  className="text-purple-600"
+                  size={22}
                 />
-
-                <select
-                  value={statusFilter}
-                  onChange={(event) =>
-                    setStatusFilter(
-                      event.target.value
-                    )
-                  }
-                  className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 outline-none focus:border-[#173563]"
-                >
-                  <option value="all">
-                    All Requests
-                  </option>
-                  <option value="new">
-                    New
-                  </option>
-                  <option value="pending">
-                    Pending
-                  </option>
-                  <option value="in-progress">
-                    In Progress
-                  </option>
-                  <option value="completed">
-                    Completed
-                  </option>
-                </select>
-
               </div>
 
             </div>
 
-          </section>
+          </div>
 
-          {/* =================================================
-              REQUEST LIST
-          ================================================= */}
+          {/* BIDS */}
 
-          <section>
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
 
-            <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center justify-between">
 
               <div>
 
-                <h2 className="text-sm font-bold text-[#14213D]">
-                  Import requests
-                </h2>
+                <p className="text-sm text-gray-500">
+                  My Submitted Bids
+                </p>
 
-                <p className="mt-1 text-[11px] text-slate-500">
-                  {filteredRequests.length} request
-                  {filteredRequests.length !== 1
-                    ? "s"
-                    : ""}{" "}
-                  available
+                <p className="text-2xl font-bold text-[#173563] mt-1">
+                  {agentBids.filter(
+                    (bid) =>
+                      bid.agentId ===
+                        (
+                          currentAgent.id ||
+                          currentAgent.agentId ||
+                          currentAgent.email
+                        ) ||
+                      (
+                        !bid.agentId &&
+                        bid.agentName ===
+                          currentAgent.name
+                      )
+                  ).length}
                 </p>
 
               </div>
 
-            </div>
-
-            <div className="space-y-3">
-
-              {filteredRequests.length === 0 ? (
-
-                <EmptyState
-                  icon={ClipboardList}
-                  title="No requests found"
-                  description="There are no SME requests matching your current filters."
+              <div className="p-3 bg-green-50 rounded-xl">
+                <CheckCircle2
+                  className="text-green-600"
+                  size={22}
                 />
-
-              ) : (
-
-                filteredRequests.map(
-                  (request) => (
-                    <RequestCard
-                      key={request.id}
-                      request={request}
-                      onView={() =>
-                        handleViewRequest(
-                          request
-                        )
-                      }
-                    />
-                  )
-                )
-
-              )}
+              </div>
 
             </div>
 
-          </section>
-
-          {/* FOOTER */}
-
-          <div className="mt-9 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-[10px] text-slate-400">
-            ImportEase · Clearing Agency Platform
           </div>
 
-        </main>
+        </div>
 
-      </div>
+        {/* ===================================================
+            SEARCH / FILTERS
+        ==================================================== */}
 
-    </div>
-  );
-}
+        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
 
-/* =========================================================
-   REQUEST CARD
-========================================================= */
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-function RequestCard({ request, onView }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)] transition hover:border-slate-300">
+            {/* SEARCH */}
 
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="relative">
 
-        {/* LEFT */}
+              <Search
+                size={19}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              />
 
-        <div className="min-w-0 flex-1">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) =>
+                  setSearch(e.target.value)
+                }
+                placeholder="Search products, HS codes..."
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              />
 
-          <div className="flex flex-wrap items-center gap-2">
-
-            <span className="rounded-lg bg-slate-100 px-2 py-1 font-mono text-[9px] font-bold text-slate-500">
-              {request.id}
-            </span>
-
-            <StatusBadge
-              status={request.status}
-            />
-
-          </div>
-
-          <div className="mt-3 flex items-start gap-3">
-
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#173563]">
-              <Package size={19} />
             </div>
 
-            <div className="min-w-0">
+            {/* CATEGORY */}
 
-              <h3 className="text-sm font-bold text-slate-800">
-                {request.product ||
-                  "Import Request"}
+            <select
+              value={category}
+              onChange={(e) =>
+                setCategory(e.target.value)
+              }
+              className="px-4 py-3 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+            >
+
+              {categories.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+
+            </select>
+
+            {/* URGENCY */}
+
+            <select
+              value={urgency}
+              onChange={(e) =>
+                setUrgency(e.target.value)
+              }
+              className="px-4 py-3 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+            >
+
+              <option value="All">
+                All Urgency
+              </option>
+
+              <option value="High">
+                High
+              </option>
+
+              <option value="Medium">
+                Medium
+              </option>
+
+              <option value="Low">
+                Low
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+        {/* ===================================================
+            MARKETPLACE
+        ==================================================== */}
+
+        <div className="space-y-4">
+
+          {filteredRequests.length === 0 ? (
+
+            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+
+              <Package
+                size={42}
+                className="mx-auto text-gray-300 mb-3"
+              />
+
+              <h3 className="font-semibold text-gray-700">
+                No requests found
               </h3>
 
-              <p className="mt-1 text-[11px] text-slate-500">
-                {request.smeName ||
-                  "SME Customer"}
+              <p className="text-sm text-gray-500 mt-1">
+                Try changing your search or filters.
               </p>
 
             </div>
 
+          ) : (
+
+            filteredRequests.map(
+              (request) => {
+
+                const alreadyBid =
+                  hasAgentBid(request.id);
+
+                return (
+
+                  <div
+                    key={request.id}
+                    className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition"
+                  >
+
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+
+                      {/* REQUEST */}
+
+                      <div className="flex-1">
+
+                        <div className="flex items-start gap-4">
+
+                          <div className="p-3 bg-blue-50 rounded-xl">
+
+                            <Package
+                              size={24}
+                              className="text-blue-600"
+                            />
+
+                          </div>
+
+                          <div>
+
+                            <div className="flex items-center gap-3 flex-wrap">
+
+                              <h2 className="font-bold text-[#173563] text-lg">
+                                {request.product}
+                              </h2>
+
+                              <span
+                                className={`px-2.5 py-1 rounded-full text-xs font-medium ${getUrgencyClass(
+                                  request.urgency
+                                )}`}
+                              >
+                                {request.urgency ||
+                                  "Medium"}{" "}
+                                Priority
+                              </span>
+
+                              {alreadyBid && (
+
+                                <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-600">
+                                  Bid Submitted
+                                </span>
+
+                              )}
+
+                            </div>
+
+                            <p className="text-sm text-gray-500 mt-1">
+                              Request ID:{" "}
+                              {request.id}
+                            </p>
+
+                            <p className="text-sm text-gray-600 mt-3">
+                              {request.description ||
+                                request.product}
+                            </p>
+
+                          </div>
+
+                        </div>
+
+                        {/* DETAILS */}
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5">
+
+                          <div>
+
+                            <p className="text-xs text-gray-400">
+                              HS Code
+                            </p>
+
+                            <p className="text-sm font-semibold text-gray-700 mt-1">
+                              {request.hsCode ||
+                                "Not classified"}
+                            </p>
+
+                          </div>
+
+                          <div>
+
+                            <p className="text-xs text-gray-400">
+                              Shipment Value
+                            </p>
+
+                            <p className="text-sm font-semibold text-gray-700 mt-1">
+                              {formatCurrency(
+                                request.shipmentValue
+                              )}
+                            </p>
+
+                          </div>
+
+                          <div>
+
+                            <p className="text-xs text-gray-400">
+                              Origin
+                            </p>
+
+                            <p className="text-sm font-semibold text-gray-700 mt-1">
+                              {request.origin ||
+                                "Not specified"}
+                            </p>
+
+                          </div>
+
+                          <div>
+
+                            <p className="text-xs text-gray-400">
+                              Required By
+                            </p>
+
+                            <p className="text-sm font-semibold text-gray-700 mt-1">
+                              {request.requestedDate ||
+                                "Not specified"}
+                            </p>
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                      {/* ACTION */}
+
+                      <button
+                        onClick={() =>
+                          openRequest(request)
+                        }
+                        className="flex items-center justify-center gap-2 px-5 py-3 bg-[#2563EB] text-white rounded-lg font-medium hover:bg-blue-700 transition"
+                      >
+
+                        View Request
+
+                        <ChevronRight
+                          size={18}
+                        />
+
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                );
+              }
+            )
+
+          )}
+
+        </div>
+
+      </main>
+
+      {/* =====================================================
+          REQUEST DETAILS MODAL
+      ====================================================== */}
+
+      {selectedRequest &&
+        !showBidModal && (
+
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
+
+            <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+
+              {/* HEADER */}
+
+              <div className="flex items-center justify-between px-6 py-5 border-b">
+
+                <div>
+
+                  <h2 className="text-xl font-bold text-[#173563]">
+                    Import Request
+                  </h2>
+
+                  <p className="text-sm text-gray-500 mt-1">
+                    {selectedRequest.id}
+                  </p>
+
+                </div>
+
+                <button
+                  onClick={() =>
+                    setSelectedRequest(null)
+                  }
+                  className="p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  <X size={20} />
+                </button>
+
+              </div>
+
+              {/* CONTENT */}
+
+              <div className="p-6 space-y-6">
+
+                <div>
+
+                  <h3 className="text-lg font-bold text-gray-800">
+                    {selectedRequest.product}
+                  </h3>
+
+                  <p className="text-gray-500 mt-2">
+                    {selectedRequest.description ||
+                      selectedRequest.product}
+                  </p>
+
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                  {/* HS */}
+
+                  <div className="border rounded-xl p-4">
+
+                    <div className="flex items-center gap-2 text-gray-500 text-sm">
+
+                      <Package size={17} />
+
+                      HS Code
+
+                    </div>
+
+                    <p className="font-semibold mt-2">
+                      {selectedRequest.hsCode ||
+                        "Not classified"}
+                    </p>
+
+                  </div>
+
+                  {/* VALUE */}
+
+                  <div className="border rounded-xl p-4">
+
+                    <div className="flex items-center gap-2 text-gray-500 text-sm">
+
+                      <DollarSign size={17} />
+
+                      Shipment Value
+
+                    </div>
+
+                    <p className="font-semibold mt-2">
+                      {formatCurrency(
+                        selectedRequest.shipmentValue
+                      )}
+                    </p>
+
+                  </div>
+
+                  {/* ORIGIN */}
+
+                  <div className="border rounded-xl p-4">
+
+                    <div className="flex items-center gap-2 text-gray-500 text-sm">
+
+                      <MapPin size={17} />
+
+                      Origin
+
+                    </div>
+
+                    <p className="font-semibold mt-2">
+                      {selectedRequest.origin ||
+                        "Not specified"}
+                    </p>
+
+                  </div>
+
+                  {/* DATE */}
+
+                  <div className="border rounded-xl p-4">
+
+                    <div className="flex items-center gap-2 text-gray-500 text-sm">
+
+                      <Clock3 size={17} />
+
+                      Required By
+
+                    </div>
+
+                    <p className="font-semibold mt-2">
+                      {selectedRequest.requestedDate ||
+                        "Not specified"}
+                    </p>
+
+                  </div>
+
+                </div>
+
+                {/* DESTINATION */}
+
+                <div className="bg-gray-50 rounded-xl p-4">
+
+                  <p className="text-sm text-gray-500">
+                    Destination
+                  </p>
+
+                  <p className="font-semibold text-gray-800 mt-1">
+                    {selectedRequest.destination ||
+                      "Colombo, Sri Lanka"}
+                  </p>
+
+                </div>
+
+                {/* BID STATUS */}
+
+                {hasAgentBid(
+                  selectedRequest.id
+                ) ? (
+
+                  <div className="rounded-xl bg-green-50 border border-green-100 p-4">
+
+                    <div className="flex items-start gap-3">
+
+                      <CheckCircle2
+                        size={20}
+                        className="text-green-600 mt-0.5"
+                      />
+
+                      <div>
+
+                        <p className="font-semibold text-green-700">
+                          Bid Already Submitted
+                        </p>
+
+                        <p className="text-sm text-green-600 mt-1">
+                          You have already submitted a
+                          bid for this SME request.
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                ) : (
+
+                  <button
+                    onClick={openBidForm}
+                    className="w-full flex items-center justify-center gap-2 bg-[#2563EB] text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
+                  >
+
+                    <Send size={18} />
+
+                    Submit Bid
+
+                  </button>
+
+                )}
+
+              </div>
+
+            </div>
+
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        )}
 
-            <InfoItem
-              icon={FileText}
-              label="HS Code"
-              value={
-                request.hsCode ||
-                "Not assigned"
-              }
-            />
+      {/* =====================================================
+          BID MODAL
+      ====================================================== */}
 
-            <InfoItem
-              icon={Building2}
-              label="Origin"
-              value={
-                request.origin ||
-                "Unknown"
-              }
-            />
+      {showBidModal &&
+        selectedRequest && (
 
-            <InfoItem
-              icon={DollarSign}
-              label="Declared Value"
-              value={formatCurrency(
-                request.declaredValue,
-                request.currency
-              )}
-            />
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-[60]">
 
-            <InfoItem
-              icon={CalendarDays}
-              label="Required By"
-              value={formatDate(
-                request.requiredDate
-              )}
-            />
+            <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+
+              {/* HEADER */}
+
+              <div className="flex items-center justify-between px-6 py-5 border-b">
+
+                <div>
+
+                  <h2 className="text-xl font-bold text-[#173563]">
+                    Submit Your Bid
+                  </h2>
+
+                  <p className="text-sm text-gray-500 mt-1">
+                    {selectedRequest.product}
+                  </p>
+
+                </div>
+
+                <button
+                  onClick={closeBidModal}
+                  className="p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  <X size={20} />
+                </button>
+
+              </div>
+
+              {/* FORM */}
+
+              <form
+                onSubmit={submitBid}
+                className="p-6 space-y-4"
+              >
+
+                {/* CLEARANCE FEE */}
+
+                <div>
+
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Clearance Fee (LKR)
+                  </label>
+
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    value={
+                      bidForm.clearanceFee
+                    }
+                    onChange={(e) =>
+                      setBidForm({
+                        ...bidForm,
+                        clearanceFee:
+                          e.target.value,
+                      })
+                    }
+                    placeholder="Enter your clearance fee"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+
+                </div>
+
+                {/* PROCESSING TIME */}
+
+                <div>
+
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Estimated Processing Time
+                  </label>
+
+                  <input
+                    type="text"
+                    required
+                    value={
+                      bidForm.processingTime
+                    }
+                    onChange={(e) =>
+                      setBidForm({
+                        ...bidForm,
+                        processingTime:
+                          e.target.value,
+                      })
+                    }
+                    placeholder="e.g. 3-5 business days"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+
+                </div>
+
+                {/* ADDITIONAL */}
+
+                <div>
+
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Additional Charges (LKR)
+                  </label>
+
+                  <input
+                    type="number"
+                    min="0"
+                    value={
+                      bidForm.additionalCharges
+                    }
+                    onChange={(e) =>
+                      setBidForm({
+                        ...bidForm,
+                        additionalCharges:
+                          e.target.value,
+                      })
+                    }
+                    placeholder="0"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+
+                </div>
+
+                {/* MESSAGE */}
+
+                <div>
+
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Message to SME
+                  </label>
+
+                  <textarea
+                    rows="4"
+                    value={
+                      bidForm.message
+                    }
+                    onChange={(e) =>
+                      setBidForm({
+                        ...bidForm,
+                        message:
+                          e.target.value,
+                      })
+                    }
+                    placeholder="Tell the SME why they should choose your agency..."
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  />
+
+                </div>
+
+                {/* SUMMARY */}
+
+                <div className="rounded-xl bg-blue-50 p-4">
+
+                  <div className="flex items-center justify-between">
+
+                    <span className="text-sm text-blue-700">
+                      Total Service Cost
+                    </span>
+
+                    <span className="font-bold text-[#173563]">
+
+                      {formatCurrency(
+                        Number(
+                          bidForm.clearanceFee ||
+                            0
+                        ) +
+                          Number(
+                            bidForm.additionalCharges ||
+                              0
+                          )
+                      )}
+
+                    </span>
+
+                  </div>
+
+                </div>
+
+                {/* SUBMIT */}
+
+                <button
+                  type="submit"
+                  className="w-full flex items-center justify-center gap-2 bg-[#2563EB] text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
+                >
+
+                  <Send size={18} />
+
+                  Submit Bid
+
+                </button>
+
+              </form>
+
+            </div>
 
           </div>
 
-          {request.description && (
-            <p className="mt-4 max-w-3xl text-[11px] leading-5 text-slate-400">
-              {request.description}
-            </p>
-          )}
-
-        </div>
-
-        {/* RIGHT */}
-
-        <div className="flex shrink-0 flex-col gap-2 sm:flex-row lg:flex-col">
-
-          <button
-            type="button"
-            onClick={onView}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-          >
-            <Eye size={15} />
-            View Request
-          </button>
-
-          {request.status === "new" && (
-            <button
-              type="button"
-              onClick={onView}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#102547]"
-            >
-              <Send size={15} />
-              Submit Bid
-            </button>
-          )}
-
-          {request.status === "pending" && (
-            <button
-              type="button"
-              onClick={onView}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#102547]"
-            >
-              <Eye size={15} />
-              Review
-            </button>
-          )}
-
-        </div>
-
-      </div>
+        )}
 
     </div>
   );
-}
-
-/* =========================================================
-   STATUS BADGE
-========================================================= */
-
-function StatusBadge({ status }) {
-  const styles = {
-    new: {
-      label: "New",
-      className:
-        "bg-blue-50 text-blue-700",
-      icon: ClipboardList,
-    },
-
-    pending: {
-      label: "Pending",
-      className:
-        "bg-amber-50 text-amber-700",
-      icon: Clock3,
-    },
-
-    "in-progress": {
-      label: "In Progress",
-      className:
-        "bg-violet-50 text-violet-700",
-      icon: Ship,
-    },
-
-    completed: {
-      label: "Completed",
-      className:
-        "bg-emerald-50 text-emerald-700",
-      icon: CheckCircle2,
-    },
-  };
-
-  const config =
-    styles[status] || styles.pending;
-
-  const Icon = config.icon;
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[9px] font-semibold ${config.className}`}
-    >
-      <Icon size={10} />
-      {config.label}
-    </span>
-  );
-}
-
-/* =========================================================
-   INFO ITEM
-========================================================= */
-
-function InfoItem({
-  icon: Icon,
-  label,
-  value,
-}) {
-  return (
-    <div>
-
-      <div className="flex items-center gap-1 text-[9px] font-semibold text-slate-400">
-        <Icon size={10} />
-        {label}
-      </div>
-
-      <p className="mt-1 truncate text-[11px] font-semibold text-slate-700">
-        {value}
-      </p>
-
-    </div>
-  );
-}
-
-/* =========================================================
-   SUMMARY CARD
-========================================================= */
-
-function SummaryCard({
-  icon: Icon,
-  label,
-  value,
-  iconStyle,
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
-
-      <div className="flex items-start justify-between">
-
-        <div>
-
-          <p className="text-[10px] font-semibold text-slate-400">
-            {label}
-          </p>
-
-          <p className="mt-2 text-2xl font-bold tracking-tight text-slate-800">
-            {value}
-          </p>
-
-        </div>
-
-        <div
-          className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconStyle}`}
-        >
-          <Icon
-            size={18}
-            strokeWidth={1.8}
-          />
-        </div>
-
-      </div>
-
-    </div>
-  );
-}
-
-/* =========================================================
-   EMPTY STATE
-========================================================= */
-
-function EmptyState({
-  icon: Icon,
-  title,
-  description,
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center">
-
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-slate-400">
-        <Icon size={22} />
-      </div>
-
-      <h3 className="mt-4 text-sm font-bold text-slate-700">
-        {title}
-      </h3>
-
-      <p className="mx-auto mt-1 max-w-sm text-[11px] leading-5 text-slate-400">
-        {description}
-      </p>
-
-    </div>
-  );
-}
-
-/* =========================================================
-   SIDEBAR ITEM
-========================================================= */
-
-function SidebarItem({
-  icon: Icon,
-  label,
-  to,
-  active = false,
-  onClick,
-}) {
-  return (
-    <Link
-      to={to}
-      onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${
-        active
-          ? "bg-blue-50 text-[#173563]"
-          : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
-      }`}
-    >
-      <Icon
-        size={17}
-        strokeWidth={1.8}
-      />
-
-      <span>{label}</span>
-    </Link>
-  );
-}
-
-/* =========================================================
-   DATE
-========================================================= */
-
-function formatDate(date) {
-  if (!date) {
-    return "Not set";
-  }
-
-  try {
-    return new Date(date).toLocaleDateString(
-      "en-US",
-      {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }
-    );
-  } catch {
-    return "Not set";
-  }
-}
-
-/* =========================================================
-   CURRENCY
-========================================================= */
-
-function formatCurrency(
-  value,
-  currency = "USD"
-) {
-  if (
-    value === undefined ||
-    value === null ||
-    value === ""
-  ) {
-    return "Not set";
-  }
-
-  try {
-    return new Intl.NumberFormat(
-      "en-US",
-      {
-        style: "currency",
-        currency,
-        maximumFractionDigits: 0,
-      }
-    ).format(Number(value));
-  } catch {
-    return `${currency} ${value}`;
-  }
-}
-
-/* =========================================================
-   INITIALS
-========================================================= */
-
-function getInitials(name) {
-  if (!name) {
-    return "AD";
-  }
-
-  const words = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-
-  if (words.length === 1) {
-    return words[0]
-      .slice(0, 2)
-      .toUpperCase();
-  }
-
-  return `${words[0][0]}${
-    words[words.length - 1][0]
-  }`.toUpperCase();
 }
 
 export default AgentMarketplace;

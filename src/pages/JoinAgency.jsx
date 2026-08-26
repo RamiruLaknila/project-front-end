@@ -1,544 +1,567 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
+  ArrowRight,
   Building2,
   CheckCircle2,
-  KeyRound,
   Search,
   ShieldCheck,
+  UserRound,
+  FileText,
 } from "lucide-react";
+
+const demoAgencies = [
+  {
+    id: "AGY-001",
+    name: "ABC Clearing Agency",
+    code: "ABC001",
+    city: "Colombo",
+    status: "Active",
+  },
+  {
+    id: "AGY-002",
+    name: "Lanka Customs Solutions",
+    code: "LCS002",
+    city: "Colombo",
+    status: "Active",
+  },
+  {
+    id: "AGY-003",
+    name: "Global Trade Clearing",
+    code: "GTC003",
+    city: "Gampaha",
+    status: "Active",
+  },
+];
 
 function JoinAgency() {
   const navigate = useNavigate();
 
-  const [agencyCode, setAgencyCode] = useState("");
-  const [agency, setAgency] = useState(null);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(1);
+  const [search, setSearch] = useState("");
+  const [selectedAgency, setSelectedAgency] = useState(null);
 
-  /* =========================================================
-     FIND AGENCY
-  ========================================================= */
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    address: "",
+    licenseNumber: "",
+    licenseType: "",
+    licenseExpiry: "",
+  });
 
-  const handleFindAgency = () => {
-    setError("");
-    setAgency(null);
+  const [errors, setErrors] = useState({});
 
-    const code = agencyCode.trim().toUpperCase();
+  const filteredAgencies = demoAgencies.filter((agency) => {
+    const query = search.toLowerCase().trim();
 
-    if (!code) {
-      setError("Please enter your agency code.");
-      return;
-    }
+    if (!query) return true;
 
-    setLoading(true);
+    return (
+      agency.name.toLowerCase().includes(query) ||
+      agency.code.toLowerCase().includes(query) ||
+      agency.city.toLowerCase().includes(query)
+    );
+  });
 
-    setTimeout(() => {
-      try {
-        const storedAgency =
-          localStorage.getItem("clearingAgency");
+  const updateField = (field, value) => {
+    setFormData((previous) => ({
+      ...previous,
+      [field]: value,
+    }));
 
-        if (!storedAgency) {
-          setError(
-            "Agency not found. Please check the code and try again."
-          );
-          setLoading(false);
-          return;
-        }
-
-        const parsedAgency = JSON.parse(storedAgency);
-
-        /*
-         * Support both:
-         * agency.name
-         * agency.agencyName
-         */
-        const storedCode = (
-          parsedAgency.code ||
-          parsedAgency.id ||
-          ""
-        )
-          .toString()
-          .toUpperCase();
-
-        if (!storedCode || storedCode !== code) {
-          setError(
-            "Invalid agency code. Please check the code provided by your administrator."
-          );
-          setLoading(false);
-          return;
-        }
-
-        setAgency(parsedAgency);
-        setLoading(false);
-      } catch (error) {
-        console.error("Failed to find agency:", error);
-
-        setError(
-          "Something went wrong while finding the agency."
-        );
-
-        setLoading(false);
-      }
-    }, 500);
+    setErrors((previous) => ({
+      ...previous,
+      [field]: "",
+    }));
   };
 
-  /* =========================================================
-     JOIN AGENCY
-  ========================================================= */
+  const selectAgency = (agency) => {
+    setSelectedAgency(agency);
 
-  const handleJoinAgency = () => {
-    if (!agency) {
+    localStorage.setItem(
+      "selectedAgency",
+      JSON.stringify(agency)
+    );
+
+    setErrors({});
+  };
+
+  const validateStep = () => {
+    const newErrors = {};
+
+    if (step === 1) {
+      if (!selectedAgency) {
+        newErrors.agency =
+          "Please select an agency to continue.";
+      }
+    }
+
+    if (step === 2) {
+      if (!formData.fullName.trim()) {
+        newErrors.fullName = "Full name is required.";
+      }
+
+      if (!formData.email.trim()) {
+        newErrors.email = "Email is required.";
+      }
+
+      if (!formData.phone.trim()) {
+        newErrors.phone =
+          "Phone number is required.";
+      }
+
+      if (!formData.address.trim()) {
+        newErrors.address =
+          "Address is required.";
+      }
+    }
+
+    if (step === 3) {
+      if (!formData.licenseNumber.trim()) {
+        newErrors.licenseNumber =
+          "License number is required.";
+      }
+
+      if (!formData.licenseType) {
+        newErrors.licenseType =
+          "Please select a license type.";
+      }
+
+      if (!formData.licenseExpiry) {
+        newErrors.licenseExpiry =
+          "License expiry date is required.";
+      }
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (!validateStep()) return;
+
+    if (step < 4) {
+      setStep((previous) => previous + 1);
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+
       return;
     }
 
-    try {
-      const storedAgent =
-        localStorage.getItem("clearingAgent");
+    handleSubmit();
+  };
 
-      if (!storedAgent) {
-        setError(
-          "Agent account not found. Please create an agent account first."
-        );
-        return;
-      }
-
-      const agent = JSON.parse(storedAgent);
-
-      const agencyId =
-        agency.id ||
-        agency.code;
-
-      const agencyName =
-        agency.name ||
-        agency.agencyName ||
-        "Clearing Agency";
-
-      const agencyCodeValue =
-        agency.code ||
-        agency.id ||
-        agencyCode;
-
-      /* =====================================================
-         UPDATE CURRENT AGENT
-      ===================================================== */
-
-      const updatedAgent = {
-        ...agent,
-
-        agencyId,
-
-        agencyName,
-
-        agencyCode: agencyCodeValue,
-
-        role: "agent",
-
-        agentStatus: "pending",
-
-        profileStatus:
-          agent.profileStatus || "incomplete",
-      };
-
-      localStorage.setItem(
-        "clearingAgent",
-        JSON.stringify(updatedAgent)
-      );
-
-      /* =====================================================
-         ADD AGENT TO AGENCY AGENTS
-      ===================================================== */
-
-      const existingAgents = JSON.parse(
-        localStorage.getItem("agencyAgents") || "[]"
-      );
-
-      const alreadyExists = existingAgents.some(
-        (item) =>
-          item.email?.toLowerCase() ===
-            agent.email?.toLowerCase() &&
-          item.agencyId === agencyId
-      );
-
-      if (!alreadyExists) {
-        const newAgent = {
-          id: `agent-${Date.now()}`,
-
-          name: agent.name || "Agent",
-
-          email: agent.email || "",
-
-          agencyId,
-
-          agencyName,
-
-          agencyCode: agencyCodeValue,
-
-          role: "agent",
-
-          status: "pending",
-
-          agentStatus: "pending",
-
-          requestedAt:
-            new Date().toISOString(),
-        };
-
-        existingAgents.push(newAgent);
-
-        localStorage.setItem(
-          "agencyAgents",
-          JSON.stringify(existingAgents)
-        );
-      } else {
-        /*
-         * If the agent already exists,
-         * make sure the status is still pending.
-         */
-        const updatedAgents =
-          existingAgents.map((item) => {
-            if (
-              item.email?.toLowerCase() ===
-                agent.email?.toLowerCase() &&
-              item.agencyId === agencyId
-            ) {
-              return {
-                ...item,
-
-                name:
-                  agent.name ||
-                  item.name ||
-                  "Agent",
-
-                agencyName,
-
-                agencyCode:
-                  agencyCodeValue,
-
-                status: "pending",
-
-                agentStatus: "pending",
-
-                requestedAt:
-                  item.requestedAt ||
-                  new Date().toISOString(),
-              };
-            }
-
-            return item;
-          });
-
-        localStorage.setItem(
-          "agencyAgents",
-          JSON.stringify(updatedAgents)
-        );
-      }
-
-      /* =====================================================
-         ADD TO PENDING REQUESTS
-      ===================================================== */
-
-      const existingRequests = JSON.parse(
-        localStorage.getItem(
-          "agencyPendingAgents"
-        ) || "[]"
-      );
-
-      const alreadyRequested =
-        existingRequests.some(
-          (request) =>
-            request.email?.toLowerCase() ===
-              agent.email?.toLowerCase() &&
-            request.agencyId === agencyId
-        );
-
-      if (!alreadyRequested) {
-        existingRequests.push({
-          id: `request-${Date.now()}`,
-
-          name: agent.name || "Agent",
-
-          email: agent.email || "",
-
-          agencyId,
-
-          agencyName,
-
-          agencyCode: agencyCodeValue,
-
-          status: "pending",
-
-          agentStatus: "pending",
-
-          requestedAt:
-            new Date().toISOString(),
-        });
-
-        localStorage.setItem(
-          "agencyPendingAgents",
-          JSON.stringify(existingRequests)
-        );
-      }
-
-      /* =====================================================
-         SAVE CURRENT AGENCY
-      ===================================================== */
-
-      const updatedAgency = {
-        ...agency,
-      };
-
-      localStorage.setItem(
-        "clearingAgency",
-        JSON.stringify(updatedAgency)
-      );
-
-      /* =====================================================
-         GO TO PENDING APPROVAL
-      ===================================================== */
-
-      navigate("/agent-pending-approval");
-    } catch (error) {
-      console.error(
-        "Failed to join agency:",
-        error
-      );
-
-      setError(
-        "Unable to submit your agency request."
-      );
+  const handleBack = () => {
+    if (step > 1) {
+      setStep((previous) => previous - 1);
+      setErrors({});
+      return;
     }
+
+    navigate("/agency-choice");
+  };
+
+  const handleSubmit = () => {
+    if (!selectedAgency) return;
+
+    const application = {
+      id: `JOIN-${Date.now()}`,
+
+      type: "join-agency",
+
+      agencyId: selectedAgency.id,
+
+      agencyName: selectedAgency.name,
+
+      agencyCode: selectedAgency.code,
+
+      applicant: {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+      },
+
+      license: {
+        number: formData.licenseNumber,
+        type: formData.licenseType,
+        expiry: formData.licenseExpiry,
+      },
+
+      status: "pending",
+
+      submittedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem(
+      "agencyJoinApplication",
+      JSON.stringify(application)
+    );
+
+    localStorage.setItem(
+      "agencyJoinStatus",
+      "pending"
+    );
+
+    navigate("/agent-pending");
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#F6F8FB] px-4 py-8 sm:py-10">
+    <div className="min-h-screen bg-[#F8FAFC] px-4 py-8 sm:py-10">
+      <div className="mx-auto w-full max-w-4xl">
 
-      {/* =====================================================
-          BACKGROUND
-      ===================================================== */}
+        {/* HEADER */}
 
-      <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-blue-100/50 blur-3xl" />
+        <div className="mb-6">
 
-      <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-slate-200/50 blur-3xl" />
-
-      {/* =====================================================
-          CONTAINER
-      ===================================================== */}
-
-      <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-lg flex-col justify-center">
-
-        {/* =====================================================
-            LOGO
-        ===================================================== */}
-
-        <div className="mb-7 flex justify-center">
-
-          <Link
-            to="/"
-            className="flex items-center gap-3"
+          <button
+            type="button"
+            onClick={handleBack}
+            className="mb-5 inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-800"
           >
+            <ArrowLeft size={16} />
+            Back
+          </button>
 
-            <img
-              src="/logo.jpeg"
-              alt="ImportEase"
-              className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
-            />
+          <div className="flex items-center gap-3">
 
-            <span className="text-2xl font-bold tracking-tight text-slate-900">
-              Import
-              <span className="text-[#173563]">
-                Ease
-              </span>
-            </span>
-
-          </Link>
-
-        </div>
-
-        {/* =====================================================
-            CARD
-        ===================================================== */}
-
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.12)] sm:p-8">
-
-          {/* =================================================
-              ICON
-          ================================================= */}
-
-          <div className="mb-5 flex justify-center">
-
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-[#173563]">
-
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#173563]">
               <Building2
-                size={26}
-                strokeWidth={1.8}
+                size={21}
+                className="text-white"
               />
+            </div>
 
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                Join an Existing Agency
+              </h1>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Submit a request to join a registered
+                clearing agency.
+              </p>
             </div>
 
           </div>
+        </div>
 
-          {/* =================================================
-              HEADER
-          ================================================= */}
+        {/* PROGRESS */}
 
-          <div className="mb-7 text-center">
+        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
 
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-              Join an Agency
-            </h1>
+          <div className="flex items-center justify-between">
 
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              Enter the agency code provided by your
-              clearing agency administrator.
-            </p>
+            <StepIndicator
+              number="1"
+              title="Find Agency"
+              active={step === 1}
+              completed={step > 1}
+            />
+
+            <div className="mx-2 h-px flex-1 bg-slate-200" />
+
+            <StepIndicator
+              number="2"
+              title="Personal Details"
+              active={step === 2}
+              completed={step > 2}
+            />
+
+            <div className="mx-2 h-px flex-1 bg-slate-200" />
+
+            <StepIndicator
+              number="3"
+              title="License"
+              active={step === 3}
+              completed={step > 3}
+            />
+
+            <div className="mx-2 h-px flex-1 bg-slate-200" />
+
+            <StepIndicator
+              number="4"
+              title="Review"
+              active={step === 4}
+              completed={false}
+            />
 
           </div>
+        </div>
 
-          {/* =================================================
-              ERROR
-          ================================================= */}
+        {/* MAIN CARD */}
 
-          {error && (
-            <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-              {error}
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+
+          {/* STEP 1 */}
+
+          {step === 1 && (
+            <div>
+
+              <SectionHeader
+                icon={Search}
+                title="Find Your Agency"
+                description="Search for the clearing agency you want to join."
+              />
+
+              <div className="relative mt-7">
+
+                <Search
+                  size={18}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(event) =>
+                    setSearch(event.target.value)
+                  }
+                  placeholder="Search agency name, code or city..."
+                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+
+              </div>
+
+              {errors.agency && (
+                <p className="mt-2 text-xs text-red-500">
+                  {errors.agency}
+                </p>
+              )}
+
+              <div className="mt-5 space-y-3">
+
+                {filteredAgencies.map((agency) => {
+
+                  const selected =
+                    selectedAgency?.id === agency.id;
+
+                  return (
+                    <button
+                      key={agency.id}
+                      type="button"
+                      onClick={() =>
+                        selectAgency(agency)
+                      }
+                      className={`w-full rounded-2xl border-2 p-4 text-left transition ${
+                        selected
+                          ? "border-[#173563] bg-blue-50/50"
+                          : "border-slate-200 hover:border-blue-300 hover:bg-slate-50"
+                      }`}
+                    >
+
+                      <div className="flex items-center justify-between gap-4">
+
+                        <div className="flex items-center gap-3">
+
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                            <Building2 size={20} />
+                          </div>
+
+                          <div>
+
+                            <h3 className="text-sm font-bold text-slate-900">
+                              {agency.name}
+                            </h3>
+
+                            <p className="mt-1 text-xs text-slate-500">
+                              {agency.code} · {agency.city}
+                            </p>
+
+                          </div>
+
+                        </div>
+
+                        <div className="flex items-center gap-2">
+
+                          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-600">
+                            {agency.status}
+                          </span>
+
+                          {selected && (
+                            <CheckCircle2
+                              size={20}
+                              className="text-[#173563]"
+                            />
+                          )}
+
+                        </div>
+
+                      </div>
+
+                    </button>
+                  );
+                })}
+
+              </div>
             </div>
           )}
 
-          {!agency ? (
+          {/* STEP 2 */}
 
-            /* =================================================
-               SEARCH AGENCY
-            ================================================= */
+          {step === 2 && (
+            <div>
 
-            <div className="space-y-5">
+              <SectionHeader
+                icon={UserRound}
+                title="Personal Details"
+                description="Enter your details for the agency administrator."
+              />
 
-              <div>
+              <div className="mt-7 grid gap-5 sm:grid-cols-2">
 
-                <label
-                  htmlFor="agencyCode"
-                  className="mb-1.5 block text-sm font-semibold text-slate-700"
-                >
-                  Agency code
-                </label>
+                <InputField
+                  label="Full Name"
+                  value={formData.fullName}
+                  onChange={(value) =>
+                    updateField(
+                      "fullName",
+                      value
+                    )
+                  }
+                  placeholder="John Perera"
+                  error={errors.fullName}
+                  required
+                />
 
-                <div className="relative">
+                <InputField
+                  label="Email Address"
+                  type="email"
+                  value={formData.email}
+                  onChange={(value) =>
+                    updateField(
+                      "email",
+                      value
+                    )
+                  }
+                  placeholder="john@example.com"
+                  error={errors.email}
+                  required
+                />
 
-                  <KeyRound
-                    size={17}
-                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  />
+                <InputField
+                  label="Phone Number"
+                  value={formData.phone}
+                  onChange={(value) =>
+                    updateField(
+                      "phone",
+                      value
+                    )
+                  }
+                  placeholder="+94 77 123 4567"
+                  error={errors.phone}
+                  required
+                />
 
-                  <input
-                    id="agencyCode"
-                    type="text"
-                    value={agencyCode}
-                    onChange={(e) => {
-                      setAgencyCode(
-                        e.target.value.toUpperCase()
-                      );
+                <div className="sm:col-span-2">
 
-                      setError("");
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleFindAgency();
-                      }
-                    }}
-                    placeholder="e.g. IMP-4821"
-                    className="h-12 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm font-semibold tracking-wider text-slate-900 outline-none transition placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                  <InputField
+                    label="Address"
+                    value={formData.address}
+                    onChange={(value) =>
+                      updateField(
+                        "address",
+                        value
+                      )
+                    }
+                    placeholder="Enter your address"
+                    error={errors.address}
+                    required
                   />
 
                 </div>
 
-                <p className="mt-2 text-xs text-slate-400">
-                  Ask your agency administrator for this code.
-                </p>
-
               </div>
 
-              <button
-                type="button"
-                onClick={handleFindAgency}
-                disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#173563] py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition hover:bg-[#102547] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-
-                <Search size={17} />
-
-                {loading
-                  ? "Finding agency..."
-                  : "Find Agency"}
-
-              </button>
+              <SelectedAgencyCard
+                agency={selectedAgency}
+              />
 
             </div>
+          )}
 
-          ) : (
+          {/* STEP 3 */}
 
-            /* =================================================
-               AGENCY FOUND
-            ================================================= */
+          {step === 3 && (
+            <div>
 
-            <div className="space-y-5">
+              <SectionHeader
+                icon={FileText}
+                title="License Details"
+                description="Provide your clearing agent license information."
+              />
 
-              {/* AGENCY CARD */}
+              <div className="mt-7 grid gap-5 sm:grid-cols-2">
 
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
+                <InputField
+                  label="License Number"
+                  value={formData.licenseNumber}
+                  onChange={(value) =>
+                    updateField(
+                      "licenseNumber",
+                      value
+                    )
+                  }
+                  placeholder="CL-123456"
+                  error={errors.licenseNumber}
+                  required
+                />
 
-                <div className="flex items-start gap-3">
+                <SelectField
+                  label="License Type"
+                  value={formData.licenseType}
+                  onChange={(value) =>
+                    updateField(
+                      "licenseType",
+                      value
+                    )
+                  }
+                  error={errors.licenseType}
+                  required
+                >
 
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-[#173563] shadow-sm">
+                  <option value="">
+                    Select license type
+                  </option>
 
-                    <Building2 size={20} />
+                  <option value="clearing-agent">
+                    Clearing Agent License
+                  </option>
 
-                  </div>
+                  <option value="customs-broker">
+                    Customs Broker License
+                  </option>
 
-                  <div className="min-w-0">
+                  <option value="other">
+                    Other
+                  </option>
 
-                    <div className="flex items-center gap-2">
+                </SelectField>
 
-                      <h2 className="truncate text-sm font-bold text-slate-900">
-                        {agency.name ||
-                          agency.agencyName ||
-                          "Clearing Agency"}
-                      </h2>
-
-                      <CheckCircle2
-                        size={16}
-                        className="shrink-0 text-emerald-600"
-                      />
-
-                    </div>
-
-                    <p className="mt-1 text-xs text-slate-500">
-                      Agency code:{" "}
-
-                      <span className="font-semibold text-slate-700">
-                        {agency.code ||
-                          agency.id ||
-                          agencyCode}
-                      </span>
-                    </p>
-
-                    {(agency.location ||
-                      agency.city) && (
-                      <p className="mt-1 text-xs text-slate-500">
-                        {agency.location ||
-                          agency.city}
-                      </p>
-                    )}
-
-                  </div>
-
-                </div>
+                <InputField
+                  label="License Expiry Date"
+                  type="date"
+                  value={formData.licenseExpiry}
+                  onChange={(value) =>
+                    updateField(
+                      "licenseExpiry",
+                      value
+                    )
+                  }
+                  error={errors.licenseExpiry}
+                  required
+                />
 
               </div>
 
-              {/* INFO */}
-
-              <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+              <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
 
                 <div className="flex items-start gap-3">
 
@@ -547,100 +570,407 @@ function JoinAgency() {
                     className="mt-0.5 shrink-0 text-blue-600"
                   />
 
-                  <div>
-
-                    <p className="text-xs font-semibold text-blue-900">
-                      Approval required
-                    </p>
-
-                    <p className="mt-1 text-xs leading-5 text-blue-700">
-                      Your request will be sent to the
-                      agency administrator. You will get
-                      access after they approve your
-                      membership.
-                    </p>
-
-                  </div>
+                  <p className="text-xs leading-5 text-blue-800">
+                    Your agency administrator will review
+                    your license information before approving
+                    your request.
+                  </p>
 
                 </div>
 
               </div>
 
-              {/* JOIN */}
+            </div>
+          )}
 
-              <button
-                type="button"
-                onClick={handleJoinAgency}
-                className="w-full rounded-xl bg-[#173563] py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition hover:-translate-y-0.5 hover:bg-[#102547]"
-              >
-                Request to Join Agency
-              </button>
+          {/* STEP 4 */}
 
-              {/* CHANGE CODE */}
+          {step === 4 && (
+            <div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setAgency(null);
-                  setError("");
-                }}
-                className="w-full rounded-xl border border-slate-200 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-              >
-                Use a Different Code
-              </button>
+              <SectionHeader
+                icon={CheckCircle2}
+                title="Review Application"
+                description="Check your information before submitting."
+              />
+
+              <div className="mt-7 space-y-5">
+
+                <ReviewSection title="Selected Agency">
+
+                  <ReviewRow
+                    label="Agency"
+                    value={selectedAgency?.name}
+                  />
+
+                  <ReviewRow
+                    label="Agency Code"
+                    value={selectedAgency?.code}
+                  />
+
+                  <ReviewRow
+                    label="City"
+                    value={selectedAgency?.city}
+                  />
+
+                </ReviewSection>
+
+                <ReviewSection title="Personal Details">
+
+                  <ReviewRow
+                    label="Full Name"
+                    value={formData.fullName}
+                  />
+
+                  <ReviewRow
+                    label="Email"
+                    value={formData.email}
+                  />
+
+                  <ReviewRow
+                    label="Phone"
+                    value={formData.phone}
+                  />
+
+                  <ReviewRow
+                    label="Address"
+                    value={formData.address}
+                  />
+
+                </ReviewSection>
+
+                <ReviewSection title="License Details">
+
+                  <ReviewRow
+                    label="License Number"
+                    value={formData.licenseNumber}
+                  />
+
+                  <ReviewRow
+                    label="License Type"
+                    value={formData.licenseType}
+                  />
+
+                  <ReviewRow
+                    label="License Expiry"
+                    value={formData.licenseExpiry}
+                  />
+
+                </ReviewSection>
+
+                <div className="rounded-xl border border-amber-100 bg-amber-50 p-4">
+
+                  <p className="text-xs leading-5 text-amber-800">
+                    By submitting this application, your
+                    information will be sent to the selected
+                    agency administrator for review.
+                  </p>
+
+                </div>
+
+              </div>
 
             </div>
           )}
 
-          {/* =================================================
-              INDIVIDUAL AGENT
-          ================================================= */}
+          {/* ACTIONS */}
 
-          <div className="mt-7 border-t border-slate-100 pt-6 text-center">
-
-            <p className="text-sm text-slate-500">
-              Working independently?
-            </p>
+          <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-6">
 
             <button
               type="button"
-              onClick={() => {
-                localStorage.setItem(
-                  "agentMembershipType",
-                  "individual"
-                );
-
-                navigate("/agent-profile");
-              }}
-              className="mt-1 text-sm font-semibold text-[#173563] hover:text-blue-700"
+              onClick={handleBack}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
             >
-              Continue as an independent agent
+              <ArrowLeft size={16} />
+              Back
+            </button>
+
+            <button
+              type="button"
+              onClick={handleNext}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#173563] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#10294d]"
+            >
+              {step === 4
+                ? "Submit Application"
+                : "Continue"}
+
+              <ArrowRight size={16} />
             </button>
 
           </div>
 
         </div>
 
-        {/* =====================================================
-            BACK
-        ===================================================== */}
+        {/* FOOTER */}
 
-        <div className="mt-5 flex justify-center">
+        <div className="mt-5 flex items-center justify-center gap-2 text-xs text-slate-400">
+          <ShieldCheck size={14} />
+          ImportEase Clearing Agent Registration
+        </div>
 
-          <Link
-            to="/agent-signin"
-            className="flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-800"
-          >
+      </div>
+    </div>
+  );
+}
 
-            <ArrowLeft size={16} />
+/* =========================================================
+   STEP INDICATOR
+========================================================= */
 
-            Back to Agent Sign In
+function StepIndicator({
+  number,
+  title,
+  active,
+  completed,
+}) {
+  return (
+    <div className="flex items-center gap-2">
 
-          </Link>
+      <div
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+          completed
+            ? "bg-emerald-500 text-white"
+            : active
+            ? "bg-[#173563] text-white"
+            : "bg-slate-100 text-slate-400"
+        }`}
+      >
+        {completed ? (
+          <CheckCircle2 size={15} />
+        ) : (
+          number
+        )}
+      </div>
+
+      <span
+        className={`hidden text-xs font-semibold sm:block ${
+          active
+            ? "text-slate-900"
+            : "text-slate-400"
+        }`}
+      >
+        {title}
+      </span>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   SECTION HEADER
+========================================================= */
+
+function SectionHeader({
+  icon: Icon,
+  title,
+  description,
+}) {
+  return (
+    <div className="flex items-start gap-3">
+
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+        <Icon size={19} />
+      </div>
+
+      <div>
+
+        <h2 className="text-lg font-bold text-slate-900">
+          {title}
+        </h2>
+
+        <p className="mt-1 text-sm text-slate-500">
+          {description}
+        </p>
+
+      </div>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   INPUT
+========================================================= */
+
+function InputField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  error,
+  required = false,
+}) {
+  return (
+    <div>
+
+      <label className="mb-2 block text-xs font-semibold text-slate-700">
+
+        {label}
+
+        {required && (
+          <span className="ml-1 text-red-500">
+            *
+          </span>
+        )}
+
+      </label>
+
+      <input
+        type={type}
+        value={value}
+        onChange={(event) =>
+          onChange(event.target.value)
+        }
+        placeholder={placeholder}
+        className={`w-full rounded-xl border px-3.5 py-3 text-sm outline-none transition placeholder:text-slate-400 ${
+          error
+            ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+            : "border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+        }`}
+      />
+
+      {error && (
+        <p className="mt-1.5 text-[11px] text-red-500">
+          {error}
+        </p>
+      )}
+
+    </div>
+  );
+}
+
+/* =========================================================
+   SELECT
+========================================================= */
+
+function SelectField({
+  label,
+  value,
+  onChange,
+  children,
+  error,
+  required = false,
+}) {
+  return (
+    <div>
+
+      <label className="mb-2 block text-xs font-semibold text-slate-700">
+
+        {label}
+
+        {required && (
+          <span className="ml-1 text-red-500">
+            *
+          </span>
+        )}
+
+      </label>
+
+      <select
+        value={value}
+        onChange={(event) =>
+          onChange(event.target.value)
+        }
+        className={`w-full rounded-xl border bg-white px-3.5 py-3 text-sm outline-none transition ${
+          error
+            ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+            : "border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+        }`}
+      >
+        {children}
+      </select>
+
+      {error && (
+        <p className="mt-1.5 text-[11px] text-red-500">
+          {error}
+        </p>
+      )}
+
+    </div>
+  );
+}
+
+/* =========================================================
+   SELECTED AGENCY
+========================================================= */
+
+function SelectedAgencyCard({ agency }) {
+  if (!agency) return null;
+
+  return (
+    <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-600">
+        Selected Agency
+      </p>
+
+      <div className="mt-2 flex items-center gap-3">
+
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-blue-600">
+          <Building2 size={18} />
+        </div>
+
+        <div>
+
+          <p className="text-sm font-bold text-slate-900">
+            {agency.name}
+          </p>
+
+          <p className="mt-1 text-xs text-slate-500">
+            {agency.code} · {agency.city}
+          </p>
 
         </div>
 
       </div>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   REVIEW SECTION
+========================================================= */
+
+function ReviewSection({
+  title,
+  children,
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200 p-5">
+
+      <h3 className="text-sm font-bold text-slate-900">
+        {title}
+      </h3>
+
+      <div className="mt-4 space-y-3">
+        {children}
+      </div>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   REVIEW ROW
+========================================================= */
+
+function ReviewRow({
+  label,
+  value,
+}) {
+  return (
+    <div className="flex flex-col gap-1 border-b border-slate-100 pb-3 last:border-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
+
+      <span className="text-xs text-slate-500">
+        {label}
+      </span>
+
+      <span className="text-sm font-semibold text-slate-900 sm:text-right">
+        {value || "—"}
+      </span>
 
     </div>
   );

@@ -1,645 +1,640 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
+  ArrowRight,
   Building2,
   CheckCircle2,
   FileText,
-  Globe2,
-  Mail,
-  MapPin,
-  Phone,
+  UserRound,
   ShieldCheck,
-  User,
 } from "lucide-react";
 
 function AgencyCreate() {
   const navigate = useNavigate();
 
+  const [step, setStep] = useState(1);
+
   const [formData, setFormData] = useState({
     agencyName: "",
-    registrationNumber: "",
-    licenseNumber: "",
-    contactEmail: "",
-    phone: "",
-    address: "",
+    businessRegistrationNumber: "",
+    agencyAddress: "",
     city: "",
-    website: "",
+    phone: "",
+    email: "",
+
+    licenseNumber: "",
+    licenseType: "",
+    licenseExpiry: "",
+
+    ownerName: "",
+    ownerEmail: "",
+    ownerPhone: "",
+    ownerNic: "",
   });
 
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const updateField = (field, value) => {
+    setFormData((previous) => ({
+      ...previous,
+      [field]: value,
+    }));
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
+    setErrors((previous) => ({
+      ...previous,
+      [field]: "",
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError("");
+  const validateStep = () => {
+    const newErrors = {};
 
-    const {
-      agencyName,
-      registrationNumber,
-      licenseNumber,
-      contactEmail,
-      phone,
-      address,
-      city,
-    } = formData;
+    if (step === 1) {
+      if (!formData.agencyName.trim()) {
+        newErrors.agencyName = "Agency name is required";
+      }
 
-    if (
-      !agencyName.trim() ||
-      !registrationNumber.trim() ||
-      !licenseNumber.trim() ||
-      !contactEmail.trim() ||
-      !phone.trim() ||
-      !address.trim() ||
-      !city.trim()
-    ) {
-      setError("Please complete all required agency details.");
+      if (!formData.businessRegistrationNumber.trim()) {
+        newErrors.businessRegistrationNumber =
+          "Business registration number is required";
+      }
+
+      if (!formData.agencyAddress.trim()) {
+        newErrors.agencyAddress = "Agency address is required";
+      }
+
+      if (!formData.city.trim()) {
+        newErrors.city = "City is required";
+      }
+
+      if (!formData.phone.trim()) {
+        newErrors.phone = "Agency phone number is required";
+      }
+
+      if (!formData.email.trim()) {
+        newErrors.email = "Agency email is required";
+      }
+    }
+
+    if (step === 2) {
+      if (!formData.licenseNumber.trim()) {
+        newErrors.licenseNumber = "License number is required";
+      }
+
+      if (!formData.licenseType) {
+        newErrors.licenseType = "Please select a license type";
+      }
+
+      if (!formData.licenseExpiry) {
+        newErrors.licenseExpiry = "License expiry date is required";
+      }
+    }
+
+    if (step === 3) {
+      if (!formData.ownerName.trim()) {
+        newErrors.ownerName = "Owner name is required";
+      }
+
+      if (!formData.ownerEmail.trim()) {
+        newErrors.ownerEmail = "Owner email is required";
+      }
+
+      if (!formData.ownerPhone.trim()) {
+        newErrors.ownerPhone = "Owner phone number is required";
+      }
+
+      if (!formData.ownerNic.trim()) {
+        newErrors.ownerNic = "NIC / ID number is required";
+      }
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (!validateStep()) return;
+
+    if (step < 3) {
+      setStep((previous) => previous + 1);
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
       return;
     }
 
-    /*
-     * =========================================================
-     * FRONTEND DEMO AGENCY
-     * =========================================================
-     *
-     * This will later be replaced with the real backend/Firebase.
-     */
-
-    const agency = {
-      id: `AG-${Date.now()}`,
-      agencyName: agencyName.trim(),
-      registrationNumber: registrationNumber.trim(),
-      licenseNumber: licenseNumber.trim(),
-      contactEmail: contactEmail.trim(),
-      phone: phone.trim(),
-      address: address.trim(),
-      city: city.trim(),
-      website: formData.website.trim(),
-
-      role: "admin",
-      status: "active",
-
-      createdAt: new Date().toISOString(),
-    };
-
     localStorage.setItem(
-      "clearingAgency",
-      JSON.stringify(agency)
+      "agencyRegistrationDraft",
+      JSON.stringify(formData)
     );
 
-    /*
-     * Update the current clearing-agent account.
-     */
+    navigate("/agency-review");
+  };
 
-    const storedAgent =
-      localStorage.getItem("clearingAgent");
-
-    let agent = {};
-
-    try {
-      agent = storedAgent
-        ? JSON.parse(storedAgent)
-        : {};
-    } catch {
-      agent = {};
+  const handleBack = () => {
+    if (step > 1) {
+      setStep((previous) => previous - 1);
+      return;
     }
 
-    const updatedAgent = {
-      ...agent,
-
-      agencyId: agency.id,
-      agencyName: agency.agencyName,
-
-      role: "admin",
-
-      agentStatus: "active",
-
-      profileStatus: "complete",
-    };
-
-    localStorage.setItem(
-      "clearingAgent",
-      JSON.stringify(updatedAgent)
-    );
-
-    /*
-     * Mark onboarding as completed.
-     */
-
-    localStorage.setItem(
-      "agentOnboardingComplete",
-      "true"
-    );
-
-    /*
-     * Go to the future Agency Admin Dashboard.
-     */
-
-    navigate("/agent-admin-dashboard");
+    navigate("/agency-choice");
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#F8FAFC] px-4 py-8 sm:py-10">
+    <div className="min-h-screen bg-[#F8FAFC] px-4 py-8 sm:py-10">
 
-      {/* =====================================================
-          BACKGROUND
-      ===================================================== */}
+      <div className="mx-auto w-full max-w-3xl">
 
-      <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-blue-100/50 blur-3xl" />
-
-      <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-slate-200/50 blur-3xl" />
-
-
-      {/* =====================================================
-          CONTAINER
-      ===================================================== */}
-
-      <div className="relative mx-auto w-full max-w-2xl">
-
-        {/* =====================================================
-            LOGO
-        ===================================================== */}
-
-        <div className="mb-7 flex justify-center">
-
-          <Link
-            to="/"
-            className="flex items-center gap-3"
+        {/* Header */}
+        <div className="mb-6">
+          <button
+            type="button"
+            onClick={handleBack}
+            className="mb-5 inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800"
           >
+            <ArrowLeft size={16} />
+            Back
+          </button>
 
-            <img
-              src="/logo.jpeg"
-              alt="ImportEase"
-              className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
-            />
-
-            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
-              Import
-              <span className="text-[#173563]">
-                Ease
-              </span>
-            </span>
-
-          </Link>
-
-        </div>
-
-
-        {/* =====================================================
-            MAIN CARD
-        ===================================================== */}
-
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.15)] sm:p-8">
-
-          {/* =================================================
-              HEADER
-          ================================================= */}
-
-          <div className="mb-7">
-
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#173563] shadow-md shadow-[#173563]/15">
-
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#173563]">
               <Building2
-                size={23}
+                size={21}
                 className="text-white"
               />
-
             </div>
 
-            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                Register Your Clearing Agency
+              </h1>
 
-              <div>
+              <p className="mt-1 text-sm text-slate-500">
+                Complete your agency registration application.
+              </p>
+            </div>
+          </div>
+        </div>
 
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[27px]">
-                  Create your clearing agency
-                </h1>
+        {/* Progress */}
+        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
+          <div className="flex items-center justify-between">
 
-                <p className="mt-1.5 text-sm leading-6 text-slate-500">
-                  Register your agency and become its administrator.
-                </p>
+            <StepIndicator
+              number="1"
+              title="Agency Details"
+              active={step === 1}
+              completed={step > 1}
+            />
 
-              </div>
+            <div className="mx-2 h-px flex-1 bg-slate-200" />
 
-              <div className="inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5">
+            <StepIndicator
+              number="2"
+              title="License Details"
+              active={step === 2}
+              completed={step > 2}
+            />
 
-                <ShieldCheck
-                  size={13}
-                  className="text-emerald-600"
+            <div className="mx-2 h-px flex-1 bg-slate-200" />
+
+            <StepIndicator
+              number="3"
+              title="Owner Details"
+              active={step === 3}
+              completed={false}
+            />
+          </div>
+        </div>
+
+        {/* Form Card */}
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+
+          {/* STEP 1 */}
+          {step === 1 && (
+            <div>
+              <SectionHeader
+                icon={Building2}
+                title="Agency Details"
+                description="Enter the basic information about your clearing agency."
+              />
+
+              <div className="mt-7 grid gap-5 sm:grid-cols-2">
+
+                <InputField
+                  label="Agency Name"
+                  value={formData.agencyName}
+                  onChange={(value) =>
+                    updateField("agencyName", value)
+                  }
+                  placeholder="ABC Clearing Agency"
+                  error={errors.agencyName}
+                  required
                 />
 
-                <span className="text-[10px] font-semibold text-emerald-700">
-                  Agency Admin
-                </span>
+                <InputField
+                  label="Business Registration Number"
+                  value={formData.businessRegistrationNumber}
+                  onChange={(value) =>
+                    updateField(
+                      "businessRegistrationNumber",
+                      value
+                    )
+                  }
+                  placeholder="BR-123456"
+                  error={errors.businessRegistrationNumber}
+                  required
+                />
 
+                <div className="sm:col-span-2">
+                  <InputField
+                    label="Agency Address"
+                    value={formData.agencyAddress}
+                    onChange={(value) =>
+                      updateField("agencyAddress", value)
+                    }
+                    placeholder="Full business address"
+                    error={errors.agencyAddress}
+                    required
+                  />
+                </div>
+
+                <InputField
+                  label="City"
+                  value={formData.city}
+                  onChange={(value) =>
+                    updateField("city", value)
+                  }
+                  placeholder="Colombo"
+                  error={errors.city}
+                  required
+                />
+
+                <InputField
+                  label="Phone Number"
+                  value={formData.phone}
+                  onChange={(value) =>
+                    updateField("phone", value)
+                  }
+                  placeholder="+94 77 123 4567"
+                  error={errors.phone}
+                  required
+                />
+
+                <InputField
+                  label="Agency Email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(value) =>
+                    updateField("email", value)
+                  }
+                  placeholder="agency@example.com"
+                  error={errors.email}
+                  required
+                />
               </div>
-
-            </div>
-
-          </div>
-
-
-          {/* =================================================
-              ERROR
-          ================================================= */}
-
-          {error && (
-            <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
-              {error}
             </div>
           )}
 
-
-          {/* =================================================
-              FORM
-          ================================================= */}
-
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-5"
-          >
-
-            {/* =================================================
-                AGENCY NAME
-            ================================================= */}
-
+          {/* STEP 2 */}
+          {step === 2 && (
             <div>
+              <SectionHeader
+                icon={FileText}
+                title="License Details"
+                description="Provide your clearing agency license information."
+              />
 
-              <label
-                htmlFor="agencyName"
-                className="mb-1.5 block text-sm font-medium text-slate-700"
-              >
-                Agency / Company name
-                <span className="ml-1 text-red-500">*</span>
-              </label>
+              <div className="mt-7 grid gap-5 sm:grid-cols-2">
 
-              <div className="relative">
-
-                <Building2
-                  size={17}
-                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                <InputField
+                  label="License Number"
+                  value={formData.licenseNumber}
+                  onChange={(value) =>
+                    updateField("licenseNumber", value)
+                  }
+                  placeholder="CL-123456"
+                  error={errors.licenseNumber}
+                  required
                 />
 
-                <input
-                  id="agencyName"
-                  name="agencyName"
-                  type="text"
-                  value={formData.agencyName}
-                  onChange={handleChange}
-                  placeholder="Enter your registered agency name"
-                  className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                <SelectField
+                  label="License Type"
+                  value={formData.licenseType}
+                  onChange={(value) =>
+                    updateField("licenseType", value)
+                  }
+                  error={errors.licenseType}
+                  required
+                >
+                  <option value="">Select license type</option>
+                  <option value="clearing-agent">
+                    Clearing Agent License
+                  </option>
+                  <option value="customs-broker">
+                    Customs Broker License
+                  </option>
+                  <option value="other">
+                    Other
+                  </option>
+                </SelectField>
+
+                <InputField
+                  label="License Expiry Date"
+                  type="date"
+                  value={formData.licenseExpiry}
+                  onChange={(value) =>
+                    updateField("licenseExpiry", value)
+                  }
+                  error={errors.licenseExpiry}
+                  required
                 />
-
               </div>
 
+              <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+                <div className="flex gap-3">
+                  <ShieldCheck
+                    size={18}
+                    className="mt-0.5 shrink-0 text-blue-600"
+                  />
+
+                  <p className="text-xs leading-5 text-blue-800">
+                    Your license information may be reviewed before
+                    the agency is approved.
+                  </p>
+                </div>
+              </div>
             </div>
+          )}
 
-
-            {/* =================================================
-                REGISTRATION + LICENSE
-            ================================================= */}
-
-            <div className="grid gap-5 sm:grid-cols-2">
-
-              {/* REGISTRATION */}
-
-              <div>
-
-                <label
-                  htmlFor="registrationNumber"
-                  className="mb-1.5 block text-sm font-medium text-slate-700"
-                >
-                  Business registration number
-                  <span className="ml-1 text-red-500">*</span>
-                </label>
-
-                <div className="relative">
-
-                  <FileText
-                    size={17}
-                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  />
-
-                  <input
-                    id="registrationNumber"
-                    name="registrationNumber"
-                    type="text"
-                    value={formData.registrationNumber}
-                    onChange={handleChange}
-                    placeholder="e.g. BR-123456"
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
-                  />
-
-                </div>
-
-              </div>
-
-
-              {/* LICENSE */}
-
-              <div>
-
-                <label
-                  htmlFor="licenseNumber"
-                  className="mb-1.5 block text-sm font-medium text-slate-700"
-                >
-                  Clearing license number
-                  <span className="ml-1 text-red-500">*</span>
-                </label>
-
-                <div className="relative">
-
-                  <FileText
-                    size={17}
-                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  />
-
-                  <input
-                    id="licenseNumber"
-                    name="licenseNumber"
-                    type="text"
-                    value={formData.licenseNumber}
-                    onChange={handleChange}
-                    placeholder="Enter license number"
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
-                  />
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-            {/* =================================================
-                EMAIL + PHONE
-            ================================================= */}
-
-            <div className="grid gap-5 sm:grid-cols-2">
-
-              {/* EMAIL */}
-
-              <div>
-
-                <label
-                  htmlFor="contactEmail"
-                  className="mb-1.5 block text-sm font-medium text-slate-700"
-                >
-                  Agency email
-                  <span className="ml-1 text-red-500">*</span>
-                </label>
-
-                <div className="relative">
-
-                  <Mail
-                    size={17}
-                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  />
-
-                  <input
-                    id="contactEmail"
-                    name="contactEmail"
-                    type="email"
-                    value={formData.contactEmail}
-                    onChange={handleChange}
-                    placeholder="agency@company.com"
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
-                  />
-
-                </div>
-
-              </div>
-
-
-              {/* PHONE */}
-
-              <div>
-
-                <label
-                  htmlFor="phone"
-                  className="mb-1.5 block text-sm font-medium text-slate-700"
-                >
-                  Contact phone
-                  <span className="ml-1 text-red-500">*</span>
-                </label>
-
-                <div className="relative">
-
-                  <Phone
-                    size={17}
-                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  />
-
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="+94 77 123 4567"
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
-                  />
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-            {/* =================================================
-                ADDRESS
-            ================================================= */}
-
+          {/* STEP 3 */}
+          {step === 3 && (
             <div>
+              <SectionHeader
+                icon={UserRound}
+                title="Owner Details"
+                description="Tell us about the person responsible for this agency."
+              />
 
-              <label
-                htmlFor="address"
-                className="mb-1.5 block text-sm font-medium text-slate-700"
-              >
-                Agency address
-                <span className="ml-1 text-red-500">*</span>
-              </label>
+              <div className="mt-7 grid gap-5 sm:grid-cols-2">
 
-              <div className="relative">
-
-                <MapPin
-                  size={17}
-                  className="pointer-events-none absolute left-3 top-3.5 text-slate-400"
+                <InputField
+                  label="Owner Full Name"
+                  value={formData.ownerName}
+                  onChange={(value) =>
+                    updateField("ownerName", value)
+                  }
+                  placeholder="John Perera"
+                  error={errors.ownerName}
+                  required
                 />
 
-                <textarea
-                  id="address"
-                  name="address"
-                  rows={3}
-                  value={formData.address}
-                  onChange={handleChange}
-                  placeholder="Enter your registered business address"
-                  className="w-full resize-none rounded-xl border border-slate-300 bg-white py-3 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                <InputField
+                  label="Owner Email"
+                  type="email"
+                  value={formData.ownerEmail}
+                  onChange={(value) =>
+                    updateField("ownerEmail", value)
+                  }
+                  placeholder="owner@example.com"
+                  error={errors.ownerEmail}
+                  required
                 />
 
-              </div>
-
-            </div>
-
-
-            {/* =================================================
-                CITY + WEBSITE
-            ================================================= */}
-
-            <div className="grid gap-5 sm:grid-cols-2">
-
-              {/* CITY */}
-
-              <div>
-
-                <label
-                  htmlFor="city"
-                  className="mb-1.5 block text-sm font-medium text-slate-700"
-                >
-                  City
-                  <span className="ml-1 text-red-500">*</span>
-                </label>
-
-                <div className="relative">
-
-                  <MapPin
-                    size={17}
-                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  />
-
-                  <input
-                    id="city"
-                    name="city"
-                    type="text"
-                    value={formData.city}
-                    onChange={handleChange}
-                    placeholder="e.g. Colombo"
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
-                  />
-
-                </div>
-
-              </div>
-
-
-              {/* WEBSITE */}
-
-              <div>
-
-                <label
-                  htmlFor="website"
-                  className="mb-1.5 block text-sm font-medium text-slate-700"
-                >
-                  Website
-                  <span className="ml-1 text-[10px] font-normal text-slate-400">
-                    Optional
-                  </span>
-                </label>
-
-                <div className="relative">
-
-                  <Globe2
-                    size={17}
-                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  />
-
-                  <input
-                    id="website"
-                    name="website"
-                    type="url"
-                    value={formData.website}
-                    onChange={handleChange}
-                    placeholder="https://yourcompany.com"
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
-                  />
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-            {/* =================================================
-                ADMIN NOTICE
-            ================================================= */}
-
-            <div className="rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3">
-
-              <div className="flex items-start gap-3">
-
-                <CheckCircle2
-                  size={17}
-                  className="mt-0.5 shrink-0 text-blue-600"
+                <InputField
+                  label="Owner Phone"
+                  value={formData.ownerPhone}
+                  onChange={(value) =>
+                    updateField("ownerPhone", value)
+                  }
+                  placeholder="+94 77 123 4567"
+                  error={errors.ownerPhone}
+                  required
                 />
 
-                <div>
+                <InputField
+                  label="NIC / ID Number"
+                  value={formData.ownerNic}
+                  onChange={(value) =>
+                    updateField("ownerNic", value)
+                  }
+                  placeholder="Enter NIC / ID number"
+                  error={errors.ownerNic}
+                  required
+                />
+              </div>
 
-                  <p className="text-xs font-semibold text-blue-800">
-                    You will become the Agency Admin
+              <div className="mt-6 rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
+                <div className="flex gap-3">
+                  <CheckCircle2
+                    size={18}
+                    className="mt-0.5 shrink-0 text-emerald-600"
+                  />
+
+                  <p className="text-xs leading-5 text-emerald-800">
+                    After completing this step, you will review your
+                    application before submitting it for approval.
                   </p>
-
-                  <p className="mt-1 text-[11px] leading-5 text-blue-700">
-                    As the agency owner, you will be able to
-                    manage agents, review join requests, and
-                    send invitation codes to your team.
-                  </p>
-
                 </div>
-
               </div>
-
             </div>
+          )}
 
-
-            {/* =================================================
-                SUBMIT
-            ================================================= */}
+          {/* Actions */}
+          <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-6">
 
             <button
-              type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#173563] py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#102547] hover:shadow-xl hover:shadow-[#173563]/20 active:translate-y-0 active:scale-[0.99]"
+              type="button"
+              onClick={handleBack}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
             >
-              Create Agency
+              <ArrowLeft size={16} />
 
-              <Building2 size={17} />
-
+              Back
             </button>
 
-          </form>
+            <button
+              type="button"
+              onClick={handleNext}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#173563] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#10294d]"
+            >
+              {step === 3 ? "Review Application" : "Continue"}
+
+              <ArrowRight size={16} />
+            </button>
+          </div>
 
         </div>
 
-
-        {/* =====================================================
-            BACK
-        ===================================================== */}
-
-        <div className="mt-5 flex justify-center">
-
-          <button
-            type="button"
-            onClick={() => navigate("/agency-choice")}
-            className="flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-slate-800"
-          >
-            <ArrowLeft size={16} />
-
-            Back to Agency Choice
-
-          </button>
-
+        {/* Security note */}
+        <div className="mt-5 flex items-center justify-center gap-2 text-xs text-slate-400">
+          <ShieldCheck size={14} />
+          Your information is securely stored for application review.
         </div>
+      </div>
+    </div>
+  );
+}
 
+/* =========================================================
+   STEP INDICATOR
+========================================================= */
+
+function StepIndicator({
+  number,
+  title,
+  active,
+  completed,
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+          completed
+            ? "bg-emerald-500 text-white"
+            : active
+            ? "bg-[#173563] text-white"
+            : "bg-slate-100 text-slate-400"
+        }`}
+      >
+        {completed ? (
+          <CheckCircle2 size={15} />
+        ) : (
+          number
+        )}
       </div>
 
+      <span
+        className={`hidden text-xs font-semibold sm:block ${
+          active
+            ? "text-slate-900"
+            : "text-slate-400"
+        }`}
+      >
+        {title}
+      </span>
+    </div>
+  );
+}
+
+/* =========================================================
+   SECTION HEADER
+========================================================= */
+
+function SectionHeader({
+  icon: Icon,
+  title,
+  description,
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+        <Icon size={19} />
+      </div>
+
+      <div>
+        <h2 className="text-lg font-bold text-slate-900">
+          {title}
+        </h2>
+
+        <p className="mt-1 text-sm text-slate-500">
+          {description}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   INPUT
+========================================================= */
+
+function InputField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  error,
+  required = false,
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-xs font-semibold text-slate-700">
+        {label}
+
+        {required && (
+          <span className="ml-1 text-red-500">*</span>
+        )}
+      </label>
+
+      <input
+        type={type}
+        value={value}
+        onChange={(event) =>
+          onChange(event.target.value)
+        }
+        placeholder={placeholder}
+        className={`w-full rounded-xl border px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-2 ${
+          error
+            ? "border-red-300 focus:border-red-500 focus:ring-red-100"
+            : "border-slate-200 focus:border-blue-500 focus:ring-blue-100"
+        }`}
+      />
+
+      {error && (
+        <p className="mt-1.5 text-[11px] text-red-500">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* =========================================================
+   SELECT
+========================================================= */
+
+function SelectField({
+  label,
+  value,
+  onChange,
+  children,
+  error,
+  required = false,
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-xs font-semibold text-slate-700">
+        {label}
+
+        {required && (
+          <span className="ml-1 text-red-500">*</span>
+        )}
+      </label>
+
+      <select
+        value={value}
+        onChange={(event) =>
+          onChange(event.target.value)
+        }
+        className={`w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition focus:ring-2 ${
+          error
+            ? "border-red-300 focus:border-red-500 focus:ring-red-100"
+            : "border-slate-200 focus:border-blue-500 focus:ring-blue-100"
+        }`}
+      >
+        {children}
+      </select>
+
+      {error && (
+        <p className="mt-1.5 text-[11px] text-red-500">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

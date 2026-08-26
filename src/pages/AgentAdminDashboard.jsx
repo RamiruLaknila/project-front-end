@@ -1,131 +1,166 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
+  Activity,
   Bell,
   Building2,
   CheckCircle2,
-  ChevronRight,
-  ClipboardList,
+  Clock3,
   Copy,
   FileText,
+  LayoutDashboard,
   LogOut,
-  Menu,
+  Package,
+  Search,
   Settings,
   ShieldCheck,
+  UserCheck,
   UserPlus,
   Users,
-  X,
   XCircle,
 } from "lucide-react";
 
 function AgentAdminDashboard() {
   const navigate = useNavigate();
 
-  const [agency, setAgency] = useState(null);
-  const [agent, setAgent] = useState(null);
-  const [agencyAgents, setAgencyAgents] = useState([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [joinApplication, setJoinApplication] =
+    useState(null);
+
+  const [joinStatus, setJoinStatus] =
+    useState("pending");
+
   const [copied, setCopied] = useState(false);
 
-  /* =========================================================
-     LOAD AGENCY + ADMIN + AGENTS
-  ========================================================= */
-
   useEffect(() => {
-    try {
-      const storedAgency = localStorage.getItem("clearingAgency");
-      const storedAgent = localStorage.getItem("clearingAgent");
-      const storedAgents = localStorage.getItem("agencyAgents");
-
-      if (storedAgency) {
-        setAgency(JSON.parse(storedAgency));
-      }
-
-      if (storedAgent) {
-        setAgent(JSON.parse(storedAgent));
-      }
-
-      if (storedAgents) {
-        const parsedAgents = JSON.parse(storedAgents);
-
-        if (Array.isArray(parsedAgents)) {
-          setAgencyAgents(parsedAgents);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to load agency information:", error);
-    }
+    loadJoinApplication();
   }, []);
 
-  /* =========================================================
-     PROTECT ADMIN DASHBOARD
-  ========================================================= */
+  const loadJoinApplication = () => {
+    const savedApplication =
+      localStorage.getItem(
+        "agencyJoinApplication"
+      );
 
-  useEffect(() => {
-    const storedAgent = localStorage.getItem("clearingAgent");
-    const storedAgency = localStorage.getItem("clearingAgency");
+    const savedStatus =
+      localStorage.getItem(
+        "agencyJoinStatus"
+      );
 
-    if (!storedAgent || !storedAgency) {
-      navigate("/agent-signin");
+    if (savedApplication) {
+      const parsed = JSON.parse(
+        savedApplication
+      );
+
+      setJoinApplication(parsed);
+
+      setJoinStatus(
+        savedStatus ||
+          parsed.status ||
+          "pending"
+      );
+
       return;
     }
 
-    try {
-      const currentAgent = JSON.parse(storedAgent);
+    setJoinApplication(null);
+    setJoinStatus("pending");
+  };
 
-      if (currentAgent.role !== "admin") {
-        navigate("/agent-signin");
-      }
-    } catch {
-      navigate("/agent-signin");
-    }
-  }, [navigate]);
+  const handleApproveJoin = () => {
+    if (!joinApplication) return;
 
-  /* =========================================================
-     AGENCY ID
-  ========================================================= */
+    const updatedApplication = {
+      ...joinApplication,
+      status: "approved",
+      approvedAt: new Date().toISOString(),
+    };
 
-  const agencyCode = useMemo(() => {
-    if (!agency?.id) {
-      return "AG-000000";
-    }
-
-    return agency.id;
-  }, [agency]);
-
-  /* =========================================================
-     FILTER AGENTS FOR THIS AGENCY
-  ========================================================= */
-
-  const agencyMembers = useMemo(() => {
-    if (!agency?.id) {
-      return [];
-    }
-
-    return agencyAgents.filter(
-      (member) => member.agencyId === agency.id
+    localStorage.setItem(
+      "agencyJoinApplication",
+      JSON.stringify(updatedApplication)
     );
-  }, [agencyAgents, agency]);
 
-  const pendingAgents = useMemo(() => {
-    return agencyMembers.filter(
-      (member) => member.status === "pending"
+    localStorage.setItem(
+      "agencyJoinStatus",
+      "approved"
     );
-  }, [agencyMembers]);
 
-  const approvedAgents = useMemo(() => {
-    return agencyMembers.filter(
-      (member) => member.status === "approved"
+    /*
+      Store the approved agent separately.
+      This gives the frontend a simple list
+      that can later be used by Manage Agents.
+    */
+
+    const existingAgents = JSON.parse(
+      localStorage.getItem(
+        "agencyAgents"
+      ) || "[]"
     );
-  }, [agencyMembers]);
 
-  /* =========================================================
-     COPY AGENCY CODE
-  ========================================================= */
+    const approvedAgent = {
+      id: `AGENT-${Date.now()}`,
+      name:
+        joinApplication.applicant
+          ?.fullName || "Agent",
+      email:
+        joinApplication.applicant
+          ?.email || "",
+      phone:
+        joinApplication.applicant
+          ?.phone || "",
+      agencyId:
+        joinApplication.agencyId || "",
+      agencyName:
+        joinApplication.agencyName || "",
+      licenseNumber:
+        joinApplication.license?.number || "",
+      status: "active",
+      joinedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem(
+      "agencyAgents",
+      JSON.stringify([
+        ...existingAgents,
+        approvedAgent,
+      ])
+    );
+
+    setJoinApplication(updatedApplication);
+    setJoinStatus("approved");
+  };
+
+  const handleRejectJoin = () => {
+    if (!joinApplication) return;
+
+    const updatedApplication = {
+      ...joinApplication,
+      status: "rejected",
+      rejectedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem(
+      "agencyJoinApplication",
+      JSON.stringify(updatedApplication)
+    );
+
+    localStorage.setItem(
+      "agencyJoinStatus",
+      "rejected"
+    );
+
+    setJoinApplication(updatedApplication);
+    setJoinStatus("rejected");
+  };
 
   const handleCopyCode = async () => {
+    const code =
+      localStorage.getItem(
+        "agencyInviteCode"
+      ) || "ABC001";
+
     try {
-      await navigator.clipboard.writeText(agencyCode);
+      await navigator.clipboard.writeText(code);
 
       setCopied(true);
 
@@ -133,305 +168,57 @@ function AgentAdminDashboard() {
         setCopied(false);
       }, 2000);
     } catch (error) {
-      console.error("Failed to copy agency code:", error);
+      console.error(
+        "Failed to copy:",
+        error
+      );
     }
   };
-
-  /* =========================================================
-     APPROVE AGENT
-  ========================================================= */
-
-  const handleApproveAgent = (agentId) => {
-    const updatedAgents = agencyAgents.map((member) => {
-      if (member.id !== agentId) {
-        return member;
-      }
-
-      return {
-        ...member,
-        status: "approved",
-        agencyId: agency?.id,
-        agencyName: agency?.agencyName,
-        approvedAt: new Date().toISOString(),
-      };
-    });
-
-    setAgencyAgents(updatedAgents);
-
-    localStorage.setItem(
-      "agencyAgents",
-      JSON.stringify(updatedAgents)
-    );
-
-    try {
-      const storedAgent = localStorage.getItem("clearingAgent");
-
-      if (storedAgent) {
-        const currentAgent = JSON.parse(storedAgent);
-
-        const approvedAgent = updatedAgents.find(
-          (item) => item.id === agentId
-        );
-
-        if (
-          approvedAgent &&
-          (currentAgent.id === agentId ||
-            currentAgent.email === approvedAgent.email)
-        ) {
-          localStorage.setItem(
-            "clearingAgent",
-            JSON.stringify({
-              ...currentAgent,
-              ...approvedAgent,
-              role: "agent",
-              status: "approved",
-            })
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Failed to update clearing agent:", error);
-    }
-  };
-
-  /* =========================================================
-     REJECT AGENT
-  ========================================================= */
-
-  const handleRejectAgent = (agentId) => {
-    const updatedAgents = agencyAgents.map((member) => {
-      if (member.id !== agentId) {
-        return member;
-      }
-
-      return {
-        ...member,
-        status: "rejected",
-        agencyId: agency?.id,
-        agencyName: agency?.agencyName,
-        rejectedAt: new Date().toISOString(),
-      };
-    });
-
-    setAgencyAgents(updatedAgents);
-
-    localStorage.setItem(
-      "agencyAgents",
-      JSON.stringify(updatedAgents)
-    );
-
-    try {
-      const storedAgent = localStorage.getItem("clearingAgent");
-
-      if (storedAgent) {
-        const currentAgent = JSON.parse(storedAgent);
-
-        const rejectedAgent = updatedAgents.find(
-          (item) => item.id === agentId
-        );
-
-        if (
-          rejectedAgent &&
-          (currentAgent.id === agentId ||
-            currentAgent.email === rejectedAgent.email)
-        ) {
-          localStorage.setItem(
-            "clearingAgent",
-            JSON.stringify({
-              ...currentAgent,
-              ...rejectedAgent,
-              status: "rejected",
-            })
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Failed to update rejected agent:", error);
-    }
-  };
-
-  /* =========================================================
-     LOGOUT
-  ========================================================= */
 
   const handleLogout = () => {
-    localStorage.removeItem("clearingAgent");
-    localStorage.removeItem("agentOnboardingType");
-    localStorage.removeItem("agentOnboardingComplete");
-
     navigate("/agent-signin");
   };
 
-  /* =========================================================
-     DASHBOARD STATS
-  ========================================================= */
+  const totalAgents = JSON.parse(
+    localStorage.getItem(
+      "agencyAgents"
+    ) || "[]"
+  ).length;
 
-  const stats = [
-    {
-      title: "Total Agents",
-      value: agencyMembers.length + 1,
-      description: "Currently registered",
-      icon: Users,
-      iconStyle: "bg-blue-50 text-blue-600",
-    },
-    {
-      title: "Pending Requests",
-      value: pendingAgents.length,
-      description: "Agents waiting for approval",
-      icon: UserPlus,
-      iconStyle: "bg-amber-50 text-amber-700",
-    },
-    {
-      title: "SME Requests",
-      value: "0",
-      description: "New marketplace requests",
-      icon: ClipboardList,
-      iconStyle: "bg-emerald-50 text-emerald-700",
-    },
-    {
-      title: "Active Shipments",
-      value: "0",
-      description: "Currently in progress",
-      icon: FileText,
-      iconStyle: "bg-indigo-50 text-indigo-600",
-    },
-  ];
-
-  /* =========================================================
-     QUICK ACTIONS
-  ========================================================= */
-
-  const quickActions = [
-    {
-      title: "Invite an Agent",
-      description:
-        "Invite another clearing agent to your agency.",
-      icon: UserPlus,
-      to: "/agency-invite",
-      iconStyle: "bg-blue-50 text-blue-600",
-    },
-    {
-      title: "Manage Agents",
-      description:
-        "View and manage your agency members.",
-      icon: Users,
-      to: "/agency-agents",
-      iconStyle: "bg-emerald-50 text-emerald-700",
-    },
-    {
-      title: "SME Requests",
-      description:
-        "Review import requests from SMEs.",
-      icon: ClipboardList,
-      to: "/agent-marketplace",
-      iconStyle: "bg-violet-50 text-violet-700",
-    },
-    {
-      title: "Shipments",
-      description:
-        "Manage your agency shipments.",
-      icon: FileText,
-
-      // FIXED ROUTE
-      to: "/agency-shipments",
-
-      iconStyle: "bg-indigo-50 text-indigo-600",
-    },
-  ];
+  const pendingCount =
+    joinApplication &&
+    joinStatus === "pending"
+      ? 1
+      : 0;
 
   return (
-    <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
+    <div className="min-h-screen bg-[#F8FAFC]">
 
-      {/* =====================================================
-          MOBILE SIDEBAR OVERLAY
-      ===================================================== */}
-
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-slate-900/30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* =====================================================
+      {/* =================================================
           SIDEBAR
-      ===================================================== */}
+      ================================================= */}
 
-      <aside
-        className={`fixed left-0 top-0 z-50 flex h-screen w-[250px] flex-col border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen
-            ? "translate-x-0"
-            : "-translate-x-full"
-        }`}
-      >
+      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-slate-200 bg-white lg:block">
 
         {/* LOGO */}
 
-        <div className="flex h-[70px] items-center border-b border-slate-100 px-5">
+        <div className="flex h-20 items-center border-b border-slate-100 px-6">
 
-          <Link
-            to="/agent-admin-dashboard"
-            className="flex items-center gap-3"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <img
-              src="/logo.jpeg"
-              alt="ImportEase"
-              className="h-9 w-9 object-contain mix-blend-multiply"
-            />
+          <img
+            src="/logo.jpeg"
+            alt="ImportEase"
+            className="h-11 w-11 object-contain mix-blend-multiply"
+          />
 
-            <div>
-              <p className="text-[16px] font-bold tracking-tight text-[#173563]">
-                Import
-                <span className="text-slate-900">
-                  Ease
-                </span>
-              </p>
+          <div className="ml-3">
 
-              <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                Agent Platform
-              </p>
-            </div>
-          </Link>
+            <p className="text-lg font-bold text-slate-900">
+              Import<span className="text-[#173563]">Ease</span>
+            </p>
 
-          {/* MOBILE CLOSE */}
-
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(false)}
-            className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 lg:hidden"
-          >
-            <X size={18} />
-          </button>
-
-        </div>
-
-        {/* AGENCY */}
-
-        <div className="border-b border-slate-100 p-4">
-
-          <div className="rounded-xl bg-slate-50 p-3">
-
-            <div className="flex items-center gap-3">
-
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#173563] text-white">
-                <Building2 size={17} />
-              </div>
-
-              <div className="min-w-0">
-
-                <p className="truncate text-xs font-bold text-slate-800">
-                  {agency?.agencyName ||
-                    "Your Agency"}
-                </p>
-
-                <p className="mt-0.5 text-[9px] text-slate-400">
-                  Agency Admin
-                </p>
-
-              </div>
-
-            </div>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              Agency Admin
+            </p>
 
           </div>
 
@@ -439,142 +226,136 @@ function AgentAdminDashboard() {
 
         {/* NAVIGATION */}
 
-        <nav className="flex-1 space-y-1 p-3">
+        <nav className="p-4">
 
           <SidebarItem
-            icon={Building2}
+            icon={LayoutDashboard}
             label="Dashboard"
             active
-            to="/agent-admin-dashboard"
-            onClick={() => setSidebarOpen(false)}
+            onClick={() =>
+              navigate(
+                "/agent-admin-dashboard"
+              )
+            }
           />
 
           <SidebarItem
             icon={Users}
             label="Agents"
-            to="/agency-agents"
-            onClick={() => setSidebarOpen(false)}
+            onClick={() =>
+              navigate("/agency-agents")
+            }
           />
 
           <SidebarItem
             icon={UserPlus}
             label="Invite Agents"
-            to="/agency-invite"
-            onClick={() => setSidebarOpen(false)}
+            onClick={() =>
+              navigate("/agency-invite")
+            }
           />
 
           <SidebarItem
-            icon={ClipboardList}
-            label="SME Requests"
-            to="/agent-marketplace"
-            onClick={() => setSidebarOpen(false)}
+            icon={Package}
+            label="Shipments"
+            onClick={() =>
+              navigate("/agency-shipments")
+            }
           />
 
           <SidebarItem
             icon={FileText}
-            label="Shipments"
-
-            // FIXED ROUTE
-            to="/agency-shipments"
-
-            onClick={() => setSidebarOpen(false)}
+            label="SME Requests"
+            onClick={() =>
+              navigate(
+                "/agent-marketplace"
+              )
+            }
           />
 
-        </nav>
-
-        {/* BOTTOM */}
-
-        <div className="border-t border-slate-100 p-3">
+          <div className="my-4 border-t border-slate-100" />
 
           <SidebarItem
             icon={Settings}
             label="Settings"
-            to="/agent-settings"
-            onClick={() => setSidebarOpen(false)}
+            onClick={() =>
+              navigate("/settings")
+            }
           />
+
+        </nav>
+
+        {/* LOGOUT */}
+
+        <div className="absolute bottom-0 left-0 right-0 border-t border-slate-100 p-4">
 
           <button
             type="button"
             onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-500 transition hover:bg-red-50 hover:text-red-600"
           >
             <LogOut size={17} />
-            Logout
+            Sign Out
           </button>
 
         </div>
 
       </aside>
 
-      {/* =====================================================
-          MAIN AREA
-      ===================================================== */}
+      {/* =================================================
+          MAIN
+      ================================================= */}
 
-      <div className="lg:ml-[250px]">
+      <main className="lg:pl-64">
 
-        {/* =================================================
-            TOP BAR
-        ================================================= */}
+        {/* TOP BAR */}
 
-        <header className="sticky top-0 z-30 flex h-[70px] items-center border-b border-slate-200 bg-white/95 px-5 backdrop-blur-xl sm:px-8">
+        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
 
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className="mr-3 flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 lg:hidden"
-          >
-            <Menu size={19} />
-          </button>
+          <div className="flex h-20 items-center justify-between px-5 sm:px-8">
 
-          <div>
+            <div>
 
-            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">
-              Agency workspace
-            </p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Agency Management
+              </p>
 
-            <h1 className="text-sm font-bold text-slate-800">
-              Admin Dashboard
-            </h1>
+              <h1 className="mt-1 text-xl font-bold text-slate-900">
+                Agency Dashboard
+              </h1>
 
-          </div>
+            </div>
 
-          <div className="ml-auto flex items-center gap-3">
+            <div className="flex items-center gap-3">
 
-            {/* NOTIFICATION */}
+              <button
+                type="button"
+                className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50"
+              >
+                <Bell size={18} />
 
-            <button
-              type="button"
-              className="relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100"
-            >
-              <Bell size={17} />
-
-              {pendingAgents.length > 0 && (
-                <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-blue-600 ring-2 ring-white" />
-              )}
-            </button>
-
-            <div className="hidden h-7 w-px bg-slate-200 sm:block" />
-
-            {/* ADMIN */}
-
-            <div className="flex items-center gap-2">
-
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#173563] text-[10px] font-bold text-white">
-                {getInitials(
-                  agent?.name || "Admin"
+                {pendingCount > 0 && (
+                  <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
                 )}
-              </div>
+              </button>
 
-              <div className="hidden sm:block">
+              <div className="hidden h-10 items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 sm:flex">
 
-                <p className="text-xs font-semibold text-slate-800">
-                  {agent?.name ||
-                    "Agency Admin"}
-                </p>
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#173563] text-xs font-bold text-white">
+                  AD
+                </div>
 
-                <p className="text-[9px] text-slate-400">
-                  Administrator
-                </p>
+                <div>
+
+                  <p className="text-xs font-bold text-slate-800">
+                    Agency Admin
+                  </p>
+
+                  <p className="text-[10px] text-slate-400">
+                    Administrator
+                  </p>
+
+                </div>
 
               </div>
 
@@ -584,550 +365,334 @@ function AgentAdminDashboard() {
 
         </header>
 
-        {/* =================================================
-            CONTENT
-        ================================================= */}
+        {/* CONTENT */}
 
-        <main className="mx-auto w-full max-w-[1180px] px-5 py-7 sm:px-8 lg:py-9">
+        <div className="p-5 sm:p-8">
 
-          {/* HEADER */}
+          {/* WELCOME */}
 
-          <section className="mb-7">
+          <div className="mb-7">
 
-            <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+            <h2 className="text-2xl font-bold text-slate-900">
+              Welcome back 👋
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Manage your agency, agents and SME
+              requests from one place.
+            </p>
+
+          </div>
+
+          {/* =================================================
+              STATS
+          ================================================= */}
+
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+            <StatCard
+              icon={Users}
+              title="Total Agents"
+              value={totalAgents}
+              description="Active agents"
+            />
+
+            <StatCard
+              icon={Clock3}
+              title="Pending Requests"
+              value={pendingCount}
+              description="Awaiting review"
+            />
+
+            <StatCard
+              icon={FileText}
+              title="SME Requests"
+              value="0"
+              description="Marketplace requests"
+            />
+
+            <StatCard
+              icon={Package}
+              title="Active Shipments"
+              value="0"
+              description="Current shipments"
+            />
+
+          </div>
+
+          {/* =================================================
+              AGENCY CODE
+          ================================================= */}
+
+          <div className="mt-6 rounded-2xl bg-[#173563] p-6 text-white shadow-lg">
+
+            <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
 
               <div>
 
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-blue-200">
+                  Agency Invitation Code
+                </p>
 
-                  <ShieldCheck
-                    size={13}
-                    className="text-blue-600"
-                  />
+                <h3 className="mt-2 text-2xl font-bold tracking-wider">
+                  {localStorage.getItem(
+                    "agencyInviteCode"
+                  ) || "ABC001"}
+                </h3>
 
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-700">
-                    Agency administrator
-                  </span>
-
-                </div>
-
-                <h2 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[38px]">
-                  Welcome,{" "}
-                  {agent?.name || "Admin"}.
-                </h2>
-
-                <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
-                  Manage your clearing agency,
-                  agents, SME requests, and
-                  shipments from one workspace.
+                <p className="mt-2 text-xs text-blue-200">
+                  Share this code with agents who
+                  want to join your agency.
                 </p>
 
               </div>
 
-              <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
+              <button
+                type="button"
+                onClick={handleCopyCode}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-bold text-[#173563] transition hover:bg-blue-50"
+              >
+                <Copy size={16} />
 
-                <CheckCircle2
-                  size={14}
-                  className="text-emerald-600"
-                />
-
-                <span className="text-[10px] font-semibold text-emerald-700">
-                  Agency active
-                </span>
-
-              </div>
-
-            </div>
-
-          </section>
-
-          {/* AGENCY CODE CARD */}
-
-          <section className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_10px_rgba(15,23,42,.02)]">
-
-            <div className="flex flex-col gap-5 p-5 sm:p-6 md:flex-row md:items-center md:justify-between">
-
-              <div className="flex min-w-0 items-start gap-4">
-
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-
-                  <ShieldCheck
-                    size={19}
-                    strokeWidth={1.8}
-                  />
-
-                </div>
-
-                <div>
-
-                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                    Agency invitation code
-                  </p>
-
-                  <h3 className="mt-1 text-sm font-bold text-slate-800">
-                    Invite your clearing agents
-                  </h3>
-
-                  <p className="mt-1 max-w-lg text-[11px] leading-5 text-slate-500">
-                    Share this code with agents you
-                    trust. They can use it to
-                    request access to your agency.
-                  </p>
-
-                </div>
-
-              </div>
-
-              <div className="flex items-center gap-2">
-
-                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-2.5">
-
-                  <p className="font-mono text-sm font-bold tracking-wider text-[#173563]">
-                    {agencyCode}
-                  </p>
-
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleCopyCode}
-                  className="flex h-10 items-center gap-2 rounded-xl bg-[#173563] px-3 text-xs font-semibold text-white transition hover:bg-[#102547]"
-                >
-
-                  <Copy size={14} />
-
-                  <span className="hidden sm:inline">
-                    {copied
-                      ? "Copied"
-                      : "Copy"}
-                  </span>
-
-                </button>
-
-              </div>
+                {copied
+                  ? "Copied!"
+                  : "Copy Code"}
+              </button>
 
             </div>
 
-          </section>
+          </div>
 
-          {/* STATS */}
+          {/* =================================================
+              PENDING REQUEST
+          ================================================= */}
 
-          <section className="mb-7 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-7">
 
-            {stats.map((stat) => {
+            <div className="mb-4 flex items-center justify-between">
 
-              const Icon = stat.icon;
+              <div>
 
-              return (
-                <div
-                  key={stat.title}
-                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]"
-                >
+                <h2 className="text-lg font-bold text-slate-900">
+                  Agent Requests
+                </h2>
 
-                  <div className="flex items-start justify-between">
+                <p className="mt-1 text-xs text-slate-500">
+                  Review agents requesting to join
+                  your agency.
+                </p>
+
+              </div>
+
+              <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+                {pendingCount} Pending
+              </span>
+
+            </div>
+
+            {joinApplication &&
+            joinStatus === "pending" ? (
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
+                  <div className="flex items-center gap-4">
+
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                      <UserCheck size={22} />
+                    </div>
 
                     <div>
 
-                      <p className="text-[10px] font-semibold text-slate-400">
-                        {stat.title}
+                      <h3 className="text-sm font-bold text-slate-900">
+                        {joinApplication
+                          .applicant
+                          ?.fullName ||
+                          "Agent"}
+                      </h3>
+
+                      <p className="mt-1 text-xs text-slate-500">
+                        {joinApplication
+                          .applicant
+                          ?.email ||
+                          "No email"}
                       </p>
 
-                      <p className="mt-2 text-2xl font-bold tracking-tight text-slate-800">
-                        {stat.value}
+                      <p className="mt-1 text-xs text-slate-500">
+                        License:{" "}
+                        <span className="font-semibold text-slate-700">
+                          {joinApplication
+                            .license
+                            ?.number ||
+                            "—"}
+                        </span>
                       </p>
 
-                    </div>
-
-                    <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.iconStyle}`}
-                    >
-                      <Icon
-                        size={18}
-                        strokeWidth={1.8}
-                      />
                     </div>
 
                   </div>
 
-                  <p className="mt-3 text-[10px] text-slate-400">
-                    {stat.description}
-                  </p>
+                  <span className="w-fit rounded-full bg-amber-50 px-3 py-1 text-[10px] font-bold text-amber-700">
+                    Pending Review
+                  </span>
 
                 </div>
-              );
-            })}
 
-          </section>
+                {/* DETAILS */}
 
-          {/* PENDING AGENT REQUESTS */}
+                <div className="mt-5 grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-3">
 
-          <section className="mb-7 rounded-2xl border border-slate-200 bg-white shadow-[0_2px_10px_rgba(15,23,42,.02)]">
+                  <Detail
+                    label="Agency"
+                    value={
+                      joinApplication.agencyName
+                    }
+                  />
 
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-5 sm:px-6">
+                  <Detail
+                    label="License Type"
+                    value={
+                      joinApplication
+                        .license
+                        ?.type
+                    }
+                  />
 
-              <div>
+                  <Detail
+                    label="Application ID"
+                    value={
+                      joinApplication.id
+                    }
+                  />
 
-                <div className="flex items-center gap-2">
+                </div>
 
-                  <h2 className="text-sm font-bold text-[#14213D]">
-                    Pending agent requests
-                  </h2>
+                {/* ACTIONS */}
 
-                  {pendingAgents.length > 0 && (
-                    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-700">
-                      {pendingAgents.length}
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+
+                  <button
+                    type="button"
+                    onClick={handleApproveJoin}
+                    className="flex-1 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
+                  >
+                    <span className="inline-flex items-center justify-center gap-2">
+                      <CheckCircle2 size={17} />
+                      Approve Agent
                     </span>
-                  )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleRejectJoin}
+                    className="flex-1 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-600 transition hover:bg-red-100"
+                  >
+                    <span className="inline-flex items-center justify-center gap-2">
+                      <XCircle size={17} />
+                      Reject Agent
+                    </span>
+                  </button>
 
                 </div>
 
-                <p className="mt-1 text-[11px] text-slate-500">
-                  Review agents requesting access
-                  to your agency.
-                </p>
-
               </div>
 
-              <Link
-                to="/agency-agents"
-                className="hidden items-center gap-1 text-[10px] font-semibold text-[#173B6C] sm:flex"
-              >
-                Manage agents
-                <ChevronRight size={12} />
-              </Link>
+            ) : joinApplication &&
+              joinStatus === "approved" ? (
 
-            </div>
+              <EmptyState
+                icon={CheckCircle2}
+                title="Agent approved"
+                description="The latest agent request has already been approved."
+                type="success"
+              />
 
-            {pendingAgents.length === 0 ? (
+            ) : joinApplication &&
+              joinStatus === "rejected" ? (
 
-              <div className="px-5 py-10 text-center sm:px-6">
-
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-
-                  <CheckCircle2 size={22} />
-
-                </div>
-
-                <h3 className="mt-3 text-sm font-bold text-slate-700">
-                  No pending requests
-                </h3>
-
-                <p className="mx-auto mt-1 max-w-sm text-[11px] leading-5 text-slate-400">
-                  New agents who join your agency
-                  using your invitation code will
-                  appear here.
-                </p>
-
-              </div>
+              <EmptyState
+                icon={XCircle}
+                title="Agent request rejected"
+                description="The latest agent request was rejected."
+                type="danger"
+              />
 
             ) : (
 
-              <div className="divide-y divide-slate-100">
-
-                {pendingAgents.map((member) => (
-
-                  <div
-                    key={member.id}
-                    className="flex flex-col gap-4 px-5 py-5 sm:px-6 md:flex-row md:items-center md:justify-between"
-                  >
-
-                    <div className="flex min-w-0 items-center gap-3">
-
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#173563] text-xs font-bold text-white">
-                        {getInitials(
-                          member.name ||
-                            "Agent"
-                        )}
-                      </div>
-
-                      <div className="min-w-0">
-
-                        <div className="flex flex-wrap items-center gap-2">
-
-                          <p className="truncate text-xs font-bold text-slate-800">
-                            {member.name ||
-                              "Unnamed Agent"}
-                          </p>
-
-                          <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide text-amber-700">
-                            Pending
-                          </span>
-
-                        </div>
-
-                        <p className="mt-0.5 truncate text-[10px] text-slate-500">
-                          {member.email ||
-                            "No email provided"}
-                        </p>
-
-                        {member.requestedAt && (
-                          <p className="mt-1 text-[9px] text-slate-400">
-                            Requested{" "}
-                            {formatDate(
-                              member.requestedAt
-                            )}
-                          </p>
-                        )}
-
-                      </div>
-
-                    </div>
-
-                    <div className="flex items-center gap-2 md:shrink-0">
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleRejectAgent(
-                            member.id
-                          )
-                        }
-                        className="flex h-9 items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 text-[10px] font-semibold text-red-600 transition hover:bg-red-50"
-                      >
-                        <XCircle size={14} />
-                        Reject
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleApproveAgent(
-                            member.id
-                          )
-                        }
-                        className="flex h-9 items-center gap-1.5 rounded-lg bg-emerald-600 px-3 text-[10px] font-semibold text-white transition hover:bg-emerald-700"
-                      >
-                        <CheckCircle2 size={14} />
-                        Approve
-                      </button>
-
-                    </div>
-
-                  </div>
-
-                ))}
-
-              </div>
+              <EmptyState
+                icon={UserPlus}
+                title="No pending agent requests"
+                description="New agent applications will appear here."
+              />
 
             )}
 
-          </section>
-
-          {/* ACTIVE AGENTS */}
-
-          {approvedAgents.length > 0 && (
-            <section className="mb-7 rounded-2xl border border-slate-200 bg-white shadow-[0_2px_10px_rgba(15,23,42,.02)]">
-
-              <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
-
-                <h2 className="text-sm font-bold text-[#14213D]">
-                  Active agents
-                </h2>
-
-                <p className="mt-1 text-[11px] text-slate-500">
-                  Agents currently approved to
-                  work under your agency.
-                </p>
-
-              </div>
-
-              <div className="divide-y divide-slate-100">
-
-                {approvedAgents.map((member) => (
-
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between px-5 py-4 sm:px-6"
-                  >
-
-                    <div className="flex min-w-0 items-center gap-3">
-
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-blue-700">
-                        {getInitials(
-                          member.name ||
-                            "Agent"
-                        )}
-                      </div>
-
-                      <div className="min-w-0">
-
-                        <p className="truncate text-xs font-bold text-slate-800">
-                          {member.name ||
-                            "Agent"}
-                        </p>
-
-                        <p className="truncate text-[10px] text-slate-500">
-                          {member.email ||
-                            "No email provided"}
-                        </p>
-
-                      </div>
-
-                    </div>
-
-                    <div className="flex items-center gap-2">
-
-                      <span className="hidden rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-semibold text-emerald-700 sm:inline-flex">
-                        Active
-                      </span>
-
-                      <CheckCircle2
-                        size={15}
-                        className="text-emerald-500"
-                      />
-
-                    </div>
-
-                  </div>
-
-                ))}
-
-              </div>
-
-            </section>
-          )}
-
-          {/* QUICK ACTIONS */}
-
-          <section>
-
-            <div className="mb-4">
-
-              <h2 className="text-sm font-bold text-[#14213D]">
-                Quick actions
-              </h2>
-
-              <p className="mt-1 text-[11px] text-slate-500">
-                Manage your agency from these
-                shortcuts.
-              </p>
-
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-
-              {quickActions.map((action) => {
-
-                const Icon = action.icon;
-
-                return (
-                  <Link
-                    key={action.title}
-                    to={action.to}
-                    className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-[0_10px_28px_rgba(15,23,42,.06)]"
-                  >
-
-                    <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${action.iconStyle} transition group-hover:scale-105`}
-                    >
-                      <Icon
-                        size={18}
-                        strokeWidth={1.8}
-                      />
-                    </div>
-
-                    <h3 className="mt-3 text-[13px] font-bold text-slate-800 group-hover:text-[#173B6C]">
-                      {action.title}
-                    </h3>
-
-                    <p className="mt-1.5 text-[11px] leading-5 text-slate-500">
-                      {action.description}
-                    </p>
-
-                    <div className="mt-3 flex items-center gap-1">
-
-                      <span className="text-[10px] font-semibold text-[#173B6C]">
-                        Open
-                      </span>
-
-                      <ChevronRight
-                        size={12}
-                        className="text-[#173B6C] transition-transform group-hover:translate-x-0.5"
-                      />
-
-                    </div>
-
-                  </Link>
-                );
-              })}
-
-            </div>
-
-          </section>
-
-          {/* AGENCY INFORMATION */}
-
-          <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
-
-            <div className="mb-5 flex items-center gap-3">
-
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
-                <Building2 size={18} />
-              </div>
-
-              <div>
-
-                <h2 className="text-sm font-bold text-slate-800">
-                  Agency information
-                </h2>
-
-                <p className="text-[10px] text-slate-400">
-                  Your registered agency details
-                </p>
-
-              </div>
-
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
-              <InfoItem
-                label="Agency name"
-                value={agency?.agencyName}
-              />
-
-              <InfoItem
-                label="Registration number"
-                value={agency?.registrationNumber}
-              />
-
-              <InfoItem
-                label="License number"
-                value={agency?.licenseNumber}
-              />
-
-              <InfoItem
-                label="Agency email"
-                value={agency?.contactEmail}
-              />
-
-              <InfoItem
-                label="Phone"
-                value={agency?.phone}
-              />
-
-              <InfoItem
-                label="Location"
-                value={`${agency?.city || ""}${
-                  agency?.address
-                    ? ` · ${agency.address}`
-                    : ""
-                }`}
-              />
-
-            </div>
-
-          </section>
-
-          {/* FOOTER */}
-
-          <div className="mt-9 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-[10px] text-slate-400">
-            ImportEase · Clearing Agency Platform
           </div>
 
-        </main>
+          {/* =================================================
+              QUICK ACTIONS
+          ================================================= */}
 
-      </div>
+          <div className="mt-7">
+
+            <h2 className="text-lg font-bold text-slate-900">
+              Quick Actions
+            </h2>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+              <QuickAction
+                icon={UserPlus}
+                title="Invite Agent"
+                description="Invite a clearing agent"
+                onClick={() =>
+                  navigate(
+                    "/agency-invite"
+                  )
+                }
+              />
+
+              <QuickAction
+                icon={Users}
+                title="Manage Agents"
+                description="View agency agents"
+                onClick={() =>
+                  navigate(
+                    "/agency-agents"
+                  )
+                }
+              />
+
+              <QuickAction
+                icon={Search}
+                title="SME Requests"
+                description="Find import requests"
+                onClick={() =>
+                  navigate(
+                    "/agent-marketplace"
+                  )
+                }
+              />
+
+              <QuickAction
+                icon={Package}
+                title="Shipments"
+                description="View agency shipments"
+                onClick={() =>
+                  navigate(
+                    "/agency-shipments"
+                  )
+                }
+              />
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </main>
 
     </div>
   );
@@ -1140,47 +705,61 @@ function AgentAdminDashboard() {
 function SidebarItem({
   icon: Icon,
   label,
-  to,
   active = false,
   onClick,
 }) {
   return (
-    <Link
-      to={to}
+    <button
+      type="button"
       onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${
+      className={`mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
         active
           ? "bg-blue-50 text-[#173563]"
-          : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+          : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
       }`}
     >
-      <Icon
-        size={17}
-        strokeWidth={1.8}
-      />
-
-      <span>{label}</span>
-    </Link>
+      <Icon size={17} />
+      {label}
+    </button>
   );
 }
 
 /* =========================================================
-   INFO ITEM
+   STAT CARD
 ========================================================= */
 
-function InfoItem({
-  label,
+function StatCard({
+  icon: Icon,
+  title,
   value,
+  description,
 }) {
   return (
-    <div className="rounded-xl bg-slate-50 px-4 py-3">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5">
 
-      <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-        {label}
+      <div className="flex items-center justify-between">
+
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+          <Icon size={19} />
+        </div>
+
+        <Activity
+          size={16}
+          className="text-slate-300"
+        />
+
+      </div>
+
+      <p className="mt-5 text-xs font-semibold text-slate-500">
+        {title}
       </p>
 
-      <p className="mt-1 truncate text-xs font-semibold text-slate-700">
-        {value || "Not provided"}
+      <p className="mt-1 text-2xl font-bold text-slate-900">
+        {value}
+      </p>
+
+      <p className="mt-1 text-[11px] text-slate-400">
+        {description}
       </p>
 
     </div>
@@ -1188,47 +767,97 @@ function InfoItem({
 }
 
 /* =========================================================
-   INITIALS
+   DETAIL
 ========================================================= */
 
-function getInitials(name) {
-  if (!name) {
-    return "AD";
-  }
+function Detail({
+  label,
+  value,
+}) {
+  return (
+    <div>
 
-  const words = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+        {label}
+      </p>
 
-  if (words.length === 1) {
-    return words[0]
-      .slice(0, 2)
-      .toUpperCase();
-  }
+      <p className="mt-1 truncate text-xs font-bold text-slate-700">
+        {value || "—"}
+      </p>
 
-  return `${words[0][0]}${
-    words[words.length - 1][0]
-  }`.toUpperCase();
+    </div>
+  );
 }
 
 /* =========================================================
-   DATE FORMAT
+   EMPTY STATE
 ========================================================= */
 
-function formatDate(date) {
-  try {
-    return new Date(date).toLocaleDateString(
-      "en-US",
-      {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }
-    );
-  } catch {
-    return "Recently";
-  }
+function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  type = "default",
+}) {
+  const iconClasses =
+    type === "success"
+      ? "bg-emerald-50 text-emerald-600"
+      : type === "danger"
+      ? "bg-red-50 text-red-600"
+      : "bg-slate-100 text-slate-400";
+
+  return (
+    <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center">
+
+      <div
+        className={`mx-auto flex h-12 w-12 items-center justify-center rounded-xl ${iconClasses}`}
+      >
+        <Icon size={22} />
+      </div>
+
+      <h3 className="mt-4 text-sm font-bold text-slate-700">
+        {title}
+      </h3>
+
+      <p className="mt-1 text-xs text-slate-400">
+        {description}
+      </p>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   QUICK ACTION
+========================================================= */
+
+function QuickAction({
+  icon: Icon,
+  title,
+  description,
+  onClick,
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="rounded-2xl border border-slate-200 bg-white p-5 text-left transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
+    >
+
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+        <Icon size={18} />
+      </div>
+
+      <h3 className="mt-4 text-sm font-bold text-slate-900">
+        {title}
+      </h3>
+
+      <p className="mt-1 text-xs text-slate-500">
+        {description}
+      </p>
+
+    </button>
+  );
 }
 
 export default AgentAdminDashboard;

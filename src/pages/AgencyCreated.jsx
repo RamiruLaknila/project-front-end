@@ -1,136 +1,65 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  ArrowRight,
+  ArrowLeft,
   Building2,
-  Check,
   CheckCircle2,
-  Copy,
+  Clock3,
+  FileBadge2,
   ShieldCheck,
-  Users,
 } from "lucide-react";
 
 function AgencyCreated() {
   const navigate = useNavigate();
 
-  const [copied, setCopied] = useState(false);
+  const application = JSON.parse(
+    localStorage.getItem("agencyApplication") || "null"
+  );
 
-  /* =========================================================
-     LOAD AGENCY
-  ========================================================= */
+  const agency = JSON.parse(
+    localStorage.getItem("clearingAgency") || "null"
+  );
 
-  const getAgency = () => {
-    try {
-      const stored = localStorage.getItem("clearingAgency");
+  const agencyName =
+    application?.agencyName ||
+    agency?.agencyName ||
+    "Your Clearing Agency";
 
-      if (!stored) {
-        return null;
-      }
+  const applicationId =
+    application?.id ||
+    "AGY-PENDING";
 
-      return JSON.parse(stored);
-    } catch (error) {
-      console.error("Failed to load agency:", error);
-      return null;
-    }
-  };
-
-  const agency = getAgency();
-
-  /* =========================================================
-     COPY AGENCY CODE
-  ========================================================= */
-
-  const handleCopy = async () => {
-    if (!agency?.agencyCode) {
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(agency.agencyCode);
-
-      setCopied(true);
-
-      setTimeout(() => {
-        setCopied(false);
-      }, 2000);
-    } catch (error) {
-      console.error("Failed to copy agency code:", error);
-    }
-  };
-
-  /* =========================================================
-     CONTINUE
-  ========================================================= */
+  const submittedDate = application?.submittedAt
+    ? new Date(application.submittedAt).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : new Date().toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
 
   const handleContinue = () => {
-    navigate("/agent-profile");
+    navigate("/agent-pending");
   };
-
-  /* =========================================================
-     AGENCY NOT FOUND
-  ========================================================= */
-
-  if (!agency) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] px-4">
-
-        <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-xl">
-
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600">
-            <Building2 size={22} />
-          </div>
-
-          <h1 className="mt-4 text-xl font-bold text-slate-900">
-            Agency information not found
-          </h1>
-
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            We couldn't find your agency information. Please
-            return to the agency setup process.
-          </p>
-
-          <Link
-            to="/agency-choice"
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#173563] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#102547]"
-          >
-            Back to Agency Choice
-            <ArrowRight size={16} />
-          </Link>
-
-        </div>
-
-      </div>
-    );
-  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#F8FAFC] px-4 py-8 sm:py-10">
 
-      {/* =====================================================
-          BACKGROUND
-      ===================================================== */}
-
+      {/* Background decoration */}
       <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-blue-100/50 blur-3xl" />
 
-      <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-emerald-100/40 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-slate-200/50 blur-3xl" />
 
-      {/* =====================================================
-          CONTAINER
-      ===================================================== */}
+      <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-2xl flex-col justify-center">
 
-      <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-xl flex-col justify-center">
-
-        {/* ===================================================
-            LOGO
-        =================================================== */}
-
+        {/* Logo */}
         <div className="mb-7 flex justify-center">
-
           <Link
             to="/"
             className="flex items-center gap-3"
           >
-
             <img
               src="/logo.jpeg"
               alt="ImportEase"
@@ -143,209 +72,220 @@ function AgencyCreated() {
                 Ease
               </span>
             </span>
-
           </Link>
-
         </div>
 
-        {/* ===================================================
-            CARD
-        =================================================== */}
-
+        {/* Main card */}
         <div className="rounded-3xl border border-slate-200/80 bg-white p-6 text-center shadow-[0_20px_60px_-15px_rgba(15,23,42,0.15)] sm:p-8">
 
-          {/* =================================================
-              SUCCESS ICON
-          ================================================= */}
+          {/* Success icon */}
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
+            <CheckCircle2
+              size={34}
+              className="text-emerald-600"
+              strokeWidth={1.8}
+            />
+          </div>
 
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
+          {/* Heading */}
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
+            Application Submitted
+          </h1>
 
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md shadow-emerald-500/20">
+          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
+            Your clearing agency registration has been successfully
+            submitted. Our team will review your application and
+            license information.
+          </p>
 
-              <Check
-                size={24}
-                strokeWidth={3}
+          {/* Status */}
+          <div className="mx-auto mt-7 flex max-w-md items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-left">
+
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
+              <Clock3
+                size={22}
+                className="text-amber-600"
               />
-
-            </div>
-
-          </div>
-
-          {/* =================================================
-              HEADER
-          ================================================= */}
-
-          <div className="mt-5">
-
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
-
-              <CheckCircle2
-                size={13}
-                className="text-emerald-600"
-              />
-
-              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-700">
-                Agency created
-              </span>
-
-            </div>
-
-            <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
-              Your agency is ready
-            </h1>
-
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-              Congratulations! Your clearing agency has been
-              successfully created on ImportEase.
-            </p>
-
-          </div>
-
-          {/* =================================================
-              AGENCY INFORMATION
-          ================================================= */}
-
-          <div className="mt-7 rounded-2xl border border-slate-200 bg-slate-50 p-5 text-left">
-
-            <div className="flex items-start gap-3">
-
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-
-                <Building2 size={18} />
-
-              </div>
-
-              <div className="min-w-0">
-
-                <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                  Agency
-                </p>
-
-                <h2 className="mt-1 truncate text-sm font-bold text-slate-900">
-                  {agency.name}
-                </h2>
-
-                <p className="mt-1 text-[10px] text-slate-500">
-                  {agency.city}
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* =================================================
-              AGENCY CODE
-          ================================================= */}
-
-          <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50/60 p-5">
-
-            <div className="flex items-center justify-center gap-2">
-
-              <Users
-                size={16}
-                className="text-blue-600"
-              />
-
-              <p className="text-xs font-bold text-blue-800">
-                Agent invitation code
-              </p>
-
-            </div>
-
-            <div className="mt-4 flex items-center gap-2">
-
-              <div className="flex h-12 min-w-0 flex-1 items-center justify-center rounded-xl border border-blue-200 bg-white px-3">
-
-                <span className="truncate text-lg font-bold tracking-[0.18em] text-[#173563]">
-                  {agency.agencyCode}
-                </span>
-
-              </div>
-
-              <button
-                type="button"
-                onClick={handleCopy}
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border transition ${
-                  copied
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-600"
-                    : "border-blue-200 bg-white text-blue-600 hover:bg-blue-100"
-                }`}
-                aria-label="Copy agency invitation code"
-              >
-
-                {copied ? (
-                  <Check size={18} />
-                ) : (
-                  <Copy size={18} />
-                )}
-
-              </button>
-
-            </div>
-
-            <p className="mt-3 text-[10px] leading-5 text-blue-700/70">
-              Share this code with clearing agents who need to
-              join your agency. Agents using this code will be
-              sent for admin approval.
-            </p>
-
-            {copied && (
-              <p className="mt-2 text-xs font-semibold text-emerald-600">
-                Agency code copied!
-              </p>
-            )}
-
-          </div>
-
-          {/* =================================================
-              ADMIN STATUS
-          ================================================= */}
-
-          <div className="mt-5 flex items-start gap-3 rounded-xl border border-slate-100 bg-white p-4 text-left">
-
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-
-              <ShieldCheck size={17} />
-
             </div>
 
             <div>
-
-              <p className="text-xs font-bold text-slate-800">
-                You are the Agency Admin
+              <p className="text-xs font-bold uppercase tracking-wide text-amber-700">
+                Application Status
               </p>
 
-              <p className="mt-1 text-[10px] leading-5 text-slate-500">
-                You will be able to manage agents, approve
-                joining requests, and manage your agency once
-                your profile is completed.
+              <p className="mt-1 text-sm font-bold text-amber-900">
+                Pending Review
               </p>
+
+              <p className="mt-1 text-[11px] leading-5 text-amber-700">
+                Your account will remain pending until your application
+                is approved.
+              </p>
+            </div>
+
+          </div>
+
+          {/* Application information */}
+          <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 text-left">
+
+            <div className="border-b border-slate-100 bg-slate-50 px-4 py-3">
+              <p className="text-xs font-bold text-slate-700">
+                Application Information
+              </p>
+            </div>
+
+            <div className="grid gap-5 p-4 sm:grid-cols-2">
+
+              <InfoItem
+                icon={Building2}
+                label="Agency"
+                value={agencyName}
+              />
+
+              <InfoItem
+                icon={FileBadge2}
+                label="Application ID"
+                value={applicationId}
+              />
+
+              <InfoItem
+                icon={Clock3}
+                label="Submitted"
+                value={submittedDate}
+              />
+
+              <InfoItem
+                icon={ShieldCheck}
+                label="Status"
+                value="Pending Review"
+                valueClass="text-amber-600"
+              />
 
             </div>
 
           </div>
 
-          {/* =================================================
-              CONTINUE
-          ================================================= */}
+          {/* What happens next */}
+          <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50/60 p-4 text-left">
 
+            <div className="flex items-start gap-3">
+
+              <ShieldCheck
+                size={18}
+                className="mt-0.5 shrink-0 text-blue-600"
+              />
+
+              <div>
+
+                <p className="text-xs font-bold text-blue-900">
+                  What happens next?
+                </p>
+
+                <div className="mt-2 space-y-2">
+
+                  <Step
+                    number="1"
+                    text="ImportEase reviews your agency information."
+                  />
+
+                  <Step
+                    number="2"
+                    text="Your business and license details are verified."
+                  />
+
+                  <Step
+                    number="3"
+                    text="Once approved, your Agency Admin Dashboard becomes available."
+                  />
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* Continue */}
           <button
             type="button"
             onClick={handleContinue}
-            className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-[#173563] py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#102547] hover:shadow-xl hover:shadow-[#173563]/20 active:translate-y-0 active:scale-[0.99]"
+            className="mt-7 w-full rounded-xl bg-[#173563] py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition-all hover:-translate-y-0.5 hover:bg-[#102547]"
           >
-
-            Complete Admin Profile
-
-            <ArrowRight size={16} />
-
+            View Application Status
           </button>
 
         </div>
 
+        {/* Back */}
+        <div className="mt-5 flex justify-center">
+
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-slate-800"
+          >
+            <ArrowLeft size={16} />
+            Back to ImportEase
+          </Link>
+
+        </div>
+
       </div>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   INFO ITEM
+========================================================= */
+
+function InfoItem({
+  icon: Icon,
+  label,
+  value,
+  valueClass = "text-slate-800",
+}) {
+  return (
+    <div className="flex items-start gap-3">
+
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+        <Icon size={15} />
+      </div>
+
+      <div className="min-w-0">
+
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+          {label}
+        </p>
+
+        <p
+          className={`mt-1 break-words text-xs font-bold ${valueClass}`}
+        >
+          {value}
+        </p>
+
+      </div>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   NEXT STEP
+========================================================= */
+
+function Step({ number, text }) {
+  return (
+    <div className="flex items-start gap-2">
+
+      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold text-white">
+        {number}
+      </div>
+
+      <p className="text-[11px] leading-5 text-blue-800">
+        {text}
+      </p>
 
     </div>
   );

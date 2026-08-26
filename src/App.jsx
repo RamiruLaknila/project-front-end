@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+// =========================
+// SME
+// =========================
 import Home from "./pages/Home";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
@@ -14,60 +17,81 @@ import Shipments from "./pages/Shipments";
 import TrackShipment from "./pages/TrackShipment";
 import Documents from "./pages/Documents";
 import CompleteProfile from "./pages/CompleteProfile";
-import AgentPending from "./pages/AgentPending";
-import AgencyAgents from "./pages/AgencyAgents";
-import AgentDashboard from "./pages/AgentDashboard";
-import AgencyInvite from "./pages/AgencyInvite";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
-import AgencyCreate from "./pages/AgencyCreate";
 
-// Clearing Agent
+// =========================
+// EXISTING CLEARING AGENT
+// =========================
 import AgentSignIn from "./pages/AgentSignIn";
-import AgencyChoice from "./pages/AgencyChoice";
 import AgentSignUp from "./pages/AgentSignUp";
+import AgencyChoice from "./pages/AgencyChoice";
+import AgencyCreate from "./pages/AgencyCreate";
 import AgencyCreated from "./pages/AgencyCreated";
-import AgentAdminDashboard from "./pages/AgentAdminDashboard";
 import JoinAgency from "./pages/JoinAgency";
+
+import AgentPending from "./pages/AgentPending";
+import AgentDashboard from "./pages/AgentDashboard";
+
+import AgencyAgents from "./pages/AgencyAgents";
+import AgencyInvite from "./pages/AgencyInvite";
 import AgentMarketplace from "./pages/AgentMarketplace";
 import AgencyShipments from "./pages/AgencyShipments";
+import AgentAdminDashboard from "./pages/AgentAdminDashboard";
+import AgencyReview from "./pages/AgencyReview";
+import AgentMyBids from "./pages/AgentMyBids";
+import AgentBids from "./pages/AgentBids";
+import ReviewBids from "./pages/ReviewBids";
+import IndividualAgentSignup from "./pages/IndividualAgentSignup";
+import IndividualAgentVerification from "./pages/IndividualAgentVerification";
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* =========================
-            MAIN / SME
-        ========================= */}
+        {/* =====================================================
+            HOME
+        ===================================================== */}
+        <Route
+          path="/"
+          element={<Home />}
+        />
 
-        <Route path="/" element={<Home />} />
+        {/* =====================================================
+            SME AUTH
+        ===================================================== */}
+        <Route
+          path="/signin"
+          element={<SignIn />}
+        />
 
-        <Route path="/signin" element={<SignIn />} />
-
-        <Route path="/signup" element={<SignUp />} />
+        <Route
+          path="/signup"
+          element={<SignUp />}
+        />
 
         <Route
           path="/forgot-password"
           element={<ForgotPassword />}
         />
-        <Route
-  path="/agent-dashboard"
-  element={<AgentDashboard />}
-/>
-        <Route
-  path="/complete-profile"
-  element={<CompleteProfile />}
-/>
 
+        <Route
+          path="/complete-profile"
+          element={<CompleteProfile />}
+        />
+
+        {/* =====================================================
+            SME DASHBOARD
+        ===================================================== */}
         <Route
           path="/dashboard"
           element={<Dashboard />}
         />
 
-        {/* =========================
-            IMPORT
-        ========================= */}
-
+        {/* =====================================================
+            SME IMPORT
+        ===================================================== */}
         <Route
           path="/new-import"
           element={<NewImport />}
@@ -83,10 +107,9 @@ function App() {
           element={<Calculator />}
         />
 
-        {/* =========================
-            SME AGENTS
-        ========================= */}
-
+        {/* =====================================================
+            SME CLEARING AGENT
+        ===================================================== */}
         <Route
           path="/find-agent"
           element={<FindAgent />}
@@ -96,18 +119,10 @@ function App() {
           path="/shipment-confirmation"
           element={<ShipmentConfirmation />}
         />
-        <Route
-  path="/agency-create"
-  element={<AgencyCreate />}
-/>
-<Route
-  path="/agency-created"
-  element={<AgencyCreated />}
-/>
-        {/* =========================
-            SHIPMENTS
-        ========================= */}
 
+        {/* =====================================================
+            SME SHIPMENTS
+        ===================================================== */}
         <Route
           path="/shipments"
           element={<Shipments />}
@@ -118,19 +133,17 @@ function App() {
           element={<TrackShipment />}
         />
 
-        {/* =========================
-            DOCUMENTS
-        ========================= */}
-
+        {/* =====================================================
+            SME DOCUMENTS
+        ===================================================== */}
         <Route
           path="/documents"
           element={<Documents />}
         />
 
-        {/* =========================
-            PROFILE
-        ========================= */}
-
+        {/* =====================================================
+            SME PROFILE
+        ===================================================== */}
         <Route
           path="/profile"
           element={<Profile />}
@@ -141,57 +154,139 @@ function App() {
           element={<Settings />}
         />
 
-        {/* =========================
-            CLEARING AGENT
-        ========================= */}
+        {/* =====================================================
+            CLEARING AGENT AUTH
+        ===================================================== */}
 
+        {/* Agent Sign In */}
         <Route
           path="/agent-signin"
           element={<AgentSignIn />}
         />
+
+        {/* Create Agent Account */}
+        <Route
+          path="/agent-signup"
+          element={<AgentSignUp />}
+        />
+
+        {/* =====================================================
+            CREATE AGENT ACCOUNT → CHOOSE TYPE
+        ===================================================== */}
 
         <Route
           path="/agency-choice"
           element={<AgencyChoice />}
         />
 
+        {/* =====================================================
+            AGENCY / COMPANY
+        ===================================================== */}
+
+        {/* Register New Agency */}
         <Route
-          path="/agent-signup"
-          element={<AgentSignUp />}
+          path="/agency-create"
+          element={<AgencyCreate />}
         />
+
+        {/* Agency Created / Application Submitted */}
+        <Route
+          path="/agency-created"
+          element={<AgencyCreated />}
+        />
+
+        {/* =====================================================
+            JOIN EXISTING AGENCY
+        ===================================================== */}
+
+        <Route
+          path="/join-agency"
+          element={<JoinAgency />}
+        />
+
+        {/* =====================================================
+            AGENT PENDING
+        ===================================================== */}
+
+        <Route
+          path="/agent-pending"
+          element={<AgentPending />}
+        />
+        <Route
+          path="/agency-review"
+          element={<AgencyReview />}
+        />
+        <Route
+          path="/agent-my-bids"
+          element={<AgentMyBids />}
+        />
+        {/* =====================================================
+            AGENCY ADMIN
+        ===================================================== */}
+
         <Route
           path="/agent-admin-dashboard"
           element={<AgentAdminDashboard />}
+        />
 
+        <Route
+          path="/agency-agents"
+          element={<AgencyAgents />}
+        />
+
+        <Route
+          path="/agency-invite"
+          element={<AgencyInvite />}
+        />
+
+        <Route
+          path="/agency-shipments"
+          element={<AgencyShipments />}
+        />
+
+        {/* =====================================================
+            AGENT DASHBOARD
+        ===================================================== */}
+
+        <Route
+          path="/agent-dashboard"
+          element={<AgentDashboard />}
+        />
+
+        <Route
+          path="/agent-marketplace"
+          element={<AgentMarketplace />}
+        />
+
+        {/* =====================================================
+            COMPATIBILITY ROUTE
+        ===================================================== */}
+
+        <Route
+          path="/agent-shipments"
+          element={<AgencyShipments />}
+        />
+        <Route
+          path="/agent-bids"
+          element={<AgentBids />}
+        />
+        <Route
+          path="/review-bids"
+          element={<ReviewBids />}
+        />
+        <Route
+          path="/agent-signup"
+          element={<AgentSignUp />}
 />
 <Route
-  path="/agency-agents"
-  element={<AgencyAgents />}
+  path="/individual-agent-signup"
+  element={<IndividualAgentSignup />}
 />
 <Route
-  path="/agent-pending"
-  element={<AgentPending />}
+  path="/individual-agent-verification"
+  element={<IndividualAgentVerification />}
 />
-<Route
-  path="/join-agency"
-  element={<JoinAgency />}
-/>
-<Route
-  path="/agency-invite"
-  element={<AgencyInvite />}
-/>
-<Route
-  path="/agent-marketplace"
-  element={<AgentMarketplace />}
-/>
-<Route
-  path="/agency-shipments"
-  element={<AgencyShipments />}
-/>
-<Route
-  path="/agent-shipments"
-  element={<AgencyShipments />}
-/>
+
       </Routes>
     </BrowserRouter>
   );
