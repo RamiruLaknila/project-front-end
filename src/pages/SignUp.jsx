@@ -1,449 +1,346 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Building2,
-  BriefcaseBusiness,
-  Check,
   ArrowLeft,
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  ShieldCheck,
+  Store,
+  UserRound,
 } from "lucide-react";
 
 function SignUp() {
   const navigate = useNavigate();
 
-  const [userType, setUserType] = useState("");
+  const handleSME = () => {
+    // Remember that this user selected the SME registration.
+    localStorage.setItem("signupRole", "sme");
 
-  const [formData, setFormData] = useState({
-    fullName: "",
-    businessName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    terms: false,
-  });
-
-  const [error, setError] = useState("");
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    // Keep your existing SME registration flow.
+    navigate("/sme-signup");
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError("");
+  const handleClearingAgent = () => {
+    // Remember that this user selected the clearing-agent flow.
+    localStorage.setItem("signupRole", "clearing-agent");
 
-    if (!userType) {
-      setError("Please choose your account type.");
-      return;
-    }
-
-    if (
-      !formData.fullName.trim() ||
-      !formData.businessName.trim() ||
-      !formData.email.trim() ||
-      !formData.password ||
-      !formData.confirmPassword
-    ) {
-      setError("Please fill in all required fields.");
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-
-    if (!formData.terms) {
-      setError("Please agree to the Terms of Service and Privacy Policy.");
-      return;
-    }
-
-    /*
-     * Frontend-only account storage for now.
-     * This will later be replaced by the real backend/Firebase.
-     */
-    const newUser = {
-      fullName: formData.fullName.trim(),
-      businessName: formData.businessName.trim(),
-      email: formData.email.trim(),
-      password: formData.password,
-      userType,
-      profileComplete: false,
-    };
-
-    localStorage.setItem(
-      "importease_user",
-      JSON.stringify(newUser)
-    );
-
-    /*
-     * SME users must complete their profile
-     * before accessing the SME application.
-     */
-    if (userType === "sme") {
-      navigate("/complete-profile");
-      return;
-    }
-
-    /*
-     * Clearing Agent flow is handled separately.
-     */
-    if (userType === "agent") {
-      navigate("/agent-signup");
-    }
+    // Go directly to the clearing-agent registration.
+    navigate("/agent-signup");
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#F4F8FF] px-4 py-8 sm:py-10">
+    <div className="relative min-h-screen overflow-hidden bg-[#F8FAFC] px-4 py-8 sm:py-10">
 
-      {/* BACKGROUND DECORATION */}
-      <div className="pointer-events-none absolute -left-32 -top-32 h-72 w-72 rounded-full bg-blue-200/30 blur-3xl" />
+      {/* =====================================================
+          BACKGROUND
+      ===================================================== */}
 
-      <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-sky-200/30 blur-3xl" />
+      <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-blue-100/50 blur-3xl" />
 
-      {/* MAIN CONTAINER */}
-      <div className="relative mx-auto w-full max-w-lg">
+      <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-slate-200/50 blur-3xl" />
 
-        {/* LOGO */}
-        <div className="mb-6 flex justify-center">
-          <Link to="/" className="flex items-center gap-3">
+      {/* =====================================================
+          MAIN CONTAINER
+      ===================================================== */}
+
+      <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-3xl flex-col justify-center">
+
+        {/* ===================================================
+            LOGO
+        =================================================== */}
+
+        <div className="mb-7 flex justify-center">
+
+          <Link
+            to="/"
+            className="flex items-center gap-3"
+          >
 
             <img
               src="/logo.jpeg"
               alt="ImportEase"
-              className="h-20 w-20 rounded-xl object-contain"
+              className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
             />
 
-            <span className="text-2xl font-bold tracking-tight text-slate-900">
-              Import<span className="text-[#173563]">Ease</span>
+            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
+              Import
+              <span className="text-[#173563]">
+                Ease
+              </span>
             </span>
 
           </Link>
+
         </div>
 
-        {/* MAIN CARD */}
-        <div className="rounded-3xl border border-blue-100 bg-white p-6 shadow-xl shadow-blue-900/5 sm:p-7">
+        {/* ===================================================
+            CARD
+        =================================================== */}
 
-          {/* HEADING */}
-          <div className="mb-6 text-center">
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.15)] sm:p-9">
 
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-              Create your account
+          {/* =================================================
+              ICON
+          ================================================= */}
+
+          <div className="mb-5 flex justify-center">
+
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#173563] shadow-md shadow-[#173563]/15">
+              <ShieldCheck
+                size={23}
+                className="text-white"
+              />
+            </div>
+
+          </div>
+
+          {/* =================================================
+              HEADING
+          ================================================= */}
+
+          <div className="mb-8 text-center">
+
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
+              Create your ImportEase account
             </h1>
 
-            <p className="mt-1 text-sm text-slate-500">
-              Choose how you'll use ImportEase
+            <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-500">
+              Choose the type of account you want to create.
+              This will take you to the appropriate registration process.
             </p>
 
           </div>
 
-          {/* ACCOUNT TYPE */}
-          <div className="mb-6">
+          {/* =================================================
+              ROLE SELECTION
+          ================================================= */}
 
-            <p className="mb-2 text-sm font-semibold text-slate-700">
-              Account type
-            </p>
+          <div className="grid gap-5 md:grid-cols-2">
 
-            <div className="grid gap-2 sm:grid-cols-2">
+            {/* =================================================
+                SME
+            ================================================= */}
 
-              {/* SME / IMPORTER */}
-              <button
-                type="button"
-                onClick={() => {
-                  setUserType("sme");
-                  setError("");
-                }}
-                className={`relative rounded-xl border-2 px-3 py-2.5 text-left transition-all duration-200 ${
-                  userType === "sme"
-                    ? "border-blue-600 bg-blue-50 shadow-sm shadow-blue-600/10"
-                    : "border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/40"
-                }`}
-              >
-
-                {userType === "sme" && (
-                  <div className="absolute right-2.5 top-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-white">
-                    <Check size={10} strokeWidth={3} />
-                  </div>
-                )}
-
-                <div
-                  className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${
-                    userType === "sme"
-                      ? "bg-blue-600 text-white"
-                      : "bg-blue-50 text-blue-600"
-                  }`}
-                >
-                  <Building2 size={16} />
-                </div>
-
-                <h3 className="mt-1.5 text-xs font-semibold text-slate-900">
-                  SME / Importer
-                </h3>
-
-                <p className="mt-0.5 text-[10px] leading-3 text-slate-500">
-                  Manage imports, tariffs, shipments and clearing agents.
-                </p>
-
-              </button>
-
-              {/* CLEARING AGENT */}
-              <button
-                type="button"
-                onClick={() => {
-                  setUserType("agent");
-                  setError("");
-                }}
-                className={`relative rounded-xl border-2 px-3 py-2.5 text-left transition-all duration-200 ${
-                  userType === "agent"
-                    ? "border-blue-600 bg-blue-50 shadow-sm shadow-blue-600/10"
-                    : "border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/40"
-                }`}
-              >
-
-                {userType === "agent" && (
-                  <div className="absolute right-2.5 top-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-white">
-                    <Check size={10} strokeWidth={3} />
-                  </div>
-                )}
-
-                <div
-                  className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${
-                    userType === "agent"
-                      ? "bg-blue-600 text-white"
-                      : "bg-blue-50 text-blue-600"
-                  }`}
-                >
-                  <BriefcaseBusiness size={16} />
-                </div>
-
-                <h3 className="mt-1.5 text-xs font-semibold text-slate-900">
-                  Clearing Agent
-                </h3>
-
-                <p className="mt-0.5 text-[10px] leading-3 text-slate-500">
-                  Receive requests, submit bids and manage SME clients.
-                </p>
-
-              </button>
-
-            </div>
-
-          </div>
-
-          {/* ERROR */}
-          {error && (
-            <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-              {error}
-            </div>
-          )}
-
-          {/* FORM */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-
-            {/* FULL NAME */}
-            <div>
-
-              <label
-                htmlFor="fullName"
-                className="mb-1.5 block text-sm font-medium text-slate-700"
-              >
-                Full name
-              </label>
-
-              <input
-                id="fullName"
-                name="fullName"
-                type="text"
-                value={formData.fullName}
-                onChange={handleChange}
-                placeholder="Enter your full name"
-                autoComplete="name"
-                className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
-              />
-
-            </div>
-
-            {/* BUSINESS NAME */}
-            <div>
-
-              <label
-                htmlFor="businessName"
-                className="mb-1.5 block text-sm font-medium text-slate-700"
-              >
-                Business name
-              </label>
-
-              <input
-                id="businessName"
-                name="businessName"
-                type="text"
-                value={formData.businessName}
-                onChange={handleChange}
-                placeholder="Enter your business name"
-                autoComplete="organization"
-                className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
-              />
-
-            </div>
-
-            {/* EMAIL */}
-            <div>
-
-              <label
-                htmlFor="email"
-                className="mb-1.5 block text-sm font-medium text-slate-700"
-              >
-                Email address
-              </label>
-
-              <input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@company.com"
-                autoComplete="email"
-                className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
-              />
-
-            </div>
-
-            {/* PASSWORD */}
-            <div>
-
-              <label
-                htmlFor="password"
-                className="mb-1.5 block text-sm font-medium text-slate-700"
-              >
-                Password
-              </label>
-
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Create a password"
-                autoComplete="new-password"
-                className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
-              />
-
-            </div>
-
-            {/* CONFIRM PASSWORD */}
-            <div>
-
-              <label
-                htmlFor="confirmPassword"
-                className="mb-1.5 block text-sm font-medium text-slate-700"
-              >
-                Confirm password
-              </label>
-
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm your password"
-                autoComplete="new-password"
-                className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
-              />
-
-            </div>
-
-            {/* TERMS */}
-            <div className="flex items-start gap-3 pt-1">
-
-              <input
-                id="terms"
-                name="terms"
-                type="checkbox"
-                checked={formData.terms}
-                onChange={handleChange}
-                className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-              />
-
-              <label
-                htmlFor="terms"
-                className="text-xs leading-5 text-slate-500"
-              >
-                I agree to the{" "}
-
-                <a
-                  href="#"
-                  className="font-medium text-blue-600 hover:underline"
-                >
-                  Terms of Service
-                </a>
-
-                {" "}and{" "}
-
-                <a
-                  href="#"
-                  className="font-medium text-blue-600 hover:underline"
-                >
-                  Privacy Policy
-                </a>
-                .
-              </label>
-
-            </div>
-
-            {/* CREATE ACCOUNT */}
             <button
-              type="submit"
-              className="w-full rounded-xl bg-[#173563] py-3 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#102547]"
+              type="button"
+              onClick={handleSME}
+              className="group rounded-2xl border-2 border-slate-200 bg-white p-6 text-left transition-all duration-200 hover:-translate-y-1 hover:border-blue-400 hover:bg-blue-50/30 hover:shadow-xl hover:shadow-blue-900/5"
             >
-              Create Account
+
+              {/* Icon */}
+
+              <div className="flex items-center justify-between">
+
+                <div className="flex h-13 w-13 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-all duration-200 group-hover:bg-blue-600 group-hover:text-white">
+                  <Store
+                    size={24}
+                    strokeWidth={1.8}
+                  />
+                </div>
+
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition group-hover:bg-blue-100 group-hover:text-blue-600">
+                  <ArrowRight size={17} />
+                </div>
+
+              </div>
+
+              {/* Title */}
+
+              <h2 className="mt-6 text-lg font-bold text-slate-900">
+                SME / Importer
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                Register your business to manage imports, calculate
+                import costs and find professional clearing agents.
+              </p>
+
+              {/* Features */}
+
+              <div className="mt-5 space-y-2.5">
+
+                <RoleFeature text="Manage your import shipments" />
+
+                <RoleFeature text="Search HS codes and calculate costs" />
+
+                <RoleFeature text="Find and hire clearing agents" />
+
+              </div>
+
+              {/* Action */}
+
+              <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+
+                <span className="text-xs font-bold text-[#173563]">
+                  Continue as SME
+                </span>
+
+                <span className="text-[10px] font-medium text-slate-400">
+                  Business account
+                </span>
+
+              </div>
+
             </button>
 
-          </form>
+            {/* =================================================
+                CLEARING AGENT
+            ================================================= */}
 
-          {/* SIGN IN */}
+            <button
+              type="button"
+              onClick={handleClearingAgent}
+              className="group rounded-2xl border-2 border-slate-200 bg-white p-6 text-left transition-all duration-200 hover:-translate-y-1 hover:border-[#173563] hover:bg-slate-50 hover:shadow-xl hover:shadow-slate-900/5"
+            >
+
+              {/* Icon */}
+
+              <div className="flex items-center justify-between">
+
+                <div className="flex h-13 w-13 items-center justify-center rounded-xl bg-slate-100 text-[#173563] transition-all duration-200 group-hover:bg-[#173563] group-hover:text-white">
+                  <Building2
+                    size={24}
+                    strokeWidth={1.8}
+                  />
+                </div>
+
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition group-hover:bg-slate-200 group-hover:text-[#173563]">
+                  <ArrowRight size={17} />
+                </div>
+
+              </div>
+
+              {/* Title */}
+
+              <h2 className="mt-6 text-lg font-bold text-slate-900">
+                Clearing Agent
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                Register as a professional clearing agent and work
+                with SMEs through the ImportEase marketplace.
+              </p>
+
+              {/* Features */}
+
+              <div className="mt-5 space-y-2.5">
+
+                <RoleFeature text="Create or join a clearing agency" />
+
+                <RoleFeature text="Verify your clearing license" />
+
+                <RoleFeature text="Receive SME requests and submit bids" />
+
+              </div>
+
+              {/* Action */}
+
+              <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+
+                <span className="text-xs font-bold text-[#173563]">
+                  Continue as Clearing Agent
+                </span>
+
+                <span className="text-[10px] font-medium text-slate-400">
+                  Professional account
+                </span>
+
+              </div>
+
+            </button>
+
+          </div>
+
+          {/* =================================================
+              INFORMATION
+          ================================================= */}
+
+          <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3">
+
+            <div className="flex items-start gap-3">
+
+              <ShieldCheck
+                size={17}
+                className="mt-0.5 shrink-0 text-blue-600"
+              />
+
+              <p className="text-[11px] leading-5 text-blue-800">
+                Your account type determines which dashboard,
+                registration process and features will be available
+                to you on ImportEase.
+              </p>
+
+            </div>
+
+          </div>
+
+          {/* =================================================
+              SIGN IN
+          ================================================= */}
+
           <div className="mt-6 border-t border-slate-100 pt-5 text-center">
 
             <p className="text-sm text-slate-500">
+
               Already have an account?{" "}
 
               <Link
                 to="/signin"
-                className="font-semibold text-[#173563] transition hover:text-blue-700"
+                className="font-semibold text-[#173563] transition-colors hover:text-blue-700"
               >
                 Sign in
               </Link>
+
             </p>
 
           </div>
 
         </div>
 
-        {/* BACK HOME */}
+        {/* ===================================================
+            BACK HOME
+        =================================================== */}
+
         <div className="mt-5 flex justify-center">
 
           <Link
             to="/"
-            className="flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-800"
+            className="flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-slate-800"
           >
+
             <ArrowLeft size={16} />
+
             Back to ImportEase
+
           </Link>
 
         </div>
 
       </div>
+
+    </div>
+  );
+}
+
+
+/* =========================================================
+   FEATURE
+========================================================= */
+
+function RoleFeature({ text }) {
+  return (
+    <div className="flex items-center gap-2">
+
+      <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-50">
+        <CheckCircle2
+          size={11}
+          className="text-emerald-600"
+        />
+      </div>
+
+      <span className="text-[11px] text-slate-500">
+        {text}
+      </span>
 
     </div>
   );

@@ -198,7 +198,7 @@ function AppNavbar() {
           <img
             src="/logo.jpeg"
             alt="ImportEase"
-            className="h-10 w-10 object-contain mix-blend-multiply"
+            className="h-15 w-15 object-contain mix-blend-multiply"
           />
 
           <div>

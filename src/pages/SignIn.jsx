@@ -6,12 +6,15 @@ import {
   EyeOff,
   LockKeyhole,
   Mail,
+  ShieldCheck,
+  HelpCircle,
 } from "lucide-react";
 
 function SignIn() {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [portal, setPortal] = useState("importer");
 
   const [formData, setFormData] = useState({
     email: "",
@@ -39,33 +42,45 @@ function SignIn() {
       return;
     }
 
-    console.log("Sign in data:", formData);
+    console.log("Sign in data:", {
+      ...formData,
+      portal,
+    });
+
+    // Store selected portal for later flow handling
+    localStorage.setItem("loginPortal", portal);
 
     // Login successful
-    navigate("/dashboard");
+    if (portal === "agent") {
+      navigate("/agent-dashboard");
+    } else {
+      navigate("/dashboard");
+    }
+  };
+
+  const handleSocialSignIn = (provider) => {
+    setError(`${provider} sign-in is not connected yet.`);
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#F8FAFC] px-4 py-8 sm:py-10">
-
+    <div className="relative min-h-screen overflow-hidden bg-[#F8FAFC] px-4 py-6 sm:py-8">
       {/* BACKGROUND DECORATION */}
       <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-blue-100/50 blur-3xl" />
 
       <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-slate-200/50 blur-3xl" />
 
       {/* MAIN CONTAINER */}
-      <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-lg flex-col justify-center">
-
+      <div className="relative mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-lg flex-col justify-center">
         {/* LOGO */}
-        <div className="mb-7 flex justify-center">
-          <Link to="/" className="flex items-center gap-3">
+        <div className="mb-4 flex justify-center sm:mb-5">
+          <Link to="/" className="flex items-center gap-2.5">
             <img
               src="/logo.jpeg"
               alt="ImportEase"
-              className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
+              className="h-14 w-14 object-contain mix-blend-multiply sm:h-16 sm:w-16"
             />
 
-            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[25px]">
               Import
               <span className="text-[#173563]">Ease</span>
             </span>
@@ -73,16 +88,65 @@ function SignIn() {
         </div>
 
         {/* MAIN CARD */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.15)] sm:p-8">
-
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.15)] sm:p-8">
           {/* HEADING */}
-          <div className="mb-7 text-center">
+          <div className="mb-6 text-center">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
               Welcome back
             </h1>
 
             <p className="mt-1.5 text-sm text-slate-500">
               Sign in to continue to your ImportEase account
+            </p>
+          </div>
+
+          {/* PORTAL SELECTOR */}
+          <div className="mb-6">
+            <p className="mb-2 text-center text-xs font-medium text-slate-500">
+              Choose your portal
+            </p>
+
+            <div className="grid grid-cols-2 rounded-xl border border-slate-200 bg-slate-50 p-1">
+              <button
+                type="button"
+                onClick={() => setPortal("importer")}
+                className={`rounded-lg px-3 py-2.5 text-sm font-semibold transition-all ${
+                  portal === "importer"
+                    ? "bg-white text-[#173563] shadow-sm ring-1 ring-slate-200"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                Importer Portal
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPortal("agent")}
+                className={`rounded-lg px-3 py-2.5 text-sm font-semibold transition-all ${
+                  portal === "agent"
+                    ? "bg-white text-[#173563] shadow-sm ring-1 ring-slate-200"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                Agent Portal
+              </button>
+            </div>
+          </div>
+
+          {/* ACTIVE PORTAL INDICATOR */}
+          <div className="mb-5 flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50/70 px-3.5 py-2.5">
+            <ShieldCheck
+              size={17}
+              className="shrink-0 text-[#2563EB]"
+            />
+
+            <p className="text-xs font-medium text-slate-600">
+              Signing in to{" "}
+              <span className="font-semibold text-[#173563]">
+                {portal === "importer"
+                  ? "Importer Workspace"
+                  : "Clearing Agent Workspace"}
+              </span>
             </p>
           </div>
 
@@ -95,7 +159,6 @@ function SignIn() {
 
           {/* FORM */}
           <form onSubmit={handleSubmit} className="space-y-5">
-
             {/* EMAIL */}
             <div>
               <label
@@ -119,7 +182,7 @@ function SignIn() {
                   onChange={handleChange}
                   placeholder="you@company.com"
                   autoComplete="email"
-                  className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                  className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-4 focus:ring-[#173563]/10"
                 />
               </div>
             </div>
@@ -134,12 +197,12 @@ function SignIn() {
                   Password
                 </label>
 
-              <Link
-  to="/forgot-password"
-  className="text-sm font-semibold text-[#2563EB] hover:text-[#1D4ED8]"
->
-  Forgot password?
-</Link>
+                <Link
+                  to="/forgot-password"
+                  className="text-sm font-semibold text-[#2563EB] transition-colors hover:text-[#1D4ED8]"
+                >
+                  Forgot password?
+                </Link>
               </div>
 
               <div className="relative">
@@ -156,7 +219,7 @@ function SignIn() {
                   onChange={handleChange}
                   placeholder="Enter your password"
                   autoComplete="current-password"
-                  className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                  className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173563] focus:ring-4 focus:ring-[#173563]/10"
                 />
 
                 <button
@@ -177,7 +240,7 @@ function SignIn() {
             </div>
 
             {/* REMEMBER ME */}
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center justify-between pt-0.5">
               <label className="flex cursor-pointer items-center gap-2">
                 <input
                   id="remember"
@@ -203,6 +266,49 @@ function SignIn() {
             </button>
           </form>
 
+          {/* DIVIDER */}
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-slate-200" />
+
+            <span className="text-xs font-medium text-slate-400">
+              OR CONTINUE WITH
+            </span>
+
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
+
+          {/* SOCIAL SIGN IN */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* GOOGLE */}
+            <button
+              type="button"
+              onClick={() => handleSocialSignIn("Google")}
+              className="flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
+            >
+              <span className="flex h-5 w-5 items-center justify-center rounded-full text-sm font-bold">
+                G
+              </span>
+
+              Google
+            </button>
+
+            {/* MICROSOFT */}
+            <button
+              type="button"
+              onClick={() => handleSocialSignIn("Microsoft")}
+              className="flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
+            >
+              <span className="grid h-4 w-4 grid-cols-2 gap-[1px]">
+                <span className="bg-[#F25022]" />
+                <span className="bg-[#7FBA00]" />
+                <span className="bg-[#00A4EF]" />
+                <span className="bg-[#FFB900]" />
+              </span>
+
+              Microsoft
+            </button>
+          </div>
+
           {/* SIGN UP */}
           <div className="mt-6 border-t border-slate-100 pt-5 text-center">
             <p className="text-sm text-slate-500">
@@ -215,10 +321,23 @@ function SignIn() {
               </Link>
             </p>
           </div>
+
+          {/* SECURITY NOTICE */}
+          <div className="mt-5 flex items-center justify-center gap-2 text-center">
+            <LockKeyhole
+              size={14}
+              className="shrink-0 text-slate-400"
+            />
+
+            <p className="text-[11px] font-medium text-slate-400">
+              Your connection is secure and your account information is
+              protected.
+            </p>
+          </div>
         </div>
 
         {/* BACK HOME */}
-        <div className="mt-5 flex justify-center">
+        <div className="mt-4 flex justify-center">
           <Link
             to="/"
             className="flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-slate-800"
@@ -227,6 +346,40 @@ function SignIn() {
             Back to ImportEase
           </Link>
         </div>
+
+        {/* FOOTER NAVIGATION */}
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-slate-400">
+          <Link
+            to="/privacy"
+            className="transition-colors hover:text-slate-700"
+          >
+            Privacy Policy
+          </Link>
+
+          <span className="h-1 w-1 rounded-full bg-slate-300" />
+
+          <Link
+            to="/terms"
+            className="transition-colors hover:text-slate-700"
+          >
+            Terms of Service
+          </Link>
+
+          <span className="h-1 w-1 rounded-full bg-slate-300" />
+
+          <Link
+            to="/support"
+            className="flex items-center gap-1 transition-colors hover:text-slate-700"
+          >
+            <HelpCircle size={12} />
+            Help / Contact Support
+          </Link>
+        </div>
+
+        {/* COPYRIGHT */}
+        <p className="mt-3 pb-2 text-center text-[10px] text-slate-400">
+          © {new Date().getFullYear()} ImportEase. All rights reserved.
+        </p>
       </div>
     </div>
   );

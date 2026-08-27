@@ -12,7 +12,9 @@ import {
   FileText,
   X,
   ChevronRight,
+  ChevronDown,
   CircleHelp,
+  SlidersHorizontal,
 } from "lucide-react";
 
 import AppNavbar from "../components/ui/AppNavbar";
@@ -24,6 +26,16 @@ function HSCodeSearch() {
   const [importData, setImportData] = useState(null);
   const [search, setSearch] = useState("");
   const [selectedCode, setSelectedCode] = useState(null);
+
+  // Browse category dropdown
+  const [showCategories, setShowCategories] = useState(false);
+
+  // Which category group is expanded
+  const [expandedCategory, setExpandedCategory] = useState(null);
+
+  /* =====================================================
+     LOAD CURRENT IMPORT
+  ====================================================== */
 
   useEffect(() => {
     const savedImport = localStorage.getItem("currentImport");
@@ -37,10 +49,330 @@ function HSCodeSearch() {
     }
   }, []);
 
-  /*
-   * Demo HS code database.
-   * Replace these records with real tariff/customs data later.
-   */
+  /* =====================================================
+     CATEGORY DATA
+     50 CATEGORIES / 7 GROUPS
+  ====================================================== */
+
+  const categoryGroups = [
+    {
+      id: "electronics",
+      title: "Electronics & Tech",
+      icon: "💻",
+      chapter: "Ch. 84-85",
+      categories: [
+        {
+          title: "Computers & Laptops",
+          range: "Ch. 84-85",
+          search: "laptop computer",
+        },
+        {
+          title: "Computer Parts",
+          range: "Ch. 84",
+          search: "computer parts",
+        },
+        {
+          title: "Mobile Phones",
+          range: "Ch. 85",
+          search: "mobile phone",
+        },
+        {
+          title: "Telecommunications",
+          range: "Ch. 85",
+          search: "telecommunications",
+        },
+        {
+          title: "Electronic Components",
+          range: "Ch. 85",
+          search: "electronic components",
+        },
+        {
+          title: "Solar & Photovoltaic",
+          range: "Ch. 85",
+          search: "solar panels",
+        },
+        {
+          title: "Electrical Equipment",
+          range: "Ch. 85",
+          search: "electrical equipment",
+        },
+        {
+          title: "Batteries & Accumulators",
+          range: "Ch. 85",
+          search: "batteries",
+        },
+      ],
+    },
+
+    {
+      id: "textiles",
+      title: "Textiles & Apparel",
+      icon: "👕",
+      chapter: "Ch. 50-64",
+      categories: [
+        {
+          title: "Cotton Clothing",
+          range: "Ch. 61-62",
+          search: "cotton shirt",
+        },
+        {
+          title: "T-Shirts & Tops",
+          range: "Ch. 61-62",
+          search: "t-shirt",
+        },
+        {
+          title: "Trousers & Pants",
+          range: "Ch. 61-62",
+          search: "trousers",
+        },
+        {
+          title: "Dresses & Skirts",
+          range: "Ch. 61-62",
+          search: "dresses",
+        },
+        {
+          title: "Footwear",
+          range: "Ch. 64",
+          search: "footwear",
+        },
+        {
+          title: "Textile Fabrics",
+          range: "Ch. 50-60",
+          search: "textile fabric",
+        },
+        {
+          title: "Home Textiles",
+          range: "Ch. 63",
+          search: "home textiles",
+        },
+      ],
+    },
+
+    {
+      id: "metals",
+      title: "Metals & Construction",
+      icon: "🏗️",
+      chapter: "Ch. 68-83",
+      categories: [
+        {
+          title: "Iron & Steel",
+          range: "Ch. 72-73",
+          search: "iron steel",
+        },
+        {
+          title: "Aluminium",
+          range: "Ch. 76",
+          search: "aluminium",
+        },
+        {
+          title: "Copper",
+          range: "Ch. 74",
+          search: "copper",
+        },
+        {
+          title: "Metal Products",
+          range: "Ch. 73-83",
+          search: "metal products",
+        },
+        {
+          title: "Tools & Hardware",
+          range: "Ch. 82",
+          search: "tools hardware",
+        },
+        {
+          title: "Building Materials",
+          range: "Ch. 68-70",
+          search: "building materials",
+        },
+        {
+          title: "Cement & Concrete",
+          range: "Ch. 25",
+          search: "cement",
+        },
+      ],
+    },
+
+    {
+      id: "chemicals",
+      title: "Chemicals & Plastics",
+      icon: "🧪",
+      chapter: "Ch. 28-40",
+      categories: [
+        {
+          title: "Industrial Chemicals",
+          range: "Ch. 28-29",
+          search: "industrial chemicals",
+        },
+        {
+          title: "Organic Chemicals",
+          range: "Ch. 29",
+          search: "organic chemicals",
+        },
+        {
+          title: "Pharmaceuticals",
+          range: "Ch. 30",
+          search: "pharmaceuticals",
+        },
+        {
+          title: "Fertilizers",
+          range: "Ch. 31",
+          search: "fertilizers",
+        },
+        {
+          title: "Paints & Coatings",
+          range: "Ch. 32",
+          search: "paints",
+        },
+        {
+          title: "Cosmetics",
+          range: "Ch. 33",
+          search: "cosmetics",
+        },
+        {
+          title: "Plastics & Articles",
+          range: "Ch. 39",
+          search: "plastics",
+        },
+      ],
+    },
+
+    {
+      id: "agriculture",
+      title: "Agriculture & Food",
+      icon: "🌾",
+      chapter: "Ch. 01-24",
+      categories: [
+        {
+          title: "Cereals & Grains",
+          range: "Ch. 10",
+          search: "cereals grains",
+        },
+        {
+          title: "Rice",
+          range: "Ch. 10",
+          search: "rice",
+        },
+        {
+          title: "Fruits & Vegetables",
+          range: "Ch. 07-08",
+          search: "fruits vegetables",
+        },
+        {
+          title: "Tea & Coffee",
+          range: "Ch. 09",
+          search: "tea coffee",
+        },
+        {
+          title: "Spices",
+          range: "Ch. 09",
+          search: "spices",
+        },
+        {
+          title: "Meat & Seafood",
+          range: "Ch. 02-03",
+          search: "meat seafood",
+        },
+        {
+          title: "Processed Foods",
+          range: "Ch. 16-21",
+          search: "processed food",
+        },
+        {
+          title: "Beverages",
+          range: "Ch. 22",
+          search: "beverages",
+        },
+      ],
+    },
+
+    {
+      id: "transport",
+      title: "Transport & Automotive",
+      icon: "🚗",
+      chapter: "Ch. 40, 86-89",
+      categories: [
+        {
+          title: "Motor Cars",
+          range: "Ch. 87",
+          search: "motor car",
+        },
+        {
+          title: "Commercial Vehicles",
+          range: "Ch. 87",
+          search: "commercial vehicle",
+        },
+        {
+          title: "Motorcycles",
+          range: "Ch. 87",
+          search: "motorcycle",
+        },
+        {
+          title: "Vehicle Parts",
+          range: "Ch. 87",
+          search: "vehicle parts",
+        },
+        {
+          title: "Tyres & Tubes",
+          range: "Ch. 40",
+          search: "tyres",
+        },
+        {
+          title: "Bicycles",
+          range: "Ch. 87",
+          search: "bicycle",
+        },
+        {
+          title: "Ships & Boats",
+          range: "Ch. 89",
+          search: "ships boats",
+        },
+      ],
+    },
+
+    {
+      id: "consumer",
+      title: "Consumer Goods",
+      icon: "🛍️",
+      chapter: "Ch. 39-96",
+      categories: [
+        {
+          title: "Furniture",
+          range: "Ch. 94",
+          search: "furniture",
+        },
+        {
+          title: "Household Products",
+          range: "Ch. 39-96",
+          search: "household products",
+        },
+        {
+          title: "Kitchenware",
+          range: "Ch. 69-82",
+          search: "kitchenware",
+        },
+        {
+          title: "Toys & Games",
+          range: "Ch. 95",
+          search: "toys games",
+        },
+        {
+          title: "Sports Equipment",
+          range: "Ch. 95",
+          search: "sports equipment",
+        },
+        {
+          title: "Bags & Luggage",
+          range: "Ch. 42",
+          search: "bags luggage",
+        },
+      ],
+    },
+  ];
+
+  /* =====================================================
+     DEMO HS CODE DATABASE
+  ====================================================== */
+
   const hsCodes = [
     {
       code: "8541.43",
@@ -59,6 +391,7 @@ function HSCodeSearch() {
       description:
         "Classification commonly associated with photovoltaic cells assembled in modules or panels.",
     },
+
     {
       code: "8471.30",
       title:
@@ -74,6 +407,7 @@ function HSCodeSearch() {
       description:
         "Example classification for certain portable computers and related devices.",
     },
+
     {
       code: "8471.49",
       title:
@@ -90,6 +424,7 @@ function HSCodeSearch() {
       description:
         "Example classification for certain computer systems.",
     },
+
     {
       code: "6109.10",
       title: "T-shirts, singlets and other vests of cotton",
@@ -105,6 +440,7 @@ function HSCodeSearch() {
       description:
         "Example classification for certain cotton knitted garments.",
     },
+
     {
       code: "8703.23",
       title:
@@ -120,6 +456,7 @@ function HSCodeSearch() {
       description:
         "Example classification for certain passenger motor vehicles.",
     },
+
     {
       code: "8504.40",
       title: "Electrical static converters",
@@ -136,18 +473,20 @@ function HSCodeSearch() {
     },
   ];
 
-  /*
-   * Load product name from previous import step.
-   */
+  /* =====================================================
+     LOAD PRODUCT NAME FROM PREVIOUS IMPORT
+  ====================================================== */
+
   useEffect(() => {
     if (importData?.productName) {
       setSearch(importData.productName);
     }
   }, [importData]);
 
-  /*
-   * Search and rank results.
-   */
+  /* =====================================================
+     SEARCH + RANK RESULTS
+  ====================================================== */
+
   const results = useMemo(() => {
     const query = search.trim().toLowerCase();
 
@@ -203,9 +542,17 @@ function HSCodeSearch() {
       .sort((a, b) => b.score - a.score);
   }, [search]);
 
+  /* =====================================================
+     SELECT CODE
+  ====================================================== */
+
   const handleSelectCode = (item) => {
     setSelectedCode(item);
   };
+
+  /* =====================================================
+     CONTINUE
+  ====================================================== */
 
   const handleContinue = () => {
     if (!selectedCode) {
@@ -230,10 +577,56 @@ function HSCodeSearch() {
     navigate("/calculator");
   };
 
+  /* =====================================================
+     CLEAR SEARCH
+  ====================================================== */
+
   const clearSearch = () => {
     setSearch("");
     setSelectedCode(null);
   };
+
+  /* =====================================================
+     CATEGORY CLICK
+  ====================================================== */
+
+  const handleCategoryClick = (category) => {
+    setSearch(category.search);
+    setSelectedCode(null);
+
+    // Close the category dropdown after selecting
+    setShowCategories(false);
+    setExpandedCategory(null);
+
+    // Move user toward search results
+    setTimeout(() => {
+      const resultsElement =
+        document.getElementById("hs-results");
+
+      if (resultsElement) {
+        resultsElement.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    }, 100);
+  };
+
+  /* =====================================================
+     TOGGLE CATEGORY DROPDOWN
+  ====================================================== */
+
+  const toggleCategories = () => {
+    setShowCategories((previous) => !previous);
+
+    if (showCategories) {
+      setExpandedCategory(null);
+    }
+  };
+
+  /* =====================================================
+     RETURN
+  ====================================================== */
 
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
@@ -246,7 +639,7 @@ function HSCodeSearch() {
         @keyframes fadeUp {
           from {
             opacity: 0;
-            transform: translateY(12px);
+            transform: translateY(8px);
           }
 
           to {
@@ -258,12 +651,24 @@ function HSCodeSearch() {
         @keyframes scaleIn {
           from {
             opacity: 0;
-            transform: scale(0.96);
+            transform: scale(0.98);
           }
 
           to {
             opacity: 1;
             transform: scale(1);
+          }
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-6px);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0);
           }
         }
 
@@ -286,13 +691,26 @@ function HSCodeSearch() {
           animation: scaleIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
+        .slide-down {
+          animation: slideDown 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
         .pulse-soft {
           animation: pulseSoft 2.5s ease-in-out infinite;
+        }
+
+        .scrollbar-hide {
+          scrollbar-width: none;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
         }
 
         @media (prefers-reduced-motion: reduce) {
           .fade-up,
           .scale-in,
+          .slide-down,
           .pulse-soft {
             animation: none;
           }
@@ -369,14 +787,12 @@ function HSCodeSearch() {
         </section>
 
         {/* ===================================================
-            SMALL CENTERED PROGRESS BAR
+            PROGRESS BAR
         ==================================================== */}
 
         <section className="fade-up mx-auto mb-7 w-full max-w-[760px] rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-[0_2px_8px_rgba(15,23,42,.02)]">
 
           <div className="flex items-center">
-
-            {/* STEP 1 */}
 
             <div className="flex shrink-0 items-center gap-2">
 
@@ -392,8 +808,6 @@ function HSCodeSearch() {
 
             <div className="mx-2 h-px flex-1 bg-emerald-200" />
 
-            {/* STEP 2 */}
-
             <div className="flex shrink-0 items-center gap-2">
 
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#173B6C] text-[11px] font-bold text-white shadow-sm">
@@ -408,8 +822,6 @@ function HSCodeSearch() {
 
             <div className="mx-2 h-px flex-1 bg-slate-200" />
 
-            {/* STEP 3 */}
-
             <div className="flex shrink-0 items-center gap-2">
 
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-400">
@@ -423,8 +835,6 @@ function HSCodeSearch() {
             </div>
 
             <div className="mx-2 h-px flex-1 bg-slate-200" />
-
-            {/* STEP 4 */}
 
             <div className="flex shrink-0 items-center gap-2">
 
@@ -454,10 +864,12 @@ function HSCodeSearch() {
               <div className="flex min-w-0 items-start gap-3">
 
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#173B6C]">
+
                   <Package
                     size={18}
                     strokeWidth={1.8}
                   />
+
                 </div>
 
                 <div className="min-w-0">
@@ -525,7 +937,8 @@ function HSCodeSearch() {
             SEARCH CARD
         ==================================================== */}
 
-<section className="fade-up rounded-2xl border border-slate-200 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.06)]">
+        <section className="fade-up rounded-2xl border border-slate-200 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.06)]">
+
           {/* CARD HEADER */}
 
           <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
@@ -570,6 +983,10 @@ function HSCodeSearch() {
 
           <div className="p-5 sm:p-6">
 
+            {/* =================================================
+                SEARCH INPUT
+            ================================================== */}
+
             <div className="relative">
 
               <Search
@@ -603,7 +1020,9 @@ function HSCodeSearch() {
 
             </div>
 
-            {/* SEARCH HELP */}
+            {/* =================================================
+                SEARCH HELP
+            ================================================== */}
 
             <div className="mt-3 flex items-start gap-2">
 
@@ -613,24 +1032,315 @@ function HSCodeSearch() {
               />
 
               <p className="text-[10px] leading-5 text-slate-400">
+
                 Try specific terms such as{" "}
-                <span className="font-semibold text-slate-500">
+
+                <button
+                  type="button"
+                  onClick={() => setSearch("solar panels")}
+                  className="font-semibold text-slate-500 transition hover:text-[#173B6C]"
+                >
                   solar panels
-                </span>
+                </button>
+
                 ,{" "}
-                <span className="font-semibold text-slate-500">
+
+                <button
+                  type="button"
+                  onClick={() => setSearch("laptop computer")}
+                  className="font-semibold text-slate-500 transition hover:text-[#173B6C]"
+                >
                   laptop computer
-                </span>
+                </button>
+
                 ,{" "}
-                <span className="font-semibold text-slate-500">
+
+                <button
+                  type="button"
+                  onClick={() => setSearch("cotton t-shirt")}
+                  className="font-semibold text-slate-500 transition hover:text-[#173B6C]"
+                >
                   cotton t-shirt
-                </span>
+                </button>
+
                 , or{" "}
-                <span className="font-semibold text-slate-500">
+
+                <button
+                  type="button"
+                  onClick={() => setSearch("motor car")}
+                  className="font-semibold text-slate-500 transition hover:text-[#173B6C]"
+                >
                   motor car
-                </span>
+                </button>
+
                 .
+
               </p>
+
+            </div>
+
+            {/* =================================================
+                BROWSE BY CATEGORY - CLOSED BY DEFAULT
+            ================================================== */}
+
+            <div className="mt-5">
+
+              {/* MAIN DROPDOWN BUTTON */}
+
+              <button
+                type="button"
+                onClick={toggleCategories}
+                aria-expanded={showCategories}
+                className={`group flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-left transition-all duration-200 ${
+                  showCategories
+                    ? "border-[#173B6C] bg-[#173B6C]/[0.025] shadow-[0_4px_16px_rgba(23,59,108,.06)]"
+                    : "border-slate-200 bg-slate-50/60 hover:border-blue-200 hover:bg-blue-50/30"
+                }`}
+              >
+
+                <div className="flex items-center gap-3">
+
+                  <div
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                      showCategories
+                        ? "bg-[#173B6C] text-white"
+                        : "bg-blue-50 text-[#173B6C]"
+                    }`}
+                  >
+                    <SlidersHorizontal size={15} />
+                  </div>
+
+                  <div>
+
+                    <div className="flex items-center gap-2">
+
+                      <span className="text-[12px] font-bold text-[#14213D]">
+                        Browse by Category
+                      </span>
+
+                      <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[8px] font-bold text-blue-700">
+                        50
+                      </span>
+
+                    </div>
+
+                    <p className="mt-0.5 text-[10px] text-slate-400">
+                      Explore products by HS chapter
+                    </p>
+
+                  </div>
+
+                </div>
+
+                <div
+                  className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${
+                    showCategories
+                      ? "bg-white text-[#173B6C]"
+                      : "bg-white text-slate-400 group-hover:text-[#173B6C]"
+                  }`}
+                >
+                  <ChevronDown
+                    size={15}
+                    className={`transition-transform duration-200 ${
+                      showCategories ? "rotate-180" : ""
+                    }`}
+                  />
+                </div>
+
+              </button>
+
+              {/* =================================================
+                  CATEGORY DROPDOWN CONTENT
+              ================================================== */}
+
+              {showCategories && (
+                <div className="slide-down mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,.08)]">
+
+                  {/* DROPDOWN HEADER */}
+
+                  <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/70 px-4 py-3">
+
+                    <div>
+
+                      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#173B6C]">
+                        Product categories
+                      </p>
+
+                      <p className="mt-0.5 text-[9px] text-slate-400">
+                        Select a category to search related products
+                      </p>
+
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCategories(false);
+                        setExpandedCategory(null);
+                      }}
+                      className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white hover:text-slate-700"
+                      aria-label="Close categories"
+                    >
+                      <X size={14} />
+                    </button>
+
+                  </div>
+
+                  {/* CATEGORY GROUPS */}
+
+                  <div className="max-h-[520px] overflow-y-auto p-3">
+
+                    <div className="space-y-2">
+
+                      {categoryGroups.map((group) => {
+
+                        const isExpanded =
+                          expandedCategory === group.id;
+
+                        return (
+                          <div
+                            key={group.id}
+                            className={`overflow-hidden rounded-xl border transition-all duration-200 ${
+                              isExpanded
+                                ? "border-blue-200 bg-blue-50/20"
+                                : "border-slate-200 bg-white hover:border-blue-100"
+                            }`}
+                          >
+
+                            {/* GROUP */}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExpandedCategory(
+                                  isExpanded
+                                    ? null
+                                    : group.id
+                                )
+                              }
+                              className="flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left"
+                            >
+
+                              <div className="flex min-w-0 items-center gap-3">
+
+                                <div
+                                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-base transition ${
+                                    isExpanded
+                                      ? "bg-[#173B6C] shadow-sm"
+                                      : "bg-slate-50"
+                                  }`}
+                                >
+                                  {group.icon}
+                                </div>
+
+                                <div className="min-w-0">
+
+                                  <div className="flex flex-wrap items-center gap-2">
+
+                                    <h4
+                                      className={`text-[11px] font-bold ${
+                                        isExpanded
+                                          ? "text-[#173B6C]"
+                                          : "text-slate-800"
+                                      }`}
+                                    >
+                                      {group.title}
+                                    </h4>
+
+                                    <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[8px] font-semibold text-slate-400">
+                                      {group.categories.length}
+                                    </span>
+
+                                  </div>
+
+                                  <p className="mt-0.5 text-[9px] text-slate-400">
+                                    {group.chapter}
+                                  </p>
+
+                                </div>
+
+                              </div>
+
+                              <ChevronDown
+                                size={14}
+                                className={`shrink-0 text-slate-400 transition-transform duration-200 ${
+                                  isExpanded
+                                    ? "rotate-180 text-[#173B6C]"
+                                    : ""
+                                }`}
+                              />
+
+                            </button>
+
+                            {/* PRODUCTS */}
+
+                            {isExpanded && (
+                              <div className="border-t border-blue-100 bg-white p-2.5">
+
+                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+
+                                  {group.categories.map(
+                                    (category) => (
+                                      <button
+                                        key={category.title}
+                                        type="button"
+                                        onClick={() =>
+                                          handleCategoryClick(
+                                            category
+                                          )
+                                        }
+                                        className="group flex min-h-[64px] items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/40 hover:shadow-sm"
+                                      >
+
+                                        <div className="min-w-0">
+
+                                          <p className="truncate text-[10px] font-bold text-slate-700 transition-colors group-hover:text-[#173B6C]">
+                                            {category.title}
+                                          </p>
+
+                                          <p className="mt-1 text-[9px] font-medium text-slate-400">
+                                            {category.title} •{" "}
+                                            {category.range}
+                                          </p>
+
+                                        </div>
+
+                                        <ChevronRight
+                                          size={13}
+                                          className="ml-2 shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-blue-500"
+                                        />
+
+                                      </button>
+                                    )
+                                  )}
+
+                                </div>
+
+                              </div>
+                            )}
+
+                          </div>
+                        );
+                      })}
+
+                    </div>
+
+                  </div>
+
+                  {/* DROPDOWN FOOTER */}
+
+                  <div className="border-t border-slate-100 bg-slate-50/70 px-4 py-2.5">
+
+                    <p className="text-center text-[9px] leading-4 text-slate-400">
+                      Category selection helps you discover relevant
+                      classifications. Final HS classification should be
+                      verified against the applicable tariff.
+                    </p>
+
+                  </div>
+
+                </div>
+              )}
 
             </div>
 
@@ -639,10 +1349,13 @@ function HSCodeSearch() {
         </section>
 
         {/* ===================================================
-            RESULTS HEADER
+            RESULTS
         ==================================================== */}
 
-        <section className="mt-7">
+        <section
+          id="hs-results"
+          className="mt-7 scroll-mt-6"
+        >
 
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
 
@@ -675,7 +1388,9 @@ function HSCodeSearch() {
 
           </div>
 
-          {/* RESULTS */}
+          {/* =================================================
+              RESULT CARDS
+          ================================================== */}
 
           <div className="space-y-3">
 
@@ -790,10 +1505,12 @@ function HSCodeSearch() {
                             : "border-slate-200 text-transparent group-hover:border-blue-300 group-hover:text-blue-300"
                         }`}
                       >
+
                         <CheckCircle2
                           size={17}
                           strokeWidth={2}
                         />
+
                       </div>
 
                     </div>

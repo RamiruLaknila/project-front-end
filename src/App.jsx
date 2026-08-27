@@ -44,6 +44,8 @@ import AgentBids from "./pages/AgentBids";
 import ReviewBids from "./pages/ReviewBids";
 import IndividualAgentSignup from "./pages/IndividualAgentSignup";
 import IndividualAgentVerification from "./pages/IndividualAgentVerification";
+import SMESignUp from "./pages/SMESignUp";
+import Messages from "./pages/Messages";
 
 function App() {
   return (
@@ -286,6 +288,15 @@ function App() {
   path="/individual-agent-verification"
   element={<IndividualAgentVerification />}
 />
+<Route
+  path="/signup"
+  element={<SignUp />}
+/>
+<Route
+  path="/sme-signup"
+  element={<SMESignUp />}
+/>
+<Route path="/messages" element={<Messages />} />
 
       </Routes>
     </BrowserRouter>

@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
-  Bell,
   Check,
   ChevronRight,
   Clock3,
@@ -15,6 +14,7 @@ import {
   Truck,
 } from "lucide-react";
 
+import AppNavbar from "../components/ui/AppNavbar";
 import BackButton from "../components/ui/BackButton";
 
 /* =========================================================
@@ -87,14 +87,18 @@ function TrackShipment() {
 
   const currentStage = 1;
 
-  const shipmentId = shipment?.id || "IMP-204821";
+  const shipmentId =
+    shipment?.id || "IMP-204821";
 
   const createdDate = shipment?.createdAt
-    ? new Date(shipment.createdAt).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
+    ? new Date(shipment.createdAt).toLocaleDateString(
+        "en-GB",
+        {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }
+      )
     : "20 Aug 2026";
 
   return (
@@ -129,24 +133,28 @@ function TrackShipment() {
           }
         }
 
+        .fade-up {
+          animation:
+            fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1)
+            both;
+        }
+
+        .scale-in {
+          animation:
+            scaleIn 0.35s cubic-bezier(0.22, 1, 0.36, 1)
+            both;
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .fade-up,
           .scale-in {
             animation: none;
           }
         }
-
-        .fade-up {
-          animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
-
-        .scale-in {
-          animation: scaleIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
       `}</style>
 
       {/* =====================================================
-          NAVBAR
+          SHARED APP NAVBAR
       ====================================================== */}
 
       <AppNavbar />
@@ -205,7 +213,9 @@ function TrackShipment() {
 
             <button
               type="button"
-              onClick={() => window.location.reload()}
+              onClick={() =>
+                window.location.reload()
+              }
               className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[10px] font-bold text-slate-600 transition hover:bg-slate-50"
             >
               <RefreshCw size={13} />
@@ -291,7 +301,7 @@ function TrackShipment() {
 
           {/* =================================================
               LEFT - TIMELINE
-          ================================================= */}
+          ================================================== */}
 
           <section className="fade-up rounded-2xl border border-slate-200 bg-white shadow-[0_5px_25px_rgba(15,23,42,0.03)]">
 
@@ -316,22 +326,29 @@ function TrackShipment() {
 
               <div className="relative">
 
-                {stages.map((stage, index) => {
+                {stages.map(
+                  (stage, index) => {
 
-                  const completed = index < currentStage;
-                  const active = index === currentStage;
+                    const completed =
+                      index < currentStage;
 
-                  return (
-                    <TimelineItem
-                      key={stage.id}
-                      stage={stage}
-                      completed={completed}
-                      active={active}
-                      last={index === stages.length - 1}
-                    />
-                  );
+                    const active =
+                      index === currentStage;
 
-                })}
+                    return (
+                      <TimelineItem
+                        key={stage.id}
+                        stage={stage}
+                        completed={completed}
+                        active={active}
+                        last={
+                          index ===
+                          stages.length - 1
+                        }
+                      />
+                    );
+                  }
+                )}
 
               </div>
 
@@ -341,13 +358,13 @@ function TrackShipment() {
 
           {/* =================================================
               RIGHT COLUMN
-          ================================================= */}
+          ================================================== */}
 
           <div className="space-y-5">
 
             {/* =================================================
                 CLEARING AGENT
-            ================================================= */}
+            ================================================== */}
 
             <section className="fade-up rounded-2xl border border-slate-200 bg-white shadow-[0_5px_25px_rgba(15,23,42,0.03)]">
 
@@ -363,11 +380,13 @@ function TrackShipment() {
 
                 {agent ? (
                   <>
+                    {/* AGENT */}
 
                     <div className="flex items-center gap-3">
 
                       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#173563] text-xs font-bold text-white">
-                        {agent.initials || "AG"}
+                        {agent.initials ||
+                          "AG"}
                       </div>
 
                       <div className="min-w-0">
@@ -375,7 +394,8 @@ function TrackShipment() {
                         <div className="flex items-center gap-1.5">
 
                           <h3 className="truncate text-xs font-bold text-slate-900">
-                            {agent.name}
+                            {agent.name ||
+                              "Clearing Agent"}
                           </h3>
 
                           {agent.verified && (
@@ -391,9 +411,12 @@ function TrackShipment() {
 
                           <span className="flex items-center gap-1 text-[9px] text-slate-400">
 
-                            <MapPin size={10} />
+                            <MapPin
+                              size={10}
+                            />
 
-                            {agent.location || "Sri Lanka"}
+                            {agent.location ||
+                              "Sri Lanka"}
 
                           </span>
 
@@ -402,7 +425,9 @@ function TrackShipment() {
                           </span>
 
                           <span className="text-[9px] text-slate-400">
-                            ★ {agent.rating || "4.8"}
+                            ★{" "}
+                            {agent.rating ||
+                              "4.8"}
                           </span>
 
                         </div>
@@ -410,6 +435,8 @@ function TrackShipment() {
                       </div>
 
                     </div>
+
+                    {/* RESPONSE TIME */}
 
                     <div className="mt-4 rounded-xl bg-slate-50 p-3">
 
@@ -429,25 +456,57 @@ function TrackShipment() {
 
                     </div>
 
+                    {/* CONTACT AGENT */}
+
                     <button
                       type="button"
-                      onClick={() => navigate("/messages")}
-                      className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 py-2.5 text-[10px] font-bold text-slate-600 transition hover:bg-slate-50"
+                      onClick={() =>
+                        navigate(
+                          "/messages"
+                        )
+                      }
+                      className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 py-2.5 text-[10px] font-bold text-slate-600 transition hover:bg-slate-50 hover:text-[#173563]"
                     >
 
-                      <MessageSquare size={13} />
+                      <MessageSquare
+                        size={13}
+                      />
 
                       Contact agent
 
                     </button>
 
                   </>
-
                 ) : (
 
-                  <p className="text-xs text-slate-400">
-                    Agent information is unavailable.
-                  </p>
+                  <div className="py-2">
+
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                      <ShieldCheck
+                        size={17}
+                      />
+                    </div>
+
+                    <p className="mt-3 text-xs font-semibold text-slate-700">
+                      Agent information unavailable
+                    </p>
+
+                    <p className="mt-1 text-[9px] leading-5 text-slate-400">
+                      Your selected clearing agent
+                      information could not be loaded.
+                    </p>
+
+                    <Link
+                      to="/find-agent"
+                      className="mt-3 inline-flex items-center gap-1 text-[9px] font-bold text-blue-700 hover:text-blue-800"
+                    >
+                      Find an agent
+                      <ChevronRight
+                        size={12}
+                      />
+                    </Link>
+
+                  </div>
 
                 )}
 
@@ -457,7 +516,7 @@ function TrackShipment() {
 
             {/* =================================================
                 IMPORT SUMMARY
-            ================================================= */}
+            ================================================== */}
 
             <section className="fade-up rounded-2xl border border-slate-200 bg-white shadow-[0_5px_25px_rgba(15,23,42,0.03)]">
 
@@ -500,7 +559,8 @@ function TrackShipment() {
                   value={
                     importData
                       ? `${importData.quantity || 0} ${
-                          importData.unit || ""
+                          importData.unit ||
+                          ""
                         }`
                       : "Not specified"
                   }
@@ -538,7 +598,8 @@ function TrackShipment() {
               </p>
 
               <p className="mt-1 text-[9px] leading-4 text-slate-400">
-                View and manage documents related to this import.
+                View and manage documents related
+                to this import.
               </p>
 
             </div>
@@ -568,7 +629,8 @@ function TrackShipment() {
               </p>
 
               <p className="mt-1 text-[9px] leading-4 text-slate-400">
-                View all your imports and available tools.
+                View all your imports and available
+                tools.
               </p>
 
             </div>
@@ -594,7 +656,8 @@ function TrackShipment() {
           />
 
           <span>
-            Your import information is securely managed by ImportEase.
+            Your import information is securely managed
+            by ImportEase.
           </span>
 
         </div>
@@ -602,214 +665,6 @@ function TrackShipment() {
       </main>
 
     </div>
-  );
-}
-
-/* =========================================================
-   APP NAVBAR
-========================================================= */
-
-function AppNavbar() {
-
-  const navItems = [
-    {
-      to: "/dashboard",
-      label: "Dashboard",
-    },
-    {
-      to: "/hs-code-search",
-      label: "HS Code Search",
-      mobileLabel: "HS Code",
-    },
-    {
-      to: "/calculator",
-      label: "Calculator",
-    },
-    {
-      to: "/find-agent",
-      label: "Find Agent",
-    },
-    {
-      to: "/track-shipment",
-      label: "Track Shipment",
-    },
-  ];
-
-  const currentPath = window.location.pathname;
-
-  const isActive = (path) => {
-    return currentPath === path;
-  };
-
-  return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
-
-      {/* ===================================================
-          DESKTOP NAVBAR
-      ==================================================== */}
-
-      <div className="relative mx-auto flex h-[68px] max-w-[1280px] items-center px-5 sm:px-8">
-
-        {/* LOGO */}
-
-        <Link
-          to="/dashboard"
-          className="flex shrink-0 items-center gap-3"
-        >
-
-          <img
-            src="/logo.jpeg"
-            alt="ImportEase"
-            className="h-10 w-10 object-contain mix-blend-multiply"
-          />
-
-          <div>
-
-            <div className="text-[17px] font-bold tracking-tight text-[#173563]">
-              Import<span className="text-slate-900">Ease</span>
-            </div>
-
-            <div className="hidden text-[9px] font-semibold uppercase tracking-[0.13em] text-slate-400 sm:block">
-              SME Import Platform
-            </div>
-
-          </div>
-
-        </Link>
-
-        {/* CENTER NAVIGATION */}
-
-        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex">
-
-          {navItems.map((item) => (
-            <NavItem
-              key={item.to}
-              to={item.to}
-              label={item.label}
-              active={isActive(item.to)}
-            />
-          ))}
-
-        </nav>
-
-        {/* RIGHT SIDE */}
-
-        <div className="ml-auto flex items-center gap-3">
-
-          <button
-            type="button"
-            className="relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
-            aria-label="Notifications"
-          >
-
-            <Bell size={17} />
-
-            <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-blue-600 ring-2 ring-white" />
-
-          </button>
-
-          <div className="hidden h-7 w-px bg-slate-200 sm:block" />
-
-          <div className="flex items-center gap-2.5">
-
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#173563] text-[10px] font-bold text-white">
-              MB
-            </div>
-
-            <div className="hidden sm:block">
-
-              <p className="text-xs font-semibold text-slate-800">
-                My Business
-              </p>
-
-              <p className="text-[9px] text-slate-400">
-                SME Account
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* ===================================================
-          MOBILE NAVIGATION
-      ==================================================== */}
-
-      <div className="border-t border-slate-100 bg-white px-4 py-2 md:hidden">
-
-        <nav className="flex gap-1 overflow-x-auto pb-1">
-
-          {navItems.map((item) => (
-            <MobileNavItem
-              key={item.to}
-              to={item.to}
-              label={item.mobileLabel || item.label}
-              active={isActive(item.to)}
-            />
-          ))}
-
-        </nav>
-
-      </div>
-
-    </header>
-  );
-}
-
-/* =========================================================
-   DESKTOP NAV ITEM
-========================================================= */
-
-function NavItem({
-  to,
-  label,
-  active,
-}) {
-
-  return (
-    <Link
-      to={to}
-      className={`relative rounded-lg px-4 py-2 text-xs font-semibold transition-all duration-200 ${
-        active
-          ? "bg-blue-50 text-[#173563] shadow-sm"
-          : "text-slate-500 hover:bg-slate-100 hover:text-[#173563]"
-      }`}
-    >
-
-      {label}
-
-      {active && (
-        <span className="absolute bottom-0 left-1/2 h-[2px] w-5 -translate-x-1/2 rounded-full bg-[#173563]" />
-      )}
-
-    </Link>
-  );
-}
-
-/* =========================================================
-   MOBILE NAV ITEM
-========================================================= */
-
-function MobileNavItem({
-  to,
-  label,
-  active,
-}) {
-
-  return (
-    <Link
-      to={to}
-      className={`shrink-0 rounded-lg px-3 py-2 text-[11px] font-semibold transition ${
-        active
-          ? "bg-[#173563] text-white"
-          : "text-slate-500 hover:bg-slate-100"
-      }`}
-    >
-      {label}
-    </Link>
   );
 }
 
@@ -823,7 +678,6 @@ function TimelineItem({
   active,
   last,
 }) {
-
   return (
     <div className="relative flex gap-4">
 
@@ -874,7 +728,9 @@ function TimelineItem({
 
       <div
         className={`min-w-0 flex-1 ${
-          last ? "pb-0" : "pb-9"
+          last
+            ? "pb-0"
+            : "pb-9"
         }`}
       >
 
@@ -892,11 +748,15 @@ function TimelineItem({
             {stage.title}
           </h3>
 
+          {/* CURRENT */}
+
           {active && (
             <span className="rounded-md bg-blue-50 px-2 py-1 text-[8px] font-bold text-blue-700">
               CURRENT
             </span>
           )}
+
+          {/* COMPLETED */}
 
           {completed && (
             <span className="text-[8px] font-medium text-emerald-600">
@@ -915,6 +775,8 @@ function TimelineItem({
         >
           {stage.description}
         </p>
+
+        {/* ACTIVE STATUS */}
 
         {active && (
           <div className="mt-3 flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2">
@@ -945,7 +807,6 @@ function SummaryRow({
   label,
   value,
 }) {
-
   return (
     <div className="flex items-center justify-between gap-4 px-5 py-3">
 

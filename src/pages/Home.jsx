@@ -204,7 +204,7 @@ function Home() {
                 delay: 0.3,
                 ease: "easeOut",
               }}
-              className="mb-2 h-20 w-auto object-contain mix-blend-multiply sm:h-24"
+              className="mb-2 h-30 w-auto object-contain mix-blend-multiply sm:h-24"
             />
 
             {/* Heading */}
@@ -218,7 +218,7 @@ function Home() {
               }}
               className="mt-4 font-serif text-[28px] text-[#173563] sm:text-[32px]"
             >
-              Get Started
+              Select Your Account Type
             </motion.h2>
 
             {/* User Type Cards */}

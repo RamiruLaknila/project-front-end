@@ -190,22 +190,126 @@ function ImportCalculator() {
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
 
       {/* =====================================================
+          ANIMATIONS
+      ====================================================== */}
+
+      <style>{`
+        @keyframes fadeUp {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.98);
+          }
+
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-6px);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes pulseSoft {
+          0%,
+          100% {
+            box-shadow: 0 0 0 0 rgba(23, 59, 108, 0);
+          }
+
+          50% {
+            box-shadow: 0 0 0 6px rgba(23, 59, 108, 0.05);
+          }
+        }
+
+        .fade-up {
+          animation:
+            fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1)
+            both;
+        }
+
+        .scale-in {
+          animation:
+            scaleIn 0.35s cubic-bezier(0.22, 1, 0.36, 1)
+            both;
+        }
+
+        .slide-down {
+          animation:
+            slideDown 0.25s cubic-bezier(0.22, 1, 0.36, 1)
+            both;
+        }
+
+        .pulse-soft {
+          animation:
+            pulseSoft 2.5s ease-in-out infinite;
+        }
+
+        .calculator-delay-1 {
+          animation-delay: 0.05s;
+        }
+
+        .calculator-delay-2 {
+          animation-delay: 0.1s;
+        }
+
+        .calculator-delay-3 {
+          animation-delay: 0.15s;
+        }
+
+        .calculator-delay-4 {
+          animation-delay: 0.2s;
+        }
+
+        .calculator-delay-5 {
+          animation-delay: 0.25s;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .fade-up,
+          .scale-in,
+          .slide-down,
+          .pulse-soft {
+            animation: none;
+          }
+        }
+      `}</style>
+
+      {/* =====================================================
           NAVBAR
-      ===================================================== */}
+      ====================================================== */}
 
       <AppNavbar />
 
       {/* =====================================================
           MAIN CONTENT
-      ===================================================== */}
+      ====================================================== */}
 
-      <main className="mx-auto w-full max-w-[980px] px-5 py-8 sm:px-8 lg:py-10">
-
+        <main className="mx-auto w-full max-w-[1000px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
         {/* ===================================================
             BACK BUTTON
         ==================================================== */}
 
-        <div className="mb-6">
+        <div className="fade-up mb-6">
           <BackButton current="Import Calculator" />
         </div>
 
@@ -213,7 +317,7 @@ function ImportCalculator() {
             PAGE HEADER
         ==================================================== */}
 
-        <section className="mb-8">
+        <section className="fade-up calculator-delay-1 mb-8">
 
           <div className="flex flex-col items-center justify-center text-center">
 
@@ -266,10 +370,10 @@ function ImportCalculator() {
         </section>
 
         {/* ===================================================
-            SMALL CENTERED PROGRESS BAR
+            PROGRESS BAR
         ==================================================== */}
 
-        <section className="mx-auto mb-7 w-full max-w-[760px] rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-[0_2px_8px_rgba(15,23,42,.02)]">
+        <section className="fade-up calculator-delay-2 mx-auto mb-7 w-full max-w-[760px] rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-[0_2px_8px_rgba(15,23,42,.02)]">
 
           <div className="flex items-center">
 
@@ -278,9 +382,7 @@ function ImportCalculator() {
             <div className="flex shrink-0 items-center gap-2">
 
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
-
                 <CheckCircle2 size={14} />
-
               </div>
 
               <span className="hidden text-[11px] font-semibold text-emerald-700 sm:block">
@@ -296,9 +398,7 @@ function ImportCalculator() {
             <div className="flex shrink-0 items-center gap-2">
 
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
-
                 <CheckCircle2 size={14} />
-
               </div>
 
               <span className="hidden text-[11px] font-semibold text-emerald-700 sm:block">
@@ -347,7 +447,7 @@ function ImportCalculator() {
             INFO BANNER
         ==================================================== */}
 
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3.5">
+        <div className="fade-up calculator-delay-3 mb-6 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3.5">
 
           <Info
             size={16}
@@ -381,7 +481,7 @@ function ImportCalculator() {
               LEFT FORM
           ================================================= */}
 
-          <section className="rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,.025)]">
+          <section className="fade-up calculator-delay-4 rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,.025)]">
 
             {/* HEADER */}
 
@@ -545,7 +645,7 @@ function ImportCalculator() {
               RIGHT RESULT
           ================================================= */}
 
-          <aside className="h-fit lg:sticky lg:top-24">
+          <aside className="fade-up calculator-delay-5 h-fit lg:sticky lg:top-24">
 
             {/* RESULT CARD */}
 
@@ -572,7 +672,7 @@ function ImportCalculator() {
 
                   </div>
 
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
+                  <div className="pulse-soft flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
 
                     <Sparkles size={18} />
 
@@ -640,9 +740,11 @@ function ImportCalculator() {
 
                 </div>
 
+                {/* NOT CALCULATED */}
+
                 {!calculated && (
 
-                  <div className="mt-5 rounded-xl border border-slate-100 bg-slate-50 p-3.5 text-center">
+                  <div className="slide-down mt-5 rounded-xl border border-slate-100 bg-slate-50 p-3.5 text-center">
 
                     <p className="text-[10px] leading-5 text-slate-400">
                       Enter your values and calculate to
@@ -653,9 +755,11 @@ function ImportCalculator() {
 
                 )}
 
+                {/* CALCULATED */}
+
                 {calculated && (
 
-                  <div className="mt-5 flex items-start gap-2 rounded-xl border border-emerald-100 bg-emerald-50 p-3.5">
+                  <div className="scale-in mt-5 flex items-start gap-2 rounded-xl border border-emerald-100 bg-emerald-50 p-3.5">
 
                     <ShieldCheck
                       size={14}
@@ -679,7 +783,7 @@ function ImportCalculator() {
                 HOW IT WORKS
             ================================================= */}
 
-            <section className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
+            <section className="slide-down mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
 
               <div className="flex items-center gap-2">
 
@@ -724,7 +828,7 @@ function ImportCalculator() {
 
             <Link
               to="/hs-code-search"
-              className="group mt-4 flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/60 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-sm"
+              className="fade-up group mt-4 flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/60 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-sm"
             >
 
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-blue-700 shadow-sm">
@@ -761,7 +865,7 @@ function ImportCalculator() {
             ACTIONS
         ==================================================== */}
 
-        <div className="mt-7 flex flex-col-reverse items-stretch justify-between gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center">
+        <div className="fade-up mt-7 flex flex-col-reverse items-stretch justify-between gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center">
 
           <Link
             to="/hs-code-search"
@@ -804,7 +908,7 @@ function ImportCalculator() {
             FOOTER NOTE
         ==================================================== */}
 
-        <div className="mt-6 flex items-center justify-center gap-2 text-center text-[10px] text-slate-400">
+        <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[10px] text-slate-400">
 
           <ShieldCheck
             size={13}
