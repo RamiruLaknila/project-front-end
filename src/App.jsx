@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// =========================
+// =====================================================
 // SME
-// =========================
+// =====================================================
 import Home from "./pages/Home";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
@@ -20,32 +20,59 @@ import CompleteProfile from "./pages/CompleteProfile";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 
-// =========================
-// EXISTING CLEARING AGENT
-// =========================
+// =====================================================
+// CLEARING AGENT AUTH
+// =====================================================
 import AgentSignIn from "./pages/AgentSignIn";
 import AgentSignUp from "./pages/AgentSignUp";
 import AgencyChoice from "./pages/AgencyChoice";
 import AgencyCreate from "./pages/AgencyCreate";
 import AgencyCreated from "./pages/AgencyCreated";
 import JoinAgency from "./pages/JoinAgency";
-
 import AgentPending from "./pages/AgentPending";
+
+// =====================================================
+// CLEARING AGENT DASHBOARD
+// =====================================================
 import AgentDashboard from "./pages/AgentDashboard";
 
+// =====================================================
+// AGENCY ADMIN
+// =====================================================
 import AgencyAgents from "./pages/AgencyAgents";
 import AgencyInvite from "./pages/AgencyInvite";
-import AgentMarketplace from "./pages/AgentMarketplace";
-import AgencyShipments from "./pages/AgencyShipments";
 import AgentAdminDashboard from "./pages/AgentAdminDashboard";
 import AgencyReview from "./pages/AgencyReview";
+import AgencyWaitingApproval from "./pages/AgencyWaitingApproval";
+
+// =====================================================
+// AGENT FEATURES
+// =====================================================
+import AgentRequests from "./pages/AgentRequests";
+import AgentMarketplace from "./pages/AgentMarketplace";
 import AgentMyBids from "./pages/AgentMyBids";
 import AgentBids from "./pages/AgentBids";
 import ReviewBids from "./pages/ReviewBids";
+
+// =====================================================
+// AGENT SHIPMENTS
+// IMPORTANT: This must be AgentShipments.jsx
+// and it must have: export default AgentShipments;
+// =====================================================
+import AgentShipments from "./pages/AgentShipments";
+
+// =====================================================
+// INDIVIDUAL AGENT
+// =====================================================
 import IndividualAgentSignup from "./pages/IndividualAgentSignup";
 import IndividualAgentVerification from "./pages/IndividualAgentVerification";
+
+// =====================================================
+// SME SIGNUP / MESSAGES
+// =====================================================
 import SMESignUp from "./pages/SMESignUp";
 import Messages from "./pages/Messages";
+
 
 function App() {
   return (
@@ -55,14 +82,17 @@ function App() {
         {/* =====================================================
             HOME
         ===================================================== */}
+
         <Route
           path="/"
           element={<Home />}
         />
 
+
         {/* =====================================================
             SME AUTH
         ===================================================== */}
+
         <Route
           path="/signin"
           element={<SignIn />}
@@ -71,6 +101,11 @@ function App() {
         <Route
           path="/signup"
           element={<SignUp />}
+        />
+
+        <Route
+          path="/sme-signup"
+          element={<SMESignUp />}
         />
 
         <Route
@@ -83,17 +118,21 @@ function App() {
           element={<CompleteProfile />}
         />
 
+
         {/* =====================================================
             SME DASHBOARD
         ===================================================== */}
+
         <Route
           path="/dashboard"
           element={<Dashboard />}
         />
 
+
         {/* =====================================================
             SME IMPORT
         ===================================================== */}
+
         <Route
           path="/new-import"
           element={<NewImport />}
@@ -109,9 +148,11 @@ function App() {
           element={<Calculator />}
         />
 
+
         {/* =====================================================
             SME CLEARING AGENT
         ===================================================== */}
+
         <Route
           path="/find-agent"
           element={<FindAgent />}
@@ -122,9 +163,11 @@ function App() {
           element={<ShipmentConfirmation />}
         />
 
+
         {/* =====================================================
             SME SHIPMENTS
         ===================================================== */}
+
         <Route
           path="/shipments"
           element={<Shipments />}
@@ -135,17 +178,21 @@ function App() {
           element={<TrackShipment />}
         />
 
+
         {/* =====================================================
             SME DOCUMENTS
         ===================================================== */}
+
         <Route
           path="/documents"
           element={<Documents />}
         />
 
+
         {/* =====================================================
-            SME PROFILE
+            SME PROFILE / SETTINGS
         ===================================================== */}
+
         <Route
           path="/profile"
           element={<Profile />}
@@ -156,24 +203,29 @@ function App() {
           element={<Settings />}
         />
 
+        <Route
+          path="/messages"
+          element={<Messages />}
+        />
+
+
         {/* =====================================================
             CLEARING AGENT AUTH
         ===================================================== */}
 
-        {/* Agent Sign In */}
         <Route
           path="/agent-signin"
           element={<AgentSignIn />}
         />
 
-        {/* Create Agent Account */}
         <Route
           path="/agent-signup"
           element={<AgentSignUp />}
         />
 
+
         {/* =====================================================
-            CREATE AGENT ACCOUNT → CHOOSE TYPE
+            AGENCY CHOICE
         ===================================================== */}
 
         <Route
@@ -181,21 +233,21 @@ function App() {
           element={<AgencyChoice />}
         />
 
+
         {/* =====================================================
-            AGENCY / COMPANY
+            CREATE AGENCY
         ===================================================== */}
 
-        {/* Register New Agency */}
         <Route
           path="/agency-create"
           element={<AgencyCreate />}
         />
 
-        {/* Agency Created / Application Submitted */}
         <Route
           path="/agency-created"
           element={<AgencyCreated />}
         />
+
 
         {/* =====================================================
             JOIN EXISTING AGENCY
@@ -206,24 +258,94 @@ function App() {
           element={<JoinAgency />}
         />
 
+
         {/* =====================================================
-            AGENT PENDING
+            AGENT PENDING / APPROVAL
         ===================================================== */}
 
         <Route
           path="/agent-pending"
           element={<AgentPending />}
         />
+
+        <Route
+          path="/waiting-for-approval"
+          element={<AgencyWaitingApproval />}
+        />
+
         <Route
           path="/agency-review"
           element={<AgencyReview />}
         />
+
+
+        {/* =====================================================
+            INDIVIDUAL AGENT
+        ===================================================== */}
+
+        <Route
+          path="/individual-agent-signup"
+          element={<IndividualAgentSignup />}
+        />
+
+        <Route
+          path="/individual-agent-verification"
+          element={<IndividualAgentVerification />}
+        />
+
+
+        {/* =====================================================
+            CLEARING AGENT DASHBOARD
+        ===================================================== */}
+
+        <Route
+          path="/agent-dashboard"
+          element={<AgentDashboard />}
+        />
+
+
+        {/* =====================================================
+            AGENT SME REQUESTS
+        ===================================================== */}
+
+        <Route
+          path="/agent-requests"
+          element={<AgentRequests />}
+        />
+
+
+        {/* =====================================================
+            AGENT MARKETPLACE
+        ===================================================== */}
+
+        <Route
+          path="/agent-marketplace"
+          element={<AgentMarketplace />}
+        />
+
+
+        {/* =====================================================
+            AGENT BIDS
+        ===================================================== */}
+
         <Route
           path="/agent-my-bids"
           element={<AgentMyBids />}
         />
+
+        <Route
+          path="/agent-bids"
+          element={<AgentBids />}
+        />
+
+        <Route
+          path="/review-bids"
+          element={<ReviewBids />}
+        />
+
+
         {/* =====================================================
-            AGENCY ADMIN
+            AGENCY ADMIN DASHBOARD
         ===================================================== */}
 
         <Route
@@ -241,62 +363,24 @@ function App() {
           element={<AgencyInvite />}
         />
 
-        <Route
-          path="/agency-shipments"
-          element={<AgencyShipments />}
-        />
 
         {/* =====================================================
-            AGENT DASHBOARD
+            AGENT SHIPMENTS
+            =====================================================
+            
+            AgentDashboard.jsx
+                  ↓
+            /agent-shipments
+                  ↓
+            AgentShipments.jsx
+
+            DO NOT use AgencyShipments here.
         ===================================================== */}
 
-        <Route
-          path="/agent-dashboard"
-          element={<AgentDashboard />}
-        />
-
-        <Route
-          path="/agent-marketplace"
-          element={<AgentMarketplace />}
-        />
-
-        {/* =====================================================
-            COMPATIBILITY ROUTE
-        ===================================================== */}
-
-        <Route
-          path="/agent-shipments"
-          element={<AgencyShipments />}
-        />
-        <Route
-          path="/agent-bids"
-          element={<AgentBids />}
-        />
-        <Route
-          path="/review-bids"
-          element={<ReviewBids />}
-        />
-        <Route
-          path="/agent-signup"
-          element={<AgentSignUp />}
+      <Route
+  path="/agent-shipments"
+  element={<AgentShipments />}
 />
-<Route
-  path="/individual-agent-signup"
-  element={<IndividualAgentSignup />}
-/>
-<Route
-  path="/individual-agent-verification"
-  element={<IndividualAgentVerification />}
-/>
-<Route
-  path="/signup"
-  element={<SignUp />}
-/>
-<Route
-  path="/sme-signup"
-  element={<SMESignUp />}
-/>
-<Route path="/messages" element={<Messages />} />
 
       </Routes>
     </BrowserRouter>
