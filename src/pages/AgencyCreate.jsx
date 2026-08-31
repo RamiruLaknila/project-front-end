@@ -5,6 +5,8 @@ import {
   ArrowRight,
   Building2,
   CheckCircle2,
+  Eye,
+  EyeOff,
   FileText,
   UserRound,
   ShieldCheck,
@@ -31,9 +33,15 @@ function AgencyCreate() {
     ownerEmail: "",
     ownerPhone: "",
     ownerNic: "",
+
+    password: "",
+    confirmPassword: "",
   });
 
   const [errors, setErrors] = useState({});
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const updateField = (field, value) => {
     setFormData((previous) => ({
@@ -107,6 +115,18 @@ function AgencyCreate() {
       if (!formData.ownerNic.trim()) {
         newErrors.ownerNic = "NIC / ID number is required";
       }
+
+      if (!formData.password) {
+        newErrors.password = "Password is required";
+      } else if (formData.password.length < 8) {
+        newErrors.password = "Password must be at least 8 characters";
+      }
+
+      if (!formData.confirmPassword) {
+        newErrors.confirmPassword = "Please confirm your password";
+      } else if (formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = "Passwords do not match";
+      }
     }
 
     setErrors(newErrors);
@@ -119,10 +139,12 @@ function AgencyCreate() {
 
     if (step < 3) {
       setStep((previous) => previous + 1);
+
       window.scrollTo({
         top: 0,
         behavior: "smooth",
       });
+
       return;
     }
 
@@ -145,7 +167,6 @@ function AgencyCreate() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] px-4 py-8 sm:py-10">
-
       <div className="mx-auto w-full max-w-3xl">
 
         {/* Header */}
@@ -331,12 +352,15 @@ function AgencyCreate() {
                   required
                 >
                   <option value="">Select license type</option>
+
                   <option value="clearing-agent">
                     Clearing Agent License
                   </option>
+
                   <option value="customs-broker">
                     Customs Broker License
                   </option>
+
                   <option value="other">
                     Other
                   </option>
@@ -425,9 +449,54 @@ function AgencyCreate() {
                   error={errors.ownerNic}
                   required
                 />
+
+                {/* Create Password */}
+                <PasswordField
+                  label="Create Password"
+                  value={formData.password}
+                  onChange={(value) =>
+                    updateField("password", value)
+                  }
+                  placeholder="Create a password"
+                  error={errors.password}
+                  showPassword={showPassword}
+                  setShowPassword={setShowPassword}
+                  required
+                />
+
+                {/* Confirm Password */}
+                <PasswordField
+                  label="Confirm Password"
+                  value={formData.confirmPassword}
+                  onChange={(value) =>
+                    updateField("confirmPassword", value)
+                  }
+                  placeholder="Re-enter your password"
+                  error={errors.confirmPassword}
+                  showPassword={showConfirmPassword}
+                  setShowPassword={setShowConfirmPassword}
+                  required
+                />
               </div>
 
-              <div className="mt-6 rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
+              {/* Password Information */}
+              <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+                <div className="flex gap-3">
+                  <ShieldCheck
+                    size={18}
+                    className="mt-0.5 shrink-0 text-blue-600"
+                  />
+
+                  <p className="text-xs leading-5 text-blue-800">
+                    Your password must be at least 8 characters long.
+                    Keep it secure because you will use it to sign in
+                    to your clearing agency account.
+                  </p>
+                </div>
+              </div>
+
+              {/* Review Information */}
+              <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
                 <div className="flex gap-3">
                   <CheckCircle2
                     size={18}
@@ -452,7 +521,6 @@ function AgencyCreate() {
               className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
             >
               <ArrowLeft size={16} />
-
               Back
             </button>
 
@@ -584,6 +652,76 @@ function InputField({
             : "border-slate-200 focus:border-blue-500 focus:ring-blue-100"
         }`}
       />
+
+      {error && (
+        <p className="mt-1.5 text-[11px] text-red-500">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* =========================================================
+   PASSWORD INPUT
+========================================================= */
+
+function PasswordField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  error,
+  showPassword,
+  setShowPassword,
+  required = false,
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-xs font-semibold text-slate-700">
+        {label}
+
+        {required && (
+          <span className="ml-1 text-red-500">*</span>
+        )}
+      </label>
+
+      <div className="relative">
+        <input
+          type={showPassword ? "text" : "password"}
+          value={value}
+          onChange={(event) =>
+            onChange(event.target.value)
+          }
+          placeholder={placeholder}
+          autoComplete="new-password"
+          name="new-password"
+          className={`w-full rounded-xl border px-3.5 py-3 pr-11 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-2 ${
+            error
+              ? "border-red-300 focus:border-red-500 focus:ring-red-100"
+              : "border-slate-200 focus:border-blue-500 focus:ring-blue-100"
+          }`}
+        />
+
+        <button
+          type="button"
+          onClick={() =>
+            setShowPassword((previous) => !previous)
+          }
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
+          aria-label={
+            showPassword
+              ? "Hide password"
+              : "Show password"
+          }
+        >
+          {showPassword ? (
+            <EyeOff size={18} />
+          ) : (
+            <Eye size={18} />
+          )}
+        </button>
+      </div>
 
       {error && (
         <p className="mt-1.5 text-[11px] text-red-500">

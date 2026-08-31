@@ -11,6 +11,7 @@ import {
   CreditCard,
   ShieldCheck,
   CheckCircle2,
+  Lock,
 } from "lucide-react";
 
 function IndividualAgentSignup() {
@@ -25,6 +26,8 @@ function IndividualAgentSignup() {
     licenseNumber: "",
     licenseExpiry: "",
     experience: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -78,6 +81,18 @@ function IndividualAgentSignup() {
 
     if (!formData.experience) {
       newErrors.experience = "Please select your experience";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Confirm password is required";
+    } else if (formData.confirmPassword !== formData.password) {
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     setErrors(newErrors);
@@ -202,7 +217,7 @@ function IndividualAgentSignup() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} autoComplete="off">
 
             {/* Personal Details */}
             <section>
@@ -250,6 +265,7 @@ function IndividualAgentSignup() {
                   icon={<Mail size={17} />}
                   error={errors.email}
                   required
+                  autoComplete="off"
                 />
 
                 {/* Phone */}
@@ -274,6 +290,34 @@ function IndividualAgentSignup() {
                   icon={<CreditCard size={17} />}
                   error={errors.agentId}
                   required
+                />
+
+                {/* Password */}
+                <InputField
+                  label="Create Password"
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Create a password"
+                  icon={<Lock size={17} />}
+                  error={errors.password}
+                  required
+                  autoComplete="new-password"
+                />
+
+                {/* Confirm Password */}
+                <InputField
+                  label="Confirm Password"
+                  name="confirmPassword"
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm your password"
+                  icon={<Lock size={17} />}
+                  error={errors.confirmPassword}
+                  required
+                  autoComplete="new-password"
                 />
 
               </div>
@@ -522,6 +566,7 @@ function InputField({
   icon,
   error,
   required = false,
+  autoComplete,
 }) {
   return (
     <div>
@@ -550,6 +595,7 @@ function InputField({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
+          autoComplete={autoComplete}
           className={`w-full rounded-xl border ${
             error
               ? "border-red-400"

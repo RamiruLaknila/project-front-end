@@ -88,7 +88,7 @@ function AgencyChoice() {
               </div>
 
               <h2 className="mt-5 text-base font-bold text-slate-900">
-                Create a Clearing Agency
+                Register a Clearing Agency
               </h2>
 
               <p className="mt-2 text-xs leading-5 text-slate-500">

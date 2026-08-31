@@ -19,6 +19,7 @@ import Documents from "./pages/Documents";
 import CompleteProfile from "./pages/CompleteProfile";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import SMEGuest from "./pages/SMEGuest";
 
 // =====================================================
 // CLEARING AGENT AUTH
@@ -87,6 +88,12 @@ function App() {
           path="/"
           element={<Home />}
         />
+
+        <Route
+          path="/sme-guest"
+          element={<SMEGuest />}
+        />
+        
 
 
         {/* =====================================================

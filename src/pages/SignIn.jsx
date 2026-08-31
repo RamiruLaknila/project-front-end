@@ -409,6 +409,15 @@ function SignIn() {
 
           </div>
 
+          <div className="mt-3 text-center">
+            <Link
+              to="/sme-guest"
+              className="text-sm font-semibold text-[#173563] transition-colors hover:text-blue-700"
+            >
+              Continue as Guest
+            </Link>
+          </div>
+
           {/* =================================================
               SECURITY NOTICE
           ================================================== */}
