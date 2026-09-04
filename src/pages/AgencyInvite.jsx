@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+
 import { Link, useNavigate } from "react-router-dom";
+
 import {
   ArrowLeft,
   Building2,
@@ -23,25 +25,16 @@ function AgencyInvite() {
   const [agency, setAgency] = useState(null);
   const [admin, setAdmin] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-
   const [copied, setCopied] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
 
-  /* =========================================================
-     LOAD AGENCY
-  ========================================================= */
-
   useEffect(() => {
     try {
-      const storedAgency =
-        localStorage.getItem("clearingAgency");
-
-      const storedAdmin =
-        localStorage.getItem("clearingAgent");
+      const storedAgency = localStorage.getItem("clearingAgency");
+      const storedAdmin = localStorage.getItem("clearingAgent");
 
       if (!storedAgency || !storedAdmin) {
         navigate("/agent-signin");
@@ -59,27 +52,12 @@ function AgencyInvite() {
       setAgency(parsedAgency);
       setAdmin(parsedAdmin);
     } catch (error) {
-      console.error(
-        "Failed to load agency information:",
-        error
-      );
-
+      console.error("Failed to load agency information:", error);
       navigate("/agent-signin");
     }
   }, [navigate]);
 
-  /* =========================================================
-     AGENCY CODE
-  ========================================================= */
-
-  const agencyCode =
-    agency?.code ||
-    agency?.id ||
-    "AG-000000";
-
-  /* =========================================================
-     COPY AGENCY CODE
-  ========================================================= */
+  const agencyCode = agency?.code || agency?.id || "AG-000000";
 
   const handleCopyCode = async () => {
     try {
@@ -91,16 +69,9 @@ function AgencyInvite() {
         setCopied(false);
       }, 2000);
     } catch (error) {
-      console.error(
-        "Failed to copy agency code:",
-        error
-      );
+      console.error("Failed to copy agency code:", error);
     }
   };
-
-  /* =========================================================
-     INVITE MESSAGE
-  ========================================================= */
 
   const inviteMessage =
     `You are invited to join ${
@@ -111,15 +82,9 @@ function AgencyInvite() {
     `Use agency code: ${agencyCode}\n\n` +
     `Create or sign in to your ImportEase agent account, select "Join an Existing Agency", and enter this code to request access.`;
 
-  /* =========================================================
-     COPY INVITE MESSAGE
-  ========================================================= */
-
   const handleCopyMessage = async () => {
     try {
-      await navigator.clipboard.writeText(
-        inviteMessage
-      );
+      await navigator.clipboard.writeText(inviteMessage);
 
       setCopied(true);
 
@@ -127,16 +92,9 @@ function AgencyInvite() {
         setCopied(false);
       }, 2000);
     } catch (error) {
-      console.error(
-        "Failed to copy invitation:",
-        error
-      );
+      console.error("Failed to copy invitation:", error);
     }
   };
-
-  /* =========================================================
-     SEND INVITATION
-  ========================================================= */
 
   const handleSendInvitation = (event) => {
     event.preventDefault();
@@ -147,73 +105,49 @@ function AgencyInvite() {
     const trimmedEmail = email.trim();
 
     if (!trimmedEmail) {
-      setError(
-        "Please enter the agent's email address."
-      );
+      setError("Please enter the agent's email address.");
       return;
     }
 
-    const emailPattern =
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailPattern.test(trimmedEmail)) {
-      setError(
-        "Please enter a valid email address."
-      );
+      setError("Please enter a valid email address.");
       return;
     }
 
     try {
       const existingInvitations = JSON.parse(
-        localStorage.getItem(
-          "agencyInvitations"
-        ) || "[]"
+        localStorage.getItem("agencyInvitations") || "[]"
       );
 
-      const currentAgencyId =
-        agency?.id || agency?.code;
+      const currentAgencyId = agency?.id || agency?.code;
 
-      const alreadyInvited =
-        existingInvitations.some(
-          (invitation) =>
-            invitation.email?.toLowerCase() ===
-              trimmedEmail.toLowerCase() &&
-            invitation.agencyId ===
-              currentAgencyId
-        );
+      const alreadyInvited = existingInvitations.some(
+        (invitation) =>
+          invitation.email?.toLowerCase() ===
+            trimmedEmail.toLowerCase() &&
+          invitation.agencyId === currentAgencyId
+      );
 
       if (alreadyInvited) {
-        setError(
-          "An invitation has already been sent to this email."
-        );
+        setError("An invitation has already been sent to this email.");
         return;
       }
 
       const invitation = {
         id: `invite-${Date.now()}`,
-
         email: trimmedEmail,
-
         agencyId: currentAgencyId,
-
         agencyCode,
-
         agencyName:
           agency?.agencyName ||
           agency?.name ||
           "Clearing Agency",
-
-        invitedBy:
-          admin?.name ||
-          "Agency Administrator",
-
+        invitedBy: admin?.name || "Agency Administrator",
         status: "sent",
-
-        message:
-          message.trim() || inviteMessage,
-
-        createdAt:
-          new Date().toISOString(),
+        message: message.trim() || inviteMessage,
+        createdAt: new Date().toISOString(),
       };
 
       existingInvitations.push(invitation);
@@ -227,47 +161,29 @@ function AgencyInvite() {
       setMessage("");
       setSent(true);
     } catch (error) {
-      console.error(
-        "Failed to send invitation:",
-        error
-      );
-
-      setError(
-        "Unable to send the invitation. Please try again."
-      );
+      console.error("Failed to send invitation:", error);
+      setError("Unable to send the invitation. Please try again.");
     }
   };
 
-  /* =========================================================
-     LOGOUT
-  ========================================================= */
-
   const handleLogout = () => {
     localStorage.removeItem("clearingAgent");
-    localStorage.removeItem(
-      "agentOnboardingType"
-    );
-    localStorage.removeItem(
-      "agentOnboardingComplete"
-    );
+    localStorage.removeItem("agentOnboardingType");
+    localStorage.removeItem("agentOnboardingComplete");
 
     navigate("/agent-signin");
   };
-
-  /* =========================================================
-     LOADING
-  ========================================================= */
 
   if (!agency || !admin) {
     return null;
   }
 
+  const adminName = admin.name || "Agency Admin";
+
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
 
-      {/* =====================================================
-          MOBILE OVERLAY
-      ===================================================== */}
+      {/* Mobile Overlay */}
 
       {sidebarOpen && (
         <div
@@ -276,28 +192,22 @@ function AgencyInvite() {
         />
       )}
 
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
+      {/* Sidebar */}
 
       <aside
         className={`fixed left-0 top-0 z-50 flex h-screen w-[250px] flex-col border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen
-            ? "translate-x-0"
-            : "-translate-x-full"
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
 
-        {/* LOGO */}
+        {/* Logo */}
 
         <div className="flex h-[70px] items-center border-b border-slate-100 px-5">
 
           <Link
             to="/agent-admin-dashboard"
             className="flex items-center gap-3"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
+            onClick={() => setSidebarOpen(false)}
           >
 
             <img
@@ -308,14 +218,12 @@ function AgencyInvite() {
 
             <div>
 
-              <p className="text-[16px] font-bold tracking-tight text-[#173563]">
+              <p className="text-[18px] font-bold tracking-tight text-[#173563]">
                 Import
-                <span className="text-slate-900">
-                  Ease
-                </span>
+                <span className="text-slate-900">Ease</span>
               </p>
 
-              <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                 Agent Platform
               </p>
 
@@ -325,9 +233,7 @@ function AgencyInvite() {
 
           <button
             type="button"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
+            onClick={() => setSidebarOpen(false)}
             className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 lg:hidden"
           >
             <X size={18} />
@@ -335,109 +241,78 @@ function AgencyInvite() {
 
         </div>
 
-        {/* AGENCY */}
+        {/* Navigation */}
 
-        <div className="border-b border-slate-100 p-4">
-
-          <div className="rounded-xl bg-slate-50 p-3">
-
-            <div className="flex items-center gap-3">
-
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#173563] text-white">
-                <Building2 size={17} />
-              </div>
-
-              <div className="min-w-0">
-
-                <p className="truncate text-xs font-bold text-slate-800">
-                  {agency.agencyName ||
-                    agency.name ||
-                    "Your Agency"}
-                </p>
-
-                <p className="mt-0.5 text-[9px] text-slate-400">
-                  Agency Admin
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* NAVIGATION */}
-
-        <nav className="flex-1 space-y-1 p-3">
+        <nav className="flex-1 space-y-1.5 p-3">
 
           <SidebarItem
             icon={Building2}
             label="Dashboard"
             to="/agent-admin-dashboard"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
+            onClick={() => setSidebarOpen(false)}
           />
 
           <SidebarItem
             icon={Users}
             label="Agents"
             to="/agency-agents"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
+            onClick={() => setSidebarOpen(false)}
           />
 
           <SidebarItem
             icon={UserPlus}
             label="Invite Agents"
-            active
             to="/agency-invite"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
+            active
+            onClick={() => setSidebarOpen(false)}
           />
 
           <SidebarItem
             icon={Clipboard}
             label="SME Requests"
             to="/agent-marketplace"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-          />
-
-          <SidebarItem
-            icon={Clipboard}
-            label="Shipments"
-            to="/agent-shipments"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
+            onClick={() => setSidebarOpen(false)}
           />
 
         </nav>
 
-        {/* BOTTOM */}
+        {/* Bottom Profile */}
 
         <div className="border-t border-slate-100 p-3">
+
+          <div className="mb-3 flex items-center gap-3 rounded-xl px-2 py-2">
+
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#173563] text-xs font-bold text-white">
+              {getInitials(adminName)}
+            </div>
+
+            <div className="min-w-0">
+
+              <p className="truncate text-sm font-bold text-slate-800">
+                {adminName}
+              </p>
+
+              <p className="mt-0.5 text-[11px] text-slate-400">
+                Administrator
+              </p>
+
+            </div>
+
+          </div>
 
           <SidebarItem
             icon={Settings}
             label="Settings"
             to="/agent-settings"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
+            onClick={() => setSidebarOpen(false)}
           />
 
           <button
             type="button"
             onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
           >
-            <LogOut size={17} />
+            <LogOut size={18} />
             Logout
           </button>
 
@@ -445,437 +320,376 @@ function AgencyInvite() {
 
       </aside>
 
-      {/* =====================================================
-          MAIN
-      ===================================================== */}
+      {/* Main Area */}
 
       <div className="lg:ml-[250px]">
 
-        {/* TOP BAR */}
+        {/* Header */}
 
-        <header className="sticky top-0 z-30 flex h-[70px] items-center border-b border-slate-200 bg-white/95 px-5 backdrop-blur-xl sm:px-8">
+        <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-5 backdrop-blur sm:px-8">
 
-          <button
-            type="button"
-            onClick={() =>
-              setSidebarOpen(true)
-            }
-            className="mr-3 flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 lg:hidden"
-          >
-            <Menu size={19} />
-          </button>
+          <div className="flex items-center gap-3">
 
-          <div>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 lg:hidden"
+            >
+              <Menu size={19} />
+            </button>
 
-            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">
-              Agency workspace
-            </p>
+            <div>
 
-            <h1 className="text-sm font-bold text-slate-800">
-              Invite Agents
-            </h1>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                Agent Workspace
+              </p>
+
+              <h1 className="text-base font-bold text-slate-800">
+                Invite Agents
+              </h1>
+
+            </div>
 
           </div>
 
-          <div className="ml-auto flex items-center gap-3">
+          <div className="flex items-center gap-3">
 
-            <div className="hidden h-7 w-px bg-slate-200 sm:block" />
+            <div className="hidden text-right sm:block">
 
-            <div className="flex items-center gap-2">
+              <p className="text-sm font-bold text-slate-800">
+                {adminName}
+              </p>
 
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#173563] text-[10px] font-bold text-white">
-                {getInitials(
-                  admin.name || "Admin"
-                )}
-              </div>
+              <p className="text-[10px] text-slate-400">
+                Administrator
+              </p>
 
-              <div className="hidden sm:block">
+            </div>
 
-                <p className="text-xs font-semibold text-slate-800">
-                  {admin.name ||
-                    "Agency Admin"}
-                </p>
-
-                <p className="text-[9px] text-slate-400">
-                  Administrator
-                </p>
-
-              </div>
-
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#173563] text-xs font-bold text-white">
+              {getInitials(adminName)}
             </div>
 
           </div>
 
         </header>
 
-        {/* =====================================================
-            CONTENT
-        ===================================================== */}
+        {/* Content */}
 
-        <main className="mx-auto w-full max-w-[1180px] px-5 py-7 sm:px-8 lg:py-9">
+        <main className="px-5 py-7 sm:px-8 lg:px-10">
 
-          {/* HEADER */}
+          <div className="mx-auto max-w-[1180px]">
 
-          <section className="mb-7">
+            {/* Back */}
 
             <Link
               to="/agent-admin-dashboard"
-              className="mb-4 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-800"
+              className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-[#173563]"
             >
-              <ArrowLeft size={14} />
+              <ArrowLeft size={16} />
               Back to Dashboard
             </Link>
 
-            <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+            {/* Page Heading */}
+
+            <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
 
               <div>
 
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#2563EB]">
 
-                  <UserPlus
-                    size={13}
-                    className="text-blue-600"
-                  />
+                  <UserPlus size={14} />
 
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-700">
-                    Agent onboarding
-                  </span>
+                  Agent onboarding
 
                 </div>
 
-                <h2 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[38px]">
+                <h2 className="text-[32px] font-bold leading-tight tracking-tight text-[#173563] sm:text-[40px]">
                   Invite Agents
                 </h2>
 
-                <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
-                  Invite clearing agents to join your
-                  agency and manage them from your
-                  agency workspace.
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+                  Invite clearing agents to join your agency and collaborate
+                  on SME import requests.
                 </p>
 
               </div>
 
               <Link
                 to="/agency-agents"
-                className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
               >
-                <Users size={15} />
+                <Users size={17} />
                 Manage Agents
               </Link>
 
             </div>
 
-          </section>
+            {/* Main Grid */}
 
-          {/* =====================================================
-              GRID
-          ===================================================== */}
+            <div className="grid gap-6 lg:grid-cols-[1.35fr_0.9fr]">
 
-          <section className="grid gap-5 lg:grid-cols-[1fr_0.9fr]">
+              {/* Invite Form */}
 
-            {/* =================================================
-                EMAIL INVITE
-            ================================================= */}
+              <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)] sm:p-6">
+                <div className="mb-6">
 
-              <div className="mb-6 flex items-start gap-3">
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
+                    <Mail size={19} />
+                  </div>
 
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                  <Mail size={19} />
-                </div>
-
-                <div>
-
-                  <h2 className="text-sm font-bold text-slate-800">
+                  <h3 className="text-base font-bold text-slate-800">
                     Send an invitation
-                  </h2>
+                  </h3>
 
-                  <p className="mt-1 text-[11px] leading-5 text-slate-500">
-                    Send an invitation to a clearing
-                    agent using their email address.
+                  <p className="mt-1 text-sm leading-5 text-slate-500">
+                    Send an invitation to an agent's email address.
                   </p>
 
                 </div>
 
-              </div>
+                {error && (
+                  <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
 
-              {/* ERROR */}
+                    <X size={17} className="mt-0.5 shrink-0" />
 
-              {error && (
-                <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-600">
-                  {error}
-                </div>
-              )}
+                    <p>{error}</p>
 
-              {/* SUCCESS */}
+                  </div>
+                )}
 
-              {sent && (
-                <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                {sent && (
+                  <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
 
-                  <CheckCircle2
-                    size={17}
-                    className="mt-0.5 shrink-0 text-emerald-600"
-                  />
+                    <CheckCircle2
+                      size={18}
+                      className="mt-0.5 shrink-0 text-emerald-600"
+                    />
+
+                    <div>
+
+                      <p className="text-sm font-semibold text-emerald-800">
+                        Invitation sent successfully
+                      </p>
+
+                      <p className="mt-1 text-xs leading-5 text-emerald-700">
+                        The invitation has been saved and is ready for the
+                        agent to use.
+                      </p>
+
+                    </div>
+
+                  </div>
+                )}
+
+                <form
+                  onSubmit={handleSendInvitation}
+                  className="space-y-5"
+                >
 
                   <div>
 
-                    <p className="text-xs font-semibold text-emerald-800">
-                      Invitation recorded
-                    </p>
-
-                    <p className="mt-1 text-[11px] leading-5 text-emerald-700">
-                      The invitation has been saved.
-                      Share the agency code with the
-                      agent so they can request access.
-                    </p>
-
-                  </div>
-
-                </div>
-              )}
-
-              <form
-                onSubmit={handleSendInvitation}
-                className="space-y-5"
-              >
-
-                {/* EMAIL */}
-
-                <div>
-
-                  <label
-                    htmlFor="agentEmail"
-                    className="mb-1.5 block text-xs font-semibold text-slate-700"
-                  >
-                    Agent email
-                  </label>
-
-                  <div className="relative">
-
-                    <Mail
-                      size={16}
-                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                    />
+                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                      Agent email address
+                    </label>
 
                     <input
-                      id="agentEmail"
                       type="email"
                       value={email}
                       onChange={(event) => {
-                        setEmail(
-                          event.target.value
-                        );
+                        setEmail(event.target.value);
                         setError("");
                         setSent(false);
                       }}
                       placeholder="agent@example.com"
-                      className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
+                      className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-50"
                     />
 
                   </div>
 
-                </div>
-
-                {/* MESSAGE */}
-
-                <div>
-
-                  <label
-                    htmlFor="message"
-                    className="mb-1.5 block text-xs font-semibold text-slate-700"
-                  >
-                    Personal message
-
-                    <span className="ml-1 font-normal text-slate-400">
-                      Optional
-                    </span>
-
-                  </label>
-
-                  <textarea
-                    id="message"
-                    value={message}
-                    onChange={(event) => {
-                      setMessage(
-                        event.target.value
-                      );
-                      setSent(false);
-                    }}
-                    rows={5}
-                    placeholder="Add a short message for the agent..."
-                    className="w-full resize-none rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#173563] focus:ring-2 focus:ring-[#173563]/10"
-                  />
-
-                </div>
-
-                {/* SEND */}
-
-                <button
-                  type="submit"
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#173563] py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/10 transition hover:bg-[#102547]"
-                >
-                  <Send size={16} />
-                  Send Invitation
-                </button>
-
-              </form>
-
-            </div>
-
-            {/* =================================================
-                RIGHT SIDE
-            ================================================= */}
-
-            <div className="space-y-5">
-
-              {/* AGENCY CODE */}
-
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)] sm:p-6">
-
-                <div className="flex items-start gap-3">
-
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                    <Building2 size={19} />
-                  </div>
-
                   <div>
 
-                    <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                      Your agency
-                    </p>
+                    <div className="mb-2 flex items-center justify-between">
 
-                    <h2 className="mt-1 text-sm font-bold text-slate-800">
-                      {agency.agencyName ||
-                        agency.name ||
-                        "Your Agency"}
-                    </h2>
+                      <label className="text-sm font-semibold text-slate-700">
+                        Personal message
+                      </label>
 
-                    <p className="mt-1 text-[11px] text-slate-500">
-                      Share this code with trusted
-                      clearing agents.
-                    </p>
+                      <span className="text-xs text-slate-400">
+                        Optional
+                      </span>
+
+                    </div>
+
+                    <textarea
+                      value={message}
+                      onChange={(event) =>
+                        setMessage(event.target.value)
+                      }
+                      placeholder="Add a short message for the agent..."
+                      rows={5}
+                      className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-50"
+                    />
 
                   </div>
 
-                </div>
+                  <button
+                    type="submit"
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 text-sm font-semibold text-white transition hover:bg-[#10294d]"
+                  >
+                    <Send size={17} />
+                    Send Invitation
+                  </button>
 
-                <div className="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4">
+                </form>
 
-                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                    Agency code
+              </section>
+
+              {/* Right Column */}
+
+              <div className="space-y-6">
+
+                {/* Agency Code */}
+
+                <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+                  <div className="mb-5 flex items-start justify-between gap-4">
+
+                    <div>
+
+                      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                        Your Agency
+                      </p>
+
+                      <h3 className="mt-1 text-base font-bold text-slate-800">
+                        {agency?.agencyName ||
+                          agency?.name ||
+                          "Clearing Agency"}
+                      </h3>
+
+                    </div>
+
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-500">
+                      <Building2 size={18} />
+                    </div>
+
+                  </div>
+
+                  <p className="mb-4 text-sm leading-5 text-slate-500">
+                    Agents can use this code when joining your agency.
                   </p>
 
-                  <div className="mt-2 flex items-center justify-between gap-3">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
 
-                    <p className="font-mono text-lg font-bold tracking-wider text-[#173563]">
-                      {agencyCode}
+                    <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+                      Agency Code
                     </p>
 
-                    <button
-                      type="button"
-                      onClick={handleCopyCode}
-                      className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#173563] px-3 text-[10px] font-semibold text-white hover:bg-[#102547]"
-                    >
+                    <div className="flex items-center justify-between gap-3">
 
-                      {copied ? (
-                        <Check size={14} />
-                      ) : (
-                        <Copy size={14} />
-                      )}
+                      <p className="font-mono text-lg font-bold tracking-wider text-[#173563]">
+                        {agencyCode}
+                      </p>
 
-                      {copied
-                        ? "Copied"
-                        : "Copy"}
+                      <button
+                        type="button"
+                        onClick={handleCopyCode}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
+                      >
 
-                    </button>
+                        {copied ? (
+                          <>
+                            <Check size={14} />
+                            Copied
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={14} />
+                            Copy
+                          </>
+                        )}
+
+                      </button>
+
+                    </div>
 
                   </div>
 
-                </div>
+                  <div className="mt-4 rounded-xl bg-blue-50 p-4">
 
-                <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+                    <p className="text-sm leading-5 text-blue-800">
+                      Share this agency code with trusted agents. They can
+                      enter it during onboarding to request access.
+                    </p>
 
-                  <p className="text-[11px] leading-5 text-blue-700">
-
-                    Agents can enter this code from
-
-                    <span className="font-semibold">
-                      {" "}
-                      Join an Existing Agency
-                    </span>
-
-                    {" "}during onboarding.
-
-                  </p>
-
-                </div>
-
-              </div>
-
-              {/* =================================================
-                  SHARE MESSAGE
-              ================================================= */}
-
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)] sm:p-6">
-
-                <div className="flex items-start gap-3">
-
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
-                    <Clipboard size={17} />
                   </div>
 
-                  <div className="min-w-0">
+                </section>
 
-                    <h2 className="text-sm font-bold text-slate-800">
+                {/* Quick Invite Message */}
+
+                <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+                  <div className="mb-4">
+
+                    <h3 className="text-base font-bold text-slate-800">
                       Quick invite message
-                    </h2>
+                    </h3>
 
-                    <p className="mt-1 text-[10px] text-slate-400">
-                      Copy and send this through your
-                      preferred communication channel.
+                    <p className="mt-1 text-sm leading-5 text-slate-500">
+                      Copy this message and send it through your preferred
+                      communication channel.
                     </p>
 
                   </div>
 
-                </div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
 
-                <div className="mt-4 rounded-xl bg-slate-50 p-4">
+                    <p className="whitespace-pre-line text-sm leading-6 text-slate-600">
+                      {inviteMessage}
+                    </p>
 
-                  <p className="whitespace-pre-line text-[11px] leading-5 text-slate-600">
-                    {inviteMessage}
-                  </p>
+                  </div>
 
-                </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyMessage}
+                    className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
 
-                <button
-                  type="button"
-                  onClick={handleCopyMessage}
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2.5 text-[11px] font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
+                    {copied ? (
+                      <>
+                        <Check size={16} />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={16} />
+                        Copy Message
+                      </>
+                    )}
 
-                  {copied ? (
-                    <Check size={14} />
-                  ) : (
-                    <Copy size={14} />
-                  )}
+                  </button>
 
-                  {copied
-                    ? "Copied"
-                    : "Copy Invite Message"}
-
-                </button>
+                </section>
 
               </div>
 
             </div>
 
-          </section>
+            {/* Footer */}
 
-          {/* FOOTER */}
+            <div className="mt-8 border-t border-slate-200 pt-5">
 
-          <div className="mt-9 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-[10px] text-slate-400">
-            ImportEase · Clearing Agency Platform
+              <p className="text-xs leading-5 text-slate-400">
+                Only invite agents you trust to work under your agency.
+                Agency administrators are responsible for managing agent
+                access.
+              </p>
+
+            </div>
+
           </div>
 
         </main>
@@ -901,30 +715,24 @@ function SidebarItem({
     <Link
       to={to}
       onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${
+      className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${
         active
           ? "bg-blue-50 text-[#173563]"
           : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
       }`}
     >
-      <Icon
-        size={17}
-        strokeWidth={1.8}
-      />
-
+      <Icon size={18} strokeWidth={1.8} />
       <span>{label}</span>
     </Link>
   );
 }
 
 /* =========================================================
-   INITIALS
+   GET INITIALS
 ========================================================= */
 
 function getInitials(name) {
-  if (!name) {
-    return "AD";
-  }
+  if (!name) return "AD";
 
   const words = name
     .trim()
@@ -932,9 +740,7 @@ function getInitials(name) {
     .filter(Boolean);
 
   if (words.length === 1) {
-    return words[0]
-      .slice(0, 2)
-      .toUpperCase();
+    return words[0].slice(0, 2).toUpperCase();
   }
 
   return `${words[0][0]}${

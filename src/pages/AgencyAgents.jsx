@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   Clock3,
   ClipboardList,
-  FileText,
   Mail,
   Menu,
   RefreshCw,
@@ -196,9 +195,13 @@ function AgencyAgents() {
           selectedRequest.id ||
           `agent-${Date.now()}`,
 
-        name: selectedRequest.name || "Agent",
+        name:
+          selectedRequest.name ||
+          "Agent",
 
-        email: selectedRequest.email || "",
+        email:
+          selectedRequest.email ||
+          "",
 
         agencyId:
           selectedRequest.agencyId ||
@@ -229,18 +232,19 @@ function AgencyAgents() {
       let updatedAgents;
 
       if (existingAgentIndex >= 0) {
-        updatedAgents = storedAgents.map(
-          (agent, index) => {
-            if (index !== existingAgentIndex) {
-              return agent;
-            }
+        updatedAgents =
+          storedAgents.map(
+            (agent, index) => {
+              if (index !== existingAgentIndex) {
+                return agent;
+              }
 
-            return {
-              ...agent,
-              ...approvedAgent,
-            };
-          }
-        );
+              return {
+                ...agent,
+                ...approvedAgent,
+              };
+            }
+          );
       } else {
         updatedAgents = [
           ...storedAgents,
@@ -255,7 +259,7 @@ function AgencyAgents() {
 
       /* -------------------------------------------------------
          UPDATE CURRENT AGENT IF SAME BROWSER
-         ------------------------------------------------------- */
+      ------------------------------------------------------- */
 
       const storedCurrentAgent =
         localStorage.getItem("clearingAgent");
@@ -491,9 +495,7 @@ function AgencyAgents() {
           <Link
             to="/agent-admin-dashboard"
             className="flex items-center gap-3"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
+            onClick={() => setSidebarOpen(false)}
           >
 
             <img
@@ -504,14 +506,14 @@ function AgencyAgents() {
 
             <div>
 
-              <p className="text-[16px] font-bold tracking-tight text-[#173563]">
+              <p className="text-[18px] font-bold tracking-tight text-[#173563]">
                 Import
                 <span className="text-slate-900">
                   Ease
                 </span>
               </p>
 
-              <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                 Agent Platform
               </p>
 
@@ -521,9 +523,7 @@ function AgencyAgents() {
 
           <button
             type="button"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
+            onClick={() => setSidebarOpen(false)}
             className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 lg:hidden"
           >
             <X size={18} />
@@ -531,41 +531,9 @@ function AgencyAgents() {
 
         </div>
 
-        {/* AGENCY */}
-
-        <div className="border-b border-slate-100 p-4">
-
-          <div className="rounded-xl bg-slate-50 p-3">
-
-            <div className="flex items-center gap-3">
-
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#173563] text-white">
-                <Building2 size={17} />
-              </div>
-
-              <div className="min-w-0">
-
-                <p className="truncate text-xs font-bold text-slate-800">
-                  {agency.agencyName ||
-                    agency.name ||
-                    "Your Agency"}
-                </p>
-
-                <p className="mt-0.5 text-[9px] text-slate-400">
-                  Agency Admin
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
         {/* NAVIGATION */}
 
-        <nav className="flex-1 space-y-1 p-3">
+        <nav className="flex-1 space-y-1.5 p-3">
 
           <SidebarItem
             icon={Building2}
@@ -604,20 +572,40 @@ function AgencyAgents() {
             }
           />
 
-          <SidebarItem
-            icon={FileText}
-            label="Shipments"
-            to="/agent-shipments"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-          />
-
         </nav>
 
-        {/* BOTTOM */}
+        {/* =====================================================
+            BOTTOM LEFT
+        ===================================================== */}
 
         <div className="border-t border-slate-100 p-3">
+
+          {/* ADMIN PROFILE */}
+
+          <div className="mb-3 flex items-center gap-3 rounded-xl px-2 py-2">
+
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#173563] text-xs font-bold text-white">
+              {getInitials(
+                currentAdmin.name || "Admin"
+              )}
+            </div>
+
+            <div className="min-w-0">
+
+              <p className="truncate text-sm font-bold text-slate-800">
+                {currentAdmin.name ||
+                  "Agency Admin"}
+              </p>
+
+              <p className="mt-0.5 text-[11px] text-slate-400">
+                Administrator
+              </p>
+
+            </div>
+
+          </div>
+
+          {/* SETTINGS */}
 
           <SidebarItem
             icon={Settings}
@@ -628,12 +616,14 @@ function AgencyAgents() {
             }
           />
 
+          {/* LOGOUT */}
+
           <button
             type="button"
             onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
           >
-            <LogOut size={17} />
+            <LogOut size={18} />
             Logout
           </button>
 
@@ -653,9 +643,7 @@ function AgencyAgents() {
 
           <button
             type="button"
-            onClick={() =>
-              setSidebarOpen(true)
-            }
+            onClick={() => setSidebarOpen(true)}
             className="mr-3 flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 lg:hidden"
           >
             <Menu size={19} />
@@ -663,11 +651,11 @@ function AgencyAgents() {
 
           <div>
 
-            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">
-              Agency workspace
+            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
+              Agency Workspace
             </p>
 
-            <h1 className="text-sm font-bold text-slate-800">
+            <h1 className="text-base font-bold text-slate-800">
               Agents
             </h1>
 
@@ -679,7 +667,7 @@ function AgencyAgents() {
 
             <div className="flex items-center gap-2">
 
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#173563] text-[10px] font-bold text-white">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#173563] text-xs font-bold text-white">
                 {getInitials(
                   currentAdmin.name || "Admin"
                 )}
@@ -687,12 +675,12 @@ function AgencyAgents() {
 
               <div className="hidden sm:block">
 
-                <p className="text-xs font-semibold text-slate-800">
+                <p className="text-sm font-semibold text-slate-800">
                   {currentAdmin.name ||
                     "Agency Admin"}
                 </p>
 
-                <p className="text-[9px] text-slate-400">
+                <p className="text-[10px] text-slate-400">
                   Administrator
                 </p>
 
@@ -716,9 +704,9 @@ function AgencyAgents() {
 
             <Link
               to="/agent-admin-dashboard"
-              className="mb-4 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-800"
+              className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-800"
             >
-              <ArrowLeft size={14} />
+              <ArrowLeft size={16} />
               Back to Dashboard
             </Link>
 
@@ -729,21 +717,21 @@ function AgencyAgents() {
                 <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5">
 
                   <Users
-                    size={13}
+                    size={14}
                     className="text-blue-600"
                   />
 
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-700">
-                    Agency members
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-blue-700">
+                    Agency Members
                   </span>
 
                 </div>
 
-                <h2 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[38px]">
+                <h2 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
                   Manage Agents
                 </h2>
 
-                <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
                   Review membership requests and
                   manage the agents in your agency.
                 </p>
@@ -752,9 +740,9 @@ function AgencyAgents() {
 
               <Link
                 to="/agency-invite"
-                className="inline-flex w-fit items-center gap-2 rounded-xl bg-[#173563] px-4 py-3 text-xs font-semibold text-white transition hover:bg-[#102547]"
+                className="inline-flex w-fit items-center gap-2 rounded-xl bg-[#173563] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#102547]"
               >
-                <UserPlus size={15} />
+                <UserPlus size={17} />
                 Invite Agent
               </Link>
 
@@ -762,9 +750,11 @@ function AgencyAgents() {
 
           </section>
 
-          {/* SUMMARY */}
+          {/* =====================================================
+              SUMMARY
+          ===================================================== */}
 
-          <section className="mb-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <section className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-3">
 
             <SummaryCard
               icon={Users}
@@ -802,11 +792,11 @@ function AgencyAgents() {
 
               <div>
 
-                <h2 className="text-sm font-bold text-[#14213D]">
-                  Pending requests
+                <h2 className="text-base font-bold text-[#14213D]">
+                  Pending Requests
                 </h2>
 
-                <p className="mt-1 text-[11px] text-slate-500">
+                <p className="mt-1 text-sm text-slate-500">
                   Agents waiting for your approval.
                 </p>
 
@@ -815,9 +805,9 @@ function AgencyAgents() {
               <button
                 type="button"
                 onClick={loadData}
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[10px] font-semibold text-slate-600 hover:bg-slate-50"
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
               >
-                <RefreshCw size={13} />
+                <RefreshCw size={15} />
                 Refresh
               </button>
 
@@ -874,11 +864,11 @@ function AgencyAgents() {
 
             <div className="mb-4">
 
-              <h2 className="text-sm font-bold text-[#14213D]">
-                Active agents
+              <h2 className="text-base font-bold text-[#14213D]">
+                Active Agents
               </h2>
 
-              <p className="mt-1 text-[11px] text-slate-500">
+              <p className="mt-1 text-sm text-slate-500">
                 Agents approved to work under your agency.
               </p>
 
@@ -917,7 +907,7 @@ function AgencyAgents() {
 
           {/* FOOTER */}
 
-          <div className="mt-9 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-[10px] text-slate-400">
+          <div className="mt-10 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-xs text-slate-400">
             ImportEase · Clearing Agency Platform
           </div>
 
@@ -945,7 +935,7 @@ function AgentRow({
 
       <div className="flex min-w-0 items-center gap-3">
 
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#173563] text-xs font-bold text-white">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#173563] text-sm font-bold text-white">
           {getInitials(agent.name)}
         </div>
 
@@ -953,21 +943,21 @@ function AgentRow({
 
           <div className="flex flex-wrap items-center gap-2">
 
-            <p className="text-sm font-bold text-slate-800">
+            <p className="text-base font-bold text-slate-800">
               {agent.name || "Agent"}
             </p>
 
             {pending ? (
 
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[9px] font-semibold text-amber-700">
-                <Clock3 size={10} />
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-700">
+                <Clock3 size={11} />
                 Pending
               </span>
 
             ) : (
 
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[9px] font-semibold text-emerald-700">
-                <CheckCircle2 size={10} />
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">
+                <CheckCircle2 size={11} />
                 Active
               </span>
 
@@ -975,10 +965,10 @@ function AgentRow({
 
           </div>
 
-          <div className="mt-1 flex flex-wrap items-center gap-3 text-[10px] text-slate-400">
+          <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-slate-400">
 
-            <span className="inline-flex items-center gap-1">
-              <Mail size={11} />
+            <span className="inline-flex items-center gap-1.5">
+              <Mail size={12} />
               {agent.email || "No email"}
             </span>
 
@@ -996,15 +986,16 @@ function AgentRow({
       </div>
 
       {pending && (
+
         <div className="flex shrink-0 items-center gap-2">
 
           <button
             type="button"
             onClick={onReject}
             disabled={processing}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2.5 text-[10px] font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <X size={14} />
+            <X size={15} />
             Reject
           </button>
 
@@ -1012,9 +1003,9 @@ function AgentRow({
             type="button"
             onClick={onApprove}
             disabled={processing}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2.5 text-[10px] font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Check size={14} />
+            <Check size={15} />
 
             {processing
               ? "Updating..."
@@ -1022,6 +1013,7 @@ function AgentRow({
           </button>
 
         </div>
+
       )}
 
     </div>
@@ -1045,11 +1037,11 @@ function SummaryCard({
 
         <div>
 
-          <p className="text-[10px] font-semibold text-slate-400">
+          <p className="text-xs font-semibold text-slate-400">
             {label}
           </p>
 
-          <p className="mt-2 text-2xl font-bold tracking-tight text-slate-800">
+          <p className="mt-2 text-3xl font-bold tracking-tight text-slate-800">
             {value}
           </p>
 
@@ -1059,7 +1051,7 @@ function SummaryCard({
           className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconStyle}`}
         >
           <Icon
-            size={18}
+            size={19}
             strokeWidth={1.8}
           />
         </div>
@@ -1086,11 +1078,11 @@ function EmptyState({
         <Icon size={22} />
       </div>
 
-      <h3 className="mt-4 text-sm font-bold text-slate-700">
+      <h3 className="mt-4 text-base font-bold text-slate-700">
         {title}
       </h3>
 
-      <p className="mt-1 max-w-sm text-[11px] leading-5 text-slate-400">
+      <p className="mt-1 max-w-sm text-sm leading-5 text-slate-400">
         {description}
       </p>
 
@@ -1113,7 +1105,7 @@ function SidebarItem({
     <Link
       to={to}
       onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${
+      className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${
         active
           ? "bg-blue-50 text-[#173563]"
           : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
@@ -1121,7 +1113,7 @@ function SidebarItem({
     >
 
       <Icon
-        size={17}
+        size={18}
         strokeWidth={1.8}
       />
 

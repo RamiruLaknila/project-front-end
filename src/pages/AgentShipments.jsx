@@ -98,9 +98,7 @@ function getInitials(name) {
     .filter(Boolean);
 
   if (words.length === 1) {
-    return words[0]
-      .slice(0, 2)
-      .toUpperCase();
+    return words[0].slice(0, 2).toUpperCase();
   }
 
   return `${words[0][0]}${
@@ -274,12 +272,12 @@ function AgentShipments() {
             />
 
             <div>
-              <p className="text-[16px] font-bold tracking-tight text-[#173563]">
+              <p className="text-[18px] font-bold tracking-tight text-[#173563]">
                 Import
                 <span className="text-slate-900">Ease</span>
               </p>
 
-              <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                 Agent Platform
               </p>
             </div>
@@ -294,38 +292,9 @@ function AgentShipments() {
           </button>
         </div>
 
-        {/* AGENT MINI PROFILE */}
-
-        <div className="border-b border-slate-100 p-4">
-          <div className="rounded-xl bg-slate-50 p-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#173563] text-xs font-bold text-white">
-                {getInitials(agentName)}
-              </div>
-
-              <div className="min-w-0">
-                <p className="truncate text-xs font-bold text-slate-800">
-                  {agentName}
-                </p>
-
-                <div className="mt-0.5 flex items-center gap-1">
-                  <CheckCircle2
-                    size={11}
-                    className="text-emerald-500"
-                  />
-
-                  <span className="text-[9px] font-semibold text-emerald-600">
-                    Verified Agent
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* NAVIGATION */}
 
-        <nav className="flex-1 space-y-1 p-3">
+        <nav className="flex-1 space-y-1.5 p-3">
           <SidebarItem
             icon={TrendingUp}
             label="Dashboard"
@@ -365,9 +334,25 @@ function AgentShipments() {
           />
         </nav>
 
-        {/* BOTTOM */}
+        {/* BOTTOM PROFILE */}
 
         <div className="border-t border-slate-100 p-3">
+          <div className="mb-3 flex items-center gap-3 rounded-xl px-2 py-2">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#173563] text-xs font-bold text-white">
+              {getInitials(agentName)}
+            </div>
+
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold text-slate-800">
+                {agentName}
+              </p>
+
+              <p className="mt-0.5 text-[11px] text-slate-400">
+                Individual Agent
+              </p>
+            </div>
+          </div>
+
           <SidebarItem
             icon={Settings}
             label="Settings"
@@ -378,9 +363,9 @@ function AgentShipments() {
           <button
             type="button"
             onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
           >
-            <LogOut size={17} />
+            <LogOut size={18} />
             Logout
           </button>
         </div>
@@ -403,11 +388,11 @@ function AgentShipments() {
           </button>
 
           <div>
-            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
               Agent Workspace
             </p>
 
-            <h1 className="text-sm font-bold text-slate-800">
+            <h1 className="text-base font-bold text-slate-800">
               Shipments
             </h1>
           </div>
@@ -430,11 +415,11 @@ function AgentShipments() {
               </div>
 
               <div className="hidden sm:block">
-                <p className="text-xs font-semibold text-slate-800">
+                <p className="text-sm font-bold text-slate-800">
                   {agentName}
                 </p>
 
-                <p className="text-[9px] text-slate-400">
+                <p className="text-[10px] text-slate-400">
                   Individual Agent
                 </p>
               </div>
@@ -474,11 +459,11 @@ function AgentShipments() {
 
             <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
               <div>
-                <h2 className="text-[28px] font-bold leading-tight tracking-[-0.04em] text-[#14213D] sm:text-[32px]">
+                <h2 className="text-[32px] font-bold leading-tight tracking-[-0.04em] text-[#14213D] sm:text-[40px]">
                   My Shipments
                 </h2>
 
-                <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
                   View shipments assigned to you and monitor their current
                   progress.
                 </p>
@@ -490,7 +475,7 @@ function AgentShipments() {
                   setSearchTerm("");
                   setStatusFilter("All");
                 }}
-                className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+                className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
               >
                 <Clock3 size={15} />
                 Reset
@@ -551,7 +536,7 @@ function AgentShipments() {
                     setSearchTerm(event.target.value)
                   }
                   placeholder="Search shipment, company or product..."
-                  className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-4 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-300 focus:bg-white"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-300 focus:bg-white"
                 />
               </div>
 
@@ -560,7 +545,7 @@ function AgentShipments() {
                 onChange={(event) =>
                   setStatusFilter(event.target.value)
                 }
-                className="h-11 rounded-xl border border-slate-200 bg-slate-50 px-4 text-xs font-semibold text-slate-600 outline-none focus:border-blue-300 focus:bg-white"
+                className="h-11 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-600 outline-none focus:border-blue-300 focus:bg-white"
               >
                 <option value="All">All Statuses</option>
                 <option value="Pending">Pending</option>
@@ -629,7 +614,7 @@ function SummaryCard({
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-semibold text-slate-400">
+          <p className="text-[11px] font-semibold text-slate-400">
             {label}
           </p>
 
@@ -764,14 +749,14 @@ function SidebarItem({
     <Link
       to={to}
       onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${
+      className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${
         active
           ? "bg-blue-50 text-[#173563]"
           : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
       }`}
     >
       <Icon
-        size={17}
+        size={18}
         strokeWidth={1.8}
       />
 

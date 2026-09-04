@@ -304,7 +304,8 @@ function ImportCalculator() {
           MAIN CONTENT
       ====================================================== */}
 
-        <main className="mx-auto w-full max-w-[1000px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
+      <main className="mx-auto w-full max-w-[1000px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
+
         {/* ===================================================
             BACK BUTTON
         ==================================================== */}
@@ -317,165 +318,28 @@ function ImportCalculator() {
             PAGE HEADER
         ==================================================== */}
 
-        <section className="fade-up calculator-delay-1 mb-8">
+        <section className="fade-up -mt-8 mb-6">
 
           <div className="flex flex-col items-center justify-center text-center">
 
-            {/* BADGE */}
-
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-100 bg-amber-50 px-3 py-1.5">
-
-              <Calculator
-                size={13}
-                className="text-amber-700"
-                strokeWidth={2}
-              />
-
-              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700">
-                Import cost estimator
-              </span>
-
-            </div>
-
-            {/* TITLE */}
-
-            <h1 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[40px]">
+            <h1 className="text-[30px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[40px]">
               Estimate your import cost
             </h1>
 
-            {/* DESCRIPTION */}
-
-            <p className="mx-auto mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
+            <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
               Estimate customs duty, VAT, freight, and other
               import costs before placing your order.
             </p>
 
-            {/* STATUS BADGE */}
-
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
-
-              <CheckCircle2
-                size={14}
-                className="text-emerald-600"
-              />
-
-              <span className="text-[10px] font-semibold text-emerald-700">
-                Planning estimate
-              </span>
-
-            </div>
-
           </div>
 
         </section>
-
-        {/* ===================================================
-            PROGRESS BAR
-        ==================================================== */}
-
-        <section className="fade-up calculator-delay-2 mx-auto mb-7 w-full max-w-[760px] rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-[0_2px_8px_rgba(15,23,42,.02)]">
-
-          <div className="flex items-center">
-
-            {/* STEP 1 */}
-
-            <div className="flex shrink-0 items-center gap-2">
-
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
-                <CheckCircle2 size={14} />
-              </div>
-
-              <span className="hidden text-[11px] font-semibold text-emerald-700 sm:block">
-                Import details
-              </span>
-
-            </div>
-
-            <div className="mx-2 h-px flex-1 bg-emerald-200" />
-
-            {/* STEP 2 */}
-
-            <div className="flex shrink-0 items-center gap-2">
-
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
-                <CheckCircle2 size={14} />
-              </div>
-
-              <span className="hidden text-[11px] font-semibold text-emerald-700 sm:block">
-                HS Code
-              </span>
-
-            </div>
-
-            <div className="mx-2 h-px flex-1 bg-emerald-200" />
-
-            {/* STEP 3 */}
-
-            <div className="flex shrink-0 items-center gap-2">
-
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#173B6C] text-[11px] font-bold text-white shadow-sm">
-                3
-              </div>
-
-              <span className="hidden text-[11px] font-semibold text-[#173B6C] sm:block">
-                Costs
-              </span>
-
-            </div>
-
-            <div className="mx-2 h-px flex-1 bg-slate-200" />
-
-            {/* STEP 4 */}
-
-            <div className="flex shrink-0 items-center gap-2">
-
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-400">
-                4
-              </div>
-
-              <span className="hidden text-[11px] font-medium text-slate-400 sm:block">
-                Agent
-              </span>
-
-            </div>
-
-          </div>
-
-        </section>
-
-        {/* ===================================================
-            INFO BANNER
-        ==================================================== */}
-
-        <div className="fade-up calculator-delay-3 mb-6 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3.5">
-
-          <Info
-            size={16}
-            className="mt-0.5 shrink-0 text-blue-600"
-          />
-
-          <div>
-
-            <p className="text-[10px] font-bold text-blue-800">
-              Estimated calculation
-            </p>
-
-            <p className="mt-1 text-[11px] leading-5 text-blue-700">
-              Results are estimates for planning purposes.
-              Actual customs charges may vary depending on the
-              final HS code, customs valuation, applicable
-              exemptions, and current regulations.
-            </p>
-
-          </div>
-
-        </div>
 
         {/* ===================================================
             MAIN GRID
         ==================================================== */}
 
-        <div className="grid gap-5 lg:grid-cols-[1fr_380px]">
+        <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
 
           {/* =================================================
               LEFT FORM
@@ -489,10 +353,10 @@ function ImportCalculator() {
 
               <div className="flex items-center gap-3">
 
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
 
                   <Package
-                    size={17}
+                    size={18}
                     strokeWidth={1.8}
                   />
 
@@ -500,11 +364,11 @@ function ImportCalculator() {
 
                 <div>
 
-                  <h2 className="text-sm font-bold text-slate-900">
+                  <h2 className="text-base font-bold text-slate-900">
                     Import information
                   </h2>
 
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-[13px] text-slate-500">
                     Enter the estimated costs for your shipment.
                   </p>
 
@@ -552,11 +416,11 @@ function ImportCalculator() {
 
                 <div className="mb-4">
 
-                  <h3 className="text-xs font-bold text-slate-800">
+                  <h3 className="text-sm font-bold text-slate-800">
                     Tax assumptions
                   </h3>
 
-                  <p className="mt-1 text-[10px] leading-5 text-slate-400">
+                  <p className="mt-1 text-[11px] leading-5 text-slate-400">
                     Adjust these values based on the applicable
                     tariff information.
                   </p>
@@ -611,11 +475,11 @@ function ImportCalculator() {
 
                 <button
                   type="submit"
-                  className="group flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#173B6C] py-3.5 text-xs font-bold text-white shadow-[0_6px_18px_rgba(23,59,108,.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#12315B] hover:shadow-[0_10px_24px_rgba(23,59,108,.18)]"
+                  className="group flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#173B6C] py-3.5 text-sm font-bold text-white shadow-[0_6px_18px_rgba(23,59,108,.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#12315B] hover:shadow-[0_10px_24px_rgba(23,59,108,.18)]"
                 >
 
                   <Calculator
-                    size={15}
+                    size={17}
                     className="transition-transform duration-300 group-hover:scale-105"
                   />
 
@@ -626,10 +490,10 @@ function ImportCalculator() {
                 <button
                   type="button"
                   onClick={reset}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-xs font-bold text-slate-600 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-600 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
                 >
 
-                  <RefreshCcw size={14} />
+                  <RefreshCcw size={15} />
 
                   Reset
 
@@ -659,11 +523,11 @@ function ImportCalculator() {
 
                   <div>
 
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-blue-200">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-blue-200">
                       Estimated total
                     </p>
 
-                    <h2 className="mt-2 text-2xl font-bold tracking-[-0.03em]">
+                    <h2 className="mt-2 text-[26px] font-bold tracking-[-0.03em]">
                       LKR{" "}
                       {formatCurrency(
                         values.totalImportCost
@@ -672,15 +536,15 @@ function ImportCalculator() {
 
                   </div>
 
-                  <div className="pulse-soft flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
+                  <div className="pulse-soft flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
 
-                    <Sparkles size={18} />
+                    <Sparkles size={19} />
 
                   </div>
 
                 </div>
 
-                <p className="mt-2 text-[10px] leading-4 text-blue-100">
+                <p className="mt-2 text-[11px] leading-4 text-blue-100">
                   Estimated landed import cost
                 </p>
 
@@ -690,7 +554,7 @@ function ImportCalculator() {
 
               <div className="p-5">
 
-                <div className="space-y-3">
+                <div className="space-y-3.5">
 
                   <ResultRow
                     label="Product value"
@@ -723,11 +587,11 @@ function ImportCalculator() {
 
                     <div className="flex items-center justify-between gap-4">
 
-                      <span className="text-xs font-bold text-slate-800">
+                      <span className="text-sm font-bold text-slate-800">
                         Total import cost
                       </span>
 
-                      <span className="text-sm font-bold text-[#173B6C]">
+                      <span className="text-base font-bold text-[#173B6C]">
                         LKR{" "}
                         {formatCurrency(
                           values.totalImportCost
@@ -744,9 +608,9 @@ function ImportCalculator() {
 
                 {!calculated && (
 
-                  <div className="slide-down mt-5 rounded-xl border border-slate-100 bg-slate-50 p-3.5 text-center">
+                  <div className="slide-down mt-5 rounded-xl border border-slate-100 bg-slate-50 p-4 text-center">
 
-                    <p className="text-[10px] leading-5 text-slate-400">
+                    <p className="text-[11px] leading-5 text-slate-400">
                       Enter your values and calculate to
                       generate your estimate.
                     </p>
@@ -759,14 +623,14 @@ function ImportCalculator() {
 
                 {calculated && (
 
-                  <div className="scale-in mt-5 flex items-start gap-2 rounded-xl border border-emerald-100 bg-emerald-50 p-3.5">
+                  <div className="scale-in mt-5 flex items-start gap-2 rounded-xl border border-emerald-100 bg-emerald-50 p-4">
 
                     <ShieldCheck
-                      size={14}
+                      size={15}
                       className="mt-0.5 shrink-0 text-emerald-600"
                     />
 
-                    <p className="text-[10px] leading-5 text-emerald-700">
+                    <p className="text-[11px] leading-5 text-emerald-700">
                       Estimate generated successfully. Review
                       the result before continuing.
                     </p>
@@ -788,17 +652,17 @@ function ImportCalculator() {
               <div className="flex items-center gap-2">
 
                 <Truck
-                  size={15}
+                  size={16}
                   className="text-slate-500"
                 />
 
-                <h3 className="text-xs font-bold text-slate-800">
+                <h3 className="text-sm font-bold text-slate-800">
                   How the estimate works
                 </h3>
 
               </div>
 
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 space-y-3.5">
 
                 <Formula
                   number="01"
@@ -831,19 +695,19 @@ function ImportCalculator() {
               className="fade-up group mt-4 flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/60 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-sm"
             >
 
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-blue-700 shadow-sm">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-blue-700 shadow-sm">
 
-                <CircleHelp size={16} />
+                <CircleHelp size={17} />
 
               </div>
 
               <div className="min-w-0 flex-1">
 
-                <p className="text-[10px] font-bold text-blue-900">
+                <p className="text-[11px] font-bold text-blue-900">
                   Not sure about your duty rate?
                 </p>
 
-                <p className="mt-1 text-[9px] leading-4 text-blue-700">
+                <p className="mt-1 text-[10px] leading-4 text-blue-700">
                   Search your product to review its HS code
                   and applicable tariff information.
                 </p>
@@ -851,7 +715,7 @@ function ImportCalculator() {
               </div>
 
               <ArrowRight
-                size={14}
+                size={15}
                 className="text-blue-500 transition-transform duration-300 group-hover:translate-x-1"
               />
 
@@ -872,7 +736,7 @@ function ImportCalculator() {
             className="flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 sm:justify-start"
           >
 
-            <ArrowLeft size={16} />
+            <ArrowLeft size={17} />
 
             Back to HS Code
 
@@ -882,7 +746,7 @@ function ImportCalculator() {
             type="button"
             disabled={!calculated}
             onClick={continueToAgent}
-            className={`group flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-300 ${
+            className={`group flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold transition-all duration-300 ${
               calculated
                 ? "bg-[#173B6C] text-white shadow-[0_6px_18px_rgba(23,59,108,.12)] hover:-translate-y-0.5 hover:bg-[#12315B] hover:shadow-[0_10px_24px_rgba(23,59,108,.18)]"
                 : "cursor-not-allowed bg-slate-200 text-slate-400"
@@ -892,7 +756,7 @@ function ImportCalculator() {
             Continue to Find Agent
 
             <ArrowRight
-              size={17}
+              size={18}
               className={`transition-transform duration-300 ${
                 calculated
                   ? "group-hover:translate-x-0.5"
@@ -908,10 +772,10 @@ function ImportCalculator() {
             FOOTER NOTE
         ==================================================== */}
 
-        <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[10px] text-slate-400">
+        <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[11px] text-slate-400">
 
           <ShieldCheck
-            size={13}
+            size={14}
             className="text-emerald-600"
           />
 
@@ -948,7 +812,7 @@ function InputField({
 
         <label
           htmlFor={name}
-          className="text-xs font-semibold text-slate-700"
+          className="text-sm font-semibold text-slate-700"
         >
 
           {label}
@@ -961,7 +825,7 @@ function InputField({
 
         </label>
 
-        <span className="hidden text-[9px] text-slate-400 sm:block">
+        <span className="hidden text-[10px] text-slate-400 sm:block">
           {help}
         </span>
 
@@ -979,16 +843,16 @@ function InputField({
           onChange={onChange}
           placeholder={placeholder}
           required={required}
-          className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 pr-14 text-sm font-medium text-slate-800 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
+          className="h-12 w-full rounded-xl border border-slate-300 bg-white px-3.5 pr-14 text-sm font-medium text-slate-800 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
         />
 
-        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-400">
+        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">
           {suffix}
         </span>
 
       </div>
 
-      <p className="mt-1.5 text-[9px] text-slate-400 sm:hidden">
+      <p className="mt-1.5 text-[10px] text-slate-400 sm:hidden">
         {help}
       </p>
 
@@ -1004,11 +868,11 @@ function ResultRow({ label, value }) {
   return (
     <div className="flex items-center justify-between gap-4">
 
-      <span className="text-[10px] text-slate-500">
+      <span className="text-[11px] text-slate-500">
         {label}
       </span>
 
-      <span className="text-[10px] font-semibold text-slate-700">
+      <span className="text-[11px] font-semibold text-slate-700">
         LKR {formatCurrency(value)}
       </span>
 
@@ -1028,17 +892,17 @@ function Formula({
   return (
     <div className="flex gap-3">
 
-      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[8px] font-bold text-slate-500">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[9px] font-bold text-slate-500">
         {number}
       </div>
 
       <div>
 
-        <p className="text-[9px] font-bold text-slate-700">
+        <p className="text-[10px] font-bold text-slate-700">
           {title}
         </p>
 
-        <p className="mt-0.5 text-[8px] text-slate-400">
+        <p className="mt-0.5 text-[9px] text-slate-400">
           {text}
         </p>
 

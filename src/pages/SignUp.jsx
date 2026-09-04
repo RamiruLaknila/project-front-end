@@ -6,342 +6,210 @@ import {
   CheckCircle2,
   ShieldCheck,
   Store,
-  UserRound,
 } from "lucide-react";
 
 function SignUp() {
   const navigate = useNavigate();
 
   const handleSME = () => {
-    // Remember that this user selected the SME registration.
     localStorage.setItem("signupRole", "sme");
-
-    // Keep your existing SME registration flow.
     navigate("/sme-signup");
   };
 
   const handleClearingAgent = () => {
-    // Remember that this user selected the clearing-agent flow.
     localStorage.setItem("signupRole", "clearing-agent");
-
-    // Go directly to the clearing-agent registration.
     navigate("/agent-signup");
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#F8FAFC] px-4 py-8 sm:py-10">
+    <div className="relative min-h-screen overflow-hidden bg-[#F8FAFC] px-4 py-8 font-sans antialiased sm:px-6 sm:py-10 lg:px-8">
+      {/* BACKGROUND DECORATION */}
+      <div className="pointer-events-none absolute -left-40 -top-40 h-96 w-96 rounded-full bg-blue-100/40 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-slate-200/50 blur-3xl" />
 
-      {/* =====================================================
-          BACKGROUND
-      ===================================================== */}
-
-      <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-blue-100/50 blur-3xl" />
-
-      <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-slate-200/50 blur-3xl" />
-
-      {/* =====================================================
-          MAIN CONTAINER
-      ===================================================== */}
-
-      <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-3xl flex-col justify-center">
-
-        {/* ===================================================
-            LOGO
-        =================================================== */}
-
+      <div className="relative mx-auto w-full max-w-5xl">
+        {/* LOGO */}
         <div className="mb-7 flex justify-center">
-
           <Link
             to="/"
-            className="flex items-center gap-3"
+            className="group flex items-center gap-2.5 rounded-lg p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#173563] focus-visible:ring-offset-2"
           >
-
             <img
               src="/logo.jpeg"
               alt="ImportEase"
-              className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
+              className="h-11 w-11 object-contain mix-blend-multiply sm:h-12 sm:w-12"
             />
 
-            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
               Import
-              <span className="text-[#173563]">
-                Ease
-              </span>
+              <span className="text-[#173563]">Ease</span>
             </span>
-
           </Link>
-
         </div>
 
-        {/* ===================================================
-            CARD
-        =================================================== */}
-
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.15)] sm:p-9">
-
-          {/* =================================================
-              ICON
-          ================================================= */}
-
-          <div className="mb-5 flex justify-center">
-
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#173563] shadow-md shadow-[#173563]/15">
-              <ShieldCheck
-                size={23}
-                className="text-white"
-              />
-            </div>
-
+        {/* PAGE INTRO */}
+        <div className="mx-auto mb-8 max-w-2xl text-center">
+          <div className="mb-3 flex justify-center">
+            
           </div>
 
-          {/* =================================================
-              HEADING
-          ================================================= */}
-
-          <div className="mb-8 text-center">
-
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
-              Create your ImportEase account
-            </h1>
-
-            <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-500">
-              Choose the type of account you want to create.
-              This will take you to the appropriate registration process.
-            </p>
-
-          </div>
-
-          {/* =================================================
-              ROLE SELECTION
-          ================================================= */}
-
-          <div className="grid gap-5 md:grid-cols-2">
-
-            {/* =================================================
-                SME
-            ================================================= */}
-
-            <button
-              type="button"
-              onClick={handleSME}
-              className="group rounded-2xl border-2 border-slate-200 bg-white p-6 text-left transition-all duration-200 hover:-translate-y-1 hover:border-blue-400 hover:bg-blue-50/30 hover:shadow-xl hover:shadow-blue-900/5"
-            >
-
-              {/* Icon */}
-
-              <div className="flex items-center justify-between">
-
-                <div className="flex h-13 w-13 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-all duration-200 group-hover:bg-blue-600 group-hover:text-white">
-                  <Store
-                    size={24}
-                    strokeWidth={1.8}
-                  />
-                </div>
-
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition group-hover:bg-blue-100 group-hover:text-blue-600">
-                  <ArrowRight size={17} />
-                </div>
-
-              </div>
-
-              {/* Title */}
-
-              <h2 className="mt-6 text-lg font-bold text-slate-900">
-                SME / Importer
-              </h2>
-
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                Register your business to manage imports, calculate
-                import costs and find professional clearing agents.
-              </p>
-
-              {/* Features */}
-
-              <div className="mt-5 space-y-2.5">
-
-                <RoleFeature text="Manage your import shipments" />
-
-                <RoleFeature text="Search HS codes and calculate costs" />
-
-                <RoleFeature text="Find and hire clearing agents" />
-
-              </div>
-
-              {/* Action */}
-
-              <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
-
-                <span className="text-xs font-bold text-[#173563]">
-                  Continue as SME
-                </span>
-
-                <span className="text-[10px] font-medium text-slate-400">
-                  Business account
-                </span>
-
-              </div>
-
-            </button>
-
-            {/* =================================================
-                CLEARING AGENT
-            ================================================= */}
-
-            <button
-              type="button"
-              onClick={handleClearingAgent}
-              className="group rounded-2xl border-2 border-slate-200 bg-white p-6 text-left transition-all duration-200 hover:-translate-y-1 hover:border-[#173563] hover:bg-slate-50 hover:shadow-xl hover:shadow-slate-900/5"
-            >
-
-              {/* Icon */}
-
-              <div className="flex items-center justify-between">
-
-                <div className="flex h-13 w-13 items-center justify-center rounded-xl bg-slate-100 text-[#173563] transition-all duration-200 group-hover:bg-[#173563] group-hover:text-white">
-                  <Building2
-                    size={24}
-                    strokeWidth={1.8}
-                  />
-                </div>
-
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition group-hover:bg-slate-200 group-hover:text-[#173563]">
-                  <ArrowRight size={17} />
-                </div>
-
-              </div>
-
-              {/* Title */}
-
-              <h2 className="mt-6 text-lg font-bold text-slate-900">
-                Clearing Agent
-              </h2>
-
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                Register as a professional clearing agent and work
-                with SMEs through the ImportEase marketplace.
-              </p>
-
-              {/* Features */}
-
-              <div className="mt-5 space-y-2.5">
-
-                <RoleFeature text="Create or join a clearing agency" />
-
-                <RoleFeature text="Verify your clearing license" />
-
-                <RoleFeature text="Receive SME requests and submit bids" />
-
-              </div>
-
-              {/* Action */}
-
-              <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
-
-                <span className="text-xs font-bold text-[#173563]">
-                  Continue as Clearing Agent
-                </span>
-
-                <span className="text-[10px] font-medium text-slate-400">
-                  Professional account
-                </span>
-
-              </div>
-
-            </button>
-
-          </div>
-
-          {/* =================================================
-              INFORMATION
-          ================================================= */}
-
-          <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3">
-
-            <div className="flex items-start gap-3">
-
-              <ShieldCheck
-                size={17}
-                className="mt-0.5 shrink-0 text-blue-600"
-              />
-
-              <p className="text-[11px] leading-5 text-blue-800">
-                Your account type determines which dashboard,
-                registration process and features will be available
-                to you on ImportEase.
-              </p>
-
-            </div>
-
-          </div>
-
-          {/* =================================================
-              SIGN IN
-          ================================================= */}
-
-          <div className="mt-6 border-t border-slate-100 pt-5 text-center">
-
-            <p className="text-sm text-slate-500">
-
-              Already have an account?{" "}
-
-              <Link
-                to="/signin"
-                className="font-semibold text-[#173563] transition-colors hover:text-blue-700"
-              >
-                Sign in
-              </Link>
-
-            </p>
-
-          </div>
-
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            Create your ImportEase account
+          </h1>
+
+          
         </div>
 
-        {/* ===================================================
-            BACK HOME
-        =================================================== */}
+        {/* ACCOUNT TYPE CARDS */}
+        <div className="grid gap-5 md:grid-cols-2">
+          {/* SME CARD */}
+          <button
+            type="button"
+            onClick={handleSME}
+            className="group flex min-h-[390px] flex-col rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#173563]/30 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#173563] focus-visible:ring-offset-2 sm:p-7"
+          >
+            <div className="flex flex-1 flex-col">
+              {/* ICON + ARROW */}
+              <div className="flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-[#173563] transition-all duration-200 group-hover:border-[#173563] group-hover:bg-[#173563] group-hover:text-white">
+                  <Store className="h-5 w-5" />
+                </div>
 
-        <div className="mt-5 flex justify-center">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 transition-all duration-200 group-hover:bg-blue-50">
+                  <ArrowRight className="h-4 w-4 text-slate-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-[#173563]" />
+                </div>
+              </div>
 
+              {/* TITLE */}
+              <div className="mt-6">
+                <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-[22px]">
+                  SME / Importer
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  Register your business to simplify your importing process,
+                  manage shipments, calculate costs and connect with clearing
+                  agents.
+                </p>
+              </div>
+
+              {/* FEATURES */}
+              <div className="mt-6 border-t border-slate-100 pt-5">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  With your SME account
+                </p>
+
+                <div className="space-y-3">
+                  <RoleFeature text="Manage your import shipments" />
+                  <RoleFeature text="Search HS codes and estimate costs" />
+                  <RoleFeature text="Find and hire clearing agents" />
+                </div>
+              </div>
+            </div>
+
+            {/* FOOTER */}
+            <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-5">
+              <span className="text-sm font-semibold text-[#173563]">
+                Continue as SME
+              </span>
+
+              
+            </div>
+          </button>
+
+          {/* CLEARING AGENT CARD */}
+          <button
+            type="button"
+            onClick={handleClearingAgent}
+            className="group flex min-h-[390px] flex-col rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#173563]/30 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#173563] focus-visible:ring-offset-2 sm:p-7"
+          >
+            <div className="flex flex-1 flex-col">
+              {/* ICON + ARROW */}
+              <div className="flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-[#173563] transition-all duration-200 group-hover:border-[#173563] group-hover:bg-[#173563] group-hover:text-white">
+                  <Building2 className="h-5 w-5" />
+                </div>
+
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 transition-all duration-200 group-hover:bg-blue-50">
+                  <ArrowRight className="h-4 w-4 text-slate-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-[#173563]" />
+                </div>
+              </div>
+
+              {/* TITLE */}
+              <div className="mt-6">
+                <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-[22px]">
+                  Clearing Agent
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  Register as a professional clearing agent to work with SMEs,
+                  manage requests and grow your business through ImportEase.
+                </p>
+              </div>
+
+              {/* FEATURES */}
+              <div className="mt-6 border-t border-slate-100 pt-5">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  With your agent account
+                </p>
+
+                <div className="space-y-3">
+                  <RoleFeature text="Create or join a clearing agency" />
+                  <RoleFeature text="Manage your professional credentials" />
+                  <RoleFeature text="Receive requests and submit bids" />
+                </div>
+              </div>
+            </div>
+
+            {/* FOOTER */}
+            <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-5">
+              <span className="text-sm font-semibold text-[#173563]">
+                Continue as Clearing Agent
+              </span>
+
+              
+            </div>
+          </button>
+        </div>
+
+
+        {/* SIGN IN */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-slate-500">
+            Already have an account?{" "}
+            <Link
+              to="/signin"
+              className="font-semibold text-[#173563] underline decoration-[#173563]/30 underline-offset-4 transition-colors hover:text-blue-700 hover:decoration-blue-700"
+            >
+              Sign in
+            </Link>
+          </p>
+        </div>
+
+        {/* BACK HOME */}
+        <div className="mt-3 flex justify-center">
           <Link
             to="/"
-            className="flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-slate-800"
+            className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium text-slate-400 transition-colors hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#173563] focus-visible:ring-offset-2"
           >
-
-            <ArrowLeft size={16} />
-
+            <ArrowLeft className="h-3.5 w-3.5" />
             Back to ImportEase
-
           </Link>
-
         </div>
-
       </div>
-
     </div>
   );
 }
 
-
-/* =========================================================
-   FEATURE
-========================================================= */
-
+/* FEATURE ITEM */
 function RoleFeature({ text }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2.5">
+      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
 
-      <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-50">
-        <CheckCircle2
-          size={11}
-          className="text-emerald-600"
-        />
-      </div>
-
-      <span className="text-[11px] text-slate-500">
+      <span className="text-sm font-medium text-slate-600">
         {text}
       </span>
-
     </div>
   );
 }

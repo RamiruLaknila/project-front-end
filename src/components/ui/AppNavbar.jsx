@@ -24,9 +24,9 @@ function AppNavbar() {
 
   const navItems = [
     {
-      to: "/dashboard",
-      label: "Dashboard",
-    },
+    to: "/Dashboard",
+    label: "Home",
+  },
     {
       to: "/hs-code-search",
       label: "HS Code Search",

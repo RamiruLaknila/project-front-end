@@ -218,7 +218,7 @@ function Home() {
               }}
               className="mt-4 font-serif text-[28px] text-[#173563] sm:text-[32px]"
             >
-              Select Your Account Type
+              Sign In
             </motion.h2>
 
             {/* User Type Cards */}

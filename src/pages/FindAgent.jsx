@@ -1,14 +1,21 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
-  Package,
-  Globe2,
-  DollarSign,
-  CheckCircle2,
+  Search,
+  SlidersHorizontal,
+  MapPin,
+  Star,
   ShieldCheck,
+  Package,
+  Clock3,
+  Building2,
+  CheckCircle2,
+  X,
+  Send,
   Sparkles,
+  BriefcaseBusiness,
   ChevronDown,
   Laptop,
   Shirt,
@@ -18,7 +25,6 @@ import {
   Pill,
   Home,
   ShoppingBag,
-  X,
 } from "lucide-react";
 
 import AppNavbar from "../components/ui/AppNavbar";
@@ -27,13 +33,42 @@ import BackButton from "../components/ui/BackButton";
 function FindAgent() {
   const navigate = useNavigate();
 
+  /* =========================================================
+     SEARCH & FILTERS
+  ========================================================= */
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [categoryFilter, setCategoryFilter] =
+    useState("All Categories");
+
+  const [locationFilter, setLocationFilter] =
+    useState("All Locations");
+
+  const [experienceFilter, setExperienceFilter] =
+    useState("Any Experience");
+
+  const [ratingFilter, setRatingFilter] =
+    useState("Any Rating");
+
+  const [showFilters, setShowFilters] = useState(false);
+
+  /* =========================================================
+     REQUEST FORM
+  ========================================================= */
+
   const [productDetails, setProductDetails] = useState("");
   const [origin, setOrigin] = useState("");
   const [declaredValue, setDeclaredValue] = useState("");
 
-  // Category browser
-  const [showCategories, setShowCategories] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedAgent, setSelectedAgent] =
+    useState(null);
+
+  const [showProfile, setShowProfile] =
+    useState(false);
+
+  const [showRequestForm, setShowRequestForm] =
+    useState(false);
 
   /* =========================================================
      CATEGORIES
@@ -41,255 +76,540 @@ function FindAgent() {
 
   const categories = [
     {
-      id: "electronics",
       name: "Electronics",
-      description: "Computers, phones, devices",
       icon: Laptop,
-      examples: "Laptops, phones, accessories",
     },
     {
-      id: "textiles",
       name: "Textiles & Apparel",
-      description: "Clothing and fabrics",
       icon: Shirt,
-      examples: "Clothing, fabric, garments",
     },
     {
-      id: "automotive",
       name: "Automotive",
-      description: "Vehicles and parts",
       icon: Car,
-      examples: "Spare parts, vehicles, tyres",
     },
     {
-      id: "food",
       name: "Food & Agriculture",
-      description: "Food and agricultural goods",
       icon: Apple,
-      examples: "Food, fruits, grains",
     },
     {
-      id: "machinery",
       name: "Machinery",
-      description: "Industrial equipment",
       icon: Factory,
-      examples: "Machines, equipment, tools",
     },
     {
-      id: "pharmaceuticals",
       name: "Pharmaceuticals",
-      description: "Medical and pharmaceutical goods",
       icon: Pill,
-      examples: "Medical supplies, medicines",
     },
     {
-      id: "household",
       name: "Household Goods",
-      description: "Home and kitchen products",
       icon: Home,
-      examples: "Furniture, kitchen items",
     },
     {
-      id: "other",
       name: "Other Goods",
-      description: "Other imported products",
       icon: ShoppingBag,
-      examples: "General merchandise",
     },
   ];
 
   /* =========================================================
-     CATEGORY SELECT
+     AVAILABLE CLEARING AGENTS
   ========================================================= */
 
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category.name);
+  const agents = [
+    {
+      id: "agent-001",
+      agencyName: "LankaClear Logistics",
+      agentName: "Kasun Perera",
+      location: "Colombo",
+      rating: 4.9,
+      reviews: 128,
+      experience: 8,
+      shipments: 420,
+      verified: true,
+      responseTime: "Usually responds within 1 hour",
+      categories: [
+        "Electronics",
+        "Machinery",
+        "Automotive",
+      ],
+      description:
+        "Experienced customs clearing team specializing in commercial imports, electronics and industrial shipments.",
+    },
 
-    // Automatically put a useful starting value into product field
-    if (!productDetails.trim()) {
-      setProductDetails(`${category.name} - `);
-    }
+    {
+      id: "agent-002",
+      agencyName: "Prime Customs Solutions",
+      agentName: "Nuwan Fernando",
+      location: "Colombo",
+      rating: 4.8,
+      reviews: 96,
+      experience: 6,
+      shipments: 315,
+      verified: true,
+      responseTime: "Usually responds within 2 hours",
+      categories: [
+        "Textiles & Apparel",
+        "Electronics",
+        "Household Goods",
+      ],
+      description:
+        "Professional clearing service focused on SMEs and regular commercial import shipments.",
+    },
 
-    setShowCategories(false);
+    {
+      id: "agent-003",
+      agencyName: "Ceylon Trade Assist",
+      agentName: "Dilshan Silva",
+      location: "Colombo",
+      rating: 4.7,
+      reviews: 84,
+      experience: 5,
+      shipments: 260,
+      verified: true,
+      responseTime: "Usually responds within 3 hours",
+      categories: [
+        "Food & Agriculture",
+        "Pharmaceuticals",
+        "Household Goods",
+      ],
+      description:
+        "Customs clearance specialists helping businesses handle food, agricultural and regulated imports.",
+    },
+
+    {
+      id: "agent-004",
+      agencyName: "Island Customs & Freight",
+      agentName: "Tharindu Jayasinghe",
+      location: "Galle",
+      rating: 4.6,
+      reviews: 72,
+      experience: 9,
+      shipments: 510,
+      verified: true,
+      responseTime: "Usually responds within 2 hours",
+      categories: [
+        "Automotive",
+        "Machinery",
+        "Other Goods",
+      ],
+      description:
+        "Long-standing customs clearing agency handling heavy equipment, vehicles and commercial cargo.",
+    },
+
+    {
+      id: "agent-005",
+      agencyName: "Metro Import Services",
+      agentName: "Ravindu Wijesinghe",
+      location: "Negombo",
+      rating: 4.5,
+      reviews: 61,
+      experience: 4,
+      shipments: 198,
+      verified: true,
+      responseTime: "Usually responds within 4 hours",
+      categories: [
+        "Electronics",
+        "Textiles & Apparel",
+        "Other Goods",
+      ],
+      description:
+        "SME-focused customs clearing service providing straightforward import documentation and clearance.",
+    },
+
+    {
+      id: "agent-006",
+      agencyName: "HarbourLink Clearing",
+      agentName: "Sahan Gunawardena",
+      location: "Colombo",
+      rating: 4.4,
+      reviews: 49,
+      experience: 7,
+      shipments: 340,
+      verified: true,
+      responseTime: "Usually responds within 3 hours",
+      categories: [
+        "Machinery",
+        "Automotive",
+        "Electronics",
+      ],
+      description:
+        "Experienced clearing team located close to the Colombo port area.",
+    },
+  ];
+
+  /* =========================================================
+     FILTER AGENTS
+  ========================================================= */
+
+  const filteredAgents = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    const filtered = agents.filter((agent) => {
+      const matchesSearch =
+        !query ||
+        agent.agencyName
+          .toLowerCase()
+          .includes(query) ||
+        agent.agentName
+          .toLowerCase()
+          .includes(query) ||
+        agent.location
+          .toLowerCase()
+          .includes(query) ||
+        agent.categories.some((category) =>
+          category.toLowerCase().includes(query)
+        );
+
+      const matchesCategory =
+        categoryFilter === "All Categories" ||
+        agent.categories.includes(categoryFilter);
+
+      const matchesLocation =
+        locationFilter === "All Locations" ||
+        agent.location === locationFilter;
+
+      const matchesExperience =
+        experienceFilter === "Any Experience" ||
+        (experienceFilter === "1–3 years" &&
+          agent.experience >= 1 &&
+          agent.experience <= 3) ||
+        (experienceFilter === "4–7 years" &&
+          agent.experience >= 4 &&
+          agent.experience <= 7) ||
+        (experienceFilter === "8+ years" &&
+          agent.experience >= 8);
+
+      const matchesRating =
+        ratingFilter === "Any Rating" ||
+        (ratingFilter === "4.0+ Rating" &&
+          agent.rating >= 4.0) ||
+        (ratingFilter === "4.5+ Rating" &&
+          agent.rating >= 4.5) ||
+        (ratingFilter === "4.8+ Rating" &&
+          agent.rating >= 4.8);
+
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesLocation &&
+        matchesExperience &&
+        matchesRating
+      );
+    });
+
+    return [...filtered].sort(
+      (a, b) => b.rating - a.rating
+    );
+  }, [
+    searchQuery,
+    categoryFilter,
+    locationFilter,
+    experienceFilter,
+    ratingFilter,
+  ]);
+
+  /* =========================================================
+     ACTIVE FILTERS
+  ========================================================= */
+
+  const hasActiveFilters =
+    searchQuery.trim() ||
+    categoryFilter !== "All Categories" ||
+    locationFilter !== "All Locations" ||
+    experienceFilter !== "Any Experience" ||
+    ratingFilter !== "Any Rating";
+
+  /* =========================================================
+     CLEAR FILTERS
+  ========================================================= */
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setCategoryFilter("All Categories");
+    setLocationFilter("All Locations");
+    setExperienceFilter("Any Experience");
+    setRatingFilter("Any Rating");
   };
 
   /* =========================================================
-     SUBMIT SHIPMENT REQUEST
+     VIEW PROFILE
   ========================================================= */
 
-  const handleSubmit = (e) => {
+  const handleViewProfile = (agent) => {
+    setSelectedAgent(agent);
+    setShowProfile(true);
+  };
+
+  /* =========================================================
+     REQUEST QUOTE
+  ========================================================= */
+
+  const handleRequestQuote = (agent) => {
+    setSelectedAgent(agent);
+    setShowRequestForm(true);
+  };
+
+  /* =========================================================
+     SELECT AGENT
+  ========================================================= */
+
+  const handleSelectAgent = (agent) => {
+    setSelectedAgent(agent);
+
+    try {
+      localStorage.setItem(
+        "selectedAgent",
+        JSON.stringify(agent)
+      );
+    } catch {
+      // Ignore localStorage errors
+    }
+
+    setShowRequestForm(true);
+  };
+
+  /* =========================================================
+     CREATE SHIPMENT REQUEST
+  ========================================================= */
+
+  const createShipmentRequest = (e) => {
     if (e) {
       e.preventDefault();
     }
 
-    /* =======================================================
-       VALIDATION
-    ======================================================= */
+    const cleanProduct =
+      productDetails.trim();
 
-    const cleanProduct = productDetails.trim();
-    const cleanOrigin = origin.trim();
-    const numericValue = Number(declaredValue);
+    const cleanOrigin =
+      origin.trim();
+
+    const numericValue =
+      Number(declaredValue);
+
+    /* -------------------------------------------------------
+       VALIDATION
+    ------------------------------------------------------- */
 
     if (!cleanProduct) {
-      alert("Please enter what you are importing.");
+      alert(
+        "Please enter what you are importing."
+      );
       return;
     }
 
     if (!cleanOrigin) {
-      alert("Please enter the country or city of origin.");
+      alert(
+        "Please enter the country or city of origin."
+      );
       return;
     }
 
     if (!numericValue || numericValue <= 0) {
-      alert("Please enter a valid declared value.");
+      alert(
+        "Please enter a valid declared value."
+      );
       return;
     }
 
-    /* =======================================================
-       GET CURRENT IMPORT
-    ======================================================= */
+    /* -------------------------------------------------------
+       CURRENT IMPORT
+    ------------------------------------------------------- */
 
     let currentImport = null;
 
     try {
       currentImport = JSON.parse(
-        localStorage.getItem("currentImport") || "null"
+        localStorage.getItem(
+          "currentImport"
+        ) || "null"
       );
     } catch {
       currentImport = null;
     }
 
-    /* =======================================================
-       CREATE UNIQUE REQUEST ID
-    ======================================================= */
+    /* -------------------------------------------------------
+       REQUEST ID
+    ------------------------------------------------------- */
 
-    const requestId = `REQ-${Date.now()}`;
-    const createdAt = new Date().toISOString();
+    const requestId =
+      `REQ-${Date.now()}`;
+
+    const createdAt =
+      new Date().toISOString();
+
+    /* -------------------------------------------------------
+       CATEGORY
+    ------------------------------------------------------- */
 
     const finalCategory =
-      selectedCategory ||
       currentImport?.category ||
-      "General";
+      (categoryFilter !== "All Categories"
+        ? categoryFilter
+        : "General");
 
     /* =======================================================
-       CREATE SME SHIPMENT REQUEST
+       SHIPMENT REQUEST
     ======================================================= */
 
     const shipmentRequest = {
       id: requestId,
       requestId,
 
-      productDetails: cleanProduct,
-      product: cleanProduct,
+      productDetails:
+        cleanProduct,
 
-      origin: cleanOrigin,
+      product:
+        cleanProduct,
 
-      declaredValue: numericValue,
-      shipmentValue: numericValue,
+      origin:
+        cleanOrigin,
 
-      hsCode: currentImport?.hsCode || "",
+      declaredValue:
+        numericValue,
 
-      category: finalCategory,
+      shipmentValue:
+        numericValue,
 
-      destination: "Colombo, Sri Lanka",
+      hsCode:
+        currentImport?.hsCode || "",
 
-      urgency: "Medium",
-      status: "Open",
+      category:
+        finalCategory,
+
+      destination:
+        "Colombo, Sri Lanka",
+
+      urgency:
+        "Medium",
+
+      status:
+        "Open",
+
+      selectedAgentId:
+        selectedAgent?.id || null,
+
+      selectedAgentName:
+        selectedAgent?.agencyName || null,
 
       createdAt,
     };
 
-    /* =======================================================
-       SAVE SME REQUEST
-    ======================================================= */
-
     localStorage.setItem(
       "shipmentRequest",
-      JSON.stringify(shipmentRequest)
+      JSON.stringify(
+        shipmentRequest
+      )
     );
 
     /* =======================================================
-       GET EXISTING MARKETPLACE REQUESTS
+       MARKETPLACE REQUEST
     ======================================================= */
 
     let existingRequests = [];
 
     try {
-      existingRequests = JSON.parse(
-        localStorage.getItem("marketplaceRequests") || "[]"
-      );
+      existingRequests =
+        JSON.parse(
+          localStorage.getItem(
+            "marketplaceRequests"
+          ) || "[]"
+        );
 
-      if (!Array.isArray(existingRequests)) {
+      if (
+        !Array.isArray(
+          existingRequests
+        )
+      ) {
         existingRequests = [];
       }
     } catch {
       existingRequests = [];
     }
 
-    /* =======================================================
-       CREATE MARKETPLACE REQUEST
-    ======================================================= */
-
     const marketplaceRequest = {
       id: requestId,
       requestId,
 
-      product: cleanProduct,
-      productDetails: cleanProduct,
-      description: cleanProduct,
+      product:
+        cleanProduct,
 
-      hsCode: currentImport?.hsCode || "Not classified",
+      productDetails:
+        cleanProduct,
 
-      category: finalCategory,
+      description:
+        cleanProduct,
 
-      origin: cleanOrigin,
-      destination: "Colombo, Sri Lanka",
+      hsCode:
+        currentImport?.hsCode ||
+        "Not classified",
 
-      shipmentValue: numericValue,
-      declaredValue: numericValue,
+      category:
+        finalCategory,
 
-      requestedDate: new Date(
-        Date.now() + 7 * 24 * 60 * 60 * 1000
-      )
-        .toISOString()
-        .split("T")[0],
+      origin:
+        cleanOrigin,
 
-      urgency: "Medium",
-      status: "Open",
+      destination:
+        "Colombo, Sri Lanka",
 
-      hasBid: false,
+      shipmentValue:
+        numericValue,
+
+      declaredValue:
+        numericValue,
+
+      requestedDate:
+        new Date(
+          Date.now() +
+            7 *
+              24 *
+              60 *
+              60 *
+              1000
+        )
+          .toISOString()
+          .split("T")[0],
+
+      urgency:
+        "Medium",
+
+      status:
+        "Open",
+
+      hasBid:
+        false,
+
+      selectedAgentId:
+        selectedAgent?.id || null,
+
+      selectedAgentName:
+        selectedAgent?.agencyName ||
+        null,
 
       createdAt,
     };
 
-    /* =======================================================
-       ADD REQUEST TO MARKETPLACE
-    ======================================================= */
-
     const updatedRequests = [
       marketplaceRequest,
+
       ...existingRequests.filter(
-        (request) => request.id !== requestId
+        (request) =>
+          request.id !==
+          requestId
       ),
     ];
 
     localStorage.setItem(
       "marketplaceRequests",
-      JSON.stringify(updatedRequests)
+      JSON.stringify(
+        updatedRequests
+      )
     );
-
-    /* =======================================================
-       SAVE CURRENT MARKETPLACE REQUEST
-    ======================================================= */
 
     localStorage.setItem(
       "currentMarketplaceRequest",
-      JSON.stringify(marketplaceRequest)
+      JSON.stringify(
+        marketplaceRequest
+      )
     );
-
-    /* =======================================================
-       SAVE CURRENT REQUEST ID
-    ======================================================= */
 
     localStorage.setItem(
       "currentRequestId",
@@ -297,38 +617,77 @@ function FindAgent() {
     );
 
     /* =======================================================
-       REMOVE BIDS FROM OLD REQUEST
+       SAVE SELECTED AGENT
+    ======================================================= */
+
+    if (selectedAgent) {
+      localStorage.setItem(
+        "selectedAgent",
+        JSON.stringify(
+          selectedAgent
+        )
+      );
+    } else {
+      localStorage.removeItem(
+        "selectedAgent"
+      );
+    }
+
+    /* =======================================================
+       CLEAN OLD BIDS
     ======================================================= */
 
     let existingBids = [];
 
     try {
-      existingBids = JSON.parse(
-        localStorage.getItem("agentBids") || "[]"
-      );
+      existingBids =
+        JSON.parse(
+          localStorage.getItem(
+            "agentBids"
+          ) || "[]"
+        );
 
-      if (!Array.isArray(existingBids)) {
+      if (
+        !Array.isArray(
+          existingBids
+        )
+      ) {
         existingBids = [];
       }
     } catch {
       existingBids = [];
     }
 
-    const cleanedBids = existingBids.filter(
-      (bid) => bid.requestId !== requestId
-    );
+    const cleanedBids =
+      existingBids.filter(
+        (bid) =>
+          bid.requestId !==
+          requestId
+      );
 
     localStorage.setItem(
       "agentBids",
-      JSON.stringify(cleanedBids)
+      JSON.stringify(
+        cleanedBids
+      )
     );
 
     /* =======================================================
-       NAVIGATE TO REVIEW BIDS
+       CLOSE MODAL
+    ======================================================= */
+
+    setShowRequestForm(false);
+
+    /* =======================================================
+       GO TO REVIEW BIDS
     ======================================================= */
 
     navigate("/review-bids");
   };
+
+  /* =========================================================
+     RENDER
+  ========================================================= */
 
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
@@ -374,84 +733,51 @@ function FindAgent() {
           }
         }
 
-        @keyframes categoryOpen {
-          from {
-            opacity: 0;
-            transform: translateY(-4px);
-          }
-
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes pulseSoft {
-          0%,
-          100% {
-            box-shadow: 0 0 0 0 rgba(23, 59, 108, 0);
-          }
-
-          50% {
-            box-shadow: 0 0 0 6px rgba(23, 59, 108, 0.05);
-          }
-        }
-
         .fade-up {
           animation:
-            fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1)
+            fadeUp 0.5s
+            cubic-bezier(0.22, 1, 0.36, 1)
             both;
         }
 
         .scale-in {
           animation:
-            scaleIn 0.35s cubic-bezier(0.22, 1, 0.36, 1)
+            scaleIn 0.35s
+            cubic-bezier(0.22, 1, 0.36, 1)
             both;
         }
 
         .slide-down {
           animation:
-            slideDown 0.25s cubic-bezier(0.22, 1, 0.36, 1)
+            slideDown 0.25s
+            cubic-bezier(0.22, 1, 0.36, 1)
             both;
         }
 
-        .category-open {
-          animation:
-            categoryOpen 0.25s cubic-bezier(0.22, 1, 0.36, 1)
-            both;
-        }
-
-        .pulse-soft {
-          animation:
-            pulseSoft 2.5s ease-in-out infinite;
-        }
-
-        .calculator-delay-1 {
+        .agent-delay-1 {
           animation-delay: 0.05s;
         }
 
-        .calculator-delay-2 {
+        .agent-delay-2 {
           animation-delay: 0.1s;
         }
 
-        .calculator-delay-3 {
+        .agent-delay-3 {
           animation-delay: 0.15s;
         }
 
-        .calculator-delay-4 {
+        .agent-delay-4 {
           animation-delay: 0.2s;
         }
 
-        .calculator-delay-5 {
+        .agent-delay-5 {
           animation-delay: 0.25s;
         }
 
         @media (prefers-reduced-motion: reduce) {
           .fade-up,
           .scale-in,
-          .slide-down,
-          .category-open,
-          .pulse-soft {
+          .slide-down {
             animation: none;
           }
         }
@@ -464,7 +790,7 @@ function FindAgent() {
       <AppNavbar />
 
       {/* =====================================================
-          MAIN CONTENT
+          MAIN
       ====================================================== */}
 
       <main className="mx-auto w-full max-w-[1000px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
@@ -474,371 +800,202 @@ function FindAgent() {
         ==================================================== */}
 
         <div className="fade-up mb-6">
-          <BackButton current="Find Agent" />
+          <BackButton current="Find Clearing Agent" />
         </div>
 
         {/* ===================================================
-            PAGE HEADER
+            HEADER
         ==================================================== */}
 
-        <section className="fade-up calculator-delay-1 mb-8">
+        <section className="fade-up -mt-8 mb-7">
 
-          <div className="flex flex-col items-center justify-center text-center">
+          <div className="text-center">
 
-            {/* BADGE */}
-
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5">
-
-              <Sparkles
-                size={13}
-                className="text-blue-600"
-                strokeWidth={2}
-              />
-
-              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-700">
-                Shipment request
-              </span>
-
-            </div>
-
-            {/* TITLE */}
-
-            <h1 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[40px]">
-              Find a Clearing Agent
+            <h1 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+              Find a clearing agent
             </h1>
 
-            {/* DESCRIPTION */}
-
-            <p className="mx-auto mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
-              Tell us about your shipment and receive
-              competitive bids from licensed customs agents
-              within hours.
+            <p className="mx-auto mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-[15px]">
+              Search and compare verified clearing
+              agents based on experience, ratings,
+              location, and import specializations.
             </p>
-
-            {/* STATUS */}
-
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
-
-              <CheckCircle2
-                size={14}
-                className="text-emerald-600"
-              />
-
-              <span className="text-[10px] font-semibold text-emerald-700">
-                Free to post
-              </span>
-
-            </div>
 
           </div>
 
         </section>
 
         {/* ===================================================
-            PROGRESS BAR
+            SEARCH SECTION
         ==================================================== */}
 
-        <section className="fade-up calculator-delay-2 mx-auto mb-7 w-full max-w-[760px] rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-[0_2px_8px_rgba(15,23,42,.02)]">
+        <section className="fade-up agent-delay-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,.025)]">
 
-          <div className="flex items-center">
+          {/* SEARCH HEADER */}
 
-            {/* STEP 1 */}
+          <div className="p-5 sm:p-6">
 
-            <div className="flex shrink-0 items-center gap-2">
-
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#173B6C] text-[11px] font-bold text-white shadow-sm">
-                1
-              </div>
-
-              <span className="hidden text-[11px] font-semibold text-[#173B6C] sm:block">
-                Describe Shipment
-              </span>
-
-            </div>
-
-            <div className="mx-2 h-px flex-1 bg-slate-200" />
-
-            {/* STEP 2 */}
-
-            <div className="flex shrink-0 items-center gap-2">
-
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-400">
-                2
-              </div>
-
-              <span className="hidden text-[11px] font-medium text-slate-400 sm:block">
-                Review Bids
-              </span>
-
-            </div>
-
-            <div className="mx-2 h-px flex-1 bg-slate-200" />
-
-            {/* STEP 3 */}
-
-            <div className="flex shrink-0 items-center gap-2">
-
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-400">
-                3
-              </div>
-
-              <span className="hidden text-[11px] font-medium text-slate-400 sm:block">
-                Accept & Clear
-              </span>
-
-            </div>
-
-          </div>
-
-        </section>
-
-        {/* ===================================================
-            INFO BANNER
-        ==================================================== */}
-
-        <div className="fade-up calculator-delay-3 mb-6 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3.5">
-
-          <ShieldCheck
-            size={16}
-            className="mt-0.5 shrink-0 text-blue-600"
-          />
-
-          <div>
-
-            <p className="text-[10px] font-bold text-blue-800">
-              Connect with clearing agents
-            </p>
-
-            <p className="mt-1 text-[11px] leading-5 text-blue-700">
-              Provide accurate shipment details so
-              clearing agents can understand your
-              requirements and send a suitable bid.
-            </p>
-
-          </div>
-
-        </div>
-
-        {/* ===================================================
-            FORM CARD
-        ==================================================== */}
-
-        <section className="fade-up calculator-delay-4 scale-in rounded-2xl border border-slate-200 bg-white shadow-[0_2px_14px_rgba(15,23,42,.025)]">
-
-          {/* =================================================
-              CARD HEADER
-          ================================================== */}
-
-          <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
-
-            <div className="flex items-start justify-between gap-4">
+            <div className="mb-4 flex items-center justify-between gap-3">
 
               <div>
 
                 <div className="flex items-center gap-2">
 
-                  <h2 className="text-sm font-bold text-[#14213D]">
-                    Shipment details
-                  </h2>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-[#2563EB]">
 
-                  <div className="hidden rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-500 sm:block">
-                    Step 1 of 3
+                    <Search size={16} />
+
                   </div>
+
+                  <h2 className="text-[17px] font-bold text-slate-900">
+                    Search clearing agents
+                  </h2>
 
                 </div>
 
-                <p className="mt-1 text-[11px] leading-5 text-slate-500">
-                  Give agents enough detail to send you
-                  an accurate bid.
+                <p className="mt-2 text-[13px] text-slate-500">
+                  Find an agent that matches your
+                  shipment requirements.
                 </p>
 
               </div>
 
-              <div className="pulse-soft hidden h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 sm:flex">
+              <button
+                type="button"
+                onClick={() =>
+                  setShowFilters(
+                    !showFilters
+                  )
+                }
+                className={`flex shrink-0 items-center gap-2 rounded-xl border px-3.5 py-2.5 text-[12px] font-bold transition ${
+                  showFilters
+                    ? "border-[#173B6C] bg-[#173B6C] text-white"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                }`}
+              >
 
-                <Package
+                <SlidersHorizontal
                   size={16}
-                  strokeWidth={1.8}
                 />
 
-              </div>
+                Filters
+
+              </button>
+
+            </div>
+
+            {/* SEARCH INPUT */}
+
+            <div className="relative">
+
+              <Search
+                size={19}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) =>
+                  setSearchQuery(
+                    e.target.value
+                  )
+                }
+                placeholder="Search by agency, agent, location or specialization..."
+                className="h-12 w-full rounded-xl border border-slate-300 bg-white pl-11 pr-11 text-[13px] font-medium text-slate-800 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
+              />
+
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSearchQuery("")
+                  }
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                >
+
+                  <X size={16} />
+
+                </button>
+              )}
 
             </div>
 
           </div>
 
           {/* =================================================
-              FORM
+              FILTER PANEL
           ================================================== */}
 
-          <form
-            onSubmit={handleSubmit}
-            className="p-5 sm:p-6"
-          >
+          {showFilters && (
 
-            {/* =================================================
-                CATEGORY BROWSER
-            ================================================== */}
+            <div className="slide-down border-t border-slate-100 bg-slate-50/60 p-5 sm:p-6">
 
-            <div className="slide-down calculator-delay-1 mb-6">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70">
+                <FilterSelect
+                  label="Category"
+                  value={categoryFilter}
+                  onChange={setCategoryFilter}
+                  options={[
+                    "All Categories",
+                    ...categories.map(
+                      (category) =>
+                        category.name
+                    ),
+                  ]}
+                />
 
-                {/* CATEGORY DROPDOWN HEADER */}
+                <FilterSelect
+                  label="Location"
+                  value={locationFilter}
+                  onChange={setLocationFilter}
+                  options={[
+                    "All Locations",
+                    "Colombo",
+                    "Galle",
+                    "Negombo",
+                  ]}
+                />
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowCategories(!showCategories)
-                  }
-                  className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left transition hover:bg-slate-100/70"
-                >
+                <FilterSelect
+                  label="Experience"
+                  value={experienceFilter}
+                  onChange={setExperienceFilter}
+                  options={[
+                    "Any Experience",
+                    "1–3 years",
+                    "4–7 years",
+                    "8+ years",
+                  ]}
+                />
 
-                  <div className="flex items-center gap-3">
-
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                      <Package size={17} />
-                    </div>
-
-                    <div>
-
-                      <div className="flex items-center gap-2">
-
-                        <span className="text-xs font-bold text-[#14213D]">
-                          Browse by Category
-                        </span>
-
-                        <span className="rounded-full bg-white px-2 py-0.5 text-[9px] font-semibold text-slate-400">
-                          Optional
-                        </span>
-
-                      </div>
-
-                      <p className="mt-0.5 text-[10px] text-slate-400">
-                        Choose a category to describe your shipment faster
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                  <ChevronDown
-                    size={17}
-                    className={`shrink-0 text-slate-400 transition-transform duration-200 ${
-                      showCategories
-                        ? "rotate-180"
-                        : ""
-                    }`}
-                  />
-
-                </button>
-
-                {/* CATEGORY LIST */}
-
-                {showCategories && (
-
-                  <div className="category-open border-t border-slate-200 p-3">
-
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-
-                      {categories.map((category) => {
-
-                        const Icon = category.icon;
-
-                        const isSelected =
-                          selectedCategory ===
-                          category.name;
-
-                        return (
-                          <button
-                            key={category.id}
-                            type="button"
-                            onClick={() =>
-                              handleCategorySelect(category)
-                            }
-                            className={`group rounded-xl border p-3 text-left transition-all duration-200 ${
-                              isSelected
-                                ? "border-[#173B6C] bg-blue-50 shadow-sm"
-                                : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-sm"
-                            }`}
-                          >
-
-                            <div className="flex items-start justify-between">
-
-                              <div
-                                className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                                  isSelected
-                                    ? "bg-[#173B6C] text-white"
-                                    : "bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600"
-                                }`}
-                              >
-                                <Icon size={15} />
-                              </div>
-
-                              {isSelected && (
-                                <CheckCircle2
-                                  size={15}
-                                  className="text-[#173B6C]"
-                                />
-                              )}
-
-                            </div>
-
-                            <p className="mt-2 text-[11px] font-bold text-[#14213D]">
-                              {category.name}
-                            </p>
-
-                            <p className="mt-0.5 text-[9px] leading-4 text-slate-400">
-                              {category.description}
-                            </p>
-
-                            <p className="mt-1 text-[9px] leading-4 text-slate-400">
-                              {category.examples}
-                            </p>
-
-                          </button>
-                        );
-                      })}
-
-                    </div>
-
-                  </div>
-                )}
+                <FilterSelect
+                  label="Rating"
+                  value={ratingFilter}
+                  onChange={setRatingFilter}
+                  options={[
+                    "Any Rating",
+                    "4.0+ Rating",
+                    "4.5+ Rating",
+                    "4.8+ Rating",
+                  ]}
+                />
 
               </div>
 
-              {/* SELECTED CATEGORY */}
+              {hasActiveFilters && (
 
-              {selectedCategory && (
-
-                <div className="mt-2 flex items-center justify-between rounded-lg border border-blue-100 bg-blue-50 px-3 py-2">
-
-                  <div className="flex items-center gap-2">
-
-                    <CheckCircle2
-                      size={13}
-                      className="text-blue-600"
-                    />
-
-                    <span className="text-[10px] font-semibold text-blue-700">
-                      Selected category:
-                    </span>
-
-                    <span className="text-[10px] font-bold text-blue-800">
-                      {selectedCategory}
-                    </span>
-
-                  </div>
+                <div className="mt-4 flex justify-end">
 
                   <button
                     type="button"
-                    onClick={() =>
-                      setSelectedCategory("")
+                    onClick={
+                      clearFilters
                     }
-                    className="rounded-md p-1 text-blue-500 transition hover:bg-blue-100 hover:text-blue-700"
-                    aria-label="Clear selected category"
+                    className="text-[12px] font-bold text-[#2563EB] hover:underline"
                   >
-                    <X size={13} />
+                    Clear all filters
                   </button>
 
                 </div>
@@ -847,159 +1004,354 @@ function FindAgent() {
 
             </div>
 
-            {/* =================================================
-                PRODUCT
-            ================================================== */}
+          )}
 
-            <div className="slide-down calculator-delay-2 mb-5">
+          {/* =================================================
+              QUICK FILTERS
+          ================================================== */}
 
-              <label
-                htmlFor="productDetails"
-                className="mb-1 flex items-center gap-1.5 text-[10px] font-bold text-[#14213D]"
-              >
+          <div className="border-t border-slate-100 px-5 py-4 sm:px-6">
 
-                <Package size={13} />
+            <div className="flex items-center gap-2 overflow-x-auto">
 
-                What are you importing?
+              <span className="shrink-0 text-[12px] font-semibold text-slate-400">
+                Popular:
+              </span>
 
-              </label>
+              {[
+                "Electronics",
+                "Textiles & Apparel",
+                "Automotive",
+                "Machinery",
+              ].map((category) => {
 
-              <p className="mb-2 text-[10px] text-slate-400">
-                Product name and quantity
-              </p>
+                const active =
+                  categoryFilter ===
+                  category;
 
-              <input
-                id="productDetails"
-                type="text"
-                value={productDetails}
-                onChange={(e) =>
-                  setProductDetails(e.target.value)
-                }
-                placeholder="e.g. Laptop computers - 50 units"
-                aria-label="What are you importing"
-                className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 outline-none transition-all duration-200 placeholder:text-xs hover:border-slate-400 focus:border-[#173B6C] focus:ring-4 focus:ring-[#173B6C]/10"
-                required
-              />
-
-            </div>
-
-            {/* =================================================
-                ORIGIN
-            ================================================== */}
-
-            <div className="slide-down calculator-delay-3 mb-5">
-
-              <label
-                htmlFor="origin"
-                className="mb-1 flex items-center gap-1.5 text-[10px] font-bold text-[#14213D]"
-              >
-
-                <Globe2 size={13} />
-
-                Where is it coming from?
-
-              </label>
-
-              <p className="mb-2 text-[10px] text-slate-400">
-                Country or city of origin
-              </p>
-
-              <input
-                id="origin"
-                type="text"
-                value={origin}
-                onChange={(e) =>
-                  setOrigin(e.target.value)
-                }
-                placeholder="e.g. Shenzhen, China"
-                aria-label="Where is it coming from"
-                className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 outline-none transition-all duration-200 placeholder:text-xs hover:border-slate-400 focus:border-[#173B6C] focus:ring-4 focus:ring-[#173B6C]/10"
-                required
-              />
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() =>
+                      setCategoryFilter(
+                        active
+                          ? "All Categories"
+                          : category
+                      )
+                    }
+                    className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-bold transition ${
+                      active
+                        ? "border-[#173B6C] bg-[#173B6C] text-white"
+                        : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-700"
+                    }`}
+                  >
+                    {category}
+                  </button>
+                );
+              })}
 
             </div>
 
-            {/* =================================================
-                DECLARED VALUE
-            ================================================== */}
+          </div>
 
-            <div className="slide-down calculator-delay-4">
+        </section>
 
-              <label
-                htmlFor="declaredValue"
-                className="mb-1 flex items-center gap-1.5 text-[10px] font-bold text-[#14213D]"
-              >
+        {/* ===================================================
+            RESULTS HEADER
+        ==================================================== */}
 
-                <DollarSign size={13} />
+        <section className="fade-up agent-delay-2 mb-4 mt-7 flex items-end justify-between gap-4">
 
-                Declared value (USD)
+          <div>
 
-              </label>
+            <h2 className="text-[17px] font-bold text-slate-900">
+              Available clearing agents
+            </h2>
 
-              <p className="mb-2 text-[10px] text-slate-400">
-                The value stated on the commercial invoice
-              </p>
+            <p className="mt-1 text-[13px] text-slate-400">
+              {filteredAgents.length}{" "}
+              agent
+              {filteredAgents.length !== 1
+                ? "s"
+                : ""}{" "}
+              found
+            </p>
 
-              <div className="relative">
+          </div>
 
-                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">
-                  $
-                </span>
+          <div className="hidden items-center gap-2 text-[12px] text-slate-400 sm:flex">
 
-                <input
-                  id="declaredValue"
-                  type="number"
-                  min="1"
-                  step="0.01"
-                  value={declaredValue}
-                  onChange={(e) =>
-                    setDeclaredValue(e.target.value)
+            <ShieldCheck
+              size={15}
+              className="text-emerald-600"
+            />
+
+            Verified agents
+
+          </div>
+
+        </section>
+
+        {/* ===================================================
+            AGENT CARDS
+        ==================================================== */}
+
+        {filteredAgents.length > 0 ? (
+
+          <section className="grid gap-5 lg:grid-cols-2">
+
+            {filteredAgents.map(
+              (agent, index) => (
+
+                <AgentCard
+                  key={agent.id}
+                  agent={agent}
+                  delay={
+                    index % 5
                   }
-                  placeholder="e.g. 42500"
-                  aria-label="Declared value in USD"
-                  className="h-12 w-full rounded-xl border border-slate-300 bg-white pl-8 pr-4 text-sm text-slate-900 outline-none transition-all duration-200 placeholder:text-xs hover:border-slate-400 focus:border-[#173B6C] focus:ring-4 focus:ring-[#173B6C]/10"
-                  required
+                  selected={
+                    selectedAgent?.id ===
+                    agent.id
+                  }
+                  onViewProfile={
+                    handleViewProfile
+                  }
+                  onRequestQuote={
+                    handleRequestQuote
+                  }
+                  onSelectAgent={
+                    handleSelectAgent
+                  }
                 />
+
+              )
+            )}
+
+          </section>
+
+        ) : (
+
+          <section className="scale-in rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center">
+
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+
+              <Search size={22} />
+
+            </div>
+
+            <h3 className="mt-4 text-[17px] font-bold text-[#173B6C]">
+              No agents found
+            </h3>
+
+            <p className="mx-auto mt-2 max-w-md text-[13px] leading-5 text-slate-400">
+              Try changing your search or
+              filters to find more clearing
+              agents.
+            </p>
+
+            <button
+              type="button"
+              onClick={
+                clearFilters
+              }
+              className="mt-4 rounded-xl bg-[#173B6C] px-4 py-2.5 text-[12px] font-bold text-white transition hover:bg-[#12315B]"
+            >
+              Clear filters
+            </button>
+
+          </section>
+
+        )}
+
+        {/* ===================================================
+            SELECTED AGENT BAR
+        ==================================================== */}
+
+        {selectedAgent && (
+
+          <section className="fade-up mt-6 overflow-hidden rounded-2xl border border-blue-100 bg-blue-50">
+
+            <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+
+              <div className="flex items-center gap-3">
+
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#2563EB] shadow-sm">
+
+                  <CheckCircle2
+                    size={19}
+                  />
+
+                </div>
+
+                <div>
+
+                  <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-blue-500">
+                    Selected agent
+                  </p>
+
+                  <h3 className="mt-0.5 text-[14px] font-bold text-[#173B6C]">
+                    {selectedAgent.agencyName}
+                  </h3>
+
+                  <p className="mt-0.5 text-[12px] text-slate-500">
+                    {selectedAgent.location}{" "}
+                    ·{" "}
+                    {selectedAgent.experience}{" "}
+                    years experience
+                  </p>
+
+                </div>
+
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowRequestForm(
+                    true
+                  )
+                }
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-4 py-3 text-[12px] font-bold text-white transition hover:bg-[#12315B]"
+              >
+
+                <Send size={15} />
+
+                Request a Quote
+
+                <ArrowRight
+                  size={15}
+                />
+
+              </button>
+
+            </div>
+
+          </section>
+
+        )}
+
+        {/* ===================================================
+            BID CARD
+        ==================================================== */}
+
+        <section className="fade-up agent-delay-3 mt-6 overflow-hidden rounded-2xl border border-[#173B6C] bg-[#173B6C]">
+
+          <div className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+
+            <div className="flex gap-3">
+
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white">
+
+                <Sparkles size={19} />
+
+              </div>
+
+              <div>
+
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-blue-200">
+                  Need more options?
+                </p>
+
+                <h3 className="mt-1 text-[17px] font-bold text-white">
+                  Let clearing agents compete for your shipment
+                </h3>
+
+                <p className="mt-1 max-w-xl text-[12px] leading-5 text-blue-100">
+                  Post your shipment details and
+                  receive bids from qualified
+                  clearing agents. Compare their
+                  offers before making your
+                  decision.
+                </p>
 
               </div>
 
             </div>
 
-          </form>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedAgent(
+                  null
+                );
+                setShowRequestForm(
+                  true
+                );
+              }}
+              className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-[12px] font-bold text-[#173B6C] transition hover:bg-blue-50"
+            >
+
+              <Send size={15} />
+
+              Post Shipment Request
+
+            </button>
+
+          </div>
 
         </section>
 
         {/* ===================================================
-            BOTTOM NAVIGATION
+            INFO CARDS
         ==================================================== */}
 
-        <div className="fade-up calculator-delay-5 mt-7 flex flex-col-reverse items-stretch justify-between gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center">
+        <section className="mt-5 grid gap-4 sm:grid-cols-3">
 
-          {/* BACK */}
+          <InfoCard
+            icon={ShieldCheck}
+            title="Verified agents"
+            text="Compare verified clearing agents on ImportEase."
+          />
+
+          <InfoCard
+            icon={Package}
+            title="Compare experience"
+            text="Review ratings, experience and completed shipments."
+          />
+
+          <InfoCard
+            icon={Send}
+            title="Receive bids"
+            text="Post your shipment and compare offers from agents."
+          />
+
+        </section>
+
+        {/* ===================================================
+            BOTTOM ACTIONS
+        ==================================================== */}
+
+        <div className="fade-up mt-7 flex flex-col-reverse items-stretch justify-between gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center">
 
           <Link
             to="/import-calculator"
-            className="flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 sm:justify-start"
+            className="flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-[13px] font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 sm:justify-start"
           >
 
-            <ArrowLeft size={16} />
+            <ArrowLeft size={18} />
 
             Back to Import Calculator
 
           </Link>
 
-          {/* CONTINUE */}
-
           <button
             type="button"
-            onClick={handleSubmit}
-            className="group flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-6 py-3 text-sm font-semibold text-white shadow-[0_6px_18px_rgba(23,59,108,.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#12315B] hover:shadow-[0_10px_24px_rgba(23,59,108,.18)]"
+            onClick={() => {
+              setSelectedAgent(
+                null
+              );
+              setShowRequestForm(
+                true
+              );
+            }}
+            className="group flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-6 py-3.5 text-[13px] font-semibold text-white shadow-[0_6px_18px_rgba(23,59,108,.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#12315B] hover:shadow-[0_10px_24px_rgba(23,59,108,.18)]"
           >
 
-            Continue to Review Bids
+            Post Shipment Request
 
             <ArrowRight
-              size={17}
+              size={18}
               className="transition-transform duration-300 group-hover:translate-x-0.5"
             />
 
@@ -1008,24 +1360,933 @@ function FindAgent() {
         </div>
 
         {/* ===================================================
-            FOOTER NOTE
+            FOOTER
         ==================================================== */}
 
-        <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[10px] text-slate-400">
+        <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[12px] text-slate-400">
 
           <ShieldCheck
-            size={13}
+            size={15}
             className="text-emerald-600"
           />
 
           <span>
-            Your shipment details are only shared with agents
-            you choose to work with.
+            Compare agents and choose the
+            service that best fits your shipment.
           </span>
 
         </div>
 
       </main>
+
+      {/* =====================================================
+          PROFILE MODAL
+      ====================================================== */}
+
+      {showProfile &&
+        selectedAgent && (
+
+          <Modal
+            onClose={() =>
+              setShowProfile(false)
+            }
+          >
+
+            <div className="p-5 sm:p-6">
+
+              {/* HEADER */}
+
+              <div className="flex items-start justify-between gap-4">
+
+                <div className="flex gap-3">
+
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
+
+                    <Building2
+                      size={20}
+                    />
+
+                  </div>
+
+                  <div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+
+                      <h2 className="text-[17px] font-bold text-[#173B6C]">
+                        {
+                          selectedAgent.agencyName
+                        }
+                      </h2>
+
+                      {selectedAgent.verified && (
+
+                        <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">
+
+                          <ShieldCheck
+                            size={11}
+                          />
+
+                          Verified
+
+                        </span>
+
+                      )}
+
+                    </div>
+
+                    <p className="mt-1 text-[12px] text-slate-400">
+                      {
+                        selectedAgent.agentName
+                      }
+                    </p>
+
+                  </div>
+
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowProfile(
+                      false
+                    )
+                  }
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"
+                >
+
+                  <X size={18} />
+
+                </button>
+
+              </div>
+
+              {/* STATS */}
+
+              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+
+                <StatBox
+                  icon={Star}
+                  value={
+                    selectedAgent.rating
+                  }
+                  label={`${selectedAgent.reviews} reviews`}
+                />
+
+                <StatBox
+                  icon={
+                    BriefcaseBusiness
+                  }
+                  value={`${selectedAgent.experience} yrs`}
+                  label="Experience"
+                />
+
+                <StatBox
+                  icon={Package}
+                  value={
+                    selectedAgent.shipments
+                  }
+                  label="Shipments"
+                />
+
+                <StatBox
+                  icon={MapPin}
+                  value={
+                    selectedAgent.location
+                  }
+                  label="Location"
+                />
+
+              </div>
+
+              {/* DESCRIPTION */}
+
+              <div className="mt-5">
+
+                <h3 className="text-[13px] font-bold text-slate-800">
+                  About this agent
+                </h3>
+
+                <p className="mt-2 text-[13px] leading-5 text-slate-500">
+                  {
+                    selectedAgent.description
+                  }
+                </p>
+
+              </div>
+
+              {/* SPECIALIZATIONS */}
+
+              <div className="mt-5">
+
+                <h3 className="text-[13px] font-bold text-slate-800">
+                  Import specializations
+                </h3>
+
+                <div className="mt-2 flex flex-wrap gap-2">
+
+                  {selectedAgent.categories.map(
+                    (category) => (
+
+                      <span
+                        key={category}
+                        className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-[#2563EB]"
+                      >
+                        {category}
+                      </span>
+
+                    )
+                  )}
+
+                </div>
+
+              </div>
+
+              {/* RESPONSE */}
+
+              <div className="mt-5 flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 p-3">
+
+                <Clock3
+                  size={16}
+                  className="text-emerald-600"
+                />
+
+                <p className="text-[12px] font-semibold text-emerald-700">
+                  {
+                    selectedAgent.responseTime
+                  }
+                </p>
+
+              </div>
+
+              {/* ACTIONS */}
+
+              <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProfile(
+                      false
+                    );
+                    setShowRequestForm(
+                      true
+                    );
+                  }}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-4 py-3 text-[12px] font-bold text-white transition hover:bg-[#12315B]"
+                >
+
+                  <Send size={15} />
+
+                  Request a Quote
+
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowProfile(
+                      false
+                    )
+                  }
+                  className="rounded-xl border border-slate-200 px-5 py-3 text-[12px] font-bold text-slate-600 hover:bg-slate-50"
+                >
+                  Close
+                </button>
+
+              </div>
+
+            </div>
+
+          </Modal>
+
+        )}
+
+      {/* =====================================================
+          REQUEST MODAL
+      ====================================================== */}
+
+      {showRequestForm && (
+
+        <Modal
+          onClose={() =>
+            setShowRequestForm(
+              false
+            )
+          }
+        >
+
+          <form
+            onSubmit={
+              createShipmentRequest
+            }
+            className="p-5 sm:p-6"
+          >
+
+            {/* HEADER */}
+
+            <div className="flex items-start justify-between gap-4">
+
+              <div>
+
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-[#2563EB]">
+
+                  {selectedAgent ? (
+                    <Send size={18} />
+                  ) : (
+                    <Package size={18} />
+                  )}
+
+                </div>
+
+                <h2 className="mt-4 text-[19px] font-bold text-[#173B6C]">
+
+                  {selectedAgent
+                    ? "Request a quote"
+                    : "Post your shipment request"}
+
+                </h2>
+
+                <p className="mt-1 max-w-lg text-[12px] leading-5 text-slate-400">
+
+                  {selectedAgent
+                    ? `Send your shipment details to ${selectedAgent.agencyName}.`
+                    : "Provide your shipment details and let clearing agents send you bids."}
+
+                </p>
+
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowRequestForm(
+                    false
+                  )
+                }
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"
+              >
+
+                <X size={18} />
+
+              </button>
+
+            </div>
+
+            {/* SELECTED AGENT */}
+
+            {selectedAgent && (
+
+              <div className="mt-5 flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50 p-3">
+
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[#2563EB]">
+
+                  <Building2
+                    size={17}
+                  />
+
+                </div>
+
+                <div>
+
+                  <p className="text-[13px] font-bold text-[#173B6C]">
+                    {
+                      selectedAgent.agencyName
+                    }
+                  </p>
+
+                  <p className="mt-0.5 text-[11px] text-slate-400">
+                    {
+                      selectedAgent.location
+                    }{" "}
+                    ·{" "}
+                    {
+                      selectedAgent.experience
+                    }{" "}
+                    years experience
+                  </p>
+
+                </div>
+
+                <CheckCircle2
+                  size={17}
+                  className="ml-auto text-emerald-500"
+                />
+
+              </div>
+
+            )}
+
+            {/* FORM */}
+
+            <div className="mt-5 space-y-4">
+
+              <FormField
+                label="What are you importing?"
+                required
+              >
+
+                <textarea
+                  value={
+                    productDetails
+                  }
+                  onChange={(e) =>
+                    setProductDetails(
+                      e.target.value
+                    )
+                  }
+                  rows={3}
+                  placeholder="e.g. 50 laptops and computer accessories"
+                  className="w-full resize-none rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-[13px] font-medium text-slate-800 outline-none transition focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
+                />
+
+              </FormField>
+
+              <FormField
+                label="Country or city of origin"
+                required
+              >
+
+                <input
+                  type="text"
+                  value={origin}
+                  onChange={(e) =>
+                    setOrigin(
+                      e.target.value
+                    )
+                  }
+                  placeholder="e.g. China"
+                  className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-[13px] font-medium text-slate-800 outline-none transition focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
+                />
+
+              </FormField>
+
+              <FormField
+                label="Declared value"
+                required
+              >
+
+                <div className="relative">
+
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={
+                      declaredValue
+                    }
+                    onChange={(e) =>
+                      setDeclaredValue(
+                        e.target.value
+                      )
+                    }
+                    placeholder="e.g. 15000"
+                    className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 pr-16 text-[13px] font-medium text-slate-800 outline-none transition focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
+                  />
+
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">
+                    USD
+                  </span>
+
+                </div>
+
+              </FormField>
+
+            </div>
+
+            {/* INFO */}
+
+            <div className="mt-5 flex gap-2 rounded-xl border border-slate-100 bg-slate-50 p-3">
+
+              <ShieldCheck
+                size={16}
+                className="mt-0.5 shrink-0 text-[#2563EB]"
+              />
+
+              <p className="text-[11px] leading-5 text-slate-500">
+
+                {selectedAgent
+                  ? "The selected agent will receive these shipment details to prepare a quote."
+                  : "Your request will be shared with clearing agents so they can review it and submit bids."}
+
+              </p>
+
+            </div>
+
+            {/* ACTIONS */}
+
+            <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowRequestForm(
+                    false
+                  )
+                }
+                className="rounded-xl border border-slate-200 px-5 py-3 text-[12px] font-bold text-slate-600 transition hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-5 py-3 text-[12px] font-bold text-white transition hover:bg-[#12315B]"
+              >
+
+                <Send size={15} />
+
+                {selectedAgent
+                  ? "Send Quote Request"
+                  : "Find Agents & Get Bids"}
+
+              </button>
+
+            </div>
+
+          </form>
+
+        </Modal>
+
+      )}
+
+    </div>
+  );
+}
+
+/* =========================================================
+   FILTER SELECT
+========================================================= */
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+}) {
+  return (
+    <div>
+
+      <label className="mb-1.5 block text-[12px] font-bold text-slate-600">
+        {label}
+      </label>
+
+      <div className="relative">
+
+        <select
+          value={value}
+          onChange={(e) =>
+            onChange(
+              e.target.value
+            )
+          }
+          className="h-10 w-full appearance-none rounded-xl border border-slate-300 bg-white px-3 pr-8 text-[12px] font-semibold text-slate-700 outline-none transition focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
+        >
+
+          {options.map(
+            (option) => (
+
+              <option
+                key={option}
+                value={option}
+              >
+                {option}
+              </option>
+
+            )
+          )}
+
+        </select>
+
+        <ChevronDown
+          size={15}
+          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+        />
+
+      </div>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   AGENT CARD
+========================================================= */
+
+function AgentCard({
+  agent,
+  delay,
+  selected,
+  onViewProfile,
+  onRequestQuote,
+  onSelectAgent,
+}) {
+  return (
+    <article
+      className={`fade-up agent-delay-${Math.min(
+        delay + 1,
+        5
+      )} rounded-2xl border bg-white p-5 shadow-[0_2px_12px_rgba(15,23,42,.025)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(15,23,42,.06)] ${
+        selected
+          ? "border-[#2563EB] ring-2 ring-[#2563EB]/10"
+          : "border-slate-200 hover:border-slate-300"
+      }`}
+    >
+
+      {/* HEADER */}
+
+      <div className="flex items-start justify-between gap-3">
+
+        <div className="flex min-w-0 gap-3">
+
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
+
+            <Building2
+              size={20}
+            />
+
+          </div>
+
+          <div className="min-w-0">
+
+            <div className="flex flex-wrap items-center gap-1.5">
+
+              <h3 className="truncate text-[14px] font-bold text-[#173B6C]">
+                {agent.agencyName}
+              </h3>
+
+              {agent.verified && (
+
+                <ShieldCheck
+                  size={15}
+                  className="shrink-0 text-emerald-500"
+                />
+
+              )}
+
+            </div>
+
+            <p className="mt-1 text-[11px] text-slate-400">
+              {agent.agentName}
+            </p>
+
+          </div>
+
+        </div>
+
+        <div className="flex shrink-0 items-center gap-1 rounded-lg bg-amber-50 px-2 py-1">
+
+          <Star
+            size={13}
+            className="fill-amber-400 text-amber-400"
+          />
+
+          <span className="text-[11px] font-bold text-amber-700">
+            {agent.rating}
+          </span>
+
+        </div>
+
+      </div>
+
+      {/* VERIFIED */}
+
+      <div className="mt-3 flex items-center gap-2">
+
+        {agent.verified && (
+
+          <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">
+
+            <CheckCircle2
+              size={11}
+            />
+
+            Verified agent
+
+          </span>
+
+        )}
+
+        <span className="text-[11px] text-slate-400">
+          {agent.reviews} reviews
+        </span>
+
+      </div>
+
+      {/* DETAILS */}
+
+      <div className="mt-4 grid grid-cols-2 gap-2">
+
+        <AgentInfo
+          icon={MapPin}
+          label="Location"
+          value={agent.location}
+        />
+
+        <AgentInfo
+          icon={
+            BriefcaseBusiness
+          }
+          label="Experience"
+          value={`${agent.experience} years`}
+        />
+
+        <AgentInfo
+          icon={Package}
+          label="Completed"
+          value={`${agent.shipments} shipments`}
+        />
+
+        <AgentInfo
+          icon={Clock3}
+          label="Response"
+          value={agent.responseTime.replace(
+            "Usually responds within ",
+            ""
+          )}
+        />
+
+      </div>
+
+      {/* DESCRIPTION */}
+
+      <p className="mt-4 text-[12px] leading-5 text-slate-500">
+        {agent.description}
+      </p>
+
+      {/* SPECIALIZATIONS */}
+
+      <div className="mt-3">
+
+        <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+          Specializations
+        </p>
+
+        <div className="flex flex-wrap gap-1.5">
+
+          {agent.categories.map(
+            (category) => (
+
+              <span
+                key={category}
+                className="rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-500"
+              >
+                {category}
+              </span>
+
+            )
+          )}
+
+        </div>
+
+      </div>
+
+      {/* ACTIONS */}
+
+      <div className="mt-5 grid grid-cols-2 gap-2">
+
+        <button
+          type="button"
+          onClick={() =>
+            onViewProfile(
+              agent
+            )
+          }
+          className="rounded-xl border border-slate-200 px-3 py-2.5 text-[12px] font-bold text-[#173B6C] transition hover:border-slate-300 hover:bg-slate-50"
+        >
+          View Profile
+        </button>
+
+        <button
+          type="button"
+          onClick={() =>
+            onSelectAgent(
+              agent
+            )
+          }
+          className={`flex items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-[12px] font-bold transition ${
+            selected
+              ? "bg-emerald-600 text-white hover:bg-emerald-700"
+              : "bg-[#173B6C] text-white hover:bg-[#12315B]"
+          }`}
+        >
+
+          {selected ? (
+            <>
+              <CheckCircle2
+                size={14}
+              />
+
+              Selected
+            </>
+          ) : (
+            <>
+              Request Quote
+
+              <ArrowRight
+                size={14}
+              />
+            </>
+          )}
+
+        </button>
+
+      </div>
+
+    </article>
+  );
+}
+
+/* =========================================================
+   AGENT INFO
+========================================================= */
+
+function AgentInfo({
+  icon: Icon,
+  label,
+  value,
+}) {
+  return (
+    <div className="flex items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-2">
+
+      <Icon
+        size={14}
+        className="shrink-0 text-[#2563EB]"
+      />
+
+      <div className="min-w-0">
+
+        <p className="text-[9px] uppercase tracking-wide text-slate-400">
+          {label}
+        </p>
+
+        <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-600">
+          {value}
+        </p>
+
+      </div>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   INFO CARD
+========================================================= */
+
+function InfoCard({
+  icon: Icon,
+  title,
+  text,
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
+
+      <div className="flex gap-3">
+
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[#2563EB]">
+
+          <Icon size={17} />
+
+        </div>
+
+        <div>
+
+          <h3 className="text-[12px] font-bold text-slate-800">
+            {title}
+          </h3>
+
+          <p className="mt-1 text-[10px] leading-4 text-slate-400">
+            {text}
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   STAT BOX
+========================================================= */
+
+function StatBox({
+  icon: Icon,
+  value,
+  label,
+}) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-center">
+
+      <Icon
+        size={16}
+        className="mx-auto text-[#2563EB]"
+      />
+
+      <p className="mt-1.5 text-[13px] font-bold text-[#173B6C]">
+        {value}
+      </p>
+
+      <p className="mt-0.5 text-[10px] text-slate-400">
+        {label}
+      </p>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   FORM FIELD
+========================================================= */
+
+function FormField({
+  label,
+  required,
+  children,
+}) {
+  return (
+    <div>
+
+      <label className="mb-1.5 block text-[12px] font-bold text-slate-700">
+
+        {label}
+
+        {required && (
+          <span className="ml-1 text-red-500">
+            *
+          </span>
+        )}
+
+      </label>
+
+      {children}
+
+    </div>
+  );
+}
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function Modal({
+  children,
+  onClose,
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
+
+      <div
+        className="absolute inset-0"
+        onClick={onClose}
+      />
+
+      <div className="relative z-10 max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+
+        {children}
+
+      </div>
 
     </div>
   );

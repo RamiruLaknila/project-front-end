@@ -73,6 +73,7 @@ import IndividualAgentVerification from "./pages/IndividualAgentVerification";
 // =====================================================
 import SMESignUp from "./pages/SMESignUp";
 import Messages from "./pages/Messages";
+import SMESignUpSuccess from "./pages/SMESignUpSuccess";
 
 
 function App() {
@@ -104,6 +105,10 @@ function App() {
           path="/signin"
           element={<SignIn />}
         />
+        <Route
+  path="/sme-signup-success"
+  element={<SMESignUpSuccess />}
+/>
 
         <Route
           path="/signup"
