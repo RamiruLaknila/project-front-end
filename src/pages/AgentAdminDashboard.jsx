@@ -3,16 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Bell,
-  Building2,
   CheckCircle2,
   Clock3,
   Copy,
-  ClipboardList,
-  LogOut,
-  Menu,
   RefreshCw,
   Search,
-  Settings,
   UserCheck,
   UserPlus,
   Users,
@@ -20,15 +15,32 @@ import {
   XCircle,
 } from "lucide-react";
 
+import AgentAdminSidebar from "../components/AgentAdminSidebar";
+
 function AgentAdminDashboard() {
   const navigate = useNavigate();
 
-  const [agency, setAgency] = useState(null);
-  const [currentAdmin, setCurrentAdmin] = useState(null);
+   const [agency, setAgency] = useState(() => {
+    try {
+      const storedAgency = localStorage.getItem("clearingAgency");
+      return storedAgency ? JSON.parse(storedAgency) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [currentAdmin, setCurrentAdmin] = useState(() => {
+    try {
+      const storedAgent = localStorage.getItem("clearingAgent");
+      const parsed = storedAgent ? JSON.parse(storedAgent) : null;
+      return parsed && parsed.agentType === "agency-admin" ? parsed : null;
+    } catch {
+      return null;
+    }
+  });
   const [joinApplication, setJoinApplication] = useState(null);
   const [joinStatus, setJoinStatus] = useState("pending");
   const [copied, setCopied] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
@@ -36,23 +48,33 @@ function AgentAdminDashboard() {
     loadJoinApplication();
   }, []);
 
+  /* ============================================================
+     LOAD AGENCY DATA
+  ============================================================ */
+
   const loadAgencyData = () => {
     const storedAgency = localStorage.getItem("clearingAgency");
     const storedAgent = localStorage.getItem("clearingAgent");
 
-    if (!storedAgency || !storedAgent) {
+    if (!storedAgent) {
       navigate("/agent-signin");
       return;
     }
 
     try {
-      const parsedAgency = JSON.parse(storedAgency);
       const parsedAgent = JSON.parse(storedAgent);
 
-      if (parsedAgent.role !== "admin") {
-        navigate("/agent-dashboard");
+      if (parsedAgent.agentType !== "agency-admin") {
+        navigate("/agent-signin");
         return;
       }
+
+      if (!storedAgency) {
+        navigate("/agency-choice");
+        return;
+      }
+
+      const parsedAgency = JSON.parse(storedAgency);
 
       setAgency(parsedAgency);
       setCurrentAdmin(parsedAgent);
@@ -61,6 +83,10 @@ function AgentAdminDashboard() {
       navigate("/agent-signin");
     }
   };
+
+  /* ============================================================
+     LOAD JOIN APPLICATION
+  ============================================================ */
 
   const loadJoinApplication = () => {
     try {
@@ -73,6 +99,8 @@ function AgentAdminDashboard() {
 
       if (storedApplication) {
         setJoinApplication(JSON.parse(storedApplication));
+      } else {
+        setJoinApplication(null);
       }
 
       setJoinStatus(storedStatus);
@@ -81,10 +109,18 @@ function AgentAdminDashboard() {
     }
   };
 
+  /* ============================================================
+     REFRESH
+  ============================================================ */
+
   const handleRefresh = () => {
     loadAgencyData();
     loadJoinApplication();
   };
+
+  /* ============================================================
+     TOTAL AGENTS
+  ============================================================ */
 
   const totalAgents = useMemo(() => {
     if (!agency) {
@@ -106,8 +142,16 @@ function AgentAdminDashboard() {
     }
   }, [agency]);
 
+  /* ============================================================
+     PENDING REQUEST COUNT
+  ============================================================ */
+
   const pendingCount =
     joinApplication && joinStatus === "pending" ? 1 : 0;
+
+  /* ============================================================
+     APPROVE JOIN REQUEST
+  ============================================================ */
 
   const handleApproveJoin = () => {
     if (!joinApplication || !agency || processing) {
@@ -128,7 +172,10 @@ function AgentAdminDashboard() {
         JSON.stringify(approvedApplication)
       );
 
-      localStorage.setItem("agencyJoinStatus", "approved");
+      localStorage.setItem(
+        "agencyJoinStatus",
+        "approved"
+      );
 
       const existingAgents =
         JSON.parse(localStorage.getItem("agencyAgents")) || [];
@@ -143,9 +190,11 @@ function AgentAdminDashboard() {
           joinApplication.fullName ||
           "Agency Agent",
 
-        email: joinApplication.email || "",
+        email:
+          joinApplication.email || "",
 
-        phone: joinApplication.phone || "",
+        phone:
+          joinApplication.phone || "",
 
         agencyId:
           agency.id ||
@@ -175,9 +224,11 @@ function AgentAdminDashboard() {
           joinApplication.requestedAt ||
           new Date().toISOString(),
 
-        joinedAt: new Date().toISOString(),
+        joinedAt:
+          new Date().toISOString(),
 
-        approvedAt: new Date().toISOString(),
+        approvedAt:
+          new Date().toISOString(),
       };
 
       const filteredAgents = existingAgents.filter(
@@ -203,6 +254,10 @@ function AgentAdminDashboard() {
     }
   };
 
+  /* ============================================================
+     REJECT JOIN REQUEST
+  ============================================================ */
+
   const handleRejectJoin = () => {
     if (!joinApplication || processing) {
       return;
@@ -222,7 +277,10 @@ function AgentAdminDashboard() {
         JSON.stringify(rejectedApplication)
       );
 
-      localStorage.setItem("agencyJoinStatus", "rejected");
+      localStorage.setItem(
+        "agencyJoinStatus",
+        "rejected"
+      );
 
       setJoinStatus("rejected");
       setJoinApplication(rejectedApplication);
@@ -233,6 +291,10 @@ function AgentAdminDashboard() {
     }
   };
 
+  /* ============================================================
+     COPY INVITATION CODE
+  ============================================================ */
+
   const handleCopyCode = async () => {
     const invitationCode =
       localStorage.getItem("agencyInviteCode") ||
@@ -240,6 +302,7 @@ function AgentAdminDashboard() {
 
     try {
       await navigator.clipboard.writeText(invitationCode);
+
       setCopied(true);
 
       setTimeout(() => {
@@ -253,209 +316,42 @@ function AgentAdminDashboard() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("clearingAgent");
-    localStorage.removeItem("agentOnboardingType");
-    localStorage.removeItem("agentOnboardingComplete");
-
-    navigate("/agent-signin");
-  };
+  /* ============================================================
+     WAIT UNTIL DATA LOADS
+  ============================================================ */
 
   if (!agency || !currentAdmin) {
     return null;
   }
 
-  const adminName =
-    currentAdmin.name ||
-    "Agency Admin";
-
   const invitationCode =
     localStorage.getItem("agencyInviteCode") ||
+    agency.code ||
+    agency.agencyCode ||
     "ABC001";
 
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
 
       {/* =====================================================
-          MOBILE OVERLAY
+          ADMIN SIDEBAR
       ===================================================== */}
 
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-slate-900/30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      <AgentAdminSidebar />
 
       {/* =====================================================
-          SIDEBAR
+          MAIN
       ===================================================== */}
 
-      <aside
-        className={`fixed left-0 top-0 z-50 flex h-screen w-[250px] flex-col border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen
-            ? "translate-x-0"
-            : "-translate-x-full"
-        }`}
-      >
+      <main className="min-h-screen lg:ml-[260px]">
 
-        {/* =================================================
-            LOGO
-        ================================================= */}
-
-        <div className="flex h-[70px] items-center border-b border-slate-100 px-5">
-
-          <Link
-            to="/agent-admin-dashboard"
-            className="flex items-center gap-3"
-            onClick={() => setSidebarOpen(false)}
-          >
-
-            <img
-              src="/logo.jpeg"
-              alt="ImportEase"
-              className="h-9 w-9 object-contain mix-blend-multiply"
-            />
-
-            <div>
-
-              <p className="text-[18px] font-bold tracking-tight text-[#173563]">
-                Import
-                <span className="text-slate-900">
-                  Ease
-                </span>
-              </p>
-
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                Agent Platform
-              </p>
-
-            </div>
-
-          </Link>
-
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(false)}
-            className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 lg:hidden"
-          >
-            <X size={18} />
-          </button>
-
-        </div>
-
-        {/* =================================================
-            NAVIGATION
-        ================================================= */}
-
-        <nav className="flex-1 space-y-1.5 p-3">
-
-          <SidebarItem
-            icon={Building2}
-            label="Dashboard"
-            active
-            to="/agent-admin-dashboard"
-            onClick={() => setSidebarOpen(false)}
-          />
-
-          <SidebarItem
-            icon={Users}
-            label="Agents"
-            to="/agency-agents"
-            onClick={() => setSidebarOpen(false)}
-          />
-
-          <SidebarItem
-            icon={UserPlus}
-            label="Invite Agents"
-            to="/agency-invite"
-            onClick={() => setSidebarOpen(false)}
-          />
-
-          <SidebarItem
-            icon={ClipboardList}
-            label="SME Requests"
-            to="/agent-marketplace"
-            onClick={() => setSidebarOpen(false)}
-          />
-
-        </nav>
-
-        {/* =================================================
-            BOTTOM LEFT
-        ================================================= */}
-
-        <div className="border-t border-slate-100 p-3">
-
-          {/* ADMIN PROFILE */}
-
-          <div className="mb-3 flex items-center gap-3 rounded-xl px-2 py-2">
-
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#173563] text-xs font-bold text-white">
-              {getInitials(adminName)}
-            </div>
-
-            <div className="min-w-0">
-
-              <p className="truncate text-sm font-bold text-slate-800">
-                {adminName}
-              </p>
-
-              <p className="mt-0.5 text-[11px] text-slate-400">
-                Administrator
-              </p>
-
-            </div>
-
-          </div>
-
-          {/* SETTINGS */}
-
-          <SidebarItem
-            icon={Settings}
-            label="Settings"
-            to="/agent-settings"
-            onClick={() => setSidebarOpen(false)}
-          />
-
-          {/* LOGOUT */}
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-          >
-            <LogOut size={18} />
-            Logout
-          </button>
-
-        </div>
-
-      </aside>
-
-      {/* =====================================================
-          MAIN AREA
-      ===================================================== */}
-
-      <main className="min-h-screen lg:ml-[250px]">
-
-        {/* =================================================
-            TOP HEADER
-        ================================================= */}
+        {/* =====================================================
+            HEADER
+        ===================================================== */}
 
         <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6">
 
           <div className="flex items-center gap-3">
-
-            {/* MOBILE MENU */}
-
-            <button
-              type="button"
-              onClick={() => setSidebarOpen(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 lg:hidden"
-            >
-              <Menu size={20} />
-            </button>
 
             <div>
 
@@ -473,8 +369,6 @@ function AgentAdminDashboard() {
 
           <div className="flex items-center gap-3">
 
-            {/* REFRESH */}
-
             <button
               type="button"
               onClick={handleRefresh}
@@ -483,8 +377,6 @@ function AgentAdminDashboard() {
             >
               <RefreshCw size={18} />
             </button>
-
-            {/* NOTIFICATIONS */}
 
             <button
               type="button"
@@ -498,69 +390,39 @@ function AgentAdminDashboard() {
 
             </button>
 
-            {/* ADMIN PROFILE */}
-
-            <div className="flex items-center gap-2">
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#173563] text-xs font-bold text-white">
-                {getInitials(adminName)}
-              </div>
-
-              <div className="hidden sm:block">
-
-                <p className="text-sm font-semibold text-slate-800">
-                  {adminName}
-                </p>
-
-                <p className="text-[10px] text-slate-400">
-                  Administrator
-                </p>
-
-              </div>
-
-            </div>
-
           </div>
 
         </header>
 
-        {/* =================================================
+        {/* =====================================================
             PAGE CONTENT
-        ================================================= */}
+        ===================================================== */}
 
         <div className="mx-auto max-w-[1180px] px-5 py-7 sm:px-8 lg:py-9">
 
           {/* BACK */}
 
           <Link
-            to="/agent-dashboard"
+            to="/agent-admin-dashboard"
             className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-[#173563]"
           >
             <ArrowLeft size={16} />
-            Back to Dashboard
+            Agency Dashboard
           </Link>
 
-          {/* PAGE INTRO */}
+          {/* INTRO */}
 
           <div className="mb-7 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
 
             <div>
-
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
-
-                <Building2 size={14} />
-
-                Agency Overview
-
-              </div>
 
               <h2 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
                 Welcome back
               </h2>
 
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
-                Manage your clearing agency, agents, SME requests
-                from one place.
+                Manage your clearing agency, agents and SME
+                requests from one place.
               </p>
 
             </div>
@@ -575,9 +437,9 @@ function AgentAdminDashboard() {
 
           </div>
 
-          {/* =================================================
+          {/* =====================================================
               SUMMARY CARDS
-          ================================================= */}
+          ===================================================== */}
 
           <div className="grid gap-4 sm:grid-cols-3">
 
@@ -604,9 +466,9 @@ function AgentAdminDashboard() {
 
           </div>
 
-          {/* =================================================
+          {/* =====================================================
               INVITATION CODE
-          ================================================= */}
+          ===================================================== */}
 
           <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)] sm:p-6">
 
@@ -666,9 +528,9 @@ function AgentAdminDashboard() {
 
           </section>
 
-          {/* =================================================
+          {/* =====================================================
               RECENT ACTIVITY + REQUESTS
-          ================================================= */}
+          ===================================================== */}
 
           <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_1.25fr]">
 
@@ -755,7 +617,7 @@ function AgentAdminDashboard() {
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#173563] text-sm font-bold text-white">
                         {getInitials(
                           joinApplication.name ||
-                            joinApplication.fullName
+                          joinApplication.fullName
                         )}
                       </div>
 
@@ -851,51 +713,6 @@ function AgentAdminDashboard() {
 
           </div>
 
-          {/* =================================================
-              QUICK ACTIONS
-          ================================================= */}
-
-          <section className="mt-6">
-
-            <div className="mb-4">
-
-              <h3 className="text-base font-bold text-slate-900">
-                Quick Actions
-              </h3>
-
-              <p className="mt-1 text-sm text-slate-500">
-                Common agency management actions.
-              </p>
-
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-
-              <QuickAction
-                icon={UserPlus}
-                title="Invite Agent"
-                description="Send your agency invite code."
-                to="/agency-invite"
-              />
-
-              <QuickAction
-                icon={Users}
-                title="Manage Agents"
-                description="View and manage agency agents."
-                to="/agency-agents"
-              />
-
-              <QuickAction
-                icon={ClipboardList}
-                title="SME Requests"
-                description="Review incoming SME requests."
-                to="/agent-marketplace"
-              />
-
-            </div>
-
-          </section>
-
           {/* FOOTER */}
 
           <footer className="mt-10 border-t border-slate-200 pt-5 text-center text-xs text-slate-400">
@@ -907,37 +724,6 @@ function AgentAdminDashboard() {
       </main>
 
     </div>
-  );
-}
-
-/* ============================================================
-   SIDEBAR ITEM
-============================================================ */
-
-function SidebarItem({
-  icon: Icon,
-  label,
-  active = false,
-  to,
-  onClick,
-}) {
-  return (
-    <Link
-      to={to}
-      onClick={onClick}
-      className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${
-        active
-          ? "bg-[#173563] text-white shadow-sm"
-          : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
-      }`}
-    >
-      <Icon
-        size={18}
-        strokeWidth={1.8}
-      />
-
-      <span>{label}</span>
-    </Link>
   );
 }
 

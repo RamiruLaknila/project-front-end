@@ -193,7 +193,7 @@ function ImportCalculator() {
           ANIMATIONS
       ====================================================== */}
 
-      <style>{`
+            <style>{`
         @keyframes fadeUp {
           from {
             opacity: 0;
@@ -243,19 +243,19 @@ function ImportCalculator() {
 
         .fade-up {
           animation:
-            fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1)
+            fadeUp 0.25s cubic-bezier(0.22, 1, 0.36, 1)
             both;
         }
 
         .scale-in {
           animation:
-            scaleIn 0.35s cubic-bezier(0.22, 1, 0.36, 1)
+            scaleIn 0.2s cubic-bezier(0.22, 1, 0.36, 1)
             both;
         }
 
         .slide-down {
           animation:
-            slideDown 0.25s cubic-bezier(0.22, 1, 0.36, 1)
+            slideDown 0.15s cubic-bezier(0.22, 1, 0.36, 1)
             both;
         }
 
@@ -265,23 +265,23 @@ function ImportCalculator() {
         }
 
         .calculator-delay-1 {
-          animation-delay: 0.05s;
+          animation-delay: 0.02s;
         }
 
         .calculator-delay-2 {
-          animation-delay: 0.1s;
+          animation-delay: 0.04s;
         }
 
         .calculator-delay-3 {
-          animation-delay: 0.15s;
+          animation-delay: 0.06s;
         }
 
         .calculator-delay-4 {
-          animation-delay: 0.2s;
+          animation-delay: 0.08s;
         }
 
         .calculator-delay-5 {
-          animation-delay: 0.25s;
+          animation-delay: 0.1s;
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -293,7 +293,6 @@ function ImportCalculator() {
           }
         }
       `}</style>
-
       {/* =====================================================
           NAVBAR
       ====================================================== */}

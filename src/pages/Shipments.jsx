@@ -20,751 +20,458 @@ import AppNavbar from "../components/ui/AppNavbar";
 
 function Shipments() {
   const [shipment, setShipment] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
 
-  useEffect(() => {
-    const savedImport = localStorage.getItem("currentImport");
+  const loadShipment = () => {
+    try {
+      const storedShipment = localStorage.getItem("currentShipment");
 
-    if (savedImport) {
-      try {
-        setShipment(JSON.parse(savedImport));
-      } catch (error) {
-        console.error("Unable to load shipment:", error);
+      if (storedShipment) {
+        setShipment(JSON.parse(storedShipment));
+      } else {
+        setShipment(null);
       }
-    }
-  }, []);
 
-  const reference =
-    shipment?.shipmentReference || "IE-26-000000";
-
-  const product =
-    shipment?.productName || "Imported Product";
-
-  const hsCode =
-    shipment?.hsCode || "Not assigned";
-
-  const agent =
-    shipment?.selectedAgent;
-
-  const status =
-    shipment?.status || "Submitted";
-
-  const handleRefresh = () => {
-    const savedImport = localStorage.getItem("currentImport");
-
-    if (savedImport) {
-      try {
-        setShipment(JSON.parse(savedImport));
-      } catch (error) {
-        console.error("Unable to refresh shipment:", error);
-      }
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error("Failed to load shipment:", error);
+      setShipment(null);
     }
   };
 
+  useEffect(() => {
+    loadShipment();
+
+    const handleStorageChange = () => {
+      loadShipment();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+  const product =
+    shipment?.product ||
+    shipment?.currentImport?.product ||
+    shipment?.importDetails?.product ||
+    "Import Shipment";
+
+  const hsCode =
+    shipment?.hsCode ||
+    shipment?.currentImport?.hsCode ||
+    shipment?.importDetails?.hsCode ||
+    "—";
+
+  const reference =
+    shipment?.reference ||
+    shipment?.shipmentReference ||
+    shipment?.id ||
+    "IMP-2026-001";
+
+  const status = shipment?.status || "In Progress";
+
+  const agent =
+    shipment?.agent ||
+    shipment?.selectedAgent ||
+    shipment?.clearingAgent ||
+    null;
+
+  const total =
+    shipment?.finalSummary?.total ??
+    shipment?.total ??
+    shipment?.finalTotal ??
+    0;
+
+  const timeline = [
+    {
+      title: "Import request submitted",
+      description: "Your import request has been submitted successfully.",
+      completed: true,
+      date: "Completed",
+    },
+    {
+      title: "Clearing agent selected",
+      description: "A clearing agent has been selected for your shipment.",
+      completed: true,
+      date: "Completed",
+    },
+    {
+      title: "Documents under review",
+      description: "Your shipment documents are being reviewed.",
+      completed: true,
+      date: "Completed",
+    },
+    {
+      title: "Customs clearance",
+      description: "Your shipment is currently being processed for customs clearance.",
+      completed: false,
+      current: true,
+      date: "In progress",
+    },
+    {
+      title: "Shipment cleared",
+      description: "Your shipment will be marked complete once customs clearance is finished.",
+      completed: false,
+      date: "Pending",
+    },
+  ];
+
+  const documents = [
+    {
+      name: "Commercial Invoice",
+      status: "Uploaded",
+    },
+    {
+      name: "Packing List",
+      status: "Uploaded",
+    },
+    {
+      name: "Import Documents",
+      status: "Under review",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
-
-      {/* =====================================================
-          SHARED NAVBAR
-      ===================================================== */}
-
       <AppNavbar />
 
-      {/* =====================================================
-          MAIN
-      ===================================================== */}
-
-      <main className="mx-auto max-w-[1280px] px-5 py-8 sm:px-8 lg:py-10">
-
-        {/* ===================================================
-            BREADCRUMB
-        =================================================== */}
-
-        <div className="mb-6 flex items-center gap-2 text-xs text-slate-400">
-
+      <main className="mx-auto w-full max-w-[1000px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
+        {/* Breadcrumb */}
+        <div className="fade-up mb-6 flex items-center gap-2 text-[12px] font-medium text-slate-400">
           <Link
             to="/dashboard"
-            className="transition hover:text-slate-700"
+            className="transition-colors hover:text-[#173B6C]"
           >
             Dashboard
           </Link>
 
-          <ChevronRight size={13} />
+          <ChevronRight className="h-3.5 w-3.5" />
 
-          <span className="font-medium text-slate-600">
-            Shipment Tracking
-          </span>
-
+          <span className="text-[#173B6C]">Shipment Tracking</span>
         </div>
 
-        {/* ===================================================
-            PAGE HEADER
-        =================================================== */}
+        {/* Header */}
+        <section className="fade-up -mt-6 mb-7 text-center">
+          <h1 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+            Track your import
+          </h1>
 
-        <section className="mb-7">
+          <p className="mx-auto mt-2 max-w-[650px] text-[13px] leading-6 text-slate-500 sm:text-[15px]">
+            Follow your import shipment from agent selection through customs
+            clearance and completion.
+          </p>
 
-          <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-
-            <div>
-
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5">
-
-                <Truck
-                  size={13}
-                  className="text-blue-700"
-                />
-
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700">
-                  Shipment tracking
-                </span>
-
-              </div>
-
-              <h1 className="text-2xl font-bold tracking-tight text-[#14213D] sm:text-3xl">
-                Track your import
-              </h1>
-
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                Monitor your import request, clearance progress,
-                documents, and clearing agent activity from one place.
-              </p>
-
-            </div>
-
-            <button
-              type="button"
-              onClick={handleRefresh}
-              className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
-            >
-
-              <RefreshCw size={14} />
-
-              Refresh status
-
-            </button>
-
-          </div>
-
+          <button
+            type="button"
+            onClick={loadShipment}
+            className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-[12px] font-bold text-slate-600 shadow-[0_2px_10px_rgba(15,23,42,.02)] transition-all hover:border-[#173B6C] hover:text-[#173B6C]"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Refresh status
+          </button>
         </section>
 
-        {/* ===================================================
-            SHIPMENT HEADER CARD
-        =================================================== */}
-
-        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_6px_25px_rgba(15,23,42,0.03)]">
-
-          <div className="border-b border-slate-100 px-5 py-5 sm:px-7">
-
-            <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
-
-              <div className="flex items-start gap-4">
-
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
-                  <Package size={21} />
+        {/* Shipment Header */}
+        <section className="fade-up overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,.025)]">
+          <div className="border-b border-slate-100 p-5 sm:p-6">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex items-start gap-3.5">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
+                  <Package className="h-5 w-5" />
                 </div>
 
                 <div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-
-                    <h2 className="text-base font-bold text-slate-900">
-                      {product}
-                    </h2>
-
-                    <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[9px] font-bold text-amber-700">
-                      {status.toUpperCase()}
-                    </span>
-
-                  </div>
-
-                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-slate-400">
-
-                    <span>
-                      Reference:
-
-                      <strong className="ml-1 font-mono text-slate-600">
-                        {reference}
-                      </strong>
-                    </span>
-
-                    <span>
-                      HS Code:
-
-                      <strong className="ml-1 font-mono text-slate-600">
-                        {hsCode}
-                      </strong>
-                    </span>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-              <div className="flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-3">
-
-                <Clock3
-                  size={15}
-                  className="text-slate-400"
-                />
-
-                <div>
-
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                    Current status
+                  <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                    Current shipment
                   </p>
 
-                  <p className="mt-0.5 text-xs font-bold text-slate-700">
-                    Request submitted
-                  </p>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* =================================================
-              PROGRESS
-          ================================================= */}
-
-          <div className="px-5 py-7 sm:px-7">
-
-            <div className="mb-6 flex items-center justify-between">
-
-              <div>
-
-                <h3 className="text-sm font-bold text-slate-900">
-                  Import progress
-                </h3>
-
-                <p className="mt-1 text-[10px] text-slate-400">
-                  Your shipment journey
-                </p>
-
-              </div>
-
-              <span className="text-xs font-bold text-blue-700">
-                20% complete
-              </span>
-
-            </div>
-
-            <div className="relative">
-
-              <div className="absolute left-[18px] top-5 h-[calc(100%-40px)] w-px bg-slate-200 sm:left-[24px]" />
-
-              <TimelineItem
-                number="01"
-                title="Import request submitted"
-                description="Your import request has been successfully submitted."
-                time="Just now"
-                complete
-              />
-
-              <TimelineItem
-                number="02"
-                title="Agent reviewing request"
-                description="Your selected clearing agent will review the shipment details."
-                time="Waiting"
-                active
-              />
-
-              <TimelineItem
-                number="03"
-                title="Documents & clearance"
-                description="Required documents and customs clearance will be processed."
-                time="Pending"
-              />
-
-              <TimelineItem
-                number="04"
-                title="Customs assessment"
-                description="Customs duties, taxes, and clearance status will be updated."
-                time="Pending"
-              />
-
-              <TimelineItem
-                number="05"
-                title="Shipment cleared"
-                description="Your shipment will be ready for the next delivery stage."
-                time="Pending"
-              />
-
-            </div>
-
-          </div>
-
-        </section>
-
-        {/* ===================================================
-            LOWER GRID
-        =================================================== */}
-
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_370px]">
-
-          {/* =================================================
-              LEFT
-          ================================================= */}
-
-          <div className="space-y-6">
-
-            {/* =================================================
-                AGENT
-            ================================================= */}
-
-            <section className="rounded-2xl border border-slate-200 bg-white">
-
-              <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-
-                <div className="flex items-center gap-2.5">
-
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-                    <UserRound size={16} />
-                  </div>
-
-                  <h2 className="text-sm font-bold text-slate-900">
-                    Clearing agent
+                  <h2 className="text-[17px] font-bold text-[#173B6C]">
+                    {product}
                   </h2>
 
+                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-slate-500">
+                    <span>Reference: {reference}</span>
+
+                    <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block" />
+
+                    <span>HS Code: {hsCode}</span>
+                  </div>
                 </div>
-
-                <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-bold text-emerald-700">
-                  SELECTED
-                </span>
-
               </div>
 
-              <div className="p-5">
-
-                {agent ? (
-
-                  <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-
-                    <div className="flex items-center gap-4">
-
-                      <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-[#173563] text-xs font-bold text-white">
-
-                        {agent.initials || "AG"}
-
-                        <span className="absolute -bottom-1 -right-1 rounded-full bg-white">
-
-                          <BadgeCheck
-                            size={16}
-                            className="fill-emerald-500 text-white"
-                          />
-
-                        </span>
-
-                      </div>
-
-                      <div>
-
-                        <h3 className="text-sm font-bold text-slate-900">
-                          {agent.name}
-                        </h3>
-
-                        <div className="mt-1 flex flex-wrap items-center gap-3 text-[10px] text-slate-400">
-
-                          <span className="flex items-center gap-1">
-
-                            <MapPin size={11} />
-
-                            {agent.location || "Sri Lanka"}
-
-                          </span>
-
-                          <span>
-                            ★ {agent.rating || "4.8"}
-                          </span>
-
-                        </div>
-
-                      </div>
-
-                    </div>
-
-                    <button
-                      type="button"
-                      className="rounded-lg border border-slate-200 px-4 py-2 text-[10px] font-semibold text-slate-600 transition hover:bg-slate-50"
-                    >
-                      Contact agent
-                    </button>
-
-                  </div>
-
-                ) : (
-
-                  <p className="text-xs text-slate-500">
-                    No clearing agent information available.
-                  </p>
-
-                )}
-
+              <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-amber-100 bg-amber-50 px-3 py-1.5 text-[11px] font-bold text-amber-700">
+                <Clock3 className="h-3.5 w-3.5" />
+                {status}
               </div>
-
-            </section>
-
-            {/* =================================================
-                DOCUMENTS
-            ================================================= */}
-
-            <section className="rounded-2xl border border-slate-200 bg-white">
-
-              <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-
-                <div className="flex items-center gap-2.5">
-
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
-                    <FileText size={16} />
-                  </div>
-
-                  <div>
-
-                    <h2 className="text-sm font-bold text-slate-900">
-                      Import documents
-                    </h2>
-
-                    <p className="mt-0.5 text-[9px] text-slate-400">
-                      Documents required for clearance
-                    </p>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-              <div className="divide-y divide-slate-100">
-
-                <DocumentRow
-                  title="Commercial Invoice"
-                  status="Pending upload"
-                />
-
-                <DocumentRow
-                  title="Packing List"
-                  status="Pending upload"
-                />
-
-                <DocumentRow
-                  title="Bill of Lading / Air Waybill"
-                  status="Pending upload"
-                />
-
-                <DocumentRow
-                  title="Additional clearance documents"
-                  status="May be required"
-                />
-
-              </div>
-
-            </section>
-
+            </div>
           </div>
 
-          {/* =================================================
-              RIGHT
-          ================================================= */}
+          <div className="grid grid-cols-2 divide-x divide-slate-100 sm:grid-cols-4">
+            <div className="p-4 sm:p-5">
+              <p className="text-[11px] font-semibold text-slate-400">
+                Shipment
+              </p>
+              <p className="mt-1 text-[13px] font-bold text-[#173B6C]">
+                {reference}
+              </p>
+            </div>
 
-          <aside className="space-y-6">
+            <div className="p-4 sm:p-5">
+              <p className="text-[11px] font-semibold text-slate-400">
+                HS Code
+              </p>
+              <p className="mt-1 text-[13px] font-bold text-[#173B6C]">
+                {hsCode}
+              </p>
+            </div>
 
-            {/* =================================================
-                SUMMARY
-            ================================================= */}
+            <div className="p-4 sm:p-5">
+              <p className="text-[11px] font-semibold text-slate-400">
+                Status
+              </p>
+              <p className="mt-1 text-[13px] font-bold text-[#173B6C]">
+                {status}
+              </p>
+            </div>
 
-            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <div className="p-4 sm:p-5">
+              <p className="text-[11px] font-semibold text-slate-400">
+                Last updated
+              </p>
+              <p className="mt-1 text-[13px] font-bold text-[#173B6C]">
+                {lastUpdated.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
+          </div>
+        </section>
 
-              <div className="bg-[#173563] px-5 py-5 text-white">
+        {/* Progress */}
+        <section className="fade-up mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_12px_rgba(15,23,42,.025)] sm:p-6">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-[17px] font-bold text-[#173B6C]">
+                Shipment progress
+              </h2>
 
-                <p className="text-[9px] font-semibold uppercase tracking-wider text-blue-200">
-                  Import summary
-                </p>
+              <p className="mt-1 text-[12px] text-slate-500">
+                Your shipment clearance journey
+              </p>
+            </div>
 
-                <h2 className="mt-1 text-xl font-bold">
-                  Shipment overview
-                </h2>
+            <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-[#2563EB]">
+              20% complete
+            </span>
+          </div>
 
-              </div>
+          <div className="space-y-0">
+            {timeline.map((item, index) => (
+              <TimelineItem
+                key={item.title}
+                {...item}
+                isLast={index === timeline.length - 1}
+              />
+            ))}
+          </div>
+        </section>
 
-              <div className="space-y-4 p-5">
+        {/* Lower Content */}
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_370px]">
+          {/* Left */}
+          <div className="space-y-6">
+           
+                
+              
 
-                <InfoRow
-                  label="Product"
-                  value={product}
-                />
+              
+           
+          </div>
 
-                <InfoRow
-                  label="HS Code"
-                  value={hsCode}
-                  mono
-                />
+          {/* Right */}
+          <div className="space-y-6">
+            
 
-                <InfoRow
-                  label="Reference"
-                  value={reference}
-                  mono
-                />
-
-                <InfoRow
-                  label="Status"
-                  value={status}
-                />
-
-                <div className="border-t border-slate-100 pt-4">
-
-                  <div className="flex items-center justify-between">
-
-                    <span className="text-xs font-semibold text-slate-600">
-                      Estimated total
-                    </span>
-
-                    <span className="text-lg font-bold text-[#173563]">
-                      $
-                      {formatMoney(
-                        shipment?.finalSummary?.total
-                      )}
-                    </span>
-
-                  </div>
-
-                  <p className="mt-1 text-[9px] text-slate-400">
-                    Final amount may change after customs assessment.
-                  </p>
-
-                </div>
-
-              </div>
-
-            </section>
-
-            {/* =================================================
-                HELP
-            ================================================= */}
-
-            <section className="rounded-2xl border border-slate-200 bg-white p-5">
-
-              <div className="flex items-start gap-3">
-
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
-                  <ShieldCheck size={17} />
-                </div>
-
-                <div>
-
-                  <h3 className="text-xs font-bold text-slate-800">
-                    Need assistance?
-                  </h3>
-
-                  <p className="mt-1 text-[10px] leading-5 text-slate-400">
-                    Your clearing agent can help with documents,
-                    customs requirements, and shipment questions.
-                  </p>
-
-                  <button
-                    type="button"
-                    className="mt-3 flex items-center gap-1 text-[10px] font-bold text-blue-700 hover:text-blue-800"
-                  >
-
-                    Get support
-
-                    <ArrowUpRight size={12} />
-
-                  </button>
-
-                </div>
-
-              </div>
-
-            </section>
-
-          </aside>
-
+            {/* Help */}
+           
+            
+          </div>
         </div>
 
-        {/* ===================================================
-            BACK
-        =================================================== */}
-
-        <div className="mt-7 flex justify-center">
-
+        {/* Bottom Action */}
+        <div className="fade-up mt-8 flex items-center justify-between border-t border-slate-200 pt-5">
           <Link
             to="/dashboard"
-            className="flex items-center gap-2 text-xs font-medium text-slate-400 transition hover:text-slate-700"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-bold text-slate-600 transition-all hover:border-[#173B6C] hover:text-[#173B6C]"
           >
-
-            <ArrowLeft size={14} />
-
+            <ArrowLeft className="h-4 w-4" />
             Back to dashboard
-
           </Link>
 
+          <div className="hidden items-center gap-1.5 text-[11px] text-slate-400 sm:flex">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            ImportEase shipment tracking
+          </div>
         </div>
 
+        <p className="mt-6 text-center text-[12px] text-slate-400">
+          Shipment information is updated based on the latest available
+          clearance status.
+        </p>
       </main>
 
+      <style>{`
+        @keyframes fadeUp {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .fade-up {
+          animation: fadeUp 0.45s ease-out both;
+        }
+      `}</style>
     </div>
   );
 }
 
-/* =========================================================
-   TIMELINE
-========================================================= */
-
 function TimelineItem({
-  number,
   title,
   description,
-  time,
-  complete = false,
-  active = false,
+  completed,
+  current,
+  date,
+  isLast,
 }) {
   return (
-    <div className="relative flex gap-4 pb-7 last:pb-0 sm:gap-5">
+    <div className="flex gap-3.5">
+      <div className="flex flex-col items-center">
+        <div
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 ${
+            completed
+              ? "border-[#173B6C] bg-[#173B6C] text-white"
+              : current
+              ? "border-[#2563EB] bg-blue-50 text-[#2563EB]"
+              : "border-slate-200 bg-white text-slate-300"
+          }`}
+        >
+          {completed ? (
+            <Check className="h-4 w-4" />
+          ) : current ? (
+            <Clock3 className="h-4 w-4" />
+          ) : (
+            <span className="h-2 w-2 rounded-full bg-current" />
+          )}
+        </div>
 
-      <div
-        className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-4 border-white text-[9px] font-bold shadow-sm ${
-          complete
-            ? "bg-emerald-500 text-white"
-            : active
-              ? "bg-blue-600 text-white"
-              : "bg-slate-100 text-slate-400"
-        }`}
-      >
-
-        {complete ? (
-          <Check size={14} strokeWidth={3} />
-        ) : (
-          number
+        {!isLast && (
+          <div
+            className={`my-1 w-px flex-1 min-h-[52px] ${
+              completed ? "bg-[#173B6C]" : "bg-slate-200"
+            }`}
+          />
         )}
-
       </div>
 
-      <div className="min-w-0 flex-1 pt-0.5">
-
-        <div className="flex flex-col justify-between gap-1 sm:flex-row">
-
+      <div className={`pb-6 ${isLast ? "pb-0" : ""}`}>
+        <div className="flex flex-wrap items-center gap-2">
           <h3
-            className={`text-xs font-bold ${
-              active || complete
-                ? "text-slate-800"
-                : "text-slate-400"
+            className={`text-[13px] font-bold ${
+              current || completed ? "text-[#173B6C]" : "text-slate-400"
             }`}
           >
             {title}
           </h3>
 
           <span
-            className={`text-[9px] font-medium ${
-              active
-                ? "text-blue-600"
-                : complete
-                  ? "text-emerald-600"
-                  : "text-slate-400"
+            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+              completed
+                ? "bg-emerald-50 text-emerald-700"
+                : current
+                ? "bg-blue-50 text-[#2563EB]"
+                : "bg-slate-100 text-slate-400"
             }`}
           >
-            {time}
+            {date}
           </span>
-
         </div>
 
-        <p className="mt-1 max-w-xl text-[10px] leading-5 text-slate-400">
+        <p className="mt-1 max-w-[560px] text-[12px] leading-5 text-slate-500">
           {description}
         </p>
-
-        {active && (
-          <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-[9px] font-semibold text-blue-700">
-
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-600" />
-
-            Currently in progress
-
-          </div>
-        )}
-
       </div>
-
     </div>
   );
 }
 
-/* =========================================================
-   DOCUMENT
-========================================================= */
+function DocumentRow({ name, status }) {
+  const uploaded = status === "Uploaded";
 
-function DocumentRow({
-  title,
-  status,
-}) {
   return (
-    <div className="flex items-center justify-between gap-4 px-5 py-4">
-
+    <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/60 px-3.5 py-3">
       <div className="flex min-w-0 items-center gap-3">
-
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400">
-          <FileText size={15} />
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#2563EB] shadow-sm">
+          <FileText className="h-4 w-4" />
         </div>
 
         <div className="min-w-0">
-
-          <p className="truncate text-[11px] font-semibold text-slate-700">
-            {title}
+          <p className="truncate text-[12px] font-bold text-[#173B6C]">
+            {name}
           </p>
 
-          <p className="mt-0.5 text-[9px] text-slate-400">
-            {status}
+          <p className="mt-0.5 text-[10px] text-slate-400">
+            Shipment document
           </p>
-
         </div>
-
       </div>
 
-      <span className="shrink-0 rounded-full bg-slate-100 px-2 py-1 text-[8px] font-bold text-slate-400">
-        PENDING
+      <span
+        className={`ml-3 shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${
+          uploaded
+            ? "bg-emerald-50 text-emerald-700"
+            : "bg-amber-50 text-amber-700"
+        }`}
+      >
+        {status}
       </span>
-
     </div>
   );
 }
 
-/* =========================================================
-   INFO ROW
-========================================================= */
-
-function InfoRow({
-  label,
-  value,
-  mono = false,
-}) {
+function InfoRow({ label, value }) {
   return (
-    <div className="flex items-start justify-between gap-4">
-
-      <span className="text-[10px] text-slate-400">
+    <div className="flex items-center justify-between gap-4 px-4 py-3.5">
+      <span className="text-[11px] font-semibold text-slate-400">
         {label}
       </span>
 
-      <span
-        className={`max-w-[190px] text-right text-[10px] font-semibold text-slate-700 ${
-          mono ? "font-mono" : ""
-        }`}
-      >
+      <span className="max-w-[190px] truncate text-right text-[12px] font-bold text-[#173B6C]">
         {value}
       </span>
-
     </div>
   );
 }
 
-/* =========================================================
-   MONEY
-========================================================= */
-
 function formatMoney(value) {
-  return new Intl.NumberFormat("en-US", {
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return "LKR 0.00";
+  }
+
+  return `LKR ${number.toLocaleString("en-LK", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(Number(value) || 0);
+  })}`;
 }
 
 export default Shipments;

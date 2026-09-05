@@ -1,40 +1,60 @@
 import { useEffect, useState } from "react";
-
 import { Link, useNavigate } from "react-router-dom";
-
 import {
   ArrowLeft,
+  Bell,
   Building2,
   Check,
   CheckCircle2,
-  Clipboard,
   Copy,
   Mail,
-  Menu,
+  RefreshCw,
   Send,
-  Settings,
   Users,
   UserPlus,
-  LogOut,
   X,
 } from "lucide-react";
+import AgentAdminSidebar from "../components/AgentAdminSidebar";
 
 function AgencyInvite() {
   const navigate = useNavigate();
 
-  const [agency, setAgency] = useState(null);
-  const [admin, setAdmin] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+   const [agency, setAgency] = useState(() => {
+    try {
+      const storedAgency = localStorage.getItem("clearingAgency");
+      return storedAgency ? JSON.parse(storedAgency) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [admin, setAdmin] = useState(() => {
+    try {
+      const storedAdmin = localStorage.getItem("clearingAgent");
+      const parsed = storedAdmin ? JSON.parse(storedAdmin) : null;
+      return parsed && parsed.agentType === "agency-admin" ? parsed : null;
+    } catch {
+      return null;
+    }
+  });
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [copied, setCopied] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [pendingCount, setPendingCount] = useState(0);
 
-  useEffect(() => {
+  /* =========================================================
+     LOAD AGENCY + ADMIN DATA
+  ========================================================= */
+
+  const loadData = () => {
     try {
-      const storedAgency = localStorage.getItem("clearingAgency");
-      const storedAdmin = localStorage.getItem("clearingAgent");
+      const storedAgency =
+        localStorage.getItem("clearingAgency");
+
+      const storedAdmin =
+        localStorage.getItem("clearingAgent");
 
       if (!storedAgency || !storedAdmin) {
         navigate("/agent-signin");
@@ -44,24 +64,69 @@ function AgencyInvite() {
       const parsedAgency = JSON.parse(storedAgency);
       const parsedAdmin = JSON.parse(storedAdmin);
 
-      if (parsedAdmin.role !== "admin") {
+      if (parsedAdmin.agentType !== "agency-admin") {
         navigate("/agent-signin");
         return;
       }
 
       setAgency(parsedAgency);
       setAdmin(parsedAdmin);
+
+      /* -------------------------------------------------------
+         LOAD PENDING AGENT REQUEST COUNT
+      ------------------------------------------------------- */
+
+      const storedPendingRequests = JSON.parse(
+        localStorage.getItem("agencyPendingAgents") || "[]"
+      );
+
+      const currentAgencyId =
+        parsedAgency.id || parsedAgency.code;
+
+      const agencyPendingRequests =
+        storedPendingRequests.filter((request) => {
+          const requestAgencyId =
+            request.agencyId || request.agencyCode;
+
+          return (
+            requestAgencyId === currentAgencyId &&
+            request.status === "pending"
+          );
+        });
+
+      setPendingCount(agencyPendingRequests.length);
     } catch (error) {
-      console.error("Failed to load agency information:", error);
+      console.error(
+        "Failed to load agency information:",
+        error
+      );
+
       navigate("/agent-signin");
     }
+  };
+
+  useEffect(() => {
+    loadData();
   }, [navigate]);
 
-  const agencyCode = agency?.code || agency?.id || "AG-000000";
+  /* =========================================================
+     AGENCY CODE
+  ========================================================= */
+
+  const agencyCode =
+    agency?.code ||
+    agency?.id ||
+    "AG-000000";
+
+  /* =========================================================
+     COPY AGENCY CODE
+  ========================================================= */
 
   const handleCopyCode = async () => {
     try {
-      await navigator.clipboard.writeText(agencyCode);
+      await navigator.clipboard.writeText(
+        agencyCode
+      );
 
       setCopied(true);
 
@@ -69,9 +134,16 @@ function AgencyInvite() {
         setCopied(false);
       }, 2000);
     } catch (error) {
-      console.error("Failed to copy agency code:", error);
+      console.error(
+        "Failed to copy agency code:",
+        error
+      );
     }
   };
+
+  /* =========================================================
+     DEFAULT INVITATION MESSAGE
+  ========================================================= */
 
   const inviteMessage =
     `You are invited to join ${
@@ -82,9 +154,15 @@ function AgencyInvite() {
     `Use agency code: ${agencyCode}\n\n` +
     `Create or sign in to your ImportEase agent account, select "Join an Existing Agency", and enter this code to request access.`;
 
+  /* =========================================================
+     COPY INVITATION MESSAGE
+  ========================================================= */
+
   const handleCopyMessage = async () => {
     try {
-      await navigator.clipboard.writeText(inviteMessage);
+      await navigator.clipboard.writeText(
+        inviteMessage
+      );
 
       setCopied(true);
 
@@ -92,9 +170,16 @@ function AgencyInvite() {
         setCopied(false);
       }, 2000);
     } catch (error) {
-      console.error("Failed to copy invitation:", error);
+      console.error(
+        "Failed to copy invitation:",
+        error
+      );
     }
   };
+
+  /* =========================================================
+     SEND INVITATION
+  ========================================================= */
 
   const handleSendInvitation = (event) => {
     event.preventDefault();
@@ -105,49 +190,83 @@ function AgencyInvite() {
     const trimmedEmail = email.trim();
 
     if (!trimmedEmail) {
-      setError("Please enter the agent's email address.");
+      setError(
+        "Please enter the agent's email address."
+      );
       return;
     }
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailPattern =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailPattern.test(trimmedEmail)) {
-      setError("Please enter a valid email address.");
+      setError(
+        "Please enter a valid email address."
+      );
       return;
     }
 
     try {
-      const existingInvitations = JSON.parse(
-        localStorage.getItem("agencyInvitations") || "[]"
-      );
+      const existingInvitations =
+        JSON.parse(
+          localStorage.getItem(
+            "agencyInvitations"
+          ) || "[]"
+        );
 
-      const currentAgencyId = agency?.id || agency?.code;
+      const currentAgencyId =
+        agency?.id || agency?.code;
 
-      const alreadyInvited = existingInvitations.some(
-        (invitation) =>
-          invitation.email?.toLowerCase() ===
-            trimmedEmail.toLowerCase() &&
-          invitation.agencyId === currentAgencyId
-      );
+      /* -------------------------------------------------------
+         CHECK DUPLICATE INVITATION
+      ------------------------------------------------------- */
+
+      const alreadyInvited =
+        existingInvitations.some(
+          (invitation) =>
+            invitation.email?.toLowerCase() ===
+              trimmedEmail.toLowerCase() &&
+            invitation.agencyId ===
+              currentAgencyId
+        );
 
       if (alreadyInvited) {
-        setError("An invitation has already been sent to this email.");
+        setError(
+          "An invitation has already been sent to this email."
+        );
         return;
       }
 
+      /* -------------------------------------------------------
+         CREATE INVITATION
+      ------------------------------------------------------- */
+
       const invitation = {
         id: `invite-${Date.now()}`,
+
         email: trimmedEmail,
+
         agencyId: currentAgencyId,
+
         agencyCode,
+
         agencyName:
           agency?.agencyName ||
           agency?.name ||
           "Clearing Agency",
-        invitedBy: admin?.name || "Agency Administrator",
+
+        invitedBy:
+          admin?.name ||
+          "Agency Administrator",
+
         status: "sent",
-        message: message.trim() || inviteMessage,
-        createdAt: new Date().toISOString(),
+
+        message:
+          message.trim() ||
+          inviteMessage,
+
+        createdAt:
+          new Date().toISOString(),
       };
 
       existingInvitations.push(invitation);
@@ -157,191 +276,60 @@ function AgencyInvite() {
         JSON.stringify(existingInvitations)
       );
 
+      /* -------------------------------------------------------
+         CLEAR FORM
+      ------------------------------------------------------- */
+
       setEmail("");
       setMessage("");
       setSent(true);
     } catch (error) {
-      console.error("Failed to send invitation:", error);
-      setError("Unable to send the invitation. Please try again.");
+      console.error(
+        "Failed to send invitation:",
+        error
+      );
+
+      setError(
+        "Unable to send the invitation. Please try again."
+      );
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("clearingAgent");
-    localStorage.removeItem("agentOnboardingType");
-    localStorage.removeItem("agentOnboardingComplete");
-
-    navigate("/agent-signin");
-  };
+  /* =========================================================
+     LOADING
+  ========================================================= */
 
   if (!agency || !admin) {
     return null;
   }
 
-  const adminName = admin.name || "Agency Admin";
-
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
 
-      {/* Mobile Overlay */}
+      {/* =====================================================
+          REUSABLE ADMIN SIDEBAR
+      ===================================================== */}
 
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-slate-900/30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      <AgentAdminSidebar />
 
-      {/* Sidebar */}
+      {/* =====================================================
+          MAIN AREA
+      ===================================================== */}
 
-      <aside
-        className={`fixed left-0 top-0 z-50 flex h-screen w-[250px] flex-col border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
+      <div className="lg:ml-[260px]">
 
-        {/* Logo */}
+        {/* ===================================================
+            HEADER
+        =================================================== */}
 
-        <div className="flex h-[70px] items-center border-b border-slate-100 px-5">
-
-          <Link
-            to="/agent-admin-dashboard"
-            className="flex items-center gap-3"
-            onClick={() => setSidebarOpen(false)}
-          >
-
-            <img
-              src="/logo.jpeg"
-              alt="ImportEase"
-              className="h-9 w-9 object-contain mix-blend-multiply"
-            />
-
-            <div>
-
-              <p className="text-[18px] font-bold tracking-tight text-[#173563]">
-                Import
-                <span className="text-slate-900">Ease</span>
-              </p>
-
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                Agent Platform
-              </p>
-
-            </div>
-
-          </Link>
-
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(false)}
-            className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 lg:hidden"
-          >
-            <X size={18} />
-          </button>
-
-        </div>
-
-        {/* Navigation */}
-
-        <nav className="flex-1 space-y-1.5 p-3">
-
-          <SidebarItem
-            icon={Building2}
-            label="Dashboard"
-            to="/agent-admin-dashboard"
-            onClick={() => setSidebarOpen(false)}
-          />
-
-          <SidebarItem
-            icon={Users}
-            label="Agents"
-            to="/agency-agents"
-            onClick={() => setSidebarOpen(false)}
-          />
-
-          <SidebarItem
-            icon={UserPlus}
-            label="Invite Agents"
-            to="/agency-invite"
-            active
-            onClick={() => setSidebarOpen(false)}
-          />
-
-          <SidebarItem
-            icon={Clipboard}
-            label="SME Requests"
-            to="/agent-marketplace"
-            onClick={() => setSidebarOpen(false)}
-          />
-
-        </nav>
-
-        {/* Bottom Profile */}
-
-        <div className="border-t border-slate-100 p-3">
-
-          <div className="mb-3 flex items-center gap-3 rounded-xl px-2 py-2">
-
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#173563] text-xs font-bold text-white">
-              {getInitials(adminName)}
-            </div>
-
-            <div className="min-w-0">
-
-              <p className="truncate text-sm font-bold text-slate-800">
-                {adminName}
-              </p>
-
-              <p className="mt-0.5 text-[11px] text-slate-400">
-                Administrator
-              </p>
-
-            </div>
-
-          </div>
-
-          <SidebarItem
-            icon={Settings}
-            label="Settings"
-            to="/agent-settings"
-            onClick={() => setSidebarOpen(false)}
-          />
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-          >
-            <LogOut size={18} />
-            Logout
-          </button>
-
-        </div>
-
-      </aside>
-
-      {/* Main Area */}
-
-      <div className="lg:ml-[250px]">
-
-        {/* Header */}
-
-        <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-5 backdrop-blur sm:px-8">
+        <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur-xl sm:px-6">
 
           <div className="flex items-center gap-3">
 
-            <button
-              type="button"
-              onClick={() => setSidebarOpen(true)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 lg:hidden"
-            >
-              <Menu size={19} />
-            </button>
-
             <div>
 
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                Agent Workspace
+              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
+                Agency Workspace
               </p>
 
               <h1 className="text-base font-bold text-slate-800">
@@ -352,35 +340,45 @@ function AgencyInvite() {
 
           </div>
 
+          {/* REFRESH + NOTIFICATIONS */}
+
           <div className="flex items-center gap-3">
 
-            <div className="hidden text-right sm:block">
+            <button
+              type="button"
+              onClick={loadData}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
+              title="Refresh"
+            >
+              <RefreshCw size={18} />
+            </button>
 
-              <p className="text-sm font-bold text-slate-800">
-                {adminName}
-              </p>
+            <button
+              type="button"
+              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
+              title="Notifications"
+            >
+              <Bell size={18} />
 
-              <p className="text-[10px] text-slate-400">
-                Administrator
-              </p>
+              {pendingCount > 0 && (
+                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
+              )}
 
-            </div>
-
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#173563] text-xs font-bold text-white">
-              {getInitials(adminName)}
-            </div>
+            </button>
 
           </div>
 
         </header>
 
-        {/* Content */}
+        {/* ===================================================
+            CONTENT
+        =================================================== */}
 
         <main className="px-5 py-7 sm:px-8 lg:px-10">
 
           <div className="mx-auto max-w-[1180px]">
 
-            {/* Back */}
+            {/* BACK */}
 
             <Link
               to="/agent-admin-dashboard"
@@ -390,21 +388,13 @@ function AgencyInvite() {
               Back to Dashboard
             </Link>
 
-            {/* Page Heading */}
+            {/* PAGE HEADING */}
 
             <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
 
               <div>
 
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#2563EB]">
-
-                  <UserPlus size={14} />
-
-                  Agent onboarding
-
-                </div>
-
-                <h2 className="text-[32px] font-bold leading-tight tracking-tight text-[#173563] sm:text-[40px]">
+                <h2 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
                   Invite Agents
                 </h2>
 
@@ -425,11 +415,15 @@ function AgencyInvite() {
 
             </div>
 
-            {/* Main Grid */}
+            {/* =================================================
+                MAIN GRID
+            ================================================= */}
 
             <div className="grid gap-6 lg:grid-cols-[1.35fr_0.9fr]">
 
-              {/* Invite Form */}
+              {/* =================================================
+                  INVITE FORM
+              ================================================= */}
 
               <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
@@ -449,15 +443,22 @@ function AgencyInvite() {
 
                 </div>
 
+                {/* ERROR */}
+
                 {error && (
                   <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
 
-                    <X size={17} className="mt-0.5 shrink-0" />
+                    <X
+                      size={17}
+                      className="mt-0.5 shrink-0"
+                    />
 
                     <p>{error}</p>
 
                   </div>
                 )}
+
+                {/* SUCCESS */}
 
                 {sent && (
                   <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
@@ -483,10 +484,14 @@ function AgencyInvite() {
                   </div>
                 )}
 
+                {/* FORM */}
+
                 <form
                   onSubmit={handleSendInvitation}
                   className="space-y-5"
                 >
+
+                  {/* EMAIL */}
 
                   <div>
 
@@ -498,7 +503,10 @@ function AgencyInvite() {
                       type="email"
                       value={email}
                       onChange={(event) => {
-                        setEmail(event.target.value);
+                        setEmail(
+                          event.target.value
+                        );
+
                         setError("");
                         setSent(false);
                       }}
@@ -507,6 +515,8 @@ function AgencyInvite() {
                     />
 
                   </div>
+
+                  {/* PERSONAL MESSAGE */}
 
                   <div>
 
@@ -525,7 +535,9 @@ function AgencyInvite() {
                     <textarea
                       value={message}
                       onChange={(event) =>
-                        setMessage(event.target.value)
+                        setMessage(
+                          event.target.value
+                        )
                       }
                       placeholder="Add a short message for the agent..."
                       rows={5}
@@ -533,6 +545,8 @@ function AgencyInvite() {
                     />
 
                   </div>
+
+                  {/* SEND */}
 
                   <button
                     type="submit"
@@ -546,11 +560,15 @@ function AgencyInvite() {
 
               </section>
 
-              {/* Right Column */}
+              {/* =================================================
+                  RIGHT COLUMN
+              ================================================= */}
 
               <div className="space-y-6">
 
-                {/* Agency Code */}
+                {/* =================================================
+                    AGENCY CODE
+                ================================================= */}
 
                 <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
@@ -597,7 +615,6 @@ function AgencyInvite() {
                         onClick={handleCopyCode}
                         className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
                       >
-
                         {copied ? (
                           <>
                             <Check size={14} />
@@ -609,7 +626,6 @@ function AgencyInvite() {
                             Copy
                           </>
                         )}
-
                       </button>
 
                     </div>
@@ -627,7 +643,9 @@ function AgencyInvite() {
 
                 </section>
 
-                {/* Quick Invite Message */}
+                {/* =================================================
+                    QUICK INVITE MESSAGE
+                ================================================= */}
 
                 <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
@@ -657,7 +675,6 @@ function AgencyInvite() {
                     onClick={handleCopyMessage}
                     className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                   >
-
                     {copied ? (
                       <>
                         <Check size={16} />
@@ -669,7 +686,6 @@ function AgencyInvite() {
                         Copy Message
                       </>
                     )}
-
                   </button>
 
                 </section>
@@ -678,7 +694,9 @@ function AgencyInvite() {
 
             </div>
 
-            {/* Footer */}
+            {/* =================================================
+                FOOTER
+            ================================================= */}
 
             <div className="mt-8 border-t border-slate-200 pt-5">
 
@@ -698,54 +716,6 @@ function AgencyInvite() {
 
     </div>
   );
-}
-
-/* =========================================================
-   SIDEBAR ITEM
-========================================================= */
-
-function SidebarItem({
-  icon: Icon,
-  label,
-  to,
-  active = false,
-  onClick,
-}) {
-  return (
-    <Link
-      to={to}
-      onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${
-        active
-          ? "bg-blue-50 text-[#173563]"
-          : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
-      }`}
-    >
-      <Icon size={18} strokeWidth={1.8} />
-      <span>{label}</span>
-    </Link>
-  );
-}
-
-/* =========================================================
-   GET INITIALS
-========================================================= */
-
-function getInitials(name) {
-  if (!name) return "AD";
-
-  const words = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-
-  if (words.length === 1) {
-    return words[0].slice(0, 2).toUpperCase();
-  }
-
-  return `${words[0][0]}${
-    words[words.length - 1][0]
-  }`.toUpperCase();
 }
 
 export default AgencyInvite;

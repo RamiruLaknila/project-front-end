@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Package,
   ShieldCheck,
@@ -11,6 +12,28 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
 function Home() {
+  const [userName, setUserName] = useState("there");
+
+  useEffect(() => {
+    try {
+      const savedProfile = localStorage.getItem("smeProfile");
+      const savedUser = localStorage.getItem("user");
+
+      const profile = savedProfile ? JSON.parse(savedProfile) : {};
+      const user = savedUser ? JSON.parse(savedUser) : {};
+
+      const name =
+        profile.fullName ||
+        user.fullName ||
+        user.name ||
+        "";
+
+      setUserName(name || "there");
+    } catch (error) {
+      console.error("Failed to load user name:", error);
+    }
+  }, []);
+
   // ============================
   // LEFT PANEL ANIMATION
   // ============================
@@ -218,7 +241,7 @@ function Home() {
               }}
               className="mt-4 font-serif text-[28px] text-[#173563] sm:text-[32px]"
             >
-              Sign In
+              Welcome, {userName}
             </motion.h2>
 
             {/* User Type Cards */}

@@ -1,572 +1,588 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Bell,
   ChevronDown,
   LogOut,
+  Menu,
   Settings,
-  User,
-  CircleUserRound,
+  UserRound,
+  X,
 } from "lucide-react";
-import {
-  Link,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
 
 function AppNavbar() {
-  const location = useLocation();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [profile, setProfile] = useState(null);
 
-  const profileRef = useRef(null);
-
-  const navItems = [
-    {
-    to: "/Dashboard",
-    label: "Home",
-  },
-    {
-      to: "/hs-code-search",
-      label: "HS Code Search",
-      mobileLabel: "HS Code",
-    },
-    {
-      to: "/calculator",
-      label: "Calculator",
-    },
-    {
-      to: "/find-agent",
-      label: "Find Agent",
-    },
-    {
-      to: "/track-shipment",
-      label: "Track Shipment",
-    },
-  ];
-
-  /* =========================================================
-     LOAD USER
-  ========================================================= */
-
-  const loadUser = () => {
-    const savedUser = localStorage.getItem("importease_user");
-
-    if (!savedUser) {
-      setUser(null);
-      return;
-    }
-
+  const loadProfile = () => {
     try {
-      const parsedUser = JSON.parse(savedUser);
-      setUser(parsedUser);
+      const savedProfile = localStorage.getItem("smeProfile");
+      const savedUser = localStorage.getItem("user");
+
+      let profileData = {};
+      let userData = {};
+
+      if (savedProfile) {
+        profileData = JSON.parse(savedProfile);
+      }
+
+      if (savedUser) {
+        userData = JSON.parse(savedUser);
+      }
+
+      setProfile({
+        fullName:
+          profileData.fullName ||
+          userData.fullName ||
+          userData.name ||
+          "User",
+
+        businessName:
+          profileData.businessName ||
+          userData.businessName ||
+          "",
+
+        email:
+          profileData.email ||
+          userData.email ||
+          "",
+
+        photo:
+          profileData.photo ||
+          userData.photo ||
+          "",
+      });
     } catch (error) {
-      console.error("Unable to load user:", error);
-      setUser(null);
+      console.error("Failed to load navbar profile:", error);
+
+      setProfile({
+        fullName: "User",
+        businessName: "",
+        email: "",
+        photo: "",
+      });
     }
   };
 
   useEffect(() => {
-    loadUser();
-  }, [location.pathname]);
+    loadProfile();
 
-  /* =========================================================
-     LISTEN FOR PROFILE UPDATES
-  ========================================================= */
-
-  useEffect(() => {
-    const handleStorageChange = () => {
-      loadUser();
+    const handleProfileUpdated = () => {
+      loadProfile();
     };
 
-    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("profileUpdated", handleProfileUpdated);
+    window.addEventListener("storage", handleProfileUpdated);
 
     return () => {
       window.removeEventListener(
+        "profileUpdated",
+        handleProfileUpdated
+      );
+
+      window.removeEventListener(
         "storage",
-        handleStorageChange
+        handleProfileUpdated
       );
     };
   }, []);
 
-  /* =========================================================
-     USER DISPLAY DATA
-  ========================================================= */
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("smeProfile");
 
-  const fullName = user?.fullName || "My Account";
+    setIsProfileOpen(false);
+    setIsMenuOpen(false);
 
-  const businessName =
-    user?.business?.name ||
-    user?.businessName ||
-    "SME Account";
+    navigate("/signin");
+  };
 
-  const isProfileIncomplete =
-    user?.profileComplete !== true;
+  const getInitials = (name) => {
+    if (!name) return "U";
 
-  const getInitials = () => {
-    if (!fullName) return "ME";
+    const words = name.trim().split(/\s+/);
 
-    const names = fullName.trim().split(/\s+/);
-
-    if (names.length === 1) {
-      return names[0].substring(0, 2).toUpperCase();
+    if (words.length === 1) {
+      return words[0].charAt(0).toUpperCase();
     }
 
     return (
-      names[0][0] +
-      names[names.length - 1][0]
+      words[0].charAt(0) +
+      words[words.length - 1].charAt(0)
     ).toUpperCase();
   };
 
-  const initials = getInitials();
+  const closeMobileMenu = () => {
+    setIsMenuOpen(false);
+  };
 
-  /* =========================================================
-     ACTIVE NAV ITEM
-  ========================================================= */
-
+  /*
+   * Active navigation
+   */
   const isActive = (path) => {
+    if (path === "/dashboard") {
+      return location.pathname === "/dashboard";
+    }
+
     return location.pathname === path;
   };
 
-  /* =========================================================
-     CLOSE DROPDOWN WHEN CLICKING OUTSIDE
-  ========================================================= */
+  /*
+   * Desktop navigation class
+   */
+  const desktopNavClass = (path) => {
+    const active = isActive(path);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        profileRef.current &&
-        !profileRef.current.contains(event.target)
-      ) {
-        setProfileOpen(false);
+    return `
+      relative flex h-[72px] items-center
+      text-[15px] font-semibold
+      transition-colors duration-200
+      ${
+        active
+          ? "text-[#173563]"
+          : "text-slate-600 hover:text-[#2563EB]"
       }
-    };
 
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside
-    );
+      after:absolute
+      after:bottom-0
+      after:left-0
+      after:right-0
+      after:h-[3px]
+      after:rounded-t-full
+      after:transition-all
+      after:duration-200
+      ${
+        active
+          ? "after:bg-[#2563EB] after:opacity-100"
+          : "after:bg-transparent after:opacity-0"
+      }
+    `;
+  };
 
-    return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
-    };
-  }, []);
+  /*
+   * Mobile navigation class
+   */
+  const mobileNavClass = (path) => {
+    const active = isActive(path);
 
-  /* =========================================================
-     CLOSE DROPDOWN WHEN PAGE CHANGES
-  ========================================================= */
-
-  useEffect(() => {
-    setProfileOpen(false);
-  }, [location.pathname]);
-
-  /* =========================================================
-     LOGOUT
-  ========================================================= */
-
-  const handleLogout = () => {
-    setProfileOpen(false);
-
-    localStorage.removeItem("importease_user");
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-
-    navigate("/signin", { replace: true });
+    return `
+      flex items-center
+      rounded-xl
+      px-4 py-3
+      text-[15px] font-semibold
+      transition-all duration-200
+      ${
+        active
+          ? "bg-blue-50 text-[#173563] shadow-sm"
+          : "text-slate-700 hover:bg-slate-50 hover:text-[#2563EB]"
+      }
+    `;
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
+      <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-6 lg:px-10">
 
-      {/* =====================================================
-          DESKTOP / MAIN NAVBAR
-      ===================================================== */}
-
-      <div className="relative mx-auto flex h-[68px] max-w-[1280px] items-center px-5 sm:px-8">
-
-        {/* =================================================
+        {/* =========================================================
             LOGO
-        ================================================= */}
-
+        ========================================================== */}
         <Link
-          to="/"
-          className="flex shrink-0 items-center gap-3"
+          to="/dashboard"
+          className="group flex shrink-0 items-center gap-3"
+          onClick={() => {
+            setIsMenuOpen(false);
+            setIsProfileOpen(false);
+          }}
         >
-          <img
-            src="/logo.jpeg"
-            alt="ImportEase"
-            className="h-15 w-15 object-contain mix-blend-multiply"
-          />
+          {/* Logo Container */}
+          <div className="flex h-[48px] w-[48px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
+            <img
+              src="/logo.jpeg"
+              alt="ImportEase"
+              className="h-full w-full object-contain"
+            />
+          </div>
 
-          <div>
-            <div className="text-[17px] font-bold tracking-tight text-[#173563]">
-              Import
-              <span className="text-slate-900">
-                Ease
-              </span>
+          {/* Brand Name */}
+          <div className="hidden sm:block">
+            <div className="text-[18px] font-bold leading-tight tracking-tight text-[#173563] transition-colors group-hover:text-[#2563EB]">
+              ImportEase
             </div>
 
-            <div className="hidden text-[9px] font-semibold uppercase tracking-[0.13em] text-slate-400 sm:block">
-              SME Import Platform
+            <div className="mt-0.5 text-[11px] font-medium leading-tight text-slate-500">
+              Import smarter. Trade easier.
             </div>
           </div>
         </Link>
 
-        {/* =================================================
-            CENTER NAVIGATION
-        ================================================= */}
+        {/* =========================================================
+            DESKTOP NAVIGATION
+        ========================================================== */}
+        <div className="hidden items-center gap-7 md:flex lg:gap-8">
 
-        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex">
+          {/* Dashboard */}
+          <Link
+            to="/dashboard"
+            className={desktopNavClass("/dashboard")}
+          >
+            Dashboard
+          </Link>
 
-          {navItems.map((item) => (
-            <NavItem
-              key={item.to}
-              to={item.to}
-              label={item.label}
-              active={isActive(item.to)}
-            />
-          ))}
+          {/* HS Code */}
+          <Link
+            to="/hs-code-search"
+            className={desktopNavClass("/hs-code-search")}
+          >
+            HS Code
+          </Link>
 
-        </nav>
+          {/* Calculator */}
+          <Link
+            to="/Calculator"
+            className={desktopNavClass("/Calculator")}
+          >
+            Calculator
+          </Link>
 
-        {/* =================================================
+          {/* Find Agent */}
+          <Link
+            to="/find-agent"
+            className={desktopNavClass("/find-agent")}
+          >
+            Find Agent
+          </Link>
+
+          {/* Shipments */}
+          <Link
+            to="/shipments"
+            className={desktopNavClass("/shipments")}
+          >
+            Shipments
+          </Link>
+        </div>
+
+        {/* =========================================================
             RIGHT SIDE
-        ================================================= */}
+        ========================================================== */}
+        <div className="flex items-center gap-2 sm:gap-3">
 
-        <div className="ml-auto flex items-center gap-3">
-
-          {/* =================================================
+          {/* =====================================================
               NOTIFICATIONS
-          ================================================= */}
-
+          ====================================================== */}
           <button
             type="button"
-            className="relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+            onClick={() => navigate("/notifications")}
+            className={`
+              relative flex h-10 w-10 items-center justify-center
+              rounded-xl
+              transition-all duration-200
+              ${
+                isActive("/notifications")
+                  ? "bg-blue-50 text-[#2563EB]"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-[#2563EB]"
+              }
+            `}
             aria-label="Notifications"
           >
-            <Bell size={17} />
+            <Bell className="h-[19px] w-[19px]" />
 
-            <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-blue-600 ring-2 ring-white" />
+            {/* Notification Dot */}
+            <span className="absolute right-[8px] top-[7px] h-2 w-2 rounded-full bg-[#2563EB] ring-2 ring-white" />
           </button>
 
-          <div className="hidden h-7 w-px bg-slate-200 sm:block" />
-
-          {/* =================================================
-              PROFILE DROPDOWN
-          ================================================= */}
-
-          <div
-            ref={profileRef}
-            className="relative"
-          >
-
-            {/* PROFILE BUTTON */}
+          {/* =====================================================
+              PROFILE
+          ====================================================== */}
+          <div className="relative hidden md:block">
 
             <button
               type="button"
               onClick={() =>
-                setProfileOpen((prev) => !prev)
+                setIsProfileOpen((prev) => !prev)
               }
-              className="flex items-center gap-2.5 rounded-xl px-2 py-1.5 transition hover:bg-slate-50"
-              aria-expanded={profileOpen}
-              aria-haspopup="menu"
+              className={`
+                flex items-center gap-3
+                rounded-xl
+                px-2 py-1.5
+                transition-all duration-200
+                ${
+                  isProfileOpen
+                    ? "bg-slate-100"
+                    : "hover:bg-slate-50"
+                }
+              `}
             >
 
-              {/* AVATAR */}
+              {/* Profile Photo */}
+              {profile?.photo ? (
+                <img
+                  src={profile.photo}
+                  alt={profile.fullName || "Profile"}
+                  className="h-10 w-10 rounded-full object-cover ring-2 ring-white shadow-sm"
+                />
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#173563] text-sm font-bold text-white shadow-sm">
+                  {getInitials(profile?.fullName)}
+                </div>
+              )}
 
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#173563] text-[10px] font-bold text-white">
-                {initials}
-              </div>
-
-              {/* USER INFORMATION */}
-
-              <div className="hidden max-w-[130px] text-left sm:block">
-
-                <p className="truncate text-xs font-semibold text-slate-800">
-                  {businessName}
+              {/* Profile Details */}
+              <div className="hidden text-left lg:block">
+                <p className="max-w-[150px] truncate text-[14px] font-bold text-slate-800">
+                  {profile?.fullName || "User"}
                 </p>
 
-                <p className="text-[9px] text-slate-400">
-                  SME Account
+                <p className="max-w-[150px] truncate text-[12px] text-slate-500">
+                  {profile?.businessName || "SME Account"}
                 </p>
-
               </div>
-
-              {/* ARROW */}
 
               <ChevronDown
-                size={15}
-                className={`hidden text-slate-400 transition-transform sm:block ${
-                  profileOpen
-                    ? "rotate-180"
-                    : ""
-                }`}
+                className={`
+                  h-4 w-4
+                  text-slate-500
+                  transition-transform duration-200
+                  ${isProfileOpen ? "rotate-180" : ""}
+                `}
               />
-
             </button>
 
             {/* =================================================
-                DROPDOWN
-            ================================================= */}
+                PROFILE DROPDOWN
+            ================================================== */}
+            {isProfileOpen && (
+              <>
+                {/* Background Click Layer */}
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsProfileOpen(false)}
+                />
 
-            {profileOpen && (
-              <div
-                className="absolute right-0 top-[calc(100%+10px)] z-[100] w-[250px] overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_15px_40px_rgba(15,23,42,.12)]"
-                role="menu"
-              >
+                {/* Dropdown */}
+                <div className="absolute right-0 top-[58px] z-50 w-[280px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
 
-                {/* =================================================
-                    ACCOUNT HEADER
-                ================================================= */}
-
-                <div className="mb-1 rounded-xl bg-slate-50 px-3 py-3">
-
-                  <div className="flex items-center gap-3">
-
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#173563] text-[10px] font-bold text-white">
-                      {initials}
-                    </div>
-
-                    <div className="min-w-0">
-
-                      <p className="truncate text-xs font-bold text-slate-800">
-                        {fullName}
-                      </p>
-
-                      <p className="truncate text-[10px] text-slate-400">
-                        {user?.email || "SME Account"}
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                  {/* PROFILE STATUS */}
-
-                  <div className="mt-3">
-
-                    {isProfileIncomplete ? (
-                      <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-2">
-
-                        <span className="h-2 w-2 rounded-full bg-amber-500" />
-
-                        <span className="text-[10px] font-semibold text-amber-700">
-                          Profile incomplete
-                        </span>
-
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-2">
-
-                        <span className="h-2 w-2 rounded-full bg-emerald-500" />
-
-                        <span className="text-[10px] font-semibold text-emerald-700">
-                          Profile complete
-                        </span>
-
-                      </div>
-                    )}
-
-                  </div>
-
-                </div>
-
-                {/* =================================================
-                    PROFILE
-                ================================================= */}
-
-                <Link
-                  to="/profile"
-                  onClick={() =>
-                    setProfileOpen(false)
-                  }
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-semibold text-slate-600 transition hover:bg-blue-50 hover:text-[#173563]"
-                  role="menuitem"
-                >
-
-                  <User
-                    size={17}
-                    strokeWidth={1.8}
-                  />
-
-                  <span>
-                    Profile
-                  </span>
-
-                </Link>
-
-                {/* =================================================
-                    COMPLETE PROFILE
-                    ONLY SHOWN WHEN INCOMPLETE
-                ================================================= */}
-
-                {isProfileIncomplete && (
-                  <Link
-                    to="/complete-profile"
-                    onClick={() =>
-                      setProfileOpen(false)
-                    }
-                    className="flex w-full items-center justify-between rounded-xl bg-blue-50 px-3 py-2.5 text-left text-xs font-semibold text-[#173563] transition hover:bg-blue-100"
-                    role="menuitem"
-                  >
-
+                  {/* Profile Header */}
+                  <div className="border-b border-slate-100 px-4 py-4">
                     <div className="flex items-center gap-3">
 
-                      <CircleUserRound
-                        size={17}
-                        strokeWidth={1.8}
-                      />
+                      {profile?.photo ? (
+                        <img
+                          src={profile.photo}
+                          alt={profile.fullName || "Profile"}
+                          className="h-12 w-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#173563] text-sm font-bold text-white">
+                          {getInitials(profile?.fullName)}
+                        </div>
+                      )}
 
-                      <span>
-                        Complete Profile
-                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate text-[14px] font-bold text-slate-900">
+                          {profile?.fullName || "User"}
+                        </p>
+
+                        <p className="truncate text-[12px] text-slate-500">
+                          {profile?.email || ""}
+                        </p>
+                      </div>
 
                     </div>
+                  </div>
 
-                    <span className="rounded-full bg-blue-600 px-2 py-0.5 text-[8px] font-bold text-white">
-                      Recommended
-                    </span>
+                  {/* Dropdown Links */}
+                  <div className="p-2">
 
-                  </Link>
-                )}
+                    {/* Profile */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsProfileOpen(false);
+                        navigate("/profile");
+                      }}
+                      className={`
+                        flex w-full items-center gap-3
+                        rounded-xl px-3 py-3
+                        text-left text-[14px] font-semibold
+                        transition
+                        ${
+                          isActive("/profile")
+                            ? "bg-blue-50 text-[#2563EB]"
+                            : "text-slate-700 hover:bg-slate-50 hover:text-[#2563EB]"
+                        }
+                      `}
+                    >
+                      <UserRound className="h-[18px] w-[18px]" />
+                      Profile
+                    </button>
 
-                {/* =================================================
-                    SETTINGS
-                ================================================= */}
+                    {/* Settings */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsProfileOpen(false);
+                        navigate("/settings");
+                      }}
+                      className={`
+                        flex w-full items-center gap-3
+                        rounded-xl px-3 py-3
+                        text-left text-[14px] font-semibold
+                        transition
+                        ${
+                          isActive("/settings")
+                            ? "bg-blue-50 text-[#2563EB]"
+                            : "text-slate-700 hover:bg-slate-50 hover:text-[#2563EB]"
+                        }
+                      `}
+                    >
+                      <Settings className="h-[18px] w-[18px]" />
+                      Settings
+                    </button>
 
-                <Link
-                  to="/settings"
-                  onClick={() =>
-                    setProfileOpen(false)
-                  }
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-semibold text-slate-600 transition hover:bg-blue-50 hover:text-[#173563]"
-                  role="menuitem"
-                >
+                  </div>
 
-                  <Settings
-                    size={17}
-                    strokeWidth={1.8}
-                  />
+                  {/* Logout */}
+                  <div className="border-t border-slate-100 p-2">
 
-                  <span>
-                    Settings
-                  </span>
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[14px] font-semibold text-red-600 transition hover:bg-red-50"
+                    >
+                      <LogOut className="h-[18px] w-[18px]" />
+                      Sign out
+                    </button>
 
-                </Link>
-
-                {/* DIVIDER */}
-
-                <div className="my-1.5 h-px bg-slate-100" />
-
-                {/* LOGOUT */}
-
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-semibold text-red-600 transition hover:bg-red-50"
-                  role="menuitem"
-                >
-
-                  <LogOut
-                    size={17}
-                    strokeWidth={1.8}
-                  />
-
-                  <span>
-                    Logout
-                  </span>
-
-                </button>
-
-              </div>
+                  </div>
+                </div>
+              </>
             )}
-
           </div>
 
-        </div>
-
-      </div>
-
-      {/* =====================================================
-          MOBILE NAVIGATION
-      ===================================================== */}
-
-      <div className="border-t border-slate-100 bg-white px-4 py-2 md:hidden">
-
-        <nav className="flex gap-1 overflow-x-auto pb-1">
-
-          {navItems.map((item) => (
-            <MobileNavItem
-              key={item.to}
-              to={item.to}
-              label={
-                item.mobileLabel ||
-                item.label
+          {/* =====================================================
+              MOBILE MENU BUTTON
+          ====================================================== */}
+          <button
+            type="button"
+            onClick={() =>
+              setIsMenuOpen((prev) => !prev)
+            }
+            className={`
+              flex h-10 w-10 items-center justify-center
+              rounded-xl
+              transition-all duration-200
+              ${
+                isMenuOpen
+                  ? "bg-slate-100 text-[#173563]"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-[#2563EB]"
               }
-              active={isActive(item.to)}
-            />
-          ))}
-
-        </nav>
-
+              md:hidden
+            `}
+            aria-label="Open menu"
+          >
+            {isMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </button>
+        </div>
       </div>
 
-    </header>
-  );
-}
+      {/* =========================================================
+          MOBILE MENU
+      ========================================================== */}
+      {isMenuOpen && (
+        <div className="border-t border-slate-200 bg-white md:hidden">
 
-/* =========================================================
-   DESKTOP NAV ITEM
-========================================================= */
+          <div className="space-y-1 px-5 py-4">
 
-function NavItem({
-  to,
-  label,
-  active,
-}) {
-  return (
-    <Link
-      to={to}
-      className={`relative rounded-lg px-4 py-2 text-xs font-semibold transition-all duration-200 ${
-        active
-          ? "bg-blue-50 text-[#173563] shadow-sm"
-          : "text-slate-500 hover:bg-slate-100 hover:text-[#173563]"
-      }`}
-    >
+            {/* Dashboard */}
+            <Link
+              to="/dashboard"
+              onClick={closeMobileMenu}
+              className={mobileNavClass("/dashboard")}
+            >
+              Dashboard
+            </Link>
 
-      {label}
+            {/* HS Code */}
+            <Link
+              to="/hs-code-search"
+              onClick={closeMobileMenu}
+              className={mobileNavClass("/hs-code-search")}
+            >
+              HS Code
+            </Link>
 
-      {active && (
-        <span className="absolute bottom-0 left-1/2 h-[2px] w-5 -translate-x-1/2 rounded-full bg-[#173563]" />
+            {/* Calculator */}
+            <Link
+              to="/Calculator"
+              onClick={closeMobileMenu}
+              className={mobileNavClass("/Calculator")}
+            >
+              Calculator
+            </Link>
+
+            {/* Find Agent */}
+            <Link
+              to="/find-agent"
+              onClick={closeMobileMenu}
+              className={mobileNavClass("/find-agent")}
+            >
+              Find Agent
+            </Link>
+
+            {/* Shipments */}
+            <Link
+              to="/shipments"
+              onClick={closeMobileMenu}
+              className={mobileNavClass("/shipments")}
+            >
+              Shipments
+            </Link>
+
+            {/* Divider */}
+            <div className="my-3 border-t border-slate-100" />
+
+            {/* Profile */}
+            <Link
+              to="/profile"
+              onClick={closeMobileMenu}
+              className={mobileNavClass("/profile")}
+            >
+              <UserRound className="h-5 w-5" />
+              Profile
+            </Link>
+
+            {/* Settings */}
+            <Link
+              to="/settings"
+              onClick={closeMobileMenu}
+              className={mobileNavClass("/settings")}
+            >
+              <Settings className="h-5 w-5" />
+              Settings
+            </Link>
+
+            {/* Logout */}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[15px] font-semibold text-red-600 transition hover:bg-red-50"
+            >
+              <LogOut className="h-5 w-5" />
+              Sign out
+            </button>
+
+          </div>
+        </div>
       )}
-
-    </Link>
-  );
-}
-
-/* =========================================================
-   MOBILE NAV ITEM
-========================================================= */
-
-function MobileNavItem({
-  to,
-  label,
-  active,
-}) {
-  return (
-    <Link
-      to={to}
-      className={`shrink-0 rounded-lg px-3 py-2 text-[11px] font-semibold transition ${
-        active
-          ? "bg-[#173563] text-white"
-          : "text-slate-500 hover:bg-slate-100"
-      }`}
-    >
-      {label}
-    </Link>
+    </nav>
   );
 }
 

@@ -4,19 +4,15 @@ import {
   Bell,
   CheckCircle2,
   ChevronRight,
-  ClipboardList,
   DollarSign,
   FileText,
-  LogOut,
-  Menu,
   Package,
+  RefreshCw,
   Search,
-  Settings,
-  ShieldCheck,
   TrendingUp,
   User,
-  X,
 } from "lucide-react";
+import AgentMemberSidebar from "../components/AgentMemberSidebar";
 
 const demoRequests = [
   {
@@ -96,331 +92,149 @@ function AgentDashboard() {
   const navigate = useNavigate();
 
   const [agent, setAgent] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  /* =========================================================
-     LOAD AGENT DATA
-  ========================================================= */
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    const storedAgent = localStorage.getItem("individualAgent");
+    try {
+      const storedAgent = localStorage.getItem("clearingAgent");
 
-    if (storedAgent) {
-      try {
-        setAgent(JSON.parse(storedAgent));
-      } catch {
-        setAgent(null);
+      if (!storedAgent) {
+        navigate("/agent-signin", {
+          replace: true,
+        });
+
+        return;
       }
-    }
-  }, []);
 
-  const agentName = agent?.fullName || "Clearing Agent";
+      const parsedAgent = JSON.parse(storedAgent);
+
+      if (parsedAgent.agentType !== "agency-member") {
+        navigate("/agent-signin", {
+          replace: true,
+        });
+
+        return;
+      }
+
+      setAgent(parsedAgent);
+    } catch (error) {
+      console.error("Failed to load agency member data:", error);
+
+      navigate("/agent-signin", {
+        replace: true,
+      });
+    }
+  }, [navigate]);
+
+  const agentName = agent?.fullName || "Agency Member";
 
   const firstName = useMemo(() => {
     return agentName.split(" ")[0];
   }, [agentName]);
 
-  /* =========================================================
-     LOGOUT
-  ========================================================= */
+  const handleRefresh = () => {
+    setRefreshing(true);
 
-  const handleLogout = () => {
-    localStorage.removeItem("agentLoggedIn");
-    navigate("/agent-signin");
+    window.setTimeout(() => {
+      setRefreshing(false);
+    }, 700);
   };
 
-  /* =========================================================
-     SME REQUESTS
-  ========================================================= */
-
   const goToAgentRequests = () => {
-    setSidebarOpen(false);
     navigate("/agent-requests");
   };
 
-  /* =========================================================
-     SHIPMENTS
-  ========================================================= */
-
   const goToAgentShipments = () => {
-    setSidebarOpen(false);
     navigate("/agent-shipments");
   };
 
-  /* =========================================================
-     MY BIDS
-  ========================================================= */
-
   const goToMyBids = () => {
-    setSidebarOpen(false);
     navigate("/agent-my-bids");
   };
 
-  /* =========================================================
-     PROFILE
-  ========================================================= */
-
   const goToProfile = () => {
-    setSidebarOpen(false);
     navigate("/profile");
+  };
+
+  const goToSettings = () => {
+    navigate("/settings");
   };
 
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
-      {/* =====================================================
-          MOBILE OVERLAY
-      ===================================================== */}
+      <AgentMemberSidebar />
 
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-slate-900/30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
-
-      <aside
-        className={`fixed left-0 top-0 z-50 flex h-screen w-[250px] flex-col border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {/* LOGO */}
-
-        <div className="flex h-[70px] items-center border-b border-slate-100 px-5">
-          <Link
-            to="/agent-dashboard"
-            className="flex items-center gap-3"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <img
-              src="/logo.jpeg"
-              alt="ImportEase"
-              className="h-9 w-9 object-contain mix-blend-multiply"
-            />
-
+      <main className="min-h-screen lg:ml-[270px]">
+        <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6">
+          <div className="flex items-center">
             <div>
-              <p className="text-[16px] font-bold tracking-tight text-[#173563]">
-                Import
-                <span className="text-slate-900">Ease</span>
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+                Agency Member Workspace
               </p>
 
-              <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                Agent Platform
-              </p>
-            </div>
-          </Link>
-
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(false)}
-            className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 lg:hidden"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* AGENT MINI PROFILE */}
-
-        <div className="border-b border-slate-100 p-4">
-          <div className="rounded-xl bg-slate-50 p-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#173563] text-xs font-bold text-white">
-                {getInitials(agentName)}
-              </div>
-
-              <div className="min-w-0">
-                <p className="truncate text-xs font-bold text-slate-800">
-                  {agentName}
-                </p>
-
-                <div className="mt-0.5 flex items-center gap-1">
-                  <CheckCircle2
-                    size={11}
-                    className="text-emerald-500"
-                  />
-
-                  <span className="text-[9px] font-semibold text-emerald-600">
-                    Verified Agent
-                  </span>
-                </div>
-              </div>
+              <h1 className="text-base font-bold text-slate-800">
+                Dashboard
+              </h1>
             </div>
           </div>
-        </div>
 
-        {/* NAVIGATION */}
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleRefresh}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50"
+              aria-label="Refresh dashboard"
+            >
+              <RefreshCw
+                size={17}
+                className={refreshing ? "animate-spin" : ""}
+              />
+            </button>
 
-        <nav className="flex-1 space-y-1 p-3">
-          <SidebarItem
-            icon={TrendingUp}
-            label="Dashboard"
-            active
-            to="/agent-dashboard"
-            onClick={() => setSidebarOpen(false)}
-          />
-
-          <SidebarItem
-            icon={Search}
-            label="SME Requests"
-            to="/agent-requests"
-            onClick={goToAgentRequests}
-          />
-
-          <SidebarItem
-            icon={ClipboardList}
-            label="My Bids"
-            to="/agent-my-bids"
-            onClick={goToMyBids}
-          />
-
-          {/* FIXED SHIPMENTS NAVIGATION */}
-          <SidebarItem
-            icon={Package}
-            label="Shipments"
-            to="/agent-shipments"
-            onClick={() => setSidebarOpen(false)}
-          />
-
-          <div className="my-3 border-t border-slate-100" />
-
-          <SidebarItem
-            icon={User}
-            label="My Profile"
-            to="/profile"
-            onClick={goToProfile}
-          />
-        </nav>
-
-        {/* BOTTOM */}
-
-        <div className="border-t border-slate-100 p-3">
-          <SidebarItem
-            icon={Settings}
-            label="Settings"
-            to="/settings"
-            onClick={() => setSidebarOpen(false)}
-          />
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-red-600 transition hover:bg-red-50"
-          >
-            <LogOut size={17} />
-            Logout
-          </button>
-        </div>
-      </aside>
-
-      {/* =====================================================
-          MAIN
-      ===================================================== */}
-
-      <div className="lg:ml-[250px]">
-        {/* TOP BAR */}
-
-        <header className="sticky top-0 z-30 flex h-[70px] items-center border-b border-slate-200 bg-white/95 px-5 backdrop-blur-xl sm:px-8">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className="mr-3 flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 lg:hidden"
-          >
-            <Menu size={19} />
-          </button>
-
-          <div>
-            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">
-              Agent Workspace
-            </p>
-
-            <h1 className="text-sm font-bold text-slate-800">
-              Dashboard
-            </h1>
-          </div>
-
-          <div className="ml-auto flex items-center gap-3">
             <button
               type="button"
               className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50"
+              aria-label="Notifications"
             >
               <Bell size={17} />
 
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-blue-600 ring-2 ring-white" />
             </button>
-
-            <div className="hidden h-7 w-px bg-slate-200 sm:block" />
-
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#173563] text-[10px] font-bold text-white">
-                {getInitials(agentName)}
-              </div>
-
-              <div className="hidden sm:block">
-                <p className="text-xs font-semibold text-slate-800">
-                  {agentName}
-                </p>
-
-                <p className="text-[9px] text-slate-400">
-                  Individual Agent
-                </p>
-              </div>
-            </div>
           </div>
         </header>
 
-        {/* =====================================================
-            CONTENT
-        ===================================================== */}
-
-        <main className="mx-auto w-full max-w-[1180px] px-5 py-7 sm:px-8 lg:py-9">
-          {/* HEADER / WELCOME */}
-
+        <div className="mx-auto max-w-[1180px] px-5 py-7 sm:px-8 lg:py-9">
           <section className="mb-7">
-            <div className="relative overflow-hidden rounded-2xl bg-[#173563] p-6 text-white shadow-lg sm:p-7">
-              <div className="relative z-10">
-                <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-                  <div>
-                    <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5">
-                      <CheckCircle2 size={13} />
-
-                      <span className="text-[10px] font-bold uppercase tracking-[0.14em]">
-                        Account Approved
-                      </span>
-                    </div>
-
-                    <h2 className="text-[28px] font-bold tracking-[-0.04em] text-white sm:text-[36px]">
-                      Welcome back, {firstName}
-                    </h2>
-
-                    <p className="mt-2 max-w-xl text-[13px] leading-6 text-blue-100 sm:text-sm">
-                      Find new SME import requests, submit competitive bids
-                      and manage your active clearing work from one place.
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={goToAgentRequests}
-                    className="inline-flex w-fit items-center gap-2 rounded-xl bg-white px-4 py-3 text-xs font-semibold text-[#173563] shadow-md transition hover:bg-blue-50"
-                  >
-                    <Search size={15} />
-                    Browse Requests
-                  </button>
+            <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+              <div>
+                <div className="mb-2 flex items-center gap-2">
+                  
+                 
                 </div>
+
+                <h2 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+                  Welcome back, {firstName}
+                </h2>
+
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+                  Manage SME import requests, submit competitive bids and
+                  track your assigned clearing work from your agency
+                  workspace.
+                </p>
               </div>
 
-              <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/5" />
-
-              <div className="pointer-events-none absolute -bottom-24 right-24 h-48 w-48 rounded-full bg-blue-400/10" />
+              <button
+                type="button"
+                onClick={goToAgentRequests}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#10294d]"
+              >
+                <Search size={17} />
+                Browse Requests
+              </button>
             </div>
           </section>
 
-          {/* SUMMARY CARDS */}
-
-          <section className="mb-7 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <section className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <SummaryCard
               icon={Search}
               label="New SME Requests"
@@ -450,29 +264,25 @@ function AgentDashboard() {
             />
           </section>
 
-          {/* MAIN GRID */}
-
-          <div className="mb-7 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_360px]">
-            {/* SME REQUESTS */}
-
+          <div className="mb-7 grid grid-cols-1 gap-5 xl:grid-cols-[1fr_350px]">
             <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_10px_rgba(15,23,42,.02)]">
               <div className="flex items-center justify-between border-b border-slate-100 p-5">
                 <div>
-                  <h2 className="text-sm font-bold text-[#14213D]">
+                  <h2 className="text-base font-bold text-[#14213D]">
                     New SME Requests
                   </h2>
 
-                  <p className="mt-1 text-[11px] text-slate-500">
+                  <p className="mt-1 text-xs text-slate-500">
                     Import requests available for bidding.
                   </p>
                 </div>
 
                 <Link
                   to="/agent-requests"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#173563] hover:text-blue-700"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-[#173563] hover:text-blue-700"
                 >
                   View all
-                  <ChevronRight size={14} />
+                  <ChevronRight size={15} />
                 </Link>
               </div>
 
@@ -487,18 +297,16 @@ function AgentDashboard() {
               </div>
             </section>
 
-            {/* QUICK ACTIONS */}
-
             <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
-              <h2 className="text-sm font-bold text-[#14213D]">
+              <h2 className="text-base font-bold text-[#14213D]">
                 Quick Actions
               </h2>
 
-              <p className="mt-1 text-[11px] text-slate-500">
-                Frequently used agent tools.
+              <p className="mt-1 text-xs text-slate-500">
+                Frequently used agency member tools.
               </p>
 
-              <div className="mt-5 space-y-2.5">
+              <div className="mt-5 space-y-2">
                 <QuickAction
                   icon={Search}
                   title="Browse SME Requests"
@@ -534,29 +342,25 @@ function AgentDashboard() {
             </section>
           </div>
 
-          {/* BIDS + SHIPMENTS */}
-
-          <div className="mb-7 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* RECENT BIDS */}
-
+          <div className="mb-7 grid grid-cols-1 gap-5 lg:grid-cols-2">
             <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_10px_rgba(15,23,42,.02)]">
               <div className="flex items-center justify-between border-b border-slate-100 p-5">
                 <div>
-                  <h2 className="text-sm font-bold text-[#14213D]">
+                  <h2 className="text-base font-bold text-[#14213D]">
                     Recent Bids
                   </h2>
 
-                  <p className="mt-1 text-[11px] text-slate-500">
+                  <p className="mt-1 text-xs text-slate-500">
                     Latest bidding activity.
                   </p>
                 </div>
 
                 <Link
                   to="/agent-my-bids"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#173563] hover:text-blue-700"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-[#173563] hover:text-blue-700"
                 >
                   View all
-                  <ChevronRight size={14} />
+                  <ChevronRight size={15} />
                 </Link>
               </div>
 
@@ -570,16 +374,14 @@ function AgentDashboard() {
               </div>
             </section>
 
-            {/* ACTIVE SHIPMENTS */}
-
             <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_10px_rgba(15,23,42,.02)]">
               <div className="flex items-center justify-between border-b border-slate-100 p-5">
                 <div>
-                  <h2 className="text-sm font-bold text-[#14213D]">
+                  <h2 className="text-base font-bold text-[#14213D]">
                     Active Shipments
                   </h2>
 
-                  <p className="mt-1 text-[11px] text-slate-500">
+                  <p className="mt-1 text-xs text-slate-500">
                     Current clearing assignments.
                   </p>
                 </div>
@@ -587,10 +389,10 @@ function AgentDashboard() {
                 <button
                   type="button"
                   onClick={goToAgentShipments}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#173563] hover:text-blue-700"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-[#173563] hover:text-blue-700"
                 >
                   View all
-                  <ChevronRight size={14} />
+                  <ChevronRight size={15} />
                 </button>
               </div>
 
@@ -605,58 +407,14 @@ function AgentDashboard() {
             </section>
           </div>
 
-          {/* VERIFICATION BANNER */}
-
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                  <ShieldCheck size={21} />
-                </div>
-
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-sm font-bold text-slate-900">
-                      Agent Verification
-                    </h2>
-
-                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600">
-                      VERIFIED
-                    </span>
-                  </div>
-
-                  <p className="mt-1 text-xs leading-5 text-slate-500">
-                    Your clearing agent application has been approved. You
-                    can now participate in SME requests and bidding.
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={goToProfile}
-                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
-              >
-                View Profile
-                <ChevronRight size={14} />
-              </button>
-            </div>
-          </section>
-
-          {/* FOOTER */}
-
           <div className="mt-9 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-[10px] text-slate-400">
-            ImportEase · Individual Agent Platform
+            ImportEase · Agency Member Platform
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
-
-/* =========================================================
-   SUMMARY CARD
-========================================================= */
 
 function SummaryCard({
   icon: Icon,
@@ -681,7 +439,7 @@ function SummaryCard({
           className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconStyle}`}
         >
           <Icon
-            size={18}
+            size={19}
             strokeWidth={1.8}
           />
         </div>
@@ -689,10 +447,6 @@ function SummaryCard({
     </div>
   );
 }
-
-/* =========================================================
-   REQUEST ROW
-========================================================= */
 
 function RequestRow({
   request,
@@ -705,7 +459,7 @@ function RequestRow({
       className="group flex w-full items-center gap-4 p-5 text-left transition hover:bg-slate-50"
     >
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-        <Package size={18} />
+        <Package size={19} />
       </div>
 
       <div className="min-w-0 flex-1">
@@ -720,8 +474,7 @@ function RequestRow({
         </div>
 
         <p className="mt-1 text-xs text-slate-500">
-          {request.company} · {request.origin} →{" "}
-          {request.destination}
+          {request.company} · {request.origin} → {request.destination}
         </p>
 
         <p className="mt-1 text-[10px] text-slate-400">
@@ -746,10 +499,6 @@ function RequestRow({
     </button>
   );
 }
-
-/* =========================================================
-   QUICK ACTION
-========================================================= */
 
 function QuickAction({
   icon: Icon,
@@ -791,10 +540,6 @@ function QuickAction({
   );
 }
 
-/* =========================================================
-   BID ROW
-========================================================= */
-
 function BidRow({ bid }) {
   const statusStyles = {
     Accepted: "bg-emerald-50 text-emerald-700",
@@ -805,7 +550,7 @@ function BidRow({ bid }) {
   return (
     <div className="flex items-center gap-4 p-5">
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
-        <DollarSign size={18} />
+        <DollarSign size={19} />
       </div>
 
       <div className="min-w-0 flex-1">
@@ -825,8 +570,7 @@ function BidRow({ bid }) {
 
         <span
           className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[9px] font-semibold ${
-            statusStyles[bid.status] ||
-            "bg-slate-100 text-slate-500"
+            statusStyles[bid.status] || "bg-slate-100 text-slate-500"
           }`}
         >
           {bid.status}
@@ -836,16 +580,12 @@ function BidRow({ bid }) {
   );
 }
 
-/* =========================================================
-   SHIPMENT ROW
-========================================================= */
-
 function ShipmentRow({ shipment }) {
   return (
     <div className="p-5">
       <div className="flex items-start gap-4">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-          <Package size={18} />
+          <Package size={19} />
         </div>
 
         <div className="min-w-0 flex-1">
@@ -889,60 +629,6 @@ function ShipmentRow({ shipment }) {
       </div>
     </div>
   );
-}
-
-/* =========================================================
-   SIDEBAR ITEM
-========================================================= */
-
-function SidebarItem({
-  icon: Icon,
-  label,
-  to,
-  active = false,
-  onClick,
-}) {
-  return (
-    <Link
-      to={to}
-      onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${
-        active
-          ? "bg-blue-50 text-[#173563]"
-          : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
-      }`}
-    >
-      <Icon
-        size={17}
-        strokeWidth={1.8}
-      />
-
-      <span>{label}</span>
-    </Link>
-  );
-}
-
-/* =========================================================
-   INITIALS
-========================================================= */
-
-function getInitials(name) {
-  if (!name) return "CA";
-
-  const words = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-
-  if (words.length === 1) {
-    return words[0]
-      .slice(0, 2)
-      .toUpperCase();
-  }
-
-  return `${words[0][0]}${
-    words[words.length - 1][0]
-  }`.toUpperCase();
 }
 
 export default AgentDashboard;

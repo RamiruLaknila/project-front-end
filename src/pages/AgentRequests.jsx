@@ -5,25 +5,18 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
-  ClipboardList,
   FileText,
-  LogOut,
-  Menu,
   Package,
   RefreshCw,
   Search,
-  Settings,
-  TrendingUp,
-  User,
   Users,
-  X,
 } from "lucide-react";
+import AgentMemberSidebar from "../components/AgentMemberSidebar";
 
 function AgentRequests() {
   const navigate = useNavigate();
 
   const [agent, setAgent] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [requests, setRequests] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,22 +25,36 @@ function AgentRequests() {
   const [loading, setLoading] = useState(true);
 
   /* =========================================================
-     LOAD AGENT DATA (MATCHED WITH AGENT DASHBOARD)
+     LOAD AGENCY MEMBER DATA
   ========================================================= */
 
   useEffect(() => {
-    const storedAgent = localStorage.getItem("individualAgent");
+    try {
+      const storedAgent = localStorage.getItem("clearingAgent");
 
-    if (storedAgent) {
-      try {
-        setAgent(JSON.parse(storedAgent));
-      } catch {
-        setAgent(null);
+      if (!storedAgent) {
+        navigate("/agent-signin", { replace: true });
+        return;
       }
-    }
-  }, []);
 
-  const agentName = agent?.fullName || "Clearing Agent";
+      const parsedAgent = JSON.parse(storedAgent);
+
+      if (parsedAgent.agentType !== "agency-member") {
+        navigate("/agent-signin", { replace: true });
+        return;
+      }
+
+      setAgent(parsedAgent);
+    } catch (error) {
+      console.error("Failed to load agency member data:", error);
+
+      navigate("/agent-signin", {
+        replace: true,
+      });
+    }
+  }, [navigate]);
+
+  const agentName = agent?.fullName || "Agency Member";
 
   /* =========================================================
      LOAD SME REQUESTS
@@ -81,12 +88,11 @@ function AgentRequests() {
   }, []);
 
   /* =========================================================
-     LOGOUT
+     NAVIGATION
   ========================================================= */
 
-  const handleLogout = () => {
-    localStorage.removeItem("agentLoggedIn");
-    navigate("/agent-signin");
+  const goToDashboard = () => {
+    navigate("/agent-dashboard");
   };
 
   /* =========================================================
@@ -111,294 +117,193 @@ function AgentRequests() {
 
     return requests.filter((request) => {
       const product =
-        request.productName || request.product || request.name || "";
+        request.productName ||
+        request.product ||
+        request.name ||
+        "";
+
       const category =
         request.category ||
         request.productCategory ||
         request.industry ||
         "";
+
       const hsCode = request.hsCode || request.hs_code || "";
+
       const origin =
         request.origin ||
         request.originCountry ||
         request.countryOfOrigin ||
         "";
+
       const destination =
         request.destination ||
         request.destinationCountry ||
         "Colombo";
+
       const status = request.status || "New";
 
-      const searchableText = [product, category, hsCode, origin, destination]
+      const searchableText = [
+        product,
+        category,
+        hsCode,
+        origin,
+        destination,
+      ]
         .join(" ")
         .toLowerCase();
 
-      const matchesSearch = !search || searchableText.includes(search);
+      const matchesSearch =
+        !search || searchableText.includes(search);
+
       const matchesCategory =
-        categoryFilter === "All" || category === categoryFilter;
+        categoryFilter === "All" ||
+        category === categoryFilter;
+
       const matchesStatus =
         statusFilter === "All" ||
         status.toLowerCase() === statusFilter.toLowerCase();
 
-      return matchesSearch && matchesCategory && matchesStatus;
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesStatus
+      );
     });
-  }, [requests, searchTerm, categoryFilter, statusFilter]);
+  }, [
+    requests,
+    searchTerm,
+    categoryFilter,
+    statusFilter,
+  ]);
 
   const openRequestsCount = requests.filter(
-    (request) =>
-      String(request.status || "New").toLowerCase() === "new" ||
-      String(request.status || "Open").toLowerCase() === "open"
+    (request) => {
+      const status = String(
+        request.status || "New"
+      ).toLowerCase();
+
+      return status === "new" || status === "open";
+    }
   ).length;
 
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
-      {/* =====================================================
-          MOBILE OVERLAY
-      ===================================================== */}
-
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-slate-900/30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      <AgentMemberSidebar />
 
       {/* =====================================================
-          SIDEBAR (EXACT MATCH TO AGENT DASHBOARD)
+          MAIN CONTENT
       ===================================================== */}
 
-      <aside
-        className={`fixed left-0 top-0 z-50 flex h-screen w-[250px] flex-col border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {/* LOGO */}
+      <main className="min-h-screen lg:ml-[270px]">
+        {/* ===================================================
+            HEADER
+        =================================================== */}
 
-        <div className="flex h-[70px] items-center border-b border-slate-100 px-5">
-          <Link
-            to="/agent-dashboard"
-            className="flex items-center gap-3"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <img
-              src="/logo.jpeg"
-              alt="ImportEase"
-              className="h-9 w-9 object-contain mix-blend-multiply"
-            />
-
+        <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6">
+          <div className="flex items-center">
             <div>
-              <p className="text-[16px] font-bold tracking-tight text-[#173563]">
-                Import
-                <span className="text-slate-900">Ease</span>
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+                Agency Member Workspace
               </p>
 
-              <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                Agent Platform
-              </p>
-            </div>
-          </Link>
-
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(false)}
-            className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 lg:hidden"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* AGENT MINI PROFILE */}
-
-        <div className="border-b border-slate-100 p-4">
-          <div className="rounded-xl bg-slate-50 p-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#173563] text-xs font-bold text-white">
-                {getInitials(agentName)}
-              </div>
-
-              <div className="min-w-0">
-                <p className="truncate text-xs font-bold text-slate-800">
-                  {agentName}
-                </p>
-
-                <div className="mt-0.5 flex items-center gap-1">
-                  <CheckCircle2 size={11} className="text-emerald-500" />
-
-                  <span className="text-[9px] font-semibold text-emerald-600">
-                    Verified Agent
-                  </span>
-                </div>
-              </div>
+              <h1 className="text-base font-bold text-slate-800">
+                SME Requests
+              </h1>
             </div>
           </div>
-        </div>
 
-        {/* NAVIGATION */}
+          {/* HEADER ACTIONS */}
 
-        <nav className="flex-1 space-y-1 p-3">
-          <SidebarItem
-            icon={TrendingUp}
-            label="Dashboard"
-            to="/agent-dashboard"
-            onClick={() => setSidebarOpen(false)}
-          />
+          <div className="ml-auto flex items-center gap-2">
+            {/* REFRESH */}
 
-          <SidebarItem
-            icon={Search}
-            label="SME Requests"
-            active
-            to="/agent-requests"
-            onClick={() => setSidebarOpen(false)}
-          />
+            <button
+              type="button"
+              onClick={loadRequests}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50"
+              aria-label="Refresh requests"
+            >
+              <RefreshCw
+                size={17}
+                className={
+                  loading ? "animate-spin" : ""
+                }
+              />
+            </button>
 
-          <SidebarItem
-            icon={ClipboardList}
-            label="My Bids"
-            to="/agent-my-bids"
-            onClick={() => setSidebarOpen(false)}
-          />
+            {/* NOTIFICATIONS */}
 
-          <SidebarItem
-            icon={Package}
-            label="Shipments"
-            to="/agent-shipments"
-            onClick={() => setSidebarOpen(false)}
-          />
-
-          <div className="my-3 border-t border-slate-100" />
-
-          <SidebarItem
-            icon={User}
-            label="My Profile"
-            to="/profile"
-            onClick={() => setSidebarOpen(false)}
-          />
-        </nav>
-
-        {/* BOTTOM */}
-
-        <div className="border-t border-slate-100 p-3">
-          <SidebarItem
-            icon={Settings}
-            label="Settings"
-            to="/settings"
-            onClick={() => setSidebarOpen(false)}
-          />
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-red-600 transition hover:bg-red-50"
-          >
-            <LogOut size={17} />
-            Logout
-          </button>
-        </div>
-      </aside>
-
-      {/* =====================================================
-          MAIN CONTENT AREA
-      ===================================================== */}
-
-      <div className="lg:ml-[250px]">
-        {/* TOP BAR */}
-
-        <header className="sticky top-0 z-30 flex h-[70px] items-center border-b border-slate-200 bg-white/95 px-5 backdrop-blur-xl sm:px-8">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className="mr-3 flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 lg:hidden"
-          >
-            <Menu size={19} />
-          </button>
-
-          <div>
-            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">
-              Agent Workspace
-            </p>
-
-            <h1 className="text-sm font-bold text-slate-800">
-              SME Requests
-            </h1>
-          </div>
-
-          <div className="ml-auto flex items-center gap-3">
             <button
               type="button"
               className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50"
+              aria-label="Notifications"
             >
               <Bell size={17} />
 
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-blue-600 ring-2 ring-white" />
             </button>
-
-            <div className="hidden h-7 w-px bg-slate-200 sm:block" />
-
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#173563] text-[10px] font-bold text-white">
-                {getInitials(agentName)}
-              </div>
-
-              <div className="hidden sm:block">
-                <p className="text-xs font-semibold text-slate-800">
-                  {agentName}
-                </p>
-
-                <p className="text-[9px] text-slate-400">Individual Agent</p>
-              </div>
-            </div>
           </div>
         </header>
 
-        {/* MAIN BODY */}
+        {/* ===================================================
+            CONTENT
+        =================================================== */}
 
-        <main className="mx-auto w-full max-w-[1180px] px-5 py-7 sm:px-8 lg:py-9">
-          {/* BACK LINK */}
+        <div className="mx-auto max-w-[1180px] px-5 py-7 sm:px-8 lg:py-9">
+          {/* BACK TO DASHBOARD */}
 
           <button
             type="button"
-            onClick={() => navigate("/agent-dashboard")}
+            onClick={goToDashboard}
             className="mb-5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 transition hover:text-[#173563]"
           >
             ← Back to Dashboard
           </button>
 
-          {/* PAGE HEADER */}
+          {/* =================================================
+              PAGE HEADER
+          ================================================= */}
 
           <section className="mb-7">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.14em] text-blue-600">
-              <Users size={12} />
-              SME Requests
-            </div>
-
-            <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+            <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
               <div>
-                <h2 className="text-[28px] font-bold leading-tight tracking-[-0.04em] text-[#14213D] sm:text-[32px]">
+                <div className="mb-2 flex items-center gap-2">
+              
+                </div>
+
+                <h2 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
                   Find Import Requests
                 </h2>
 
-                <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
-                  Browse import requests from SMEs and find opportunities that match your clearing services.
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+                  Browse import requests from SMEs and find
+                  opportunities that match your clearing
+                  services.
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={loadRequests}
-                className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 shadow-sm transition hover:bg-slate-50"
               >
                 <RefreshCw
-                  size={15}
-                  className={loading ? "animate-spin" : ""}
+                  size={17}
+                  className={
+                    loading ? "animate-spin" : ""
+                  }
                 />
                 Refresh
               </button>
             </div>
           </section>
 
-          {/* SUMMARY STATS CARDS */}
+          {/* =================================================
+              SUMMARY CARDS
+          ================================================= */}
 
-          <section className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <section className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SummaryCard
               icon={FileText}
               label="Available Requests"
@@ -414,74 +319,106 @@ function AgentRequests() {
             />
           </section>
 
-          {/* SEARCH & FILTERS */}
+          {/* =================================================
+              SEARCH & FILTERS
+          ================================================= */}
 
-          <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
+          <section className="mb-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
             <div className="flex flex-col gap-3 lg:flex-row">
+              {/* SEARCH */}
+
               <div className="relative flex-1">
                 <Search
-                  size={16}
+                  size={17}
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
                 />
 
                 <input
                   type="text"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) =>
+                    setSearchTerm(e.target.value)
+                  }
                   placeholder="Search product, HS code, origin..."
-                  className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-50"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-50"
                 />
               </div>
 
-              <div className="relative lg:w-[210px]">
+              {/* CATEGORY */}
+
+              <div className="relative lg:w-[220px]">
                 <select
                   value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3 pr-9 text-xs font-semibold text-slate-600 outline-none transition focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-50"
+                  onChange={(e) =>
+                    setCategoryFilter(e.target.value)
+                  }
+                  className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3 pr-9 text-sm font-semibold text-slate-600 outline-none transition focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-50"
                 >
                   {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category === "All" ? "All Categories" : category}
+                    <option
+                      key={category}
+                      value={category}
+                    >
+                      {category === "All"
+                        ? "All Categories"
+                        : category}
                     </option>
                   ))}
                 </select>
 
                 <ChevronDown
-                  size={15}
+                  size={16}
                   className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
                 />
               </div>
 
-              <div className="relative lg:w-[180px]">
+              {/* STATUS */}
+
+              <div className="relative lg:w-[190px]">
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3 pr-9 text-xs font-semibold text-slate-600 outline-none transition focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-50"
+                  onChange={(e) =>
+                    setStatusFilter(e.target.value)
+                  }
+                  className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3 pr-9 text-sm font-semibold text-slate-600 outline-none transition focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-50"
                 >
-                  <option value="All">All Statuses</option>
-                  <option value="New">New / Open</option>
-                  <option value="Closed">Closed</option>
+                  <option value="All">
+                    All Statuses
+                  </option>
+
+                  <option value="New">
+                    New / Open
+                  </option>
+
+                  <option value="Closed">
+                    Closed
+                  </option>
                 </select>
 
                 <ChevronDown
-                  size={15}
+                  size={16}
                   className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
                 />
               </div>
             </div>
           </section>
 
-          {/* RESULTS BAR */}
+          {/* =================================================
+              RESULTS HEADER
+          ================================================= */}
 
           <section className="mb-4 flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-bold text-[#14213D]">
+              <h2 className="text-base font-bold text-[#14213D]">
                 Available Import Requests
               </h2>
 
-              <p className="mt-1 text-[11px] text-slate-500">
+              <p className="mt-1 text-xs text-slate-500">
                 {filteredRequests.length} request
-                {filteredRequests.length === 1 ? "" : "s"} found
+                {filteredRequests.length === 1
+                  ? ""
+                  : "s"}{" "}
+                found
               </p>
             </div>
 
@@ -495,40 +432,56 @@ function AgentRequests() {
                   setCategoryFilter("All");
                   setStatusFilter("All");
                 }}
-                className="text-[10px] font-semibold text-blue-600 hover:text-blue-700"
+                className="text-xs font-bold text-blue-600 transition hover:text-blue-700"
               >
                 Clear Filters
               </button>
             )}
           </section>
 
-          {/* REQUEST CARDS LIST */}
+          {/* =================================================
+              REQUEST LIST
+          ================================================= */}
 
           {loading ? (
-            <div className="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center">
+            <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-[0_2px_10px_rgba(15,23,42,.02)]">
               <RefreshCw
-                size={24}
+                size={25}
                 className="mx-auto animate-spin text-blue-600"
               />
-              <p className="mt-4 text-xs font-semibold text-slate-600">
+
+              <p className="mt-4 text-sm font-semibold text-slate-600">
                 Loading requests...
+              </p>
+
+              <p className="mt-1 text-xs text-slate-400">
+                Please wait while we load the latest
+                SME requests.
               </p>
             </div>
           ) : filteredRequests.length > 0 ? (
             <div className="grid grid-cols-1 gap-4">
-              {filteredRequests.map((request, index) => (
-                <RequestCard
-                  key={request.id || `req-${index}`}
-                  request={request}
-                  onView={() => {
-                    localStorage.setItem(
-                      "selectedSMERequest",
-                      JSON.stringify(request)
-                    );
-                    navigate("/agent-request-details");
-                  }}
-                />
-              ))}
+              {filteredRequests.map(
+                (request, index) => (
+                  <RequestCard
+                    key={
+                      request.id ||
+                      `req-${index}`
+                    }
+                    request={request}
+                    onView={() => {
+                      localStorage.setItem(
+                        "selectedSMERequest",
+                        JSON.stringify(request)
+                      );
+
+                      navigate(
+                        "/agent-request-details"
+                      );
+                    }}
+                  />
+                )
+              )}
             </div>
           ) : (
             <EmptyRequests
@@ -545,27 +498,36 @@ function AgentRequests() {
             />
           )}
 
-          {/* FOOTER */}
+          {/* =================================================
+              FOOTER
+          ================================================= */}
 
           <div className="mt-9 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-[10px] text-slate-400">
-            ImportEase · Individual Agent Platform
+            ImportEase · Agency Member Platform
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
 
 /* =========================================================
-   SUMMARY CARD (MATCHED WITH AGENT DASHBOARD)
+   SUMMARY CARD
 ========================================================= */
 
-function SummaryCard({ icon: Icon, label, value, iconStyle }) {
+function SummaryCard({
+  icon: Icon,
+  label,
+  value,
+  iconStyle,
+}) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-semibold text-slate-400">{label}</p>
+          <p className="text-[10px] font-semibold text-slate-400">
+            {label}
+          </p>
 
           <p className="mt-2 text-2xl font-bold tracking-tight text-slate-800">
             {value}
@@ -575,7 +537,10 @@ function SummaryCard({ icon: Icon, label, value, iconStyle }) {
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconStyle}`}
         >
-          <Icon size={18} strokeWidth={1.8} />
+          <Icon
+            size={19}
+            strokeWidth={1.8}
+          />
         </div>
       </div>
     </div>
@@ -586,9 +551,15 @@ function SummaryCard({ icon: Icon, label, value, iconStyle }) {
    REQUEST CARD
 ========================================================= */
 
-function RequestCard({ request, onView }) {
+function RequestCard({
+  request,
+  onView,
+}) {
   const productName =
-    request.productName || request.product || request.name || "Import Request";
+    request.productName ||
+    request.product ||
+    request.name ||
+    "Import Request";
 
   const category =
     request.category ||
@@ -597,44 +568,69 @@ function RequestCard({ request, onView }) {
     "General";
 
   const origin =
-    request.origin || request.originCountry || request.countryOfOrigin || "—";
+    request.origin ||
+    request.originCountry ||
+    request.countryOfOrigin ||
+    "—";
 
   const destination =
-    request.destination || request.destinationCountry || "Colombo";
+    request.destination ||
+    request.destinationCountry ||
+    "Colombo";
 
-  const hsCode = request.hsCode || request.hs_code || "Not specified";
+  const hsCode =
+    request.hsCode ||
+    request.hs_code ||
+    "Not specified";
 
   const value =
-    request.value || request.productValue || request.estimatedValue || "Not specified";
+    request.value ||
+    request.productValue ||
+    request.estimatedValue ||
+    "Not specified";
 
   const service =
-    request.requiredService || request.service || "Customs Clearance";
+    request.requiredService ||
+    request.service ||
+    "Customs Clearance";
 
-  const status = request.status || "New";
+  const status =
+    request.status || "New";
 
-  const postedDate = request.posted || request.createdAt || request.postedAt || "Recently";
+  const postedDate =
+    request.posted ||
+    request.createdAt ||
+    request.postedAt ||
+    "Recently";
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)] transition hover:border-blue-200 hover:shadow-md">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)] transition hover:border-blue-200 hover:shadow-md sm:p-6">
       {/* CARD TOP */}
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex min-w-0 items-start gap-3">
+        <div className="flex min-w-0 items-start gap-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-            <Package size={21} strokeWidth={1.8} />
+            <Package
+              size={20}
+              strokeWidth={1.8}
+            />
           </div>
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-sm font-bold text-slate-800">{productName}</h3>
+              <h3 className="text-sm font-bold text-slate-800">
+                {productName}
+              </h3>
 
               <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-bold text-blue-600">
                 {category}
               </span>
             </div>
 
-            <p className="mt-1 text-[10px] text-slate-400">
-              {request.company ? `${request.company} · ` : ""}
+            <p className="mt-1 text-xs text-slate-400">
+              {request.company
+                ? `${request.company} · `
+                : ""}
               {request.id || "Request"}
             </p>
           </div>
@@ -648,25 +644,27 @@ function RequestCard({ request, onView }) {
 
       {/* ROUTE */}
 
-      <div className="mt-4 flex flex-col gap-2 rounded-xl bg-slate-50 p-3.5 sm:flex-row sm:items-center">
+      <div className="mt-5 flex flex-col gap-3 rounded-xl bg-slate-50 p-4 sm:flex-row sm:items-center">
         <div className="min-w-0 flex-1">
           <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">
             Origin
           </p>
 
-          <p className="mt-0.5 truncate text-xs font-bold text-slate-700">
+          <p className="mt-1 truncate text-xs font-bold text-slate-700">
             {origin}
           </p>
         </div>
 
-        <div className="hidden text-slate-300 sm:block">→</div>
+        <div className="hidden text-slate-300 sm:block">
+          →
+        </div>
 
         <div className="min-w-0 flex-1">
           <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">
             Destination
           </p>
 
-          <p className="mt-0.5 truncate text-xs font-bold text-slate-700">
+          <p className="mt-1 truncate text-xs font-bold text-slate-700">
             {destination}
           </p>
         </div>
@@ -674,24 +672,39 @@ function RequestCard({ request, onView }) {
 
       {/* DETAILS GRID */}
 
-      <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
-        <RequestDetail label="HS Code" value={hsCode} />
-        <RequestDetail label="Estimated Value" value={value} />
-        <RequestDetail label="Required Service" value={service} />
-        <RequestDetail label="Posted" value={postedDate} />
+      <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 md:grid-cols-4">
+        <RequestDetail
+          label="HS Code"
+          value={hsCode}
+        />
+
+        <RequestDetail
+          label="Estimated Value"
+          value={value}
+        />
+
+        <RequestDetail
+          label="Required Service"
+          value={service}
+        />
+
+        <RequestDetail
+          label="Posted"
+          value={postedDate}
+        />
       </div>
 
-      {/* CARD ACTION FOOTER */}
+      {/* CARD FOOTER */}
 
-      <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
-        <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
-          <span>Posted {postedDate}</span>
-        </div>
+      <div className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-[10px] text-slate-400">
+          Posted {postedDate}
+        </p>
 
         <button
           type="button"
           onClick={onView}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-[#173563] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#102547]"
+          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#173563] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#102547]"
         >
           View Request
           <ChevronRight size={14} />
@@ -702,10 +715,13 @@ function RequestCard({ request, onView }) {
 }
 
 /* =========================================================
-   REQUEST DETAIL FIELD
+   REQUEST DETAIL
 ========================================================= */
 
-function RequestDetail({ label, value }) {
+function RequestDetail({
+  label,
+  value,
+}) {
   return (
     <div className="min-w-0">
       <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">
@@ -723,18 +739,23 @@ function RequestDetail({ label, value }) {
    EMPTY STATE
 ========================================================= */
 
-function EmptyRequests({ hasFilters, onClear }) {
+function EmptyRequests({
+  hasFilters,
+  onClear,
+}) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-[0_2px_10px_rgba(15,23,42,.02)]">
+    <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-[0_2px_10px_rgba(15,23,42,.02)]">
       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
-        <FileText size={25} />
+        <FileText size={24} />
       </div>
 
-      <h3 className="mt-4 text-sm font-bold text-slate-700">
-        {hasFilters ? "No matching requests" : "No SME requests yet"}
+      <h3 className="mt-4 text-base font-bold text-slate-700">
+        {hasFilters
+          ? "No matching requests"
+          : "No SME requests yet"}
       </h3>
 
-      <p className="mx-auto mt-1 max-w-md text-[11px] leading-5 text-slate-400">
+      <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-slate-400">
         {hasFilters
           ? "Try changing your search terms or filters to find more import requests."
           : "New SME import requests will appear here when they become available."}
@@ -754,28 +775,7 @@ function EmptyRequests({ hasFilters, onClear }) {
 }
 
 /* =========================================================
-   SIDEBAR ITEM (MATCHED WITH AGENT DASHBOARD)
-========================================================= */
-
-function SidebarItem({ icon: Icon, label, to, active = false, onClick }) {
-  return (
-    <Link
-      to={to}
-      onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${
-        active
-          ? "bg-blue-50 text-[#173563]"
-          : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
-      }`}
-    >
-      <Icon size={17} strokeWidth={1.8} />
-      <span>{label}</span>
-    </Link>
-  );
-}
-
-/* =========================================================
-   DEMO REQUESTS DATA
+   DEMO REQUESTS
 ========================================================= */
 
 function getDemoRequests() {
@@ -820,22 +820,6 @@ function getDemoRequests() {
       status: "New",
     },
   ];
-}
-
-/* =========================================================
-   HELPER UTILS
-========================================================= */
-
-function getInitials(name) {
-  if (!name) return "CA";
-
-  const words = name.trim().split(/\s+/).filter(Boolean);
-
-  if (words.length === 1) {
-    return words[0].slice(0, 2).toUpperCase();
-  }
-
-  return `${words[0][0]}${words[words.length - 1][0]}`.toUpperCase();
 }
 
 export default AgentRequests;

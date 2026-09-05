@@ -212,14 +212,29 @@
 html {
   min-width: 320px;
   min-height: 100%;
+
+  /*
+   * IMPORTANT:
+   * Always reserve scrollbar space.
+   * Prevents pages from moving horizontally when
+   * switching between pages with different heights.
+   */
+  overflow-y: scroll;
+
   background: #f6f8fb;
   color: #0f172a;
 
+  /*
+   * Only animate theme changes.
+   * Do NOT put transition on every element.
+   */
   transition:
     background-color 0.25s ease,
     color 0.25s ease;
 }
-
+html {
+  scrollbar-gutter: stable;
+}
 html.dark {
   background: #0b1120;
   color-scheme: dark;
@@ -242,6 +257,10 @@ body {
     "Segoe UI",
     sans-serif;
 
+  /*
+   * Only theme transition.
+   * Removed global element transitions.
+   */
   transition:
     background-color 0.25s ease,
     color 0.25s ease;
@@ -353,7 +372,7 @@ svg {
   color: var(--accent-blue);
   background: var(--accent-blue-light);
   border: 2px solid transparent;
-  transition: border-color 0.3s;
+  transition: border-color 0.3s ease;
   margin-bottom: 24px;
 }
 
@@ -467,7 +486,10 @@ svg {
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  transition: box-shadow 0.3s;
+
+  transition:
+    box-shadow 0.3s ease,
+    background-color 0.2s ease;
 }
 
 #next-steps ul a:hover {
@@ -535,7 +557,9 @@ html.dark .bg-\[\#F5F7FA\] {
   background-color: #0b1120 !important;
 }
 
-/* Text */
+/* =========================================================
+   DARK MODE TEXT
+========================================================= */
 
 html.dark .text-slate-950 {
   color: #f8fafc !important;
@@ -565,7 +589,9 @@ html.dark .text-slate-400 {
   color: #64748b !important;
 }
 
-/* Borders */
+/* =========================================================
+   DARK MODE BORDERS
+========================================================= */
 
 html.dark .border-slate-200 {
   border-color: #263244 !important;
@@ -579,7 +605,9 @@ html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
   border-color: #1e293b !important;
 }
 
-/* Hover states */
+/* =========================================================
+   DARK MODE HOVER
+========================================================= */
 
 html.dark .hover\:bg-slate-50:hover {
   background-color: #172033 !important;
@@ -589,7 +617,9 @@ html.dark .hover\:bg-slate-100:hover {
   background-color: #1e293b !important;
 }
 
-/* Inputs */
+/* =========================================================
+   DARK MODE INPUTS
+========================================================= */
 
 html.dark input,
 html.dark textarea,
@@ -610,7 +640,9 @@ html.dark select:focus {
   border-color: #2563eb;
 }
 
-/* Vite components */
+/* =========================================================
+   DARK MODE VITE COMPONENTS
+========================================================= */
 
 html.dark .counter {
   color: var(--accent-blue);
@@ -672,22 +704,16 @@ html.dark .ticks {
 }
 
 /* =========================================================
-   SMOOTH THEME TRANSITION
+   SMALL SCREEN
 ========================================================= */
 
-body,
-header,
-section,
-nav,
-div,
-button,
-a,
-input,
-textarea,
-select {
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease;
+@media (max-width: 640px) {
+  html {
+    overflow-y: scroll;
+  }
+
+  body {
+    min-width: 320px;
+    overflow-x: hidden;
+  }
 }

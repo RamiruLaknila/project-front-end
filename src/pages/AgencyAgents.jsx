@@ -2,29 +2,41 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  Building2,
+  Bell,
   Check,
   CheckCircle2,
   Clock3,
-  ClipboardList,
   Mail,
-  Menu,
   RefreshCw,
-  Settings,
   UserPlus,
   Users,
-  LogOut,
   X,
 } from "lucide-react";
+import AgentAdminSidebar from "../components/AgentAdminSidebar";
 
 function AgencyAgents() {
   const navigate = useNavigate();
 
-  const [agency, setAgency] = useState(null);
-  const [currentAdmin, setCurrentAdmin] = useState(null);
+   const [agency, setAgency] = useState(() => {
+    try {
+      const storedAgency = localStorage.getItem("clearingAgency");
+      return storedAgency ? JSON.parse(storedAgency) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [currentAdmin, setCurrentAdmin] = useState(() => {
+    try {
+      const storedAdmin = localStorage.getItem("clearingAgent");
+      const parsed = storedAdmin ? JSON.parse(storedAdmin) : null;
+      return parsed && parsed.agentType === "agency-admin" ? parsed : null;
+    } catch {
+      return null;
+    }
+  });
   const [agents, setAgents] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [processingId, setProcessingId] = useState(null);
 
   /* =========================================================
@@ -33,11 +45,8 @@ function AgencyAgents() {
 
   const loadData = () => {
     try {
-      const storedAgency =
-        localStorage.getItem("clearingAgency");
-
-      const storedAdmin =
-        localStorage.getItem("clearingAgent");
+      const storedAgency = localStorage.getItem("clearingAgency");
+      const storedAdmin = localStorage.getItem("clearingAgent");
 
       if (!storedAgency || !storedAdmin) {
         navigate("/agent-signin");
@@ -47,31 +56,25 @@ function AgencyAgents() {
       const parsedAgency = JSON.parse(storedAgency);
       const parsedAdmin = JSON.parse(storedAdmin);
 
-      if (parsedAdmin.role !== "admin") {
+      if (parsedAdmin.agentType !== "agency-admin") {
         navigate("/agent-signin");
         return;
       }
 
-      const storedAgents =
-        JSON.parse(
-          localStorage.getItem("agencyAgents") || "[]"
-        );
+      const storedAgents = JSON.parse(
+        localStorage.getItem("agencyAgents") || "[]"
+      );
 
-      const storedPendingRequests =
-        JSON.parse(
-          localStorage.getItem("agencyPendingAgents") || "[]"
-        );
+      const storedPendingRequests = JSON.parse(
+        localStorage.getItem("agencyPendingAgents") || "[]"
+      );
 
       setAgency(parsedAgency);
       setCurrentAdmin(parsedAdmin);
       setAgents(storedAgents);
       setPendingRequests(storedPendingRequests);
     } catch (error) {
-      console.error(
-        "Failed to load agency agents:",
-        error
-      );
-
+      console.error("Failed to load agency agents:", error);
       navigate("/agent-signin");
     }
   };
@@ -93,8 +96,7 @@ function AgencyAgents() {
   const agencyPendingRequests = useMemo(() => {
     return pendingRequests.filter((request) => {
       const requestAgencyId =
-        request.agencyId ||
-        request.agencyCode;
+        request.agencyId || request.agencyCode;
 
       return (
         requestAgencyId === agencyId &&
@@ -110,8 +112,7 @@ function AgencyAgents() {
   const agencyAgents = useMemo(() => {
     return agents.filter((agent) => {
       const agentAgencyId =
-        agent.agencyId ||
-        agent.agencyCode;
+        agent.agencyId || agent.agencyCode;
 
       return agentAgencyId === agencyId;
     });
@@ -133,17 +134,13 @@ function AgencyAgents() {
     setProcessingId(requestId);
 
     try {
-      const storedRequests =
-        JSON.parse(
-          localStorage.getItem(
-            "agencyPendingAgents"
-          ) || "[]"
-        );
+      const storedRequests = JSON.parse(
+        localStorage.getItem("agencyPendingAgents") || "[]"
+      );
 
-      const selectedRequest =
-        storedRequests.find(
-          (request) => request.id === requestId
-        );
+      const selectedRequest = storedRequests.find(
+        (request) => request.id === requestId
+      );
 
       if (!selectedRequest) {
         return;
@@ -155,19 +152,18 @@ function AgencyAgents() {
          UPDATE PENDING REQUEST
       ------------------------------------------------------- */
 
-      const updatedRequests =
-        storedRequests.map((request) => {
-          if (request.id !== requestId) {
-            return request;
-          }
+      const updatedRequests = storedRequests.map((request) => {
+        if (request.id !== requestId) {
+          return request;
+        }
 
-          return {
-            ...request,
-            status: "approved",
-            agentStatus: "approved",
-            approvedAt: now,
-          };
-        });
+        return {
+          ...request,
+          status: "approved",
+          agentStatus: "approved",
+          approvedAt: now,
+        };
+      });
 
       localStorage.setItem(
         "agencyPendingAgents",
@@ -178,17 +174,15 @@ function AgencyAgents() {
          ADD / UPDATE AGENCY AGENT
       ------------------------------------------------------- */
 
-      const storedAgents =
-        JSON.parse(
-          localStorage.getItem("agencyAgents") || "[]"
-        );
+      const storedAgents = JSON.parse(
+        localStorage.getItem("agencyAgents") || "[]"
+      );
 
-      const existingAgentIndex =
-        storedAgents.findIndex(
-          (agent) =>
-            agent.email?.toLowerCase() ===
-            selectedRequest.email?.toLowerCase()
-        );
+      const existingAgentIndex = storedAgents.findIndex(
+        (agent) =>
+          agent.email?.toLowerCase() ===
+          selectedRequest.email?.toLowerCase()
+      );
 
       const approvedAgent = {
         id:
@@ -218,6 +212,8 @@ function AgencyAgents() {
 
         role: "agent",
 
+        agentType: "agency-member",
+
         status: "approved",
 
         agentStatus: "approved",
@@ -232,19 +228,18 @@ function AgencyAgents() {
       let updatedAgents;
 
       if (existingAgentIndex >= 0) {
-        updatedAgents =
-          storedAgents.map(
-            (agent, index) => {
-              if (index !== existingAgentIndex) {
-                return agent;
-              }
-
-              return {
-                ...agent,
-                ...approvedAgent,
-              };
+        updatedAgents = storedAgents.map(
+          (agent, index) => {
+            if (index !== existingAgentIndex) {
+              return agent;
             }
-          );
+
+            return {
+              ...agent,
+              ...approvedAgent,
+            };
+          }
+        );
       } else {
         updatedAgents = [
           ...storedAgents,
@@ -265,8 +260,9 @@ function AgencyAgents() {
         localStorage.getItem("clearingAgent");
 
       if (storedCurrentAgent) {
-        const currentAgent =
-          JSON.parse(storedCurrentAgent);
+        const currentAgent = JSON.parse(
+          storedCurrentAgent
+        );
 
         if (
           currentAgent.email?.toLowerCase() ===
@@ -291,6 +287,8 @@ function AgencyAgents() {
                 agency?.code,
 
               role: "agent",
+
+              agentType: "agency-member",
 
               agentStatus: "approved",
 
@@ -326,17 +324,13 @@ function AgencyAgents() {
     setProcessingId(requestId);
 
     try {
-      const storedRequests =
-        JSON.parse(
-          localStorage.getItem(
-            "agencyPendingAgents"
-          ) || "[]"
-        );
+      const storedRequests = JSON.parse(
+        localStorage.getItem("agencyPendingAgents") || "[]"
+      );
 
-      const selectedRequest =
-        storedRequests.find(
-          (request) => request.id === requestId
-        );
+      const selectedRequest = storedRequests.find(
+        (request) => request.id === requestId
+      );
 
       if (!selectedRequest) {
         return;
@@ -348,8 +342,8 @@ function AgencyAgents() {
          UPDATE REQUEST
       ------------------------------------------------------- */
 
-      const updatedRequests =
-        storedRequests.map((request) => {
+      const updatedRequests = storedRequests.map(
+        (request) => {
           if (request.id !== requestId) {
             return request;
           }
@@ -360,7 +354,8 @@ function AgencyAgents() {
             agentStatus: "rejected",
             rejectedAt: now,
           };
-        });
+        }
+      );
 
       localStorage.setItem(
         "agencyPendingAgents",
@@ -371,27 +366,25 @@ function AgencyAgents() {
          UPDATE AGENCY AGENT IF EXISTS
       ------------------------------------------------------- */
 
-      const storedAgents =
-        JSON.parse(
-          localStorage.getItem("agencyAgents") || "[]"
-        );
+      const storedAgents = JSON.parse(
+        localStorage.getItem("agencyAgents") || "[]"
+      );
 
-      const updatedAgents =
-        storedAgents.map((agent) => {
-          if (
-            agent.email?.toLowerCase() !==
-            selectedRequest.email?.toLowerCase()
-          ) {
-            return agent;
-          }
+      const updatedAgents = storedAgents.map((agent) => {
+        if (
+          agent.email?.toLowerCase() !==
+          selectedRequest.email?.toLowerCase()
+        ) {
+          return agent;
+        }
 
-          return {
-            ...agent,
-            status: "rejected",
-            agentStatus: "rejected",
-            rejectedAt: now,
-          };
-        });
+        return {
+          ...agent,
+          status: "rejected",
+          agentStatus: "rejected",
+          rejectedAt: now,
+        };
+      });
 
       localStorage.setItem(
         "agencyAgents",
@@ -406,8 +399,9 @@ function AgencyAgents() {
         localStorage.getItem("clearingAgent");
 
       if (storedCurrentAgent) {
-        const currentAgent =
-          JSON.parse(storedCurrentAgent);
+        const currentAgent = JSON.parse(
+          storedCurrentAgent
+        );
 
         if (
           currentAgent.email?.toLowerCase() ===
@@ -443,18 +437,6 @@ function AgencyAgents() {
   };
 
   /* =========================================================
-     LOGOUT
-  ========================================================= */
-
-  const handleLogout = () => {
-    localStorage.removeItem("clearingAgent");
-    localStorage.removeItem("agentOnboardingType");
-    localStorage.removeItem("agentOnboardingComplete");
-
-    navigate("/agent-signin");
-  };
-
-  /* =========================================================
      LOADING
   ========================================================= */
 
@@ -466,227 +448,63 @@ function AgencyAgents() {
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
 
       {/* =====================================================
-          MOBILE OVERLAY
+          REUSABLE ADMIN SIDEBAR
       ===================================================== */}
 
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-slate-900/30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
-
-      <aside
-        className={`fixed left-0 top-0 z-50 flex h-screen w-[250px] flex-col border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen
-            ? "translate-x-0"
-            : "-translate-x-full"
-        }`}
-      >
-
-        {/* LOGO */}
-
-        <div className="flex h-[70px] items-center border-b border-slate-100 px-5">
-
-          <Link
-            to="/agent-admin-dashboard"
-            className="flex items-center gap-3"
-            onClick={() => setSidebarOpen(false)}
-          >
-
-            <img
-              src="/logo.jpeg"
-              alt="ImportEase"
-              className="h-9 w-9 object-contain mix-blend-multiply"
-            />
-
-            <div>
-
-              <p className="text-[18px] font-bold tracking-tight text-[#173563]">
-                Import
-                <span className="text-slate-900">
-                  Ease
-                </span>
-              </p>
-
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                Agent Platform
-              </p>
-
-            </div>
-
-          </Link>
-
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(false)}
-            className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 lg:hidden"
-          >
-            <X size={18} />
-          </button>
-
-        </div>
-
-        {/* NAVIGATION */}
-
-        <nav className="flex-1 space-y-1.5 p-3">
-
-          <SidebarItem
-            icon={Building2}
-            label="Dashboard"
-            to="/agent-admin-dashboard"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-          />
-
-          <SidebarItem
-            icon={Users}
-            label="Agents"
-            active
-            to="/agency-agents"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-          />
-
-          <SidebarItem
-            icon={UserPlus}
-            label="Invite Agents"
-            to="/agency-invite"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-          />
-
-          <SidebarItem
-            icon={ClipboardList}
-            label="SME Requests"
-            to="/agent-marketplace"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-          />
-
-        </nav>
-
-        {/* =====================================================
-            BOTTOM LEFT
-        ===================================================== */}
-
-        <div className="border-t border-slate-100 p-3">
-
-          {/* ADMIN PROFILE */}
-
-          <div className="mb-3 flex items-center gap-3 rounded-xl px-2 py-2">
-
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#173563] text-xs font-bold text-white">
-              {getInitials(
-                currentAdmin.name || "Admin"
-              )}
-            </div>
-
-            <div className="min-w-0">
-
-              <p className="truncate text-sm font-bold text-slate-800">
-                {currentAdmin.name ||
-                  "Agency Admin"}
-              </p>
-
-              <p className="mt-0.5 text-[11px] text-slate-400">
-                Administrator
-              </p>
-
-            </div>
-
-          </div>
-
-          {/* SETTINGS */}
-
-          <SidebarItem
-            icon={Settings}
-            label="Settings"
-            to="/agent-settings"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-          />
-
-          {/* LOGOUT */}
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-          >
-            <LogOut size={18} />
-            Logout
-          </button>
-
-        </div>
-
-      </aside>
+      <AgentAdminSidebar />
 
       {/* =====================================================
           MAIN
       ===================================================== */}
 
-      <div className="lg:ml-[250px]">
+      <div className="lg:ml-[260px]">
 
-        {/* TOP BAR */}
+        {/* =====================================================
+            TOP BAR
+        ===================================================== */}
 
-        <header className="sticky top-0 z-30 flex h-[70px] items-center border-b border-slate-200 bg-white/95 px-5 backdrop-blur-xl sm:px-8">
+        <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur-xl sm:px-6">
 
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className="mr-3 flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 lg:hidden"
-          >
-            <Menu size={19} />
-          </button>
+          <div className="flex items-center gap-3">
 
-          <div>
+            <div>
 
-            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
-              Agency Workspace
-            </p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
+                Agency Workspace
+              </p>
 
-            <h1 className="text-base font-bold text-slate-800">
-              Agents
-            </h1>
+              <h1 className="text-base font-bold text-slate-800">
+                Agents
+              </h1>
+
+            </div>
 
           </div>
 
-          <div className="ml-auto flex items-center gap-3">
+          {/* REFRESH + NOTIFICATIONS */}
 
-            <div className="hidden h-7 w-px bg-slate-200 sm:block" />
+          <div className="flex items-center gap-3">
 
-            <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={loadData}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
+              title="Refresh"
+            >
+              <RefreshCw size={18} />
+            </button>
 
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#173563] text-xs font-bold text-white">
-                {getInitials(
-                  currentAdmin.name || "Admin"
-                )}
-              </div>
+            <button
+              type="button"
+              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
+              title="Notifications"
+            >
+              <Bell size={18} />
 
-              <div className="hidden sm:block">
-
-                <p className="text-sm font-semibold text-slate-800">
-                  {currentAdmin.name ||
-                    "Agency Admin"}
-                </p>
-
-                <p className="text-[10px] text-slate-400">
-                  Administrator
-                </p>
-
-              </div>
-
-            </div>
+              {agencyPendingRequests.length > 0 && (
+                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
+              )}
+            </button>
 
           </div>
 
@@ -713,19 +531,6 @@ function AgencyAgents() {
             <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
 
               <div>
-
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5">
-
-                  <Users
-                    size={14}
-                    className="text-blue-600"
-                  />
-
-                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-blue-700">
-                    Agency Members
-                  </span>
-
-                </div>
 
                 <h2 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
                   Manage Agents
@@ -935,8 +740,22 @@ function AgentRow({
 
       <div className="flex min-w-0 items-center gap-3">
 
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#173563] text-sm font-bold text-white">
-          {getInitials(agent.name)}
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#173563] text-sm font-bold text-white">
+          {agent.photo ||
+          agent.profilePhoto ||
+          agent.image ? (
+            <img
+              src={
+                agent.photo ||
+                agent.profilePhoto ||
+                agent.image
+              }
+              alt={agent.name || "Agent"}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            getInitials(agent.name)
+          )}
         </div>
 
         <div className="min-w-0">
@@ -1010,6 +829,7 @@ function AgentRow({
             {processing
               ? "Updating..."
               : "Approve"}
+
           </button>
 
         </div>
@@ -1050,10 +870,12 @@ function SummaryCard({
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconStyle}`}
         >
+
           <Icon
             size={19}
             strokeWidth={1.8}
           />
+
         </div>
 
       </div>
@@ -1087,39 +909,6 @@ function EmptyState({
       </p>
 
     </div>
-  );
-}
-
-/* =========================================================
-   SIDEBAR ITEM
-========================================================= */
-
-function SidebarItem({
-  icon: Icon,
-  label,
-  to,
-  active = false,
-  onClick,
-}) {
-  return (
-    <Link
-      to={to}
-      onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${
-        active
-          ? "bg-blue-50 text-[#173563]"
-          : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
-      }`}
-    >
-
-      <Icon
-        size={18}
-        strokeWidth={1.8}
-      />
-
-      <span>{label}</span>
-
-    </Link>
   );
 }
 

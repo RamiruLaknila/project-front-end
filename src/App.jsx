@@ -20,7 +20,7 @@ import CompleteProfile from "./pages/CompleteProfile";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import SMEGuest from "./pages/SMEGuest";
-
+import IndividualAgentSettings from "./pages/IndividualAgentSettings";
 // =====================================================
 // CLEARING AGENT AUTH
 // =====================================================
@@ -36,6 +36,7 @@ import AgentPending from "./pages/AgentPending";
 // CLEARING AGENT DASHBOARD
 // =====================================================
 import AgentDashboard from "./pages/AgentDashboard";
+import IndividualAgentDashboard from "./pages/IndividualAgentDashboard";
 
 // =====================================================
 // AGENCY ADMIN
@@ -54,7 +55,7 @@ import AgentMarketplace from "./pages/AgentMarketplace";
 import AgentMyBids from "./pages/AgentMyBids";
 import AgentBids from "./pages/AgentBids";
 import ReviewBids from "./pages/ReviewBids";
-
+import IndividualAgentRequests from "./pages/IndividualAgentRequests";
 // =====================================================
 // AGENT SHIPMENTS
 // IMPORTANT: This must be AgentShipments.jsx
@@ -74,7 +75,10 @@ import IndividualAgentVerification from "./pages/IndividualAgentVerification";
 import SMESignUp from "./pages/SMESignUp";
 import Messages from "./pages/Messages";
 import SMESignUpSuccess from "./pages/SMESignUpSuccess";
-
+import IndividualAgentBids from "./pages/IndividualAgentBids";
+import AgentAdminSettings from "./pages/AgentAdminSettings";
+import IndividualAgentShipments from "./pages/IndividualAgentShipments";
+import AgentSettings from "./pages/AgentSettings";
 
 function App() {
   return (
@@ -89,11 +93,39 @@ function App() {
           path="/"
           element={<Home />}
         />
-
+       <Route
+  path="/agent-admin-settings"
+  element={<AgentAdminSettings />}
+/>
         <Route
           path="/sme-guest"
           element={<SMEGuest />}
         />
+        <Route
+  path="/individual-agent-shipments"
+  element={<IndividualAgentShipments />}
+/>
+        <Route
+  path="/individual-agent-bids"
+  element={<IndividualAgentBids />}
+/>
+
+<Route
+  path="/agent-settings"
+  element={<AgentSettings />}
+/>
+<Route
+  path="/individual-agent-settings"
+  element={<IndividualAgentSettings />}
+/>
+        <Route
+  path="/individual-agent-dashboard"
+  element={<IndividualAgentDashboard />}
+/>
+<Route
+  path="/individual-agent-requests"
+  element={<IndividualAgentRequests />}
+/>
         
 
 
