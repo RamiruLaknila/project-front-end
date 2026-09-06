@@ -454,7 +454,7 @@ function InfoRow({ label, value }) {
         {label}
       </span>
 
-      <span className="max-w-[190px] truncate text-right text-[12px] font-bold text-[#173B6C]">
+      <span className="min-w-0 max-w-[60%] break-words text-right text-[12px] font-bold text-[#173B6C] sm:max-w-[190px]">
         {value}
       </span>
     </div>

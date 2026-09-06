@@ -106,7 +106,7 @@ function AgentBids() {
     <div className="min-h-screen bg-[#F6F8FB]">
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate("/dashboard")}
@@ -337,7 +337,7 @@ function AgentBids() {
                   </div>
 
                   {/* Action */}
-                  <div className="xl:w-56 flex xl:flex-col justify-between gap-3">
+                  <div className="xl:w-56 flex flex-wrap items-center xl:flex-col xl:items-stretch justify-between gap-3">
                     <div className="bg-blue-50 rounded-xl p-4">
                       <p className="text-xs text-blue-600">
                         Total Service Cost
@@ -439,7 +439,7 @@ function AgentBids() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="border rounded-xl p-4">
                   <p className="text-xs text-gray-400">
                     Clearance Fee

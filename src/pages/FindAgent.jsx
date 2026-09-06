@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -71,6 +71,292 @@ function FindAgent() {
     useState(false);
 
   /* =========================================================
+     INLINE BID REVIEW
+  ========================================================= */
+
+  const [showBidReview, setShowBidReview] = useState(false);
+  const [bids, setBids] = useState([]);
+  const [selectedBid, setSelectedBid] = useState(null);
+  const [isAccepting, setIsAccepting] = useState(false);
+
+  const getRequestId = () =>
+    localStorage.getItem("currentRequestId") ||
+    JSON.parse(localStorage.getItem("shipmentRequest") || "null")?.requestId ||
+    JSON.parse(localStorage.getItem("currentMarketplaceRequest") || "null")?.requestId ||
+    null;
+
+  const loadBids = () => {
+    const requestId = getRequestId();
+
+    try {
+      const allBids = JSON.parse(
+        localStorage.getItem("agentBids") || "[]"
+      );
+
+      const matching = Array.isArray(allBids)
+        ? allBids.filter(
+            (bid) => bid.requestId === requestId
+          )
+        : [];
+
+      matching.sort(
+        (a, b) =>
+          Number(
+            a.totalFee ??
+              Number(a.clearanceFee || 0) +
+                Number(a.additionalCharges || 0)
+          ) -
+          Number(
+            b.totalFee ??
+              Number(b.clearanceFee || 0) +
+                Number(b.additionalCharges || 0)
+          )
+      );
+
+      setBids(matching);
+    } catch {
+      setBids([]);
+    }
+  };
+
+  const openBidReview = () => {
+    loadBids();
+    setSelectedBid(null);
+    setShowBidReview(true);
+  };
+
+  useEffect(() => {
+    if (!showBidReview) return undefined;
+
+    loadBids();
+
+    const timer = window.setInterval(
+      loadBids,
+      1500
+    );
+
+    return () =>
+      window.clearInterval(timer);
+  }, [showBidReview]);
+
+  const handleAcceptBid = () => {
+    if (!selectedBid || isAccepting) return;
+
+    setIsAccepting(true);
+
+    try {
+      const requestId = getRequestId();
+
+      const shipmentRequest = JSON.parse(
+        localStorage.getItem("shipmentRequest") ||
+          "null"
+      );
+
+      const marketplaceRequest = JSON.parse(
+        localStorage.getItem(
+          "currentMarketplaceRequest"
+        ) || "null"
+      );
+
+      const totalFee = Number(
+        selectedBid.totalFee ??
+          Number(selectedBid.clearanceFee || 0) +
+            Number(
+              selectedBid.additionalCharges || 0
+            )
+      );
+
+      const selected = {
+        ...selectedBid,
+        id:
+          selectedBid.agentId ||
+          selectedBid.id,
+
+        name:
+          selectedBid.agentName ||
+          selectedBid.name ||
+          "Clearing Agent",
+
+        agentName:
+          selectedBid.agentName ||
+          selectedBid.name ||
+          "Clearing Agent",
+
+        agencyName:
+          selectedBid.agencyName ||
+          selectedBid.companyName ||
+          "Clearing Agency",
+
+        totalFee,
+
+        bidId:
+          selectedBid.id ||
+          selectedBid.bidId ||
+          `BID-${Date.now()}`,
+
+        requestId,
+
+        selectedAt:
+          new Date().toISOString(),
+      };
+
+      const allBids = JSON.parse(
+        localStorage.getItem("agentBids") ||
+          "[]"
+      );
+
+      localStorage.setItem(
+        "agentBids",
+        JSON.stringify(
+          Array.isArray(allBids)
+            ? allBids.map((bid) =>
+                bid.requestId === requestId
+                  ? {
+                      ...bid,
+                      status:
+                        (bid.id || bid.bidId) ===
+                        (selectedBid.id ||
+                          selectedBid.bidId)
+                          ? "Accepted"
+                          : "Rejected",
+                    }
+                  : bid
+              )
+            : []
+        )
+      );
+
+      localStorage.setItem(
+        "selectedAgent",
+        JSON.stringify(selected)
+      );
+
+      const updatedRequest = {
+        ...(shipmentRequest || {}),
+        id: requestId,
+        requestId,
+        status: "Agent Selected",
+        selectedBidId: selected.bidId,
+        selectedAgentId: selected.id,
+        selectedAgentName:
+          selected.agencyName,
+        selectedAt: selected.selectedAt,
+      };
+
+      localStorage.setItem(
+        "shipmentRequest",
+        JSON.stringify(updatedRequest)
+      );
+
+      const updatedMarketplace = {
+        ...(marketplaceRequest || {}),
+        id: requestId,
+        requestId,
+        status: "Agent Selected",
+        hasBid: true,
+        selectedBidId: selected.bidId,
+        selectedAgentId: selected.id,
+        selectedAgentName:
+          selected.agencyName,
+        selectedAt: selected.selectedAt,
+      };
+
+      localStorage.setItem(
+        "currentMarketplaceRequest",
+        JSON.stringify(updatedMarketplace)
+      );
+
+      try {
+        const marketplaceRequests =
+          JSON.parse(
+            localStorage.getItem(
+              "marketplaceRequests"
+            ) || "[]"
+          );
+
+        if (Array.isArray(marketplaceRequests)) {
+          localStorage.setItem(
+            "marketplaceRequests",
+            JSON.stringify(
+              marketplaceRequests.map(
+                (request) =>
+                  request.id === requestId ||
+                  request.requestId === requestId
+                    ? updatedMarketplace
+                    : request
+              )
+            )
+          );
+        }
+      } catch {
+        // Ignore malformed marketplace request data.
+      }
+
+      const currentImport = JSON.parse(
+        localStorage.getItem("currentImport") ||
+          "null"
+      );
+
+      localStorage.setItem(
+        "currentShipment",
+        JSON.stringify({
+          id: `SHIP-${Date.now()}`,
+          requestId,
+
+          product:
+            shipmentRequest?.product ||
+            shipmentRequest?.productDetails ||
+            "Import shipment",
+
+          origin:
+            shipmentRequest?.origin ||
+            "Not specified",
+
+          destination:
+            shipmentRequest?.destination ||
+            "Colombo, Sri Lanka",
+
+          shipmentValue:
+            shipmentRequest?.shipmentValue ||
+            shipmentRequest?.declaredValue ||
+            currentImport?.productValue ||
+            0,
+
+          hsCode:
+            shipmentRequest?.hsCode ||
+            currentImport?.hsCode ||
+            "",
+
+          category:
+            shipmentRequest?.category ||
+            currentImport?.category ||
+            "General",
+
+          agent: selected,
+
+          status: "Agent Selected",
+
+          createdAt:
+            new Date().toISOString(),
+        })
+      );
+
+      setShowBidReview(false);
+      setSelectedBid(null);
+
+      navigate("/shipment-confirmation");
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "We could not accept this bid. Please try again."
+      );
+    } finally {
+      setIsAccepting(false);
+    }
+  };
+
+  /* =========================================================
      CATEGORIES
   ========================================================= */
 
@@ -124,7 +410,8 @@ function FindAgent() {
       experience: 8,
       shipments: 420,
       verified: true,
-      responseTime: "Usually responds within 1 hour",
+      responseTime:
+        "Usually responds within 1 hour",
       categories: [
         "Electronics",
         "Machinery",
@@ -144,7 +431,8 @@ function FindAgent() {
       experience: 6,
       shipments: 315,
       verified: true,
-      responseTime: "Usually responds within 2 hours",
+      responseTime:
+        "Usually responds within 2 hours",
       categories: [
         "Textiles & Apparel",
         "Electronics",
@@ -164,7 +452,8 @@ function FindAgent() {
       experience: 5,
       shipments: 260,
       verified: true,
-      responseTime: "Usually responds within 3 hours",
+      responseTime:
+        "Usually responds within 3 hours",
       categories: [
         "Food & Agriculture",
         "Pharmaceuticals",
@@ -184,7 +473,8 @@ function FindAgent() {
       experience: 9,
       shipments: 510,
       verified: true,
-      responseTime: "Usually responds within 2 hours",
+      responseTime:
+        "Usually responds within 2 hours",
       categories: [
         "Automotive",
         "Machinery",
@@ -204,7 +494,8 @@ function FindAgent() {
       experience: 4,
       shipments: 198,
       verified: true,
-      responseTime: "Usually responds within 4 hours",
+      responseTime:
+        "Usually responds within 4 hours",
       categories: [
         "Electronics",
         "Textiles & Apparel",
@@ -224,7 +515,8 @@ function FindAgent() {
       experience: 7,
       shipments: 340,
       verified: true,
-      responseTime: "Usually responds within 3 hours",
+      responseTime:
+        "Usually responds within 3 hours",
       categories: [
         "Machinery",
         "Automotive",
@@ -240,60 +532,76 @@ function FindAgent() {
   ========================================================= */
 
   const filteredAgents = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
+    const query =
+      searchQuery.trim().toLowerCase();
 
-    const filtered = agents.filter((agent) => {
-      const matchesSearch =
-        !query ||
-        agent.agencyName
-          .toLowerCase()
-          .includes(query) ||
-        agent.agentName
-          .toLowerCase()
-          .includes(query) ||
-        agent.location
-          .toLowerCase()
-          .includes(query) ||
-        agent.categories.some((category) =>
-          category.toLowerCase().includes(query)
+    const filtered = agents.filter(
+      (agent) => {
+        const matchesSearch =
+          !query ||
+          agent.agencyName
+            .toLowerCase()
+            .includes(query) ||
+          agent.agentName
+            .toLowerCase()
+            .includes(query) ||
+          agent.location
+            .toLowerCase()
+            .includes(query) ||
+          agent.categories.some((category) =>
+            category
+              .toLowerCase()
+              .includes(query)
+          );
+
+        const matchesCategory =
+          categoryFilter ===
+            "All Categories" ||
+          agent.categories.includes(
+            categoryFilter
+          );
+
+        const matchesLocation =
+          locationFilter ===
+            "All Locations" ||
+          agent.location === locationFilter;
+
+        const matchesExperience =
+          experienceFilter ===
+            "Any Experience" ||
+          (experienceFilter ===
+            "1–3 years" &&
+            agent.experience >= 1 &&
+            agent.experience <= 3) ||
+          (experienceFilter ===
+            "4–7 years" &&
+            agent.experience >= 4 &&
+            agent.experience <= 7) ||
+          (experienceFilter ===
+            "8+ years" &&
+            agent.experience >= 8);
+
+        const matchesRating =
+          ratingFilter === "Any Rating" ||
+          (ratingFilter ===
+            "4.0+ Rating" &&
+            agent.rating >= 4.0) ||
+          (ratingFilter ===
+            "4.5+ Rating" &&
+            agent.rating >= 4.5) ||
+          (ratingFilter ===
+            "4.8+ Rating" &&
+            agent.rating >= 4.8);
+
+        return (
+          matchesSearch &&
+          matchesCategory &&
+          matchesLocation &&
+          matchesExperience &&
+          matchesRating
         );
-
-      const matchesCategory =
-        categoryFilter === "All Categories" ||
-        agent.categories.includes(categoryFilter);
-
-      const matchesLocation =
-        locationFilter === "All Locations" ||
-        agent.location === locationFilter;
-
-      const matchesExperience =
-        experienceFilter === "Any Experience" ||
-        (experienceFilter === "1–3 years" &&
-          agent.experience >= 1 &&
-          agent.experience <= 3) ||
-        (experienceFilter === "4–7 years" &&
-          agent.experience >= 4 &&
-          agent.experience <= 7) ||
-        (experienceFilter === "8+ years" &&
-          agent.experience >= 8);
-
-      const matchesRating =
-        ratingFilter === "Any Rating" ||
-        (ratingFilter === "4.0+ Rating" &&
-          agent.rating >= 4.0) ||
-        (ratingFilter === "4.5+ Rating" &&
-          agent.rating >= 4.5) ||
-        (ratingFilter === "4.8+ Rating" &&
-          agent.rating >= 4.8);
-
-      return (
-        matchesSearch &&
-        matchesCategory &&
-        matchesLocation &&
-        matchesExperience &&
-        matchesRating
-      );
-    });
+      }
+    );
 
     return [...filtered].sort(
       (a, b) => b.rating - a.rating
@@ -384,10 +692,6 @@ function FindAgent() {
     const numericValue =
       Number(declaredValue);
 
-    /* -------------------------------------------------------
-       VALIDATION
-    ------------------------------------------------------- */
-
     if (!cleanProduct) {
       alert(
         "Please enter what you are importing."
@@ -409,10 +713,6 @@ function FindAgent() {
       return;
     }
 
-    /* -------------------------------------------------------
-       CURRENT IMPORT
-    ------------------------------------------------------- */
-
     let currentImport = null;
 
     try {
@@ -425,29 +725,18 @@ function FindAgent() {
       currentImport = null;
     }
 
-    /* -------------------------------------------------------
-       REQUEST ID
-    ------------------------------------------------------- */
-
     const requestId =
       `REQ-${Date.now()}`;
 
     const createdAt =
       new Date().toISOString();
 
-    /* -------------------------------------------------------
-       CATEGORY
-    ------------------------------------------------------- */
-
     const finalCategory =
       currentImport?.category ||
-      (categoryFilter !== "All Categories"
+      (categoryFilter !==
+      "All Categories"
         ? categoryFilter
         : "General");
-
-    /* =======================================================
-       SHIPMENT REQUEST
-    ======================================================= */
 
     const shipmentRequest = {
       id: requestId,
@@ -498,10 +787,6 @@ function FindAgent() {
         shipmentRequest
       )
     );
-
-    /* =======================================================
-       MARKETPLACE REQUEST
-    ======================================================= */
 
     let existingRequests = [];
 
@@ -616,10 +901,6 @@ function FindAgent() {
       requestId
     );
 
-    /* =======================================================
-       SAVE SELECTED AGENT
-    ======================================================= */
-
     if (selectedAgent) {
       localStorage.setItem(
         "selectedAgent",
@@ -632,10 +913,6 @@ function FindAgent() {
         "selectedAgent"
       );
     }
-
-    /* =======================================================
-       CLEAN OLD BIDS
-    ======================================================= */
 
     let existingBids = [];
 
@@ -672,17 +949,12 @@ function FindAgent() {
       )
     );
 
-    /* =======================================================
-       CLOSE MODAL
-    ======================================================= */
-
     setShowRequestForm(false);
 
-    /* =======================================================
-       GO TO REVIEW BIDS
-    ======================================================= */
-
-    navigate("/review-bids");
+    window.setTimeout(
+      () => openBidReview(),
+      250
+    );
   };
 
   /* =========================================================
@@ -691,10 +963,6 @@ function FindAgent() {
 
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
-
-      {/* =====================================================
-          ANIMATIONS
-      ====================================================== */}
 
       <style>{`
         @keyframes fadeUp {
@@ -783,34 +1051,16 @@ function FindAgent() {
         }
       `}</style>
 
-      {/* =====================================================
-          NAVBAR
-      ====================================================== */}
-
       <AppNavbar />
 
-      {/* =====================================================
-          MAIN
-      ====================================================== */}
-
       <main className="mx-auto w-full max-w-[1000px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
-
-        {/* ===================================================
-            BACK BUTTON
-        ==================================================== */}
 
         <div className="fade-up mb-6">
           <BackButton current="Find Clearing Agent" />
         </div>
 
-        {/* ===================================================
-            HEADER
-        ==================================================== */}
-
         <section className="fade-up -mt-8 mb-7">
-
           <div className="text-center">
-
             <h1 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
               Find a clearing agent
             </h1>
@@ -820,31 +1070,20 @@ function FindAgent() {
               agents based on experience, ratings,
               location, and import specializations.
             </p>
-
           </div>
-
         </section>
 
-        {/* ===================================================
-            SEARCH SECTION
-        ==================================================== */}
-
         <section className="fade-up agent-delay-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,.025)]">
-
-          {/* SEARCH HEADER */}
 
           <div className="p-5 sm:p-6">
 
             <div className="mb-4 flex items-center justify-between gap-3">
 
               <div>
-
                 <div className="flex items-center gap-2">
 
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-[#2563EB]">
-
                     <Search size={16} />
-
                   </div>
 
                   <h2 className="text-[17px] font-bold text-slate-900">
@@ -857,7 +1096,6 @@ function FindAgent() {
                   Find an agent that matches your
                   shipment requirements.
                 </p>
-
               </div>
 
               <button
@@ -873,18 +1111,11 @@ function FindAgent() {
                     : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                 }`}
               >
-
-                <SlidersHorizontal
-                  size={16}
-                />
-
+                <SlidersHorizontal size={16} />
                 Filters
-
               </button>
 
             </div>
-
-            {/* SEARCH INPUT */}
 
             <div className="relative">
 
@@ -913,9 +1144,7 @@ function FindAgent() {
                   }
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                 >
-
                   <X size={16} />
-
                 </button>
               )}
 
@@ -923,12 +1152,7 @@ function FindAgent() {
 
           </div>
 
-          {/* =================================================
-              FILTER PANEL
-          ================================================== */}
-
           {showFilters && (
-
             <div className="slide-down border-t border-slate-100 bg-slate-50/60 p-5 sm:p-6">
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -985,30 +1209,19 @@ function FindAgent() {
               </div>
 
               {hasActiveFilters && (
-
                 <div className="mt-4 flex justify-end">
-
                   <button
                     type="button"
-                    onClick={
-                      clearFilters
-                    }
+                    onClick={clearFilters}
                     className="text-[12px] font-bold text-[#2563EB] hover:underline"
                   >
                     Clear all filters
                   </button>
-
                 </div>
-
               )}
 
             </div>
-
           )}
-
-          {/* =================================================
-              QUICK FILTERS
-          ================================================== */}
 
           <div className="border-t border-slate-100 px-5 py-4 sm:px-6">
 
@@ -1057,15 +1270,11 @@ function FindAgent() {
 
         </section>
 
-        {/* ===================================================
-            RESULTS HEADER
-        ==================================================== */}
-
         <section className="fade-up agent-delay-2 mb-4 mt-7 flex items-end justify-between gap-4">
 
           <div>
 
-            <h2 className="text-[17px] font-bold text-slate-900">
+            <h2 className="text-[18px] font-bold text-slate-900">
               Available clearing agents
             </h2>
 
@@ -1092,10 +1301,6 @@ function FindAgent() {
           </div>
 
         </section>
-
-        {/* ===================================================
-            AGENT CARDS
-        ==================================================== */}
 
         {filteredAgents.length > 0 ? (
 
@@ -1135,9 +1340,7 @@ function FindAgent() {
           <section className="scale-in rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center">
 
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-
               <Search size={22} />
-
             </div>
 
             <h3 className="mt-4 text-[17px] font-bold text-[#173B6C]">
@@ -1152,9 +1355,7 @@ function FindAgent() {
 
             <button
               type="button"
-              onClick={
-                clearFilters
-              }
+              onClick={clearFilters}
               className="mt-4 rounded-xl bg-[#173B6C] px-4 py-2.5 text-[12px] font-bold text-white transition hover:bg-[#12315B]"
             >
               Clear filters
@@ -1163,10 +1364,6 @@ function FindAgent() {
           </section>
 
         )}
-
-        {/* ===================================================
-            SELECTED AGENT BAR
-        ==================================================== */}
 
         {selectedAgent && (
 
@@ -1177,11 +1374,7 @@ function FindAgent() {
               <div className="flex items-center gap-3">
 
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#2563EB] shadow-sm">
-
-                  <CheckCircle2
-                    size={19}
-                  />
-
+                  <CheckCircle2 size={19} />
                 </div>
 
                 <div>
@@ -1190,13 +1383,12 @@ function FindAgent() {
                     Selected agent
                   </p>
 
-                  <h3 className="mt-0.5 text-[14px] font-bold text-[#173B6C]">
+                  <h3 className="mt-0.5 text-[15px] font-bold text-[#173B6C]">
                     {selectedAgent.agencyName}
                   </h3>
 
                   <p className="mt-0.5 text-[12px] text-slate-500">
-                    {selectedAgent.location}{" "}
-                    ·{" "}
+                    {selectedAgent.location} ·{" "}
                     {selectedAgent.experience}{" "}
                     years experience
                   </p>
@@ -1208,21 +1400,13 @@ function FindAgent() {
               <button
                 type="button"
                 onClick={() =>
-                  setShowRequestForm(
-                    true
-                  )
+                  setShowRequestForm(true)
                 }
-                className="flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-4 py-3 text-[12px] font-bold text-white transition hover:bg-[#12315B]"
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-4 py-3 text-[13px] font-bold text-white transition hover:bg-[#12315B]"
               >
-
                 <Send size={15} />
-
                 Request a Quote
-
-                <ArrowRight
-                  size={15}
-                />
-
+                <ArrowRight size={15} />
               </button>
 
             </div>
@@ -1231,10 +1415,6 @@ function FindAgent() {
 
         )}
 
-        {/* ===================================================
-            BID CARD
-        ==================================================== */}
-
         <section className="fade-up agent-delay-3 mt-6 overflow-hidden rounded-2xl border border-[#173B6C] bg-[#173B6C]">
 
           <div className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
@@ -1242,9 +1422,7 @@ function FindAgent() {
             <div className="flex gap-3">
 
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white">
-
                 <Sparkles size={19} />
-
               </div>
 
               <div>
@@ -1272,29 +1450,18 @@ function FindAgent() {
             <button
               type="button"
               onClick={() => {
-                setSelectedAgent(
-                  null
-                );
-                setShowRequestForm(
-                  true
-                );
+                setSelectedAgent(null);
+                setShowRequestForm(true);
               }}
-              className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-[12px] font-bold text-[#173B6C] transition hover:bg-blue-50"
+              className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-[13px] font-bold text-[#173B6C] transition hover:bg-blue-50"
             >
-
               <Send size={15} />
-
               Post Shipment Request
-
             </button>
 
           </div>
 
         </section>
-
-        {/* ===================================================
-            INFO CARDS
-        ==================================================== */}
 
         <section className="mt-5 grid gap-4 sm:grid-cols-3">
 
@@ -1318,50 +1485,33 @@ function FindAgent() {
 
         </section>
 
-        {/* ===================================================
-            BOTTOM ACTIONS
-        ==================================================== */}
-
         <div className="fade-up mt-7 flex flex-col-reverse items-stretch justify-between gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center">
 
           <Link
             to="/import-calculator"
             className="flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-[13px] font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 sm:justify-start"
           >
-
             <ArrowLeft size={18} />
-
             Back to Import Calculator
-
           </Link>
 
           <button
             type="button"
             onClick={() => {
-              setSelectedAgent(
-                null
-              );
-              setShowRequestForm(
-                true
-              );
+              setSelectedAgent(null);
+              setShowRequestForm(true);
             }}
             className="group flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-6 py-3.5 text-[13px] font-semibold text-white shadow-[0_6px_18px_rgba(23,59,108,.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#12315B] hover:shadow-[0_10px_24px_rgba(23,59,108,.18)]"
           >
-
             Post Shipment Request
 
             <ArrowRight
               size={18}
               className="transition-transform duration-300 group-hover:translate-x-0.5"
             />
-
           </button>
 
         </div>
-
-        {/* ===================================================
-            FOOTER
-        ==================================================== */}
 
         <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[12px] text-slate-400">
 
@@ -1380,6 +1530,336 @@ function FindAgent() {
       </main>
 
       {/* =====================================================
+          INLINE BID REVIEW MODAL
+      ====================================================== */}
+
+      {showBidReview && (
+        <Modal
+          onClose={() =>
+            setShowBidReview(false)
+          }
+          wide
+        >
+          <div className="p-5 sm:p-6">
+
+            <div className="flex items-start justify-between gap-4">
+
+              <div>
+
+                <h2 className="text-[20px] font-bold text-[#173B6C]">
+                  Review bids
+                </h2>
+
+                <p className="mt-3 text-[12px] leading-5 text-slate-500">
+                  Compare offers from clearing agents and choose the one that best fits your shipment.
+                </p>
+
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowBidReview(false)
+                }
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"
+              >
+                <X size={18} />
+              </button>
+
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <p className="text-[10px] font-bold uppercase text-slate-400">
+                  Offers received
+                </p>
+
+                <p className="mt-1 text-[18px] font-bold text-[#173B6C]">
+                  {bids.length}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <p className="text-[10px] font-bold uppercase text-slate-400">
+                  Product
+                </p>
+
+                <p className="mt-1 truncate text-[12px] font-semibold text-slate-700">
+                  {productDetails ||
+                    "Your shipment"}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <p className="text-[10px] font-bold uppercase text-slate-400">
+                  Destination
+                </p>
+
+                <p className="mt-1 text-[12px] font-semibold text-slate-700">
+                  Colombo, Sri Lanka
+                </p>
+              </div>
+
+            </div>
+
+            {bids.length === 0 ? (
+
+              <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center">
+
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-white text-[#2563EB] shadow-sm">
+                  <Clock3 size={22} />
+                </div>
+
+                <h3 className="mt-4 text-[16px] font-bold text-[#173B6C]">
+                  Waiting for agent bids
+                </h3>
+
+                <p className="mx-auto mt-2 max-w-md text-[12px] leading-5 text-slate-500">
+                  Your request has been posted. This window checks automatically for new agent bids.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={loadBids}
+                  className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[12px] font-bold text-[#173B6C] hover:bg-slate-50"
+                >
+                  Check for new bids
+                </button>
+
+              </div>
+
+            ) : (
+
+              <div className="mt-5 space-y-3">
+
+                {bids.map(
+                  (bid, index) => {
+
+                    const total =
+                      Number(
+                        bid.totalFee ??
+                          Number(
+                            bid.clearanceFee ||
+                              0
+                          ) +
+                            Number(
+                              bid.additionalCharges ||
+                                0
+                            )
+                      );
+
+                    const id =
+                      bid.id ||
+                      bid.bidId ||
+                      `bid-${index}`;
+
+                    const selected =
+                      selectedBid &&
+                      (
+                        selectedBid.id ||
+                        selectedBid.bidId
+                      ) === id;
+
+                    return (
+                      <article
+                        key={id}
+                        className={`rounded-2xl border p-4 sm:p-5 ${
+                          selected
+                            ? "border-[#2563EB] bg-blue-50/40 ring-2 ring-[#2563EB]/10"
+                            : "border-slate-200 bg-white"
+                        }`}
+                      >
+
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
+                          <div className="min-w-0 flex-1">
+
+                            <div className="flex items-start gap-3">
+
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
+                                <Building2 size={18} />
+                              </div>
+
+                              <div className="min-w-0">
+
+                                <div className="flex flex-wrap items-center gap-2">
+
+                                  <h3 className="text-[15px] font-bold text-[#173B6C]">
+                                    {bid.agencyName ||
+                                      bid.companyName ||
+                                      bid.name ||
+                                      "Clearing Agency"}
+                                  </h3>
+
+                                  {(bid.verified ??
+                                    true) && (
+                                    <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">
+                                      <ShieldCheck size={11} />
+                                      Verified
+                                    </span>
+                                  )}
+
+                                </div>
+
+                                <p className="mt-1 text-[12px] text-slate-400">
+                                  {bid.agentName ||
+                                    bid.name ||
+                                    "Clearing Agent"}
+
+                                  {bid.location
+                                    ? ` · ${bid.location}`
+                                    : ""}
+                                </p>
+
+                              </div>
+
+                            </div>
+
+                            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+
+                              <div className="rounded-lg bg-slate-50 p-2.5">
+
+                                <p className="text-[9px] uppercase text-slate-400">
+                                  Clearance fee
+                                </p>
+
+                                <p className="mt-0.5 text-[12px] font-bold text-slate-700">
+                                  USD{" "}
+                                  {Number(
+                                    bid.clearanceFee ||
+                                      0
+                                  ).toLocaleString()}
+                                </p>
+
+                              </div>
+
+                              <div className="rounded-lg bg-slate-50 p-2.5">
+
+                                <p className="text-[9px] uppercase text-slate-400">
+                                  Additional
+                                </p>
+
+                                <p className="mt-0.5 text-[12px] font-bold text-slate-700">
+                                  USD{" "}
+                                  {Number(
+                                    bid.additionalCharges ||
+                                      0
+                                  ).toLocaleString()}
+                                </p>
+
+                              </div>
+
+                              <div className="rounded-lg bg-blue-50 p-2.5">
+
+                                <p className="text-[9px] uppercase text-blue-500">
+                                  Total offer
+                                </p>
+
+                                <p className="mt-0.5 text-[12px] font-bold text-[#173B6C]">
+                                  USD{" "}
+                                  {total.toLocaleString()}
+                                </p>
+
+                              </div>
+
+                            </div>
+
+                            <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-slate-500">
+
+                              {bid.processingTime && (
+                                <span className="flex items-center gap-1.5">
+                                  <Clock3
+                                    size={13}
+                                    className="text-[#2563EB]"
+                                  />
+                                  {bid.processingTime}
+                                </span>
+                              )}
+
+                              {bid.rating != null && (
+                                <span className="flex items-center gap-1.5">
+                                  <Star
+                                    size={13}
+                                    className="fill-amber-400 text-amber-400"
+                                  />
+                                  {bid.rating}
+                                </span>
+                              )}
+
+                            </div>
+
+                            {bid.message && (
+                              <p className="mt-3 rounded-xl bg-slate-50 p-3 text-[11px] leading-5 text-slate-500">
+                                {bid.message}
+                              </p>
+                            )}
+
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSelectedBid(
+                                bid
+                              )
+                            }
+                            className={`shrink-0 rounded-xl px-4 py-3 text-[13px] font-bold ${
+                              selected
+                                ? "bg-[#2563EB] text-white"
+                                : "border border-slate-200 bg-white text-[#173B6C] hover:bg-slate-50"
+                            }`}
+                          >
+                            {selected
+                              ? "Selected"
+                              : "Choose This Agent"}
+                          </button>
+
+                        </div>
+
+                      </article>
+                    );
+                  }
+                )}
+
+              </div>
+
+            )}
+
+            <div className="mt-5 flex flex-col-reverse gap-2 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowBidReview(false)
+                }
+                className="rounded-xl border border-slate-200 px-4 py-3 text-[12px] font-bold text-slate-600 hover:bg-slate-50"
+              >
+                Back to Find Agents
+              </button>
+
+              {selectedBid && (
+                <button
+                  type="button"
+                  onClick={handleAcceptBid}
+                  disabled={isAccepting}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-5 py-3 text-[12px] font-bold text-white hover:bg-[#12315B] disabled:opacity-60"
+                >
+                  <CheckCircle2 size={15} />
+
+                  {isAccepting
+                    ? "Accepting bid..."
+                    : "Accept Bid & Continue"}
+                </button>
+              )}
+
+            </div>
+
+          </div>
+        </Modal>
+      )}
+
+      {/* =====================================================
           PROFILE MODAL
       ====================================================== */}
 
@@ -1394,50 +1874,33 @@ function FindAgent() {
 
             <div className="p-5 sm:p-6">
 
-              {/* HEADER */}
-
               <div className="flex items-start justify-between gap-4">
 
                 <div className="flex gap-3">
 
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
-
-                    <Building2
-                      size={20}
-                    />
-
+                    <Building2 size={20} />
                   </div>
 
                   <div>
 
                     <div className="flex flex-wrap items-center gap-2">
 
-                      <h2 className="text-[17px] font-bold text-[#173B6C]">
-                        {
-                          selectedAgent.agencyName
-                        }
+                      <h2 className="text-[18px] font-bold text-[#173B6C]">
+                        {selectedAgent.agencyName}
                       </h2>
 
                       {selectedAgent.verified && (
-
                         <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">
-
-                          <ShieldCheck
-                            size={11}
-                          />
-
+                          <ShieldCheck size={11} />
                           Verified
-
                         </span>
-
                       )}
 
                     </div>
 
-                    <p className="mt-1 text-[12px] text-slate-400">
-                      {
-                        selectedAgent.agentName
-                      }
+                    <p className="mt-1 text-[13px] text-slate-400">
+                      {selectedAgent.agentName}
                     </p>
 
                   </div>
@@ -1447,78 +1910,58 @@ function FindAgent() {
                 <button
                   type="button"
                   onClick={() =>
-                    setShowProfile(
-                      false
-                    )
+                    setShowProfile(false)
                   }
                   className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"
                 >
-
                   <X size={18} />
-
                 </button>
 
               </div>
-
-              {/* STATS */}
 
               <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
 
                 <StatBox
                   icon={Star}
-                  value={
-                    selectedAgent.rating
-                  }
+                  value={selectedAgent.rating}
                   label={`${selectedAgent.reviews} reviews`}
                 />
 
                 <StatBox
-                  icon={
-                    BriefcaseBusiness
-                  }
+                  icon={BriefcaseBusiness}
                   value={`${selectedAgent.experience} yrs`}
                   label="Experience"
                 />
 
                 <StatBox
                   icon={Package}
-                  value={
-                    selectedAgent.shipments
-                  }
+                  value={selectedAgent.shipments}
                   label="Shipments"
                 />
 
                 <StatBox
                   icon={MapPin}
-                  value={
-                    selectedAgent.location
-                  }
+                  value={selectedAgent.location}
                   label="Location"
                 />
 
               </div>
 
-              {/* DESCRIPTION */}
-
               <div className="mt-5">
 
-                <h3 className="text-[13px] font-bold text-slate-800">
+                <h3 className="text-[14px] font-bold text-slate-800">
                   About this agent
                 </h3>
 
                 <p className="mt-2 text-[13px] leading-5 text-slate-500">
-                  {
-                    selectedAgent.description
-                  }
+                  {selectedAgent.description}
                 </p>
 
               </div>
 
-              {/* SPECIALIZATIONS */}
-
               <div className="mt-5">
 
-                <h3 className="text-[13px] font-bold text-slate-800">
+                <h3 className="text-[14px] font-bold text-slate-800">
                   Import specializations
                 </h3>
 
@@ -1526,22 +1969,18 @@ function FindAgent() {
 
                   {selectedAgent.categories.map(
                     (category) => (
-
                       <span
                         key={category}
-                        className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-[#2563EB]"
+                        className="rounded-full bg-blue-50 px-2.5 py-1 text-[12px] font-semibold text-[#2563EB]"
                       >
                         {category}
                       </span>
-
                     )
                   )}
 
                 </div>
 
               </div>
-
-              {/* RESPONSE */}
 
               <div className="mt-5 flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 p-3">
 
@@ -1550,45 +1989,32 @@ function FindAgent() {
                   className="text-emerald-600"
                 />
 
-                <p className="text-[12px] font-semibold text-emerald-700">
-                  {
-                    selectedAgent.responseTime
-                  }
+                <p className="text-[13px] font-semibold text-emerald-700">
+                  {selectedAgent.responseTime}
                 </p>
 
               </div>
-
-              {/* ACTIONS */}
 
               <div className="mt-5 flex flex-col gap-2 sm:flex-row">
 
                 <button
                   type="button"
                   onClick={() => {
-                    setShowProfile(
-                      false
-                    );
-                    setShowRequestForm(
-                      true
-                    );
+                    setShowProfile(false);
+                    setShowRequestForm(true);
                   }}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-4 py-3 text-[12px] font-bold text-white transition hover:bg-[#12315B]"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-4 py-3 text-[13px] font-bold text-white transition hover:bg-[#12315B]"
                 >
-
                   <Send size={15} />
-
                   Request a Quote
-
                 </button>
 
                 <button
                   type="button"
                   onClick={() =>
-                    setShowProfile(
-                      false
-                    )
+                    setShowProfile(false)
                   }
-                  className="rounded-xl border border-slate-200 px-5 py-3 text-[12px] font-bold text-slate-600 hover:bg-slate-50"
+                  className="rounded-xl border border-slate-200 px-5 py-3 text-[13px] font-bold text-slate-600 hover:bg-slate-50"
                 >
                   Close
                 </button>
@@ -1598,7 +2024,6 @@ function FindAgent() {
             </div>
 
           </Modal>
-
         )}
 
       {/* =====================================================
@@ -1609,20 +2034,14 @@ function FindAgent() {
 
         <Modal
           onClose={() =>
-            setShowRequestForm(
-              false
-            )
+            setShowRequestForm(false)
           }
         >
 
           <form
-            onSubmit={
-              createShipmentRequest
-            }
+            onSubmit={createShipmentRequest}
             className="p-5 sm:p-6"
           >
-
-            {/* HEADER */}
 
             <div className="flex items-start justify-between gap-4">
 
@@ -1659,49 +2078,32 @@ function FindAgent() {
               <button
                 type="button"
                 onClick={() =>
-                  setShowRequestForm(
-                    false
-                  )
+                  setShowRequestForm(false)
                 }
                 className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"
               >
-
                 <X size={18} />
-
               </button>
 
             </div>
-
-            {/* SELECTED AGENT */}
 
             {selectedAgent && (
 
               <div className="mt-5 flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50 p-3">
 
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[#2563EB]">
-
-                  <Building2
-                    size={17}
-                  />
-
+                  <Building2 size={17} />
                 </div>
 
                 <div>
 
-                  <p className="text-[13px] font-bold text-[#173B6C]">
-                    {
-                      selectedAgent.agencyName
-                    }
+                  <p className="text-[14px] font-bold text-[#173B6C]">
+                    {selectedAgent.agencyName}
                   </p>
 
-                  <p className="mt-0.5 text-[11px] text-slate-400">
-                    {
-                      selectedAgent.location
-                    }{" "}
-                    ·{" "}
-                    {
-                      selectedAgent.experience
-                    }{" "}
+                  <p className="mt-0.5 text-[12px] text-slate-400">
+                    {selectedAgent.location} ·{" "}
+                    {selectedAgent.experience}{" "}
                     years experience
                   </p>
 
@@ -1716,8 +2118,6 @@ function FindAgent() {
 
             )}
 
-            {/* FORM */}
-
             <div className="mt-5 space-y-4">
 
               <FormField
@@ -1726,9 +2126,7 @@ function FindAgent() {
               >
 
                 <textarea
-                  value={
-                    productDetails
-                  }
+                  value={productDetails}
                   onChange={(e) =>
                     setProductDetails(
                       e.target.value
@@ -1771,9 +2169,7 @@ function FindAgent() {
                     type="number"
                     min="0"
                     step="0.01"
-                    value={
-                      declaredValue
-                    }
+                    value={declaredValue}
                     onChange={(e) =>
                       setDeclaredValue(
                         e.target.value
@@ -1793,8 +2189,6 @@ function FindAgent() {
 
             </div>
 
-            {/* INFO */}
-
             <div className="mt-5 flex gap-2 rounded-xl border border-slate-100 bg-slate-50 p-3">
 
               <ShieldCheck
@@ -1812,25 +2206,21 @@ function FindAgent() {
 
             </div>
 
-            {/* ACTIONS */}
-
             <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
 
               <button
                 type="button"
                 onClick={() =>
-                  setShowRequestForm(
-                    false
-                  )
+                  setShowRequestForm(false)
                 }
-                className="rounded-xl border border-slate-200 px-5 py-3 text-[12px] font-bold text-slate-600 transition hover:bg-slate-50"
+                className="rounded-xl border border-slate-200 px-5 py-3 text-[13px] font-bold text-slate-600 transition hover:bg-slate-50"
               >
                 Cancel
               </button>
 
               <button
                 type="submit"
-                className="flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-5 py-3 text-[12px] font-bold text-white transition hover:bg-[#12315B]"
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-5 py-3 text-[13px] font-bold text-white transition hover:bg-[#12315B]"
               >
 
                 <Send size={15} />
@@ -1884,14 +2274,12 @@ function FilterSelect({
 
           {options.map(
             (option) => (
-
               <option
                 key={option}
                 value={option}
               >
                 {option}
               </option>
-
             )
           )}
 
@@ -1939,33 +2327,29 @@ function AgentCard({
         <div className="flex min-w-0 gap-3">
 
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
-
-            <Building2
-              size={20}
-            />
-
+            <Building2 size={20} />
           </div>
 
           <div className="min-w-0">
 
             <div className="flex flex-wrap items-center gap-1.5">
 
-              <h3 className="truncate text-[14px] font-bold text-[#173B6C]">
+              {/* INCREASED AGENCY NAME */}
+              <h3 className="truncate text-[16px] font-bold text-[#173B6C]">
                 {agent.agencyName}
               </h3>
 
               {agent.verified && (
-
                 <ShieldCheck
-                  size={15}
+                  size={16}
                   className="shrink-0 text-emerald-500"
                 />
-
               )}
 
             </div>
 
-            <p className="mt-1 text-[11px] text-slate-400">
+            {/* INCREASED AGENT NAME */}
+            <p className="mt-1 text-[12px] text-slate-400">
               {agent.agentName}
             </p>
 
@@ -1976,11 +2360,11 @@ function AgentCard({
         <div className="flex shrink-0 items-center gap-1 rounded-lg bg-amber-50 px-2 py-1">
 
           <Star
-            size={13}
+            size={14}
             className="fill-amber-400 text-amber-400"
           />
 
-          <span className="text-[11px] font-bold text-amber-700">
+          <span className="text-[12px] font-bold text-amber-700">
             {agent.rating}
           </span>
 
@@ -1993,20 +2377,16 @@ function AgentCard({
       <div className="mt-3 flex items-center gap-2">
 
         {agent.verified && (
+          <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700">
 
-          <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">
-
-            <CheckCircle2
-              size={11}
-            />
+            <CheckCircle2 size={12} />
 
             Verified agent
 
           </span>
-
         )}
 
-        <span className="text-[11px] text-slate-400">
+        <span className="text-[12px] text-slate-400">
           {agent.reviews} reviews
         </span>
 
@@ -2014,7 +2394,7 @@ function AgentCard({
 
       {/* DETAILS */}
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
 
         <AgentInfo
           icon={MapPin}
@@ -2023,9 +2403,7 @@ function AgentCard({
         />
 
         <AgentInfo
-          icon={
-            BriefcaseBusiness
-          }
+          icon={BriefcaseBusiness}
           label="Experience"
           value={`${agent.experience} years`}
         />
@@ -2049,7 +2427,7 @@ function AgentCard({
 
       {/* DESCRIPTION */}
 
-      <p className="mt-4 text-[12px] leading-5 text-slate-500">
+      <p className="mt-4 text-[13px] leading-5 text-slate-500">
         {agent.description}
       </p>
 
@@ -2057,7 +2435,7 @@ function AgentCard({
 
       <div className="mt-3">
 
-        <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+        <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-400">
           Specializations
         </p>
 
@@ -2065,14 +2443,12 @@ function AgentCard({
 
           {agent.categories.map(
             (category) => (
-
               <span
                 key={category}
-                className="rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-500"
+                className="rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-semibold text-slate-500"
               >
                 {category}
               </span>
-
             )
           )}
 
@@ -2082,16 +2458,14 @@ function AgentCard({
 
       {/* ACTIONS */}
 
-      <div className="mt-5 grid grid-cols-2 gap-2">
+      <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
 
         <button
           type="button"
           onClick={() =>
-            onViewProfile(
-              agent
-            )
+            onViewProfile(agent)
           }
-          className="rounded-xl border border-slate-200 px-3 py-2.5 text-[12px] font-bold text-[#173B6C] transition hover:border-slate-300 hover:bg-slate-50"
+          className="rounded-xl border border-slate-200 px-3 py-2.5 text-[13px] font-bold text-[#173B6C] transition hover:border-slate-300 hover:bg-slate-50"
         >
           View Profile
         </button>
@@ -2099,11 +2473,9 @@ function AgentCard({
         <button
           type="button"
           onClick={() =>
-            onSelectAgent(
-              agent
-            )
+            onSelectAgent(agent)
           }
-          className={`flex items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-[12px] font-bold transition ${
+          className={`flex items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-[13px] font-bold transition ${
             selected
               ? "bg-emerald-600 text-white hover:bg-emerald-700"
               : "bg-[#173B6C] text-white hover:bg-[#12315B]"
@@ -2112,19 +2484,13 @@ function AgentCard({
 
           {selected ? (
             <>
-              <CheckCircle2
-                size={14}
-              />
-
+              <CheckCircle2 size={15} />
               Selected
             </>
           ) : (
             <>
               Request Quote
-
-              <ArrowRight
-                size={14}
-              />
+              <ArrowRight size={15} />
             </>
           )}
 
@@ -2149,17 +2515,17 @@ function AgentInfo({
     <div className="flex items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-2">
 
       <Icon
-        size={14}
+        size={15}
         className="shrink-0 text-[#2563EB]"
       />
 
       <div className="min-w-0">
 
-        <p className="text-[9px] uppercase tracking-wide text-slate-400">
+        <p className="text-[10px] uppercase tracking-wide text-slate-400">
           {label}
         </p>
 
-        <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-600">
+        <p className="mt-0.5 truncate text-[12px] font-semibold text-slate-600">
           {value}
         </p>
 
@@ -2184,14 +2550,12 @@ function InfoCard({
       <div className="flex gap-3">
 
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[#2563EB]">
-
           <Icon size={17} />
-
         </div>
 
         <div>
 
-          <h3 className="text-[12px] font-bold text-slate-800">
+          <h3 className="text-[13px] font-bold text-slate-800">
             {title}
           </h3>
 
@@ -2224,7 +2588,7 @@ function StatBox({
         className="mx-auto text-[#2563EB]"
       />
 
-      <p className="mt-1.5 text-[13px] font-bold text-[#173B6C]">
+      <p className="mt-1.5 text-[14px] font-bold text-[#173B6C]">
         {value}
       </p>
 
@@ -2273,6 +2637,7 @@ function FormField({
 function Modal({
   children,
   onClose,
+  wide = false,
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
@@ -2282,10 +2647,14 @@ function Modal({
         onClick={onClose}
       />
 
-      <div className="relative z-10 max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-
+      <div
+        className={`relative z-10 max-h-[92vh] w-full overflow-y-auto rounded-2xl bg-white shadow-2xl ${
+          wide
+            ? "max-w-5xl"
+            : "max-w-xl"
+        }`}
+      >
         {children}
-
       </div>
 
     </div>

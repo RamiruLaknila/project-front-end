@@ -316,13 +316,13 @@ function AgencyInvite() {
           MAIN AREA
       ===================================================== */}
 
-      <div className="lg:ml-[260px]">
+      <div className="pt-[68px] lg:ml-[260px] lg:pt-0">
 
         {/* ===================================================
             HEADER
         =================================================== */}
 
-        <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur-xl sm:px-6">
+        <header className="sticky top-[68px] z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur-xl sm:px-6 lg:top-0">
 
           <div className="flex items-center gap-3">
 

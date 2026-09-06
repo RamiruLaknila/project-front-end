@@ -318,9 +318,9 @@ function AgentMarketplace() {
     <div className="min-h-screen bg-[#f6f8fb]">
       <AgentMemberSidebar />
 
-      <main className="min-h-screen lg:ml-[270px]">
+      <main className="min-h-screen pt-[68px] lg:ml-[270px] lg:pt-0">
         {/* TOP BAR - MATCHED WITH AGENT DASHBOARD */}
-        <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-[68px] z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:top-0">
           <div className="flex items-center">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
@@ -847,7 +847,7 @@ function AgentMarketplace() {
 
       {showBidModal && selectedRequest && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/50 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
               <div>
                 <p className="text-xs font-medium text-slate-400">

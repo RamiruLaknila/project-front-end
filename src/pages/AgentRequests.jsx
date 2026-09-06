@@ -195,12 +195,12 @@ function AgentRequests() {
           MAIN CONTENT
       ===================================================== */}
 
-      <main className="min-h-screen lg:ml-[270px]">
+      <main className="min-h-screen pt-[68px] lg:ml-[270px] lg:pt-0">
         {/* ===================================================
             HEADER
         =================================================== */}
 
-        <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-[68px] z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:top-0">
           <div className="flex items-center">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">

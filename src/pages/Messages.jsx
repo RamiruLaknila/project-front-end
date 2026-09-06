@@ -374,7 +374,7 @@ function Messages() {
 
         <section className="fade-up calculator-delay-4 scale-in overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_14px_rgba(15,23,42,.025)]">
 
-          <div className="grid min-h-[620px] md:grid-cols-[290px_1fr]">
+          <div className="grid md:min-h-[620px] md:grid-cols-[290px_1fr]">
 
             {/* =================================================
                 CONVERSATION SIDEBAR
@@ -570,7 +570,7 @@ function Messages() {
 
             {selectedConversation ? (
 
-              <div className="flex min-h-[620px] flex-col">
+              <div className="flex flex-col md:min-h-[620px]">
 
                 {/* CHAT HEADER */}
 
@@ -840,7 +840,7 @@ function Messages() {
                  NO SELECTED CONVERSATION
               ================================================== */
 
-              <div className="flex min-h-[620px] items-center justify-center px-6 text-center">
+              <div className="flex items-center justify-center px-6 text-center md:min-h-[620px]">
 
                 <div>
 

@@ -671,7 +671,7 @@ function SummaryRow({ label, value }) {
         {label}
       </span>
 
-      <span className="max-w-[200px] truncate text-right text-sm font-bold text-slate-800">
+      <span className="min-w-0 max-w-[60%] break-words text-right text-sm font-bold text-slate-800 sm:max-w-[200px]">
         {value}
       </span>
     </div>

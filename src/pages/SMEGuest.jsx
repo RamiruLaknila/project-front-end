@@ -30,7 +30,7 @@ function SMEGuest() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#F6F8FB] text-slate-900">
       <header className="border-b border-slate-200 bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex min-h-[68px] max-w-[1280px] items-center gap-3 px-5 py-3 sm:px-8">
+        <div className="mx-auto flex min-h-[68px] max-w-[1280px] flex-wrap items-center gap-3 px-5 py-3 sm:px-8">
           <Link to="/" className="flex shrink-0 items-center gap-2.5">
             <img
               src="/logo.jpeg"

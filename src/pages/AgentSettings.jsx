@@ -328,9 +328,9 @@ function AgentSettings() {
       <AgentMemberSidebar />
 
       {/* Main */}
-      <main className="min-h-screen lg:ml-[270px]">
+      <main className="min-h-screen pt-[68px] lg:ml-[270px] lg:pt-0">
         {/* Header */}
-        <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-[68px] z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:top-0">
           <div className="flex min-w-0 items-center gap-3">
             <div className="min-w-0">
               <p className="hidden text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:block">
