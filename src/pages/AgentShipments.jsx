@@ -250,16 +250,8 @@ function AgentShipments() {
           {/* PAGE HEADER */}
 
           <section className="mb-7">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5">
-              <Package
-                size={12}
-                className="text-blue-600"
-              />
+            
 
-              <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-blue-600">
-                Agency Member Shipments
-              </span>
-            </div>
 
             <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
               <div>

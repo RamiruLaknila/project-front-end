@@ -97,7 +97,7 @@ function Home() {
                 duration: 0.4,
                 ease: "easeOut",
               }}
-              className="font-serif text-[34px] tracking-tight sm:text-[38px]"
+              className="font-sans text-[34px] tracking-tight sm:text-[38px]"
             >
               Import
               <span className="text-[#F5C518]">Ease</span>
@@ -116,7 +116,7 @@ function Home() {
               {/* Headline */}
               <motion.h1
                 variants={leftItem}
-                className="font-serif text-[32px] leading-[1.25] tracking-tight text-white sm:text-[38px]"
+                className="font-sans text-[32px] leading-[1.25] tracking-tight text-white sm:text-[38px]"
               >
                 Import clearing,
                 <br />
@@ -239,9 +239,9 @@ function Home() {
                 delay: 0.35,
                 ease: "easeOut",
               }}
-              className="mt-4 font-serif text-[28px] text-[#173563] sm:text-[32px]"
+              className="mt-4 font-sans text-[28px] text-[#173563] sm:text-[40px] font-bold"
             >
-              Welcome, {userName}
+              Welcome
             </motion.h2>
 
             {/* User Type Cards */}

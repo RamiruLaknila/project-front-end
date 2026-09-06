@@ -20,7 +20,7 @@ function AppNavbar() {
   const getProfileFromStorage = () => {
     try {
       const savedProfile = localStorage.getItem("smeProfile");
-      const savedUser = localStorage.getItem("user");
+      const savedUser = localStorage.getItem("smeUser");
 
       let profileData = {};
       let userData = {};

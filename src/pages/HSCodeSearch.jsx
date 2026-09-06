@@ -376,8 +376,7 @@ function HSCodeSearch() {
   const hsCodes = [
     {
       code: "8541.43",
-      title:
-        "Photovoltaic cells assembled in modules or made up into panels",
+      title: "Solar panels and photovoltaic modules",
       category: "Solar & Renewable Energy",
       keywords: [
         "solar",
@@ -387,15 +386,13 @@ function HSCodeSearch() {
         "pv",
         "panel",
       ],
-      confidence: "High",
       description:
-        "Classification commonly associated with photovoltaic cells assembled in modules or panels.",
+        "Used for certain solar panels and photovoltaic modules that generate electricity from sunlight.",
     },
 
     {
       code: "8471.30",
-      title:
-        "Portable automatic data processing machines, weighing not more than 10 kg",
+      title: "Laptops and portable computers",
       category: "Electronics & Computers",
       keywords: [
         "laptop",
@@ -403,15 +400,13 @@ function HSCodeSearch() {
         "notebook",
         "portable computer",
       ],
-      confidence: "High",
       description:
-        "Example classification for certain portable computers and related devices.",
+        "Used for certain portable computers such as laptops and notebooks.",
     },
 
     {
       code: "8471.49",
-      title:
-        "Other automatic data processing machines presented in the form of systems",
+      title: "Desktop computers and computer systems",
       category: "Electronics & Computers",
       keywords: [
         "desktop",
@@ -420,14 +415,13 @@ function HSCodeSearch() {
         "server",
         "computer system",
       ],
-      confidence: "Medium",
       description:
-        "Example classification for certain computer systems.",
+        "Used for certain desktop computers and computer systems.",
     },
 
     {
       code: "6109.10",
-      title: "T-shirts, singlets and other vests of cotton",
+      title: "Cotton T-shirts and similar clothing",
       category: "Textiles & Apparel",
       keywords: [
         "shirt",
@@ -436,15 +430,13 @@ function HSCodeSearch() {
         "cotton shirt",
         "clothing",
       ],
-      confidence: "High",
       description:
-        "Example classification for certain cotton knitted garments.",
+        "Used for certain cotton T-shirts, singlets and similar knitted clothing.",
     },
 
     {
       code: "8703.23",
-      title:
-        "Motor cars and other motor vehicles principally designed for transport of persons",
+      title: "Passenger cars and similar motor vehicles",
       category: "Motor Vehicles & Parts",
       keywords: [
         "car",
@@ -452,14 +444,13 @@ function HSCodeSearch() {
         "motor car",
         "automobile",
       ],
-      confidence: "Medium",
       description:
-        "Example classification for certain passenger motor vehicles.",
+        "Used for certain passenger cars and motor vehicles designed to carry people.",
     },
 
     {
       code: "8504.40",
-      title: "Electrical static converters",
+      title: "Electrical converters and inverters",
       category: "Electrical Equipment",
       keywords: [
         "inverter",
@@ -467,9 +458,8 @@ function HSCodeSearch() {
         "power converter",
         "solar inverter",
       ],
-      confidence: "Medium",
       description:
-        "Example classification for electrical static converters.",
+        "Used for certain electrical converters, including some types of power and solar inverters.",
     },
   ];
 
@@ -564,7 +554,6 @@ function HSCodeSearch() {
       hsCode: selectedCode.code,
       hsCodeTitle: selectedCode.title,
       hsCodeCategory: selectedCode.category,
-      hsCodeConfidence: selectedCode.confidence,
       hsCodeDescription: selectedCode.description,
       status: "HS Code Selected",
     };
@@ -940,7 +929,7 @@ function HSCodeSearch() {
 
                     <div className="flex items-center gap-2">
 
-                      <span className="text-[12px] font-bold text-[#14213D]">
+                      <span className="text-[15px] font-bold text-[#14213D]">
                         Browse by Category
                       </span>
 
@@ -1064,7 +1053,7 @@ function HSCodeSearch() {
                                   <div className="flex flex-wrap items-center gap-2">
 
                                     <h4
-                                      className={`text-[11px] font-bold ${
+                                      className={`text-[15px] font-bold ${
                                         isExpanded
                                           ? "text-[#173B6C]"
                                           : "text-slate-800"
@@ -1079,7 +1068,7 @@ function HSCodeSearch() {
 
                                   </div>
 
-                                  <p className="mt-0.5 text-[9px] text-slate-400">
+                                  <p className="mt-0.5 text-[10px] text-slate-400">
                                     {group.chapter}
                                   </p>
 
@@ -1120,11 +1109,11 @@ function HSCodeSearch() {
 
                                         <div className="min-w-0">
 
-                                          <p className="truncate text-[10px] font-bold text-slate-700 transition-colors group-hover:text-[#173B6C]">
+                                          <p className="truncate text-[15px] font-bold text-slate-700 transition-colors group-hover:text-[#173B6C]">
                                             {category.title}
                                           </p>
 
-                                          <p className="mt-1 text-[9px] font-medium text-slate-400">
+                                          <p className="mt-1 text-[10px] font-medium text-slate-400">
                                             {category.title} •{" "}
                                             {category.range}
                                           </p>
@@ -1164,6 +1153,143 @@ function HSCodeSearch() {
                     </p>
 
                   </div>
+
+                </div>
+              )}
+
+            </div>
+
+            {/* =================================================
+                HS CODE SEARCH RESULTS
+            ================================================== */}
+
+            <div
+              id="hs-results"
+              className="mt-6 scroll-mt-6"
+            >
+
+              <div className="mb-3 flex items-center justify-between">
+
+                <div>
+
+                  <h3 className="text-sm font-bold text-[#14213D]">
+                    {search.trim()
+                      ? "Matching HS codes"
+                      : "Available HS codes"}
+                  </h3>
+
+                  <p className="mt-0.5 text-[10px] text-slate-400">
+                    {search.trim()
+                      ? `Results for "${search}"`
+                      : "Select the HS code that best matches your product"}
+                  </p>
+
+                </div>
+
+                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-semibold text-slate-500">
+                  {results.length} result
+                  {results.length !== 1 ? "s" : ""}
+                </span>
+
+              </div>
+
+              {results.length > 0 ? (
+                <div className="space-y-3">
+
+                  {results.map((item) => {
+
+                    const isSelected =
+                      selectedCode?.code === item.code;
+
+                    return (
+                      <button
+                        key={item.code}
+                        type="button"
+                        onClick={() => handleSelectCode(item)}
+                        className={`group w-full rounded-xl border p-4 text-left transition-all duration-200 ${
+                          isSelected
+                            ? "border-[#173B6C] bg-blue-50/40 shadow-[0_6px_20px_rgba(23,59,108,.08)]"
+                            : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/20 hover:shadow-sm"
+                        }`}
+                      >
+
+                        <div className="flex items-start gap-3">
+
+                          <div
+                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition ${
+                              isSelected
+                                ? "bg-[#173B6C] text-white"
+                                : "bg-blue-50 text-[#173B6C]"
+                            }`}
+                          >
+                            {isSelected ? (
+                              <CheckCircle2 size={17} />
+                            ) : (
+                              <Package size={17} />
+                            )}
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+
+                            <div className="flex flex-wrap items-center gap-2">
+
+                              <span className="font-mono text-base font-bold tracking-tight text-[#173B6C]">
+                                {item.code}
+                              </span>
+
+                              {isSelected && (
+                                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide text-emerald-700">
+                                  Selected
+                                </span>
+                              )}
+
+                            </div>
+
+                            <h4 className="mt-1 text-[13px] font-bold leading-5 text-slate-800">
+                              {item.title}
+                            </h4>
+
+                            <p className="mt-1 text-[10px] font-semibold text-slate-400">
+                              Category: {item.category}
+                            </p>
+
+                            <p className="mt-2 text-[11px] leading-5 text-slate-500">
+                              {item.description}
+                            </p>
+
+                          </div>
+
+                          <ChevronRight
+                            size={16}
+                            className={`mt-1 shrink-0 transition ${
+                              isSelected
+                                ? "text-[#173B6C]"
+                                : "text-slate-300 group-hover:translate-x-0.5 group-hover:text-blue-500"
+                            }`}
+                          />
+
+                        </div>
+
+                      </button>
+                    );
+                  })}
+
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/60 px-5 py-8 text-center">
+
+                  <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm">
+                    <Search size={17} />
+                  </div>
+
+                  <h3 className="mt-3 text-sm font-bold text-slate-700">
+                    No matching HS code found
+                  </h3>
+
+                  <p className="mx-auto mt-1 max-w-md text-[10px] leading-5 text-slate-400">
+                    Try using a simpler product name or browse the
+                    categories above to find a suitable classification.
+                  </p>
 
                 </div>
               )}
@@ -1219,23 +1345,21 @@ function HSCodeSearch() {
                       {selectedCode.code}
                     </span>
 
-                    <span
-                      className={`rounded-full px-2 py-1 text-[8px] font-bold uppercase tracking-wide ${
-                        selectedCode.confidence === "High"
-                          ? "bg-emerald-50 text-emerald-700"
-                          : "bg-amber-50 text-amber-700"
-                      }`}
-                    >
-                      {selectedCode.confidence} confidence
-                    </span>
-
                   </div>
 
                   <h3 className="mt-1 text-[13px] font-bold leading-5 text-slate-800 sm:text-sm">
                     {selectedCode.title}
                   </h3>
 
+                  <p className="mt-1 text-[10px] font-semibold text-slate-400">
+                    Category: {selectedCode.category}
+                  </p>
+
                   <p className="mt-2 text-[11px] leading-5 text-slate-500">
+                    {selectedCode.description}
+                  </p>
+
+                  <p className="mt-2 text-[10px] leading-5 text-slate-400">
                     This classification will be carried forward to the
                     calculator so ImportEase can estimate the relevant
                     import costs.

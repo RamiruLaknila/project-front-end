@@ -21,7 +21,7 @@ function Dashboard() {
 
   const loadDashboardData = () => {
     try {
-      const storedUser = localStorage.getItem("importease_user");
+      const storedUser = localStorage.getItem("smeUser");
 
       if (storedUser) {
         setUser(JSON.parse(storedUser));
