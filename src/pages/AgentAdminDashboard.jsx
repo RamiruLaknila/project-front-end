@@ -384,9 +384,7 @@ function AgentAdminDashboard() {
             >
               <Bell size={18} />
 
-              {pendingCount > 0 && (
-                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
-              )}
+              
 
             </button>
 

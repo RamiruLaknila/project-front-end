@@ -16,9 +16,8 @@ function AppNavbar() {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [profile, setProfile] = useState(null);
 
-  const loadProfile = () => {
+  const getProfileFromStorage = () => {
     try {
       const savedProfile = localStorage.getItem("smeProfile");
       const savedUser = localStorage.getItem("user");
@@ -34,7 +33,7 @@ function AppNavbar() {
         userData = JSON.parse(savedUser);
       }
 
-      setProfile({
+      return {
         fullName:
           profileData.fullName ||
           userData.fullName ||
@@ -55,22 +54,29 @@ function AppNavbar() {
           profileData.photo ||
           userData.photo ||
           "",
-      });
+      };
     } catch (error) {
       console.error("Failed to load navbar profile:", error);
 
-      setProfile({
+      return {
         fullName: "User",
         businessName: "",
         email: "",
         photo: "",
-      });
+      };
     }
   };
 
-  useEffect(() => {
-    loadProfile();
+  // Lazy initializer runs synchronously on first render,
+  // so the correct profile is already there on first paint
+  // (this is what removes the shaky flash when switching tabs).
+  const [profile, setProfile] = useState(getProfileFromStorage);
 
+  const loadProfile = () => {
+    setProfile(getProfileFromStorage());
+  };
+
+  useEffect(() => {
     const handleProfileUpdated = () => {
       loadProfile();
     };

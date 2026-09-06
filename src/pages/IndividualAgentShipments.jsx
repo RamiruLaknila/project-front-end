@@ -182,10 +182,7 @@ function IndividualAgentShipments() {
         <div className="mx-auto max-w-[1180px] px-5 py-7 sm:px-8 lg:py-9">
           {/* TITLE */}
           <section className="mb-7">
-            <p className="text-sm font-semibold text-[#2563EB]">
-              Manage your shipments
-            </p>
-
+        
             <h1 className="mt-1 text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
               My Shipments
             </h1>

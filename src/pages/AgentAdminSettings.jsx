@@ -554,7 +554,7 @@ function AgentAdminSettings() {
                 strokeWidth={1.8}
               />
 
-              <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-blue-500" />
+              <span className="absolute right-2 top-2 h-2 w-2 rounded-full " />
             </button>
 
           </div>

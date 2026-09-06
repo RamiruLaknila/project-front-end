@@ -435,7 +435,7 @@ function AgentSignIn() {
                 type="submit"
                 className="w-full rounded-xl bg-[#173563] px-4 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-[#173563]/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#122b50] hover:shadow-xl hover:shadow-[#173563]/15 focus:outline-none focus:ring-4 focus:ring-[#173563]/15 active:translate-y-0"
               >
-                Continue to Dashboard
+                Sign In
               </button>
 
             </form>

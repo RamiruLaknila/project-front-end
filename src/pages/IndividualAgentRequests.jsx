@@ -249,9 +249,7 @@ function IndividualAgentRequests() {
             <section className="mb-7">
               <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
                 <div>
-                  <p className="text-sm font-medium text-slate-500">
-                    Find opportunities
-                  </p>
+                  
 
                   <h2 className="mt-1 text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
                     SME Import Requests
