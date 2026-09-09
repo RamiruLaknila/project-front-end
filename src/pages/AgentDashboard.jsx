@@ -164,8 +164,7 @@ function AgentDashboard() {
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
       <AgentMemberSidebar />
 
-      <main className="min-h-screen pt-[68px] lg:ml-[270px] lg:pt-0">
-        <header className="sticky top-[68px] z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:top-0">
+<main className="min-h-screen pt-[68px] lg:ml-[260px] lg:pt-0 border-l border-slate-200 lg:border-l-0">        <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6">
           <div className="flex items-center">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">

@@ -135,11 +135,11 @@ function IndividualAgentDashboard() {
               <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
                 <div>
                   <p className="text-sm font-medium text-slate-500">
-                    Welcome back,
+            
                   </p>
 
                   <h2 className="mt-1 text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
-                    {displayName}
+                   Welcome back, {displayName}
                   </h2>
 
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">

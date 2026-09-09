@@ -82,7 +82,7 @@ function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F7F9FC]">
       <div className="grid min-h-screen lg:grid-cols-[42%_58%]">
 
         {/* ===================== LEFT SIDE ===================== */}

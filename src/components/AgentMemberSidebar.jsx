@@ -114,7 +114,7 @@ function SidebarContent({
                 to={item.path}
                 onClick={closeMobileSidebar}
                 className={({ isActive }) =>
-                  `group flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold ${
+                  `group flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold transition-all ${
                     isActive
                       ? "bg-[#173563] text-white shadow-sm"
                       : "text-slate-600 hover:bg-slate-100 hover:text-[#173563]"
@@ -147,10 +147,10 @@ function SidebarContent({
       </div>
 
       {/* Agent Info + Settings */}
-      <div className="mt-auto shrink-0 border-t border-slate-200">
+      <div className="shrink-0 border-t border-slate-200">
         {/* Agent Info */}
         <div className="px-5 py-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#173563] text-sm font-bold text-white shadow-sm">
               {agent?.photo ||
               agent?.profilePhoto ||
@@ -162,7 +162,7 @@ function SidebarContent({
                     agent.image
                   }
                   alt={agentName}
-                  className="block h-full w-full object-cover"
+                  className="h-full w-full object-cover"
                 />
               ) : (
                 getInitials(agentName)
@@ -175,7 +175,7 @@ function SidebarContent({
               </p>
 
               <div className="mt-0.5 flex items-center gap-1.5">
-                <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#2563EB]" />
+                <ShieldCheck className="h-3.5 w-3.5 text-[#2563EB]" />
 
                 <p className="truncate text-xs font-medium text-slate-500">
                   Agency Member
@@ -197,10 +197,10 @@ function SidebarContent({
                   to={item.path}
                   onClick={closeMobileSidebar}
                   className={({ isActive }) =>
-                    `group flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold ${
+                    `group flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold transition-all ${
                       isActive
                         ? "bg-[#173563] text-white"
-                        : "text-slate-500 hover:bg-slate-100 hover:text-[#173563]"
+                        : "text-slate-600 hover:bg-slate-100 hover:text-[#173563]"
                     }`
                   }
                 >
@@ -230,11 +230,11 @@ function SidebarContent({
         </div>
 
         {/* Logout */}
-        <div className="px-4 pb-4">
+        <div className="border-t border-slate-200 p-4">
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold text-red-500 transition-colors hover:bg-red-50 hover:text-red-600"
+            className="flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-red-50 hover:text-red-600"
           >
             <LogOut className="h-[18px] w-[18px]" />
 
@@ -333,7 +333,7 @@ function AgentMemberSidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[270px] border-r border-slate-200 bg-white lg:block">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[260px] border-r border-slate-200 bg-white lg:block">
         <SidebarContent
           agent={agent}
           agencyName={agencyName}

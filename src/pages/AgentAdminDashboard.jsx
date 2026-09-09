@@ -398,15 +398,7 @@ function AgentAdminDashboard() {
 
         <div className="mx-auto max-w-[1180px] px-5 py-7 sm:px-8 lg:py-9">
 
-          {/* BACK */}
-
-          <Link
-            to="/agent-admin-dashboard"
-            className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-[#173563]"
-          >
-            <ArrowLeft size={16} />
-            Agency Dashboard
-          </Link>
+          
 
           {/* INTRO */}
 
