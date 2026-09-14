@@ -13,9 +13,14 @@ import {
   LockKeyhole,
 } from "lucide-react";
 
+import { useAuth } from "../context/AuthContext";
+import { authErrorMessage, landingPathForProfile } from "../lib/authErrors";
+
 function AgentSignIn() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
+  const [submitting, setSubmitting] = useState(false);
   const [selectedAgentType, setSelectedAgentType] =
     useState("agency-member");
 
@@ -46,7 +51,7 @@ function AgentSignIn() {
     localStorage.setItem("agentType", type);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -58,46 +63,24 @@ function AgentSignIn() {
       return;
     }
 
-    localStorage.setItem("agentType", selectedAgentType);
-    localStorage.setItem("agentAuthenticated", "true");
+    setSubmitting(true);
+    try {
+      const profile = await login(email, password, rememberMe);
 
-    localStorage.setItem(
-      "clearingAgent",
-      JSON.stringify({
-        email,
-        agentType: selectedAgentType,
-        authenticated: true,
-      })
-    );
+      if (profile?.role !== "clearing_agent") {
+        setError(
+          "This is not a clearing-agent account. Use the SME sign in instead."
+        );
+        return;
+      }
 
-    if (rememberMe) {
-      localStorage.setItem("rememberAgent", "true");
-    } else {
-      localStorage.removeItem("rememberAgent");
+      // The backend profile -- not the selected card -- decides the destination.
+      navigate(landingPathForProfile(profile), { replace: true });
+    } catch (err) {
+      setError(authErrorMessage(err, "Could not sign you in."));
+    } finally {
+      setSubmitting(false);
     }
-
-    if (selectedAgentType === "agency-admin") {
-      navigate("/agent-admin-dashboard", {
-        replace: true,
-      });
-      return;
-    }
-
-    if (selectedAgentType === "agency-member") {
-      navigate("/agent-dashboard", {
-        replace: true,
-      });
-      return;
-    }
-
-    if (selectedAgentType === "individual-agent") {
-      navigate("/individual-agent-dashboard", {
-        replace: true,
-      });
-      return;
-    }
-
-    setError("Please select an account type.");
   };
 
   return (
@@ -433,9 +416,10 @@ function AgentSignIn() {
 
               <button
                 type="submit"
-                className="w-full rounded-xl bg-[#173563] px-4 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-[#173563]/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#122b50] hover:shadow-xl hover:shadow-[#173563]/15 focus:outline-none focus:ring-4 focus:ring-[#173563]/15 active:translate-y-0"
+                disabled={submitting}
+                className="w-full rounded-xl bg-[#173563] px-4 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-[#173563]/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#122b50] hover:shadow-xl hover:shadow-[#173563]/15 focus:outline-none focus:ring-4 focus:ring-[#173563]/15 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Sign In
+                {submitting ? "Signing in…" : "Sign In"}
               </button>
 
             </form>

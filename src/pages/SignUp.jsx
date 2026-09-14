@@ -50,14 +50,14 @@ function SignUp() {
         {/* PAGE INTRO */}
         <div className="mx-auto mb-8 max-w-2xl text-center">
           <div className="mb-3 flex justify-center">
-            
+
           </div>
 
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
             Create your ImportEase account
           </h1>
 
-          
+
         </div>
 
         {/* ACCOUNT TYPE CARDS */}
@@ -113,7 +113,7 @@ function SignUp() {
                 Continue as SME
               </span>
 
-              
+
             </div>
           </button>
 
@@ -167,7 +167,7 @@ function SignUp() {
                 Continue as Clearing Agent
               </span>
 
-              
+
             </div>
           </button>
         </div>
@@ -178,7 +178,7 @@ function SignUp() {
           <p className="text-sm text-slate-500">
             Already have an account?{" "}
             <Link
-              to="/signin"
+              to="/"
               className="font-semibold text-[#173563] underline decoration-[#173563]/30 underline-offset-4 transition-colors hover:text-blue-700 hover:decoration-blue-700"
             >
               Sign in

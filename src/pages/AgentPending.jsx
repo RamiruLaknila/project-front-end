@@ -1,34 +1,79 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   CheckCircle2,
   Clock3,
   FileCheck2,
+  RefreshCw,
   ShieldCheck,
+  Upload,
   UserCheck,
 } from "lucide-react";
 
+import { useAuth } from "../context/AuthContext";
+import { api } from "../lib/api";
+import { landingPathForProfile } from "../lib/authErrors";
+
 function AgentPending() {
   const navigate = useNavigate();
+  const { user, refreshProfile, logout } = useAuth();
 
-  const [agent, setAgent] = useState(null);
+  const [checking, setChecking] = useState(false);
+  const [checkedOnce, setCheckedOnce] = useState(false);
+
+  // Only independent agents go through document verification -- an agent who
+  // joined an existing agency is reviewed by that agency's admin instead.
+  const isIndependent = user?.role === "clearing_agent" && !!user?.isIndependent;
+  const [docCount, setDocCount] = useState(null); // null = not loaded yet
 
   useEffect(() => {
-    const storedAgent = localStorage.getItem("individualAgent");
+    if (!isIndependent || !user?.id) return;
+    let active = true;
+    api
+      .get(`/users/${user.id}/verification-documents`)
+      .then((docs) => {
+        if (active) setDocCount(docs.length);
+      })
+      .catch(() => {
+        if (active) setDocCount(0);
+      });
+    return () => {
+      active = false;
+    };
+  }, [isIndependent, user?.id]);
 
-    if (storedAgent) {
-      try {
-        setAgent(JSON.parse(storedAgent));
-      } catch {
-        setAgent(null);
+  const hasDocuments = docCount !== null && docCount > 0;
+
+  const agent = user
+    ? { fullName: user.name, email: user.email, licenseNumber: user.licenseNumber, agentId: user.agentId }
+    : null;
+
+  const handleCheckStatus = async () => {
+    setChecking(true);
+    try {
+      const fresh = await refreshProfile();
+      if (fresh?.agentStatus && fresh.agentStatus !== "pending") {
+        navigate(landingPathForProfile(fresh), { replace: true });
+        return;
       }
+      setCheckedOnce(true);
+    } catch {
+      /* leave the page as-is */
+    } finally {
+      setChecking(false);
     }
-  }, []);
-
-  const handleBackHome = () => {
-    navigate("/");
   };
+
+  const handleBackHome = async () => {
+    await logout();
+    navigate("/", { replace: true });
+  };
+
+  // Already approved (e.g. arrived here from a stale link) -> go to the dashboard.
+  if (user?.role === "clearing_agent" && user.agentStatus === "approved") {
+    return <Navigate to={landingPathForProfile(user)} replace />;
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#F8FAFC] px-4 py-8 sm:py-10">
@@ -155,7 +200,7 @@ function AgentPending() {
 
             <div className="space-y-0">
 
-              {/* Completed */}
+              {/* Always completed by the time this page can be reached */}
               <StatusStep
                 icon={<CheckCircle2 size={18} />}
                 title="Registration completed"
@@ -163,20 +208,33 @@ function AgentPending() {
                 completed
               />
 
-              {/* Completed */}
-              <StatusStep
-                icon={<FileCheck2 size={18} />}
-                title="Documents submitted"
-                description="Your license and verification documents have been received."
-                completed
-              />
+              {isIndependent && (
+                <StatusStep
+                  icon={<FileCheck2 size={18} />}
+                  title="Documents submitted"
+                  description={
+                    hasDocuments
+                      ? "Your license and identity documents have been received."
+                      : "Upload your clearing license and identity document to continue."
+                  }
+                  completed={hasDocuments}
+                  active={!hasDocuments}
+                />
+              )}
 
-              {/* Current */}
               <StatusStep
                 icon={<Clock3 size={18} />}
-                title="Pending administrator review"
-                description="An administrator will review your application and documents."
-                active
+                title={
+                  isIndependent
+                    ? "Pending platform review"
+                    : "Pending agency admin review"
+                }
+                description={
+                  isIndependent
+                    ? "An ImportEase platform admin will review your application and documents."
+                    : "Your agency's administrator will approve or reject your request."
+                }
+                active={!isIndependent || hasDocuments}
               />
 
               {/* Future */}
@@ -189,6 +247,33 @@ function AgentPending() {
             </div>
 
           </div>
+
+          {/* Upload documents CTA -- independent agents only, until submitted */}
+          {isIndependent && docCount !== null && !hasDocuments && (
+            <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <Upload size={19} className="mt-0.5 shrink-0 text-amber-600" />
+                  <div>
+                    <h3 className="text-sm font-bold text-amber-900">
+                      Documents needed
+                    </h3>
+                    <p className="mt-1 text-xs leading-5 text-amber-800">
+                      Your application can't be reviewed until you upload your
+                      clearing license and identity document.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate("/individual-agent-verification")}
+                  className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-[#173563] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#122b50]"
+                >
+                  Upload documents
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Review notice */}
           <div className="mt-7 rounded-2xl border border-blue-100 bg-blue-50/60 p-4">
@@ -207,10 +292,9 @@ function AgentPending() {
                 </h3>
 
                 <p className="mt-1 text-xs leading-5 text-blue-800">
-                  Your application will be reviewed by the
-                  ImportEase administration team. Once approved,
-                  your clearing agent dashboard will become
-                  available.
+                  {isIndependent
+                    ? "Your application will be reviewed by the ImportEase platform team. Once approved, your clearing agent dashboard will become available."
+                    : "Your agency's administrator will review your application. Once approved, your clearing agent dashboard will become available."}
                 </p>
 
               </div>
@@ -218,6 +302,12 @@ function AgentPending() {
             </div>
 
           </div>
+
+          {checkedOnce && (
+            <p className="mt-6 text-center text-xs font-medium text-slate-500">
+              Still pending — your application hasn't been approved yet.
+            </p>
+          )}
 
           {/* Buttons */}
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -228,15 +318,18 @@ function AgentPending() {
               className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
             >
               <ArrowLeft size={16} />
-              Back to ImportEase
+              Sign out
             </button>
 
-            <Link
-              to="/agent-signin"
-              className="flex flex-1 items-center justify-center rounded-xl bg-[#173563] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition hover:bg-[#122b50]"
+            <button
+              type="button"
+              onClick={handleCheckStatus}
+              disabled={checking}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition hover:bg-[#122b50] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Go to Agent Sign In
-            </Link>
+              <RefreshCw size={16} className={checking ? "animate-spin" : ""} />
+              {checking ? "Checking…" : "Check approval status"}
+            </button>
 
           </div>
 

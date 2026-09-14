@@ -12,10 +12,17 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
+import { useAuth } from "../context/AuthContext";
+import { api } from "../lib/api";
+import { authErrorMessage } from "../lib/authErrors";
+
 function AgencyCreate() {
   const navigate = useNavigate();
+  const { registerAgency } = useAuth();
 
   const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const [formData, setFormData] = useState({
     agencyName: "",
@@ -26,7 +33,6 @@ function AgencyCreate() {
     email: "",
 
     licenseNumber: "",
-    licenseType: "",
     licenseExpiry: "",
 
     ownerName: "",
@@ -90,10 +96,6 @@ function AgencyCreate() {
         newErrors.licenseNumber = "License number is required";
       }
 
-      if (!formData.licenseType) {
-        newErrors.licenseType = "Please select a license type";
-      }
-
       if (!formData.licenseExpiry) {
         newErrors.licenseExpiry = "License expiry date is required";
       }
@@ -135,6 +137,7 @@ function AgencyCreate() {
   };
 
   const handleNext = () => {
+    if (submitting) return;
     if (!validateStep()) return;
 
     if (step < 3) {
@@ -148,12 +151,43 @@ function AgencyCreate() {
       return;
     }
 
-    localStorage.setItem(
-      "agencyRegistrationDraft",
-      JSON.stringify(formData)
-    );
+    handleSubmit();
+  };
 
-    navigate("/agency-review");
+  const handleSubmit = async () => {
+    setFormError("");
+    setSubmitting(true);
+    try {
+      // 1. Create the agency + its admin account. Sign-in email is the owner's.
+      const { agency } = await registerAgency({
+        companyName: formData.agencyName,
+        email: formData.ownerEmail,
+        password: formData.password,
+      });
+
+      // 2. Complete the agency profile so it becomes "active" (agents can only
+      //    bid once their agency's profileStatus is "active").
+      const address = [formData.agencyAddress.trim(), formData.city.trim()]
+        .filter(Boolean)
+        .join(", ");
+      try {
+        await api.put(`/agencies/${agency.id}/profile`, {
+          licenseNumber: formData.licenseNumber.trim(),
+          businessAddress: address,
+          businessPhone: formData.phone.trim(),
+          businessRegNumber: formData.businessRegistrationNumber.trim(),
+        });
+      } catch {
+        /* profile can be finished later from agency settings */
+      }
+
+      navigate("/agent-admin-dashboard", { replace: true });
+    } catch (err) {
+      setFormError(authErrorMessage(err, "Could not create the agency."));
+      if (/email/i.test(err?.message || "")) setStep(3);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleBack = () => {
@@ -342,30 +376,6 @@ function AgencyCreate() {
                   required
                 />
 
-                <SelectField
-                  label="License Type"
-                  value={formData.licenseType}
-                  onChange={(value) =>
-                    updateField("licenseType", value)
-                  }
-                  error={errors.licenseType}
-                  required
-                >
-                  <option value="">Select license type</option>
-
-                  <option value="clearing-agent">
-                    Clearing Agent License
-                  </option>
-
-                  <option value="customs-broker">
-                    Customs Broker License
-                  </option>
-
-                  <option value="other">
-                    Other
-                  </option>
-                </SelectField>
-
                 <InputField
                   label="License Expiry Date"
                   type="date"
@@ -512,13 +522,20 @@ function AgencyCreate() {
             </div>
           )}
 
+          {formError && (
+            <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+              {formError}
+            </div>
+          )}
+
           {/* Actions */}
           <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-6">
 
             <button
               type="button"
               onClick={handleBack}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              disabled={submitting}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-60"
             >
               <ArrowLeft size={16} />
               Back
@@ -527,9 +544,14 @@ function AgencyCreate() {
             <button
               type="button"
               onClick={handleNext}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#173563] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#10294d]"
+              disabled={submitting}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#173563] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#10294d] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {step === 3 ? "Review Application" : "Continue"}
+              {submitting
+                ? "Creating agency…"
+                : step === 3
+                ? "Create Agency"
+                : "Continue"}
 
               <ArrowRight size={16} />
             </button>
@@ -722,51 +744,6 @@ function PasswordField({
           )}
         </button>
       </div>
-
-      {error && (
-        <p className="mt-1.5 text-[11px] text-red-500">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
-
-/* =========================================================
-   SELECT
-========================================================= */
-
-function SelectField({
-  label,
-  value,
-  onChange,
-  children,
-  error,
-  required = false,
-}) {
-  return (
-    <div>
-      <label className="mb-2 block text-xs font-semibold text-slate-700">
-        {label}
-
-        {required && (
-          <span className="ml-1 text-red-500">*</span>
-        )}
-      </label>
-
-      <select
-        value={value}
-        onChange={(event) =>
-          onChange(event.target.value)
-        }
-        className={`w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition focus:ring-2 ${
-          error
-            ? "border-red-300 focus:border-red-500 focus:ring-red-100"
-            : "border-slate-200 focus:border-blue-500 focus:ring-blue-100"
-        }`}
-      >
-        {children}
-      </select>
 
       {error && (
         <p className="mt-1.5 text-[11px] text-red-500">

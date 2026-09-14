@@ -1,0 +1,2 @@
+when creating a SME account,the country should be fixed as Sri Lanka 
+when the user is trying to sign up without agreeing to the terms and conditions, screen must move the error message

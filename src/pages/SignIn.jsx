@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Eye,
@@ -10,10 +10,16 @@ import {
   HelpCircle,
 } from "lucide-react";
 
+import { useAuth } from "../context/AuthContext";
+import { authErrorMessage, landingPathForProfile } from "../lib/authErrors";
+
 function SignIn() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -40,7 +46,7 @@ function SignIn() {
       HANDLE SIGN IN
   ========================================================= */
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -49,21 +55,18 @@ function SignIn() {
       return;
     }
 
-    console.log("SME Sign in data:", formData);
-
-    /*
-      Store login information for the frontend flow.
-      This is currently frontend/localStorage based.
-    */
-
-    localStorage.setItem("loginPortal", "importer");
-    localStorage.setItem("isSMESignedIn", "true");
-
-    /*
-      Login successful → SME Dashboard
-    */
-
-    navigate("/dashboard");
+    setSubmitting(true);
+    try {
+      const profile = await login(formData.email, formData.password, formData.remember);
+      // If the guard sent them here, go back where they wanted; otherwise route
+      // by the profile the backend just returned.
+      const from = location.state?.from;
+      navigate(from || landingPathForProfile(profile), { replace: true });
+    } catch (err) {
+      setError(authErrorMessage(err, "Could not sign you in."));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   /* =========================================================
@@ -299,9 +302,10 @@ function SignIn() {
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-[#173563] py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#102547] hover:shadow-xl hover:shadow-[#173563]/20 active:translate-y-0 active:scale-[0.99]"
+              disabled={submitting}
+              className="w-full rounded-xl bg-[#173563] py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#102547] hover:shadow-xl hover:shadow-[#173563]/20 active:translate-y-0 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Sign In
+              {submitting ? "Signing in…" : "Sign In"}
             </button>
 
           </form>

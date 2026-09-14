@@ -11,11 +11,16 @@ import {
   UserRound,
 } from "lucide-react";
 
+import { useAuth } from "../context/AuthContext";
+import { authErrorMessage } from "../lib/authErrors";
+
 function SMESignUp() {
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -50,7 +55,7 @@ function SMESignUp() {
       SUBMIT
   ========================================================= */
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     setError("");
@@ -83,27 +88,31 @@ function SMESignUp() {
       return;
     }
 
-    /* =======================================================
-        FRONTEND-ONLY USER DATA
-    ======================================================= */
+    setSubmitting(true);
+    try {
+      // Creates the Firebase user + Firestore profile (role "importer") and
+      // signs in. Phone/business go to PUT /users/{id}/profile on the next step.
+      await register({
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        role: "importer",
+      });
 
-    const smeUser = {
-      role: "sme",
-      fullName: formData.fullName.trim(),
-      businessName: formData.businessName.trim(),
-      email: formData.email.trim(),
-      phone: formData.phone.trim(),
-      profileStatus: "incomplete",
-      accountStatus: "active",
-      createdAt: new Date().toISOString(),
-    };
-
-    localStorage.setItem("smeUser", JSON.stringify(smeUser));
-    localStorage.setItem("signupRole", "sme");
-    localStorage.setItem("smeSignupComplete", "true");
-    localStorage.setItem("smeRegisteredEmail", formData.email.trim());
-
-    navigate("/sme-signup-success");
+      navigate("/complete-profile", {
+        replace: true,
+        state: {
+          prefill: {
+            phone: formData.phone.trim(),
+            businessName: formData.businessName.trim(),
+          },
+        },
+      });
+    } catch (err) {
+      setError(authErrorMessage(err, "Could not create your account."));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -308,9 +317,10 @@ function SMESignUp() {
 
             <button
               type="submit"
-              className="group flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#173563] px-6 py-4 text-base font-bold text-white shadow-lg shadow-[#173563]/20 transition hover:bg-[#10294d] hover:shadow-xl"
+              disabled={submitting}
+              className="group flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#173563] px-6 py-4 text-base font-bold text-white shadow-lg shadow-[#173563]/20 transition hover:bg-[#10294d] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Create SME Account
+              {submitting ? "Creating account…" : "Create SME Account"}
               <ArrowRight
                 size={19}
                 className="transition-transform group-hover:translate-x-1"

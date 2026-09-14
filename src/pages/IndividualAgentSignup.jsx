@@ -14,8 +14,14 @@ import {
   Lock,
 } from "lucide-react";
 
+import { useAuth } from "../context/AuthContext";
+import { authErrorMessage } from "../lib/authErrors";
+
 function IndividualAgentSignup() {
   const navigate = useNavigate();
+  const { register } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -100,37 +106,41 @@ function IndividualAgentSignup() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError("");
 
     if (!validate()) {
       return;
     }
 
-    const individualAgent = {
-      ...formData,
-      registrationType: "individual",
-      status: "pending",
-      verificationStatus: "pending",
-      createdAt: new Date().toISOString(),
-    };
+    setSubmitting(true);
+    try {
+      // No agency code -> the backend auto-creates a solo/independent agency.
+      // The professional details are stored on the account and the agent starts
+      // as "pending" until an ImportEase platform admin approves them.
+      await register({
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        role: "clearing_agent",
+        phone: formData.phone,
+        licenseNumber: formData.licenseNumber,
+        licenseExpiry: formData.licenseExpiry,
+        experience: formData.experience,
+        agentId: formData.agentId,
+        address: formData.address,
+      });
 
-    localStorage.setItem(
-      "individualAgent",
-      JSON.stringify(individualAgent)
-    );
-
-    localStorage.setItem(
-      "agentRegistrationType",
-      "individual"
-    );
-
-    localStorage.setItem(
-      "individualAgentStatus",
-      "pending"
-    );
-
-    navigate("/individual-agent-verification");
+      // Account exists now, status "pending" -- that's this agent's real home
+      // until they're reviewed. Uploading verification documents is an action
+      // offered from that page, not a forced hop before reaching it.
+      navigate("/agent-pending", { replace: true });
+    } catch (err) {
+      setFormError(authErrorMessage(err, "Could not create your account."));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -218,6 +228,12 @@ function IndividualAgentSignup() {
           </div>
 
           <form onSubmit={handleSubmit} autoComplete="off">
+
+            {formError && (
+              <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+                {formError}
+              </div>
+            )}
 
             {/* Personal Details */}
             <section>
@@ -518,9 +534,10 @@ function IndividualAgentSignup() {
 
               <button
                 type="submit"
-                className="flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition hover:bg-[#122b50]"
+                disabled={submitting}
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition hover:bg-[#122b50] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Continue to Verification
+                {submitting ? "Creating account…" : "Create Agent Account"}
                 <ArrowRight size={16} />
               </button>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -10,101 +10,31 @@ import {
   X,
 } from "lucide-react";
 
+import { useAuth } from "../../context/AuthContext";
+
 function AppNavbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  const getProfileFromStorage = () => {
-    try {
-      const savedProfile = localStorage.getItem("smeProfile");
-      const savedUser = localStorage.getItem("smeUser");
-
-      let profileData = {};
-      let userData = {};
-
-      if (savedProfile) {
-        profileData = JSON.parse(savedProfile);
-      }
-
-      if (savedUser) {
-        userData = JSON.parse(savedUser);
-      }
-
-      return {
-        fullName:
-          profileData.fullName ||
-          userData.fullName ||
-          userData.name ||
-          "User",
-
-        businessName:
-          profileData.businessName ||
-          userData.businessName ||
-          "",
-
-        email:
-          profileData.email ||
-          userData.email ||
-          "",
-
-        photo:
-          profileData.photo ||
-          userData.photo ||
-          "",
-      };
-    } catch (error) {
-      console.error("Failed to load navbar profile:", error);
-
-      return {
-        fullName: "User",
-        businessName: "",
-        email: "",
-        photo: "",
-      };
-    }
+  const profile = {
+    fullName: user?.name || "User",
+    businessName: user?.businessName || "",
+    email: user?.email || "",
+    photo: "",
   };
 
-  // Lazy initializer runs synchronously on first render,
-  // so the correct profile is already there on first paint
-  // (this is what removes the shaky flash when switching tabs).
-  const [profile, setProfile] = useState(getProfileFromStorage);
-
-  const loadProfile = () => {
-    setProfile(getProfileFromStorage());
-  };
-
-  useEffect(() => {
-    const handleProfileUpdated = () => {
-      loadProfile();
-    };
-
-    window.addEventListener("profileUpdated", handleProfileUpdated);
-    window.addEventListener("storage", handleProfileUpdated);
-
-    return () => {
-      window.removeEventListener(
-        "profileUpdated",
-        handleProfileUpdated
-      );
-
-      window.removeEventListener(
-        "storage",
-        handleProfileUpdated
-      );
-    };
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("smeProfile");
-
+  const handleLogout = async () => {
     setIsProfileOpen(false);
     setIsMenuOpen(false);
-
-    navigate("/signin");
+    try {
+      await logout();
+    } finally {
+      navigate("/signin", { replace: true });
+    }
   };
 
   const getInitials = (name) => {

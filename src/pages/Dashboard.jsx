@@ -10,25 +10,18 @@ import {
 import { Link } from "react-router-dom";
 
 import AppNavbar from "../components/ui/AppNavbar";
+import { useAuth } from "../context/AuthContext";
 
 function Dashboard() {
+  const { user } = useAuth();
   const [shipments, setShipments] = useState([]);
-  const [user, setUser] = useState(null);
 
   // =========================================================
-  // LOAD USER + SHIPMENTS
+  // LOAD SHIPMENTS  (still local-only -- API wiring is a later pass)
   // =========================================================
 
   const loadDashboardData = () => {
     try {
-      const storedUser = localStorage.getItem("smeUser");
-
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      } else {
-        setUser(null);
-      }
-
       const storedShipments = localStorage.getItem("shipments");
 
       if (storedShipments) {
@@ -42,7 +35,6 @@ function Dashboard() {
       }
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
-      setUser(null);
       setShipments([]);
     }
   };
@@ -65,12 +57,9 @@ function Dashboard() {
   // USER INFORMATION
   // =========================================================
 
-  const fullName = user?.fullName?.trim() || "there";
+  const fullName = user?.name?.trim() || "there";
 
-  const businessName =
-    user?.business?.name ||
-    user?.businessName ||
-    "";
+  const businessName = user?.businessName || "";
 
   const dashboardName = businessName || fullName;
 

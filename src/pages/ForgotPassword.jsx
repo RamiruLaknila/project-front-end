@@ -7,12 +7,17 @@ import {
   Mail,
 } from "lucide-react";
 
+import { useAuth } from "../context/AuthContext";
+import { authErrorMessage } from "../lib/authErrors";
+
 function ForgotPassword() {
+  const { resetPassword } = useAuth();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     setError("");
@@ -23,7 +28,21 @@ function ForgotPassword() {
       return;
     }
 
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      await resetPassword(email);
+      setSubmitted(true);
+    } catch (err) {
+      // Don't reveal whether the address is registered -- treat "not found" as
+      // success; only surface real errors (bad format, rate limit, network).
+      if (err?.code === "auth/user-not-found") {
+        setSubmitted(true);
+      } else {
+        setError(authErrorMessage(err, "Could not send the reset email."));
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -137,9 +156,10 @@ function ForgotPassword() {
             {/* BUTTON */}
             <button
               type="submit"
-              className="w-full rounded-xl bg-[#173563] py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#102547] hover:shadow-xl hover:shadow-[#173563]/20 active:translate-y-0 active:scale-[0.99]"
+              disabled={submitting}
+              className="w-full rounded-xl bg-[#173563] py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#102547] hover:shadow-xl hover:shadow-[#173563]/20 active:translate-y-0 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Send Reset Link
+              {submitting ? "Sending…" : "Send Reset Link"}
             </button>
           </form>
 

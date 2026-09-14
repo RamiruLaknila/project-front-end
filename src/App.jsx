@@ -1,5 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import { AuthProvider } from "./context/AuthContext";
+import RequireAuth from "./components/RequireAuth";
+import AdminAgentApprovals from "./pages/AdminAgentApprovals";
+
 // =====================================================
 // SME
 // =====================================================
@@ -83,7 +87,8 @@ import AgentSettings from "./pages/AgentSettings";
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
+      <AuthProvider>
+        <Routes>
 
         {/* =====================================================
             HOME
@@ -120,7 +125,11 @@ function App() {
 />
         <Route
   path="/individual-agent-dashboard"
-  element={<IndividualAgentDashboard />}
+  element={
+    <RequireAuth roles={["clearing_agent"]}>
+      <IndividualAgentDashboard />
+    </RequireAuth>
+  }
 />
 <Route
   path="/individual-agent-requests"
@@ -159,7 +168,11 @@ function App() {
 
         <Route
           path="/complete-profile"
-          element={<CompleteProfile />}
+          element={
+            <RequireAuth>
+              <CompleteProfile />
+            </RequireAuth>
+          }
         />
 
 
@@ -169,7 +182,11 @@ function App() {
 
         <Route
           path="/dashboard"
-          element={<Dashboard />}
+          element={
+            <RequireAuth roles={["importer"]}>
+              <Dashboard />
+            </RequireAuth>
+          }
         />
 
 
@@ -309,7 +326,20 @@ function App() {
 
         <Route
           path="/agent-pending"
-          element={<AgentPending />}
+          element={
+            <RequireAuth roles={["clearing_agent"]} allowPendingAgent>
+              <AgentPending />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/admin/agent-approvals"
+          element={
+            <RequireAuth platformAdmin>
+              <AdminAgentApprovals />
+            </RequireAuth>
+          }
         />
 
         <Route
@@ -334,7 +364,11 @@ function App() {
 
         <Route
           path="/individual-agent-verification"
-          element={<IndividualAgentVerification />}
+          element={
+            <RequireAuth roles={["clearing_agent"]} allowPendingAgent>
+              <IndividualAgentVerification />
+            </RequireAuth>
+          }
         />
 
 
@@ -344,7 +378,11 @@ function App() {
 
         <Route
           path="/agent-dashboard"
-          element={<AgentDashboard />}
+          element={
+            <RequireAuth roles={["clearing_agent"]}>
+              <AgentDashboard />
+            </RequireAuth>
+          }
         />
 
 
@@ -394,7 +432,11 @@ function App() {
 
         <Route
           path="/agent-admin-dashboard"
-          element={<AgentAdminDashboard />}
+          element={
+            <RequireAuth roles={["clearing_agent"]}>
+              <AgentAdminDashboard />
+            </RequireAuth>
+          }
         />
 
         <Route
@@ -426,7 +468,8 @@ function App() {
   element={<AgentShipments />}
 />
 
-      </Routes>
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

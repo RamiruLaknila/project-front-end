@@ -14,62 +14,31 @@ import {
   EyeOff,
 } from "lucide-react";
 
-const demoAgencies = [
-  {
-    id: "AGY-001",
-    name: "ABC Clearing Agency",
-    code: "ABC001",
-    city: "Colombo",
-    status: "Active",
-  },
-  {
-    id: "AGY-002",
-    name: "Lanka Customs Solutions",
-    code: "LCS002",
-    city: "Colombo",
-    status: "Active",
-  },
-  {
-    id: "AGY-003",
-    name: "Global Trade Clearing",
-    code: "GTC003",
-    city: "Gampaha",
-    status: "Active",
-  },
-];
+import { useAuth } from "../context/AuthContext";
+import { authErrorMessage } from "../lib/authErrors";
 
 function JoinAgency() {
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const [step, setStep] = useState(1);
-  const [search, setSearch] = useState("");
-  const [selectedAgency, setSelectedAgency] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const [formData, setFormData] = useState({
+    agencyCode: "",
     fullName: "",
-    email: "", // Starts empty
+    email: "",
     phone: "",
     address: "",
     licenseNumber: "",
     licenseType: "",
     licenseExpiry: "",
-    password: "", // Starts empty
-    confirmPassword: "", // Starts empty
+    password: "",
+    confirmPassword: "",
   });
 
   const [errors, setErrors] = useState({});
-
-  const filteredAgencies = demoAgencies.filter((agency) => {
-    const query = search.toLowerCase().trim();
-
-    if (!query) return true;
-
-    return (
-      agency.name.toLowerCase().includes(query) ||
-      agency.code.toLowerCase().includes(query) ||
-      agency.city.toLowerCase().includes(query)
-    );
-  });
 
   const updateField = (field, value) => {
     setFormData((previous) => ({
@@ -81,26 +50,17 @@ function JoinAgency() {
       ...previous,
       [field]: "",
     }));
-  };
 
-  const selectAgency = (agency) => {
-    setSelectedAgency(agency);
-
-    localStorage.setItem(
-      "selectedAgency",
-      JSON.stringify(agency)
-    );
-
-    setErrors({});
+    setFormError("");
   };
 
   const validateStep = () => {
     const newErrors = {};
 
     if (step === 1) {
-      if (!selectedAgency) {
-        newErrors.agency =
-          "Please select an agency to continue.";
+      if (!formData.agencyCode.trim()) {
+        newErrors.agencyCode =
+          "Enter the agency code your agency administrator gave you.";
       }
     }
 
@@ -157,6 +117,7 @@ function JoinAgency() {
   };
 
   const handleNext = () => {
+    if (submitting) return;
     if (!validateStep()) return;
 
     if (step < 4) {
@@ -183,42 +144,30 @@ function JoinAgency() {
     navigate("/agency-choice");
   };
 
-  const handleSubmit = () => {
-    if (!selectedAgency) return;
-
-    const application = {
-      id: `JOIN-${Date.now()}`,
-      type: "join-agency",
-      agencyId: selectedAgency.id,
-      agencyName: selectedAgency.name,
-      agencyCode: selectedAgency.code,
-      applicant: {
-        fullName: formData.fullName,
+  const handleSubmit = async () => {
+    setFormError("");
+    setSubmitting(true);
+    try {
+      // Registering with an agency code creates the account as a PENDING member
+      // of that agency (agentStatus "pending") -- the agency admin approves it.
+      await register({
+        name: formData.fullName,
         email: formData.email,
+        password: formData.password,
+        role: "clearing_agent",
+        agencyCode: formData.agencyCode,
         phone: formData.phone,
-        address: formData.address,
-        // Password excluded from storage payload for safety
-      },
-      license: {
-        number: formData.licenseNumber,
-        type: formData.licenseType,
-        expiry: formData.licenseExpiry,
-      },
-      status: "pending",
-      submittedAt: new Date().toISOString(),
-    };
+      });
 
-    localStorage.setItem(
-      "agencyJoinApplication",
-      JSON.stringify(application)
-    );
-
-    localStorage.setItem(
-      "agencyJoinStatus",
-      "pending"
-    );
-
-    navigate("/agent-pending");
+      navigate("/agent-pending", { replace: true });
+    } catch (err) {
+      // e.g. "Invalid agency code" (400) or "email already exists".
+      setFormError(authErrorMessage(err, "Could not submit your request."));
+      // Send them back to step 1 if the code was the problem.
+      if (/agency code/i.test(err?.message || "")) setStep(1);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -296,77 +245,55 @@ function JoinAgency() {
             <div>
               <SectionHeader
                 icon={Search}
-                title="Find Your Agency"
-                description="Search for the clearing agency you want to join."
+                title="Enter Your Agency Code"
+                description="Your agency administrator has a unique code (e.g. AG-7X3K9P). Enter it to request to join."
               />
 
               <div className="relative mt-7">
-                <Search
+                <Building2
                   size={18}
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
                 />
                 <input
                   type="text"
-                  value={search}
+                  value={formData.agencyCode}
                   onChange={(event) =>
-                    setSearch(event.target.value)
+                    updateField(
+                      "agencyCode",
+                      event.target.value.toUpperCase()
+                    )
                   }
-                  placeholder="Search agency name, code or city..."
-                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  placeholder="AG-XXXXXX"
+                  autoComplete="off"
+                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm uppercase tracking-wider outline-none transition placeholder:text-slate-400 placeholder:normal-case focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />
               </div>
 
-              {errors.agency && (
+              {errors.agencyCode && (
                 <p className="mt-2 text-xs text-red-500">
-                  {errors.agency}
+                  {errors.agencyCode}
                 </p>
               )}
 
-              <div className="mt-5 space-y-3">
-                {filteredAgencies.map((agency) => {
-                  const selected = selectedAgency?.id === agency.id;
-
-                  return (
+              <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck
+                    size={18}
+                    className="mt-0.5 shrink-0 text-blue-600"
+                  />
+                  <p className="text-xs leading-5 text-blue-800">
+                    The code is checked when you submit. Don't have one? Ask your
+                    agency admin, or{" "}
                     <button
-                      key={agency.id}
                       type="button"
-                      onClick={() => selectAgency(agency)}
-                      className={`w-full rounded-2xl border-2 p-4 text-left transition ${
-                        selected
-                          ? "border-[#173563] bg-blue-50/50"
-                          : "border-slate-200 hover:border-blue-300 hover:bg-slate-50"
-                      }`}
+                      onClick={() => navigate("/agency-create")}
+                      className="font-semibold underline"
                     >
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                            <Building2 size={20} />
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-bold text-slate-900">
-                              {agency.name}
-                            </h3>
-                            <p className="mt-1 text-xs text-slate-500">
-                              {agency.code} · {agency.city}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-600">
-                            {agency.status}
-                          </span>
-                          {selected && (
-                            <CheckCircle2
-                              size={20}
-                              className="text-[#173563]"
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
+                      create a new agency
+                    </button>{" "}
+                    instead.
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -454,7 +381,14 @@ function JoinAgency() {
                 />
               </div>
 
-              <SelectedAgencyCard agency={selectedAgency} />
+              <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-600">
+                  Joining agency
+                </p>
+                <p className="mt-1 text-sm font-bold text-slate-900">
+                  Code {formData.agencyCode || "—"}
+                </p>
+              </div>
             </div>
           )}
 
@@ -530,10 +464,8 @@ function JoinAgency() {
               />
 
               <div className="mt-7 space-y-5">
-                <ReviewSection title="Selected Agency">
-                  <ReviewRow label="Agency" value={selectedAgency?.name} />
-                  <ReviewRow label="Agency Code" value={selectedAgency?.code} />
-                  <ReviewRow label="City" value={selectedAgency?.city} />
+                <ReviewSection title="Agency">
+                  <ReviewRow label="Agency Code" value={formData.agencyCode} />
                 </ReviewSection>
 
                 <ReviewSection title="Personal & Account Details">
@@ -559,12 +491,19 @@ function JoinAgency() {
             </div>
           )}
 
+          {formError && (
+            <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+              {formError}
+            </div>
+          )}
+
           {/* ACTIONS */}
           <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-6">
             <button
               type="button"
               onClick={handleBack}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+              disabled={submitting}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
             >
               <ArrowLeft size={16} />
               Back
@@ -573,9 +512,14 @@ function JoinAgency() {
             <button
               type="button"
               onClick={handleNext}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#173563] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#10294d]"
+              disabled={submitting}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#173563] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#10294d] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {step === 4 ? "Submit Application" : "Continue"}
+              {submitting
+                ? "Submitting…"
+                : step === 4
+                ? "Submit Application"
+                : "Continue"}
               <ArrowRight size={16} />
             </button>
           </div>
@@ -759,32 +703,6 @@ function SelectField({ label, value, onChange, children, error, required = false
       </select>
 
       {error && <p className="mt-1.5 text-[11px] text-red-500">{error}</p>}
-    </div>
-  );
-}
-
-/* =========================================================
-   SELECTED AGENCY
-========================================================= */
-
-function SelectedAgencyCard({ agency }) {
-  if (!agency) return null;
-
-  return (
-    <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-600">
-        Selected Agency
-      </p>
-
-      <div className="mt-2 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-blue-600">
-          <Building2 size={18} />
-        </div>
-        <div>
-          <p className="text-sm font-bold text-slate-900">{agency.name}</p>
-          <p className="mt-1 text-xs text-slate-500">{agency.code} · {agency.city}</p>
-        </div>
-      </div>
     </div>
   );
 }
