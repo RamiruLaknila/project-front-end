@@ -4,16 +4,17 @@ import {
   ArrowLeft,
   ArrowRight,
   Bell,
-  CheckCircle2,
-  ChevronRight,
-  MessageCircle,
+  CheckCircle,
+  CaretRight,
+  ChatCircle,
+  Package,
   Paperclip,
   Phone,
-  Search,
-  Send,
+  MagnifyingGlass,
+  PaperPlaneTilt,
   ShieldCheck,
-  MoreHorizontal,
-} from "lucide-react";
+  DotsThree,
+} from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
 import BackButton from "../components/ui/BackButton";
@@ -295,13 +296,12 @@ function Messages() {
 
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5">
 
-              <MessageCircle
+              <ChatCircle
                 size={13}
                 className="text-blue-600"
-                strokeWidth={2}
               />
 
-              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-700">
+              <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-blue-700">
                 Agent communication
               </span>
 
@@ -309,13 +309,13 @@ function Messages() {
 
             {/* TITLE */}
 
-            <h1 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[40px]">
+            <h1 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
               Messages
             </h1>
 
             {/* DESCRIPTION */}
 
-            <p className="mx-auto mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
+            <p className="mx-auto mt-2 max-w-2xl text-[14px] leading-6 text-slate-500 sm:text-[16px]">
               Communicate directly with the clearing agents
               handling your import shipments.
             </p>
@@ -324,12 +324,12 @@ function Messages() {
 
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
 
-              <CheckCircle2
+              <CheckCircle
                 size={14}
                 className="text-emerald-600"
               />
 
-              <span className="text-[10px] font-semibold text-emerald-700">
+              <span className="text-[11px] font-semibold text-emerald-700">
                 Secure messaging
               </span>
 
@@ -353,11 +353,11 @@ function Messages() {
 
           <div>
 
-            <p className="text-[10px] font-bold text-blue-800">
+            <p className="text-[11px] font-bold text-blue-800">
               Secure communication
             </p>
 
-            <p className="mt-1 text-[11px] leading-5 text-blue-700">
+            <p className="mt-1 text-[12px] leading-5 text-blue-700">
               Use messages to discuss shipment details,
               documents, clearance requirements and other
               import-related questions with your selected
@@ -396,19 +396,19 @@ function Messages() {
                         Conversations
                       </h2>
 
-                      <span className="hidden rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-500 sm:block">
+                      <span className="hidden rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500 sm:block">
                         Agents
                       </span>
 
                     </div>
 
-                    <p className="mt-1 text-[9px] text-slate-400">
+                    <p className="mt-1 text-[10px] text-slate-400">
                       Your clearing agents
                     </p>
 
                   </div>
 
-                  <div className="rounded-full bg-blue-50 px-2 py-1 text-[9px] font-bold text-blue-700">
+                  <div className="rounded-full bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">
                     {conversations.length}
                   </div>
 
@@ -418,7 +418,7 @@ function Messages() {
 
                 <div className="relative mt-4">
 
-                  <Search
+                  <MagnifyingGlass
                     size={14}
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                   />
@@ -430,7 +430,7 @@ function Messages() {
                       setSearch(e.target.value)
                     }
                     placeholder="Search conversations..."
-                    className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-[10px] text-slate-700 outline-none transition focus:border-[#173B6C] focus:bg-white focus:ring-2 focus:ring-[#173B6C]/10"
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-[11px] text-slate-700 outline-none transition focus:border-[#173B6C] focus:bg-white focus:ring-2 focus:ring-[#173B6C]/10"
                   />
 
                 </div>
@@ -474,7 +474,7 @@ function Messages() {
                             <div className="relative shrink-0">
 
                               <div
-                                className={`flex h-10 w-10 items-center justify-center rounded-full text-[10px] font-bold ${
+                                className={`flex h-10 w-10 items-center justify-center rounded-full text-[11px] font-bold ${
                                   isSelected
                                     ? "bg-[#173563] text-white"
                                     : "bg-slate-100 text-slate-600"
@@ -496,33 +496,33 @@ function Messages() {
 
                               <div className="flex items-start justify-between gap-2">
 
-                                <p className="truncate text-[11px] font-bold text-slate-800">
+                                <p className="truncate text-[12px] font-bold text-slate-800">
                                   {conversation.agentName}
                                 </p>
 
-                                <span className="shrink-0 text-[8px] text-slate-400">
+                                <span className="shrink-0 text-[9px] text-slate-400">
                                   {conversation.lastTime}
                                 </span>
 
                               </div>
 
-                              <p className="mt-0.5 truncate text-[9px] text-slate-400">
+                              <p className="mt-0.5 truncate text-[10px] text-slate-400">
                                 {conversation.agency}
                               </p>
 
-                              <p className="mt-2 truncate text-[9px] text-slate-500">
+                              <p className="mt-2 truncate text-[10px] text-slate-500">
                                 {conversation.lastMessage}
                               </p>
 
                               <div className="mt-2 flex items-center justify-between">
 
-                                <span className="rounded-md bg-slate-100 px-2 py-1 text-[8px] font-semibold text-slate-500">
+                                <span className="rounded-md bg-slate-100 px-2 py-1 text-[9px] font-semibold text-slate-500">
                                   {conversation.shipmentId}
                                 </span>
 
                                 {conversation.unread >
                                   0 && (
-                                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 text-[8px] font-bold text-white">
+                                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 text-[9px] font-bold text-white">
                                     {conversation.unread}
                                   </span>
                                 )}
@@ -545,14 +545,14 @@ function Messages() {
                   <div className="px-5 py-12 text-center">
 
                     <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-                      <Search size={18} />
+                      <MagnifyingGlass size={18} />
                     </div>
 
                     <p className="mt-3 text-xs font-bold text-slate-700">
                       No conversations found
                     </p>
 
-                    <p className="mt-1 text-[9px] text-slate-400">
+                    <p className="mt-1 text-[10px] text-slate-400">
                       Try another search.
                     </p>
 
@@ -580,7 +580,7 @@ function Messages() {
 
                     <div className="relative shrink-0">
 
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#173563] text-[10px] font-bold text-white">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#173563] text-[11px] font-bold text-white">
                         {selectedConversation.initials}
                       </div>
 
@@ -599,14 +599,14 @@ function Messages() {
                           {selectedConversation.agentName}
                         </h2>
 
-                        <CheckCircle2
+                        <CheckCircle
                           size={13}
                           className="shrink-0 text-blue-600"
                         />
 
                       </div>
 
-                      <p className="truncate text-[9px] text-slate-400">
+                      <p className="truncate text-[10px] text-slate-400">
                         {selectedConversation.agency}
                         {" • "}
                         {selectedConversation.status}
@@ -631,7 +631,7 @@ function Messages() {
                       className="hidden h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 sm:flex"
                       title="More options"
                     >
-                      <MoreHorizontal size={16} />
+                      <DotsThree size={16} />
                     </button>
 
                   </div>
@@ -647,16 +647,16 @@ function Messages() {
                     <div className="flex items-center gap-3">
 
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
-                        <PackageIcon />
+                        <Package size={15} />
                       </div>
 
                       <div>
 
-                        <p className="text-[8px] font-semibold uppercase tracking-wider text-slate-400">
+                        <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                           Shipment
                         </p>
 
-                        <p className="mt-0.5 text-[10px] font-bold text-slate-700">
+                        <p className="mt-0.5 text-[11px] font-bold text-slate-700">
                           {selectedConversation.shipmentId}
                         </p>
 
@@ -666,7 +666,7 @@ function Messages() {
 
                     <div className="min-w-0 sm:max-w-[220px]">
 
-                      <p className="truncate text-[9px] text-slate-500">
+                      <p className="truncate text-[10px] text-slate-500">
                         {selectedConversation.product}
                       </p>
 
@@ -674,10 +674,10 @@ function Messages() {
 
                     <Link
                       to="/track-shipment"
-                      className="flex shrink-0 items-center gap-1 text-[9px] font-bold text-blue-700 hover:text-blue-800"
+                      className="flex shrink-0 items-center gap-1 text-[10px] font-bold text-blue-700 hover:text-blue-800"
                     >
                       View shipment
-                      <ChevronRight size={12} />
+                      <CaretRight size={12} />
                     </Link>
 
                   </div>
@@ -690,7 +690,7 @@ function Messages() {
 
                   <div className="mb-5 flex items-center justify-center">
 
-                    <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[8px] font-semibold text-slate-400">
+                    <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[9px] font-semibold text-slate-400">
                       Today
                     </div>
 
@@ -724,7 +724,7 @@ function Messages() {
                             >
 
                               {!isMe && (
-                                <div className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#173563] text-[8px] font-bold text-white sm:flex">
+                                <div className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#173563] text-[9px] font-bold text-white sm:flex">
                                   {
                                     selectedConversation.initials
                                   }
@@ -741,14 +741,14 @@ function Messages() {
                                   }`}
                                 >
 
-                                  <p className="text-[11px] leading-5">
+                                  <p className="text-[12px] leading-5">
                                     {item.text}
                                   </p>
 
                                 </div>
 
                                 <p
-                                  className={`mt-1 text-[8px] text-slate-400 ${
+                                  className={`mt-1 text-[9px] text-slate-400 ${
                                     isMe
                                       ? "text-right"
                                       : "text-left"
@@ -809,7 +809,7 @@ function Messages() {
                         }}
                         rows={1}
                         placeholder="Write a message..."
-                        className="max-h-28 min-h-10 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3 text-[10px] text-slate-700 outline-none transition focus:border-[#173B6C] focus:bg-white focus:ring-2 focus:ring-[#173B6C]/10"
+                        className="max-h-28 min-h-10 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3 text-[11px] text-slate-700 outline-none transition focus:border-[#173B6C] focus:bg-white focus:ring-2 focus:ring-[#173B6C]/10"
                       />
 
                     </div>
@@ -820,12 +820,12 @@ function Messages() {
                       className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#173563] text-white shadow-sm transition hover:bg-[#102A4D] disabled:cursor-not-allowed disabled:opacity-40"
                       title="Send message"
                     >
-                      <Send size={15} />
+                      <PaperPlaneTilt size={15} />
                     </button>
 
                   </form>
 
-                  <p className="mt-2 px-1 text-[8px] text-slate-400">
+                  <p className="mt-2 px-1 text-[9px] text-slate-400">
                     Press Enter to send • Shift + Enter
                     for a new line
                   </p>
@@ -845,14 +845,14 @@ function Messages() {
                 <div>
 
                   <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
-                    <MessageCircle size={24} />
+                    <ChatCircle size={24} />
                   </div>
 
                   <h2 className="mt-4 text-sm font-bold text-slate-800">
                     Select a conversation
                   </h2>
 
-                  <p className="mx-auto mt-1 max-w-xs text-[10px] leading-5 text-slate-400">
+                  <p className="mx-auto mt-1 max-w-xs text-[11px] leading-5 text-slate-400">
                     Choose a clearing agent from the
                     conversation list to start messaging.
                   </p>
@@ -908,7 +908,7 @@ function Messages() {
             FOOTER NOTE
         ==================================================== */}
 
-        <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[10px] text-slate-400">
+        <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[11px] text-slate-400">
 
           <ShieldCheck
             size={13}
@@ -925,38 +925,6 @@ function Messages() {
       </main>
 
     </div>
-  );
-}
-
-/* =========================================================
-   SMALL PACKAGE ICON
-========================================================= */
-
-function PackageIcon() {
-  return (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m16.5 9.4-9-5.19" />
-
-      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-
-      <polyline points="3.29 7 12 12 20.71 7" />
-
-      <line
-        x1="12"
-        y1="22"
-        x2="12"
-        y2="12"
-      />
-    </svg>
   );
 }
 

@@ -4,24 +4,24 @@ import {
   ArrowLeft,
   ArrowRight,
   Bell,
-  Building2,
-  CheckCircle2,
-  Clock3,
-  DollarSign,
-  LayoutDashboard,
-  Loader2,
-  LogOut,
-  Menu,
-  MessageSquare,
+  Buildings,
+  CheckCircle,
+  Clock,
+  CurrencyDollar,
+  SquaresFour,
+  CircleNotch,
+  SignOut,
+  List,
+  ChatText,
   Package,
-  Search,
-  Settings,
+  MagnifyingGlass,
+  Gear,
   ShieldCheck,
   UserCheck,
-  UserRound,
+  UserCircle,
   X,
   XCircle,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 function ReviewBids() {
   const navigate = useNavigate();
@@ -720,7 +720,7 @@ function ReviewBids() {
 
                 {unreadNotifications.length >
                   0 && (
-                  <span className="absolute right-1.5 top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                  <span className="absolute right-1.5 top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                     {unreadNotifications.length >
                     9
                       ? "9+"
@@ -737,7 +737,7 @@ function ReviewBids() {
                 className="hidden h-10 items-center gap-2 rounded-xl px-2 text-slate-600 hover:bg-slate-100 sm:flex"
               >
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                  <UserRound size={17} />
+                  <UserCircle size={17} />
                 </div>
 
                 <span className="hidden text-sm font-medium md:block">
@@ -754,12 +754,12 @@ function ReviewBids() {
                   setNotificationOpen(false);
                 }}
                 className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 lg:hidden"
-                aria-label="Menu"
+                aria-label="List"
               >
                 {mobileMenuOpen ? (
                   <X size={21} />
                 ) : (
-                  <Menu size={21} />
+                  <List size={21} />
                 )}
               </button>
             </div>
@@ -775,7 +775,7 @@ function ReviewBids() {
                     Notifications
                   </h3>
 
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[12px] text-slate-400">
                     {unreadNotifications.length} unread
                   </p>
                 </div>
@@ -786,7 +786,7 @@ function ReviewBids() {
                     onClick={
                       markAllNotificationsRead
                     }
-                    className="text-[11px] font-semibold text-blue-600 hover:text-blue-700"
+                    className="text-[12px] font-semibold text-blue-600 hover:text-blue-700"
                   >
                     Mark all read
                   </button>
@@ -849,7 +849,7 @@ function ReviewBids() {
                           </p>
 
                           {notification.createdAt && (
-                            <p className="mt-1 text-[10px] text-slate-400">
+                            <p className="mt-1 text-[11px] text-slate-400">
                               {new Date(
                                 notification.createdAt
                               ).toLocaleString()}
@@ -890,7 +890,7 @@ function ReviewBids() {
                   }
                   className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-50"
                 >
-                  <LayoutDashboard
+                  <SquaresFour
                     size={18}
                   />
                   Dashboard
@@ -904,7 +904,7 @@ function ReviewBids() {
                   }
                   className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-50"
                 >
-                  <Search size={18} />
+                  <MagnifyingGlass size={18} />
                   HS Code Search
                 </button>
 
@@ -916,7 +916,7 @@ function ReviewBids() {
                   }
                   className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-50"
                 >
-                  <DollarSign size={18} />
+                  <CurrencyDollar size={18} />
                   Import Calculator
                 </button>
 
@@ -952,7 +952,7 @@ function ReviewBids() {
                   }
                   className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-50"
                 >
-                  <UserRound size={18} />
+                  <UserCircle size={18} />
                   Profile
                 </button>
 
@@ -964,8 +964,8 @@ function ReviewBids() {
                   }
                   className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-50"
                 >
-                  <Settings size={18} />
-                  Settings
+                  <Gear size={18} />
+                  Gear
                 </button>
 
                 <div className="my-2 border-t border-slate-100" />
@@ -978,7 +978,7 @@ function ReviewBids() {
                   }
                   className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-red-500 hover:bg-red-50"
                 >
-                  <LogOut size={18} />
+                  <SignOut size={18} />
                   Sign Out
                 </button>
               </nav>
@@ -1131,7 +1131,7 @@ function ReviewBids() {
 
                 {unreadNotifications.length >
                   0 && (
-                  <span className="absolute right-1.5 top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                  <span className="absolute right-1.5 top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                     {unreadNotifications.length >
                     9
                       ? "9+"
@@ -1151,7 +1151,7 @@ function ReviewBids() {
                         Notifications
                       </h3>
 
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[12px] text-slate-400">
                         {unreadNotifications.length} unread
                       </p>
                     </div>
@@ -1162,7 +1162,7 @@ function ReviewBids() {
                         onClick={
                           markAllNotificationsRead
                         }
-                        className="text-[11px] font-semibold text-blue-600 hover:text-blue-700"
+                        className="text-[12px] font-semibold text-blue-600 hover:text-blue-700"
                       >
                         Mark all read
                       </button>
@@ -1234,7 +1234,7 @@ function ReviewBids() {
                               </p>
 
                               {notification.createdAt && (
-                                <p className="mt-1 text-[10px] text-slate-400">
+                                <p className="mt-1 text-[11px] text-slate-400">
                                   {new Date(
                                     notification.createdAt
                                   ).toLocaleString()}
@@ -1279,7 +1279,7 @@ function ReviewBids() {
               className="hidden h-10 items-center gap-2 rounded-xl px-2 text-slate-600 transition hover:bg-slate-100 sm:flex"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                <UserRound size={17} />
+                <UserCircle size={17} />
               </div>
 
               <span className="hidden text-sm font-medium md:block">
@@ -1296,12 +1296,12 @@ function ReviewBids() {
                 setNotificationOpen(false);
               }}
               className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 lg:hidden"
-              aria-label="Menu"
+              aria-label="List"
             >
               {mobileMenuOpen ? (
                 <X size={21} />
               ) : (
-                <Menu size={21} />
+                <List size={21} />
               )}
             </button>
 
@@ -1325,7 +1325,7 @@ function ReviewBids() {
                 }
                 className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-50"
               >
-                <LayoutDashboard
+                <SquaresFour
                   size={18}
                 />
                 Dashboard
@@ -1339,7 +1339,7 @@ function ReviewBids() {
                 }
                 className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-50"
               >
-                <Search size={18} />
+                <MagnifyingGlass size={18} />
                 HS Code Search
               </button>
 
@@ -1351,7 +1351,7 @@ function ReviewBids() {
                 }
                 className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-50"
               >
-                <DollarSign
+                <CurrencyDollar
                   size={18}
                 />
                 Import Calculator
@@ -1391,7 +1391,7 @@ function ReviewBids() {
                 }
                 className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-50"
               >
-                <UserRound
+                <UserCircle
                   size={18}
                 />
                 Profile
@@ -1405,8 +1405,8 @@ function ReviewBids() {
                 }
                 className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-50"
               >
-                <Settings size={18} />
-                Settings
+                <Gear size={18} />
+                Gear
               </button>
 
               <div className="my-2 border-t border-slate-100" />
@@ -1419,7 +1419,7 @@ function ReviewBids() {
                 }
                 className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-red-500 hover:bg-red-50"
               >
-                <LogOut size={18} />
+                <SignOut size={18} />
                 Sign Out
               </button>
 
@@ -1493,7 +1493,7 @@ function ReviewBids() {
             <div className="flex shrink-0 items-center gap-2">
 
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white">
-                <CheckCircle2
+                <CheckCircle
                   size={16}
                 />
               </div>
@@ -1551,11 +1551,11 @@ function ReviewBids() {
 
               <div className="flex flex-wrap items-center gap-2">
 
-                <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-blue-700">
+                <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-blue-700">
                   {request.id}
                 </span>
 
-                <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-700">
+                <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
                   {request.urgency ||
                     "Medium"}{" "}
                   Priority
@@ -1583,7 +1583,7 @@ function ReviewBids() {
 
               <div className="rounded-xl bg-slate-50 px-4 py-3">
 
-                <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                   Shipment Value
                 </p>
 
@@ -1600,7 +1600,7 @@ function ReviewBids() {
 
               <div className="rounded-xl bg-slate-50 px-4 py-3">
 
-                <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                   HS Code
                 </p>
 
@@ -1613,7 +1613,7 @@ function ReviewBids() {
 
               <div className="rounded-xl bg-slate-50 px-4 py-3 min-[420px]:col-span-2 sm:col-span-1">
 
-                <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                   Required By
                 </p>
 
@@ -1652,7 +1652,7 @@ function ReviewBids() {
 
           </div>
 
-          <p className="text-[10px] text-slate-400">
+          <p className="text-[11px] text-slate-400">
             Last updated{" "}
             {lastUpdated.toLocaleTimeString()}
           </p>
@@ -1668,7 +1668,7 @@ function ReviewBids() {
 
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
 
-              <Loader2
+              <CircleNotch
                 size={30}
                 className="animate-spin text-blue-600"
               />
@@ -1688,7 +1688,7 @@ function ReviewBids() {
 
             <div className="mx-auto mt-6 flex max-w-md items-start gap-3 rounded-xl bg-slate-50 p-4 text-left">
 
-              <Clock3
+              <Clock
                 size={18}
                 className="mt-0.5 shrink-0 text-blue-600"
               />
@@ -1699,7 +1699,7 @@ function ReviewBids() {
                   This page updates automatically
                 </p>
 
-                <p className="mt-0.5 text-[11px] leading-5 text-slate-400">
+                <p className="mt-0.5 text-[12px] leading-5 text-slate-400">
                   You don't need to refresh while
                   waiting.
                 </p>
@@ -1755,7 +1755,7 @@ function ReviewBids() {
                       <div className="flex min-w-0 gap-3 sm:gap-4">
 
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                          <Building2
+                          <Buildings
                             size={22}
                           />
                         </div>
@@ -1771,7 +1771,7 @@ function ReviewBids() {
                             </h3>
 
                             {isBestPrice && (
-                              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-600">
+                              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-600">
                                 <span>
                                   ★
                                 </span>
@@ -1780,8 +1780,8 @@ function ReviewBids() {
                             )}
 
                             {isAccepted && (
-                              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-bold text-emerald-700">
-                                <CheckCircle2
+                              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
+                                <CheckCircle
                                   size={11}
                                 />
                                 Accepted
@@ -1801,7 +1801,7 @@ function ReviewBids() {
 
                       <div className="w-full rounded-xl bg-blue-50 px-5 py-3 sm:w-auto lg:min-w-[180px] lg:text-right">
 
-                        <p className="text-[10px] font-semibold uppercase tracking-wide text-blue-500">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-500">
                           Total estimated fee
                         </p>
 
@@ -1823,7 +1823,7 @@ function ReviewBids() {
 
                         <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
 
-                          <DollarSign
+                          <CurrencyDollar
                             size={14}
                           />
 
@@ -1843,7 +1843,7 @@ function ReviewBids() {
 
                         <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
 
-                          <DollarSign
+                          <CurrencyDollar
                             size={14}
                           />
 
@@ -1863,7 +1863,7 @@ function ReviewBids() {
 
                         <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
 
-                          <Clock3
+                          <Clock
                             size={14}
                           />
 
@@ -1887,7 +1887,7 @@ function ReviewBids() {
 
                         <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
 
-                          <MessageSquare
+                          <ChatText
                             size={14}
                           />
 
@@ -1951,7 +1951,7 @@ function ReviewBids() {
             FOOTER
         ==================================================== */}
 
-        <div className="mt-7 flex items-start justify-center gap-2 px-4 text-center text-[10px] leading-5 text-slate-400">
+        <div className="mt-7 flex items-start justify-center gap-2 px-4 text-center text-[11px] leading-5 text-slate-400">
 
           <ShieldCheck
             size={13}
@@ -2021,7 +2021,7 @@ function ReviewBids() {
                   <div className="flex items-center gap-3">
 
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600">
-                      <Building2
+                      <Buildings
                         size={19}
                       />
                     </div>
@@ -2099,7 +2099,7 @@ function ReviewBids() {
 
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
 
-                    <Clock3
+                    <Clock
                       size={14}
                     />
 
@@ -2154,7 +2154,7 @@ function ReviewBids() {
 
                 {isAccepting ? (
                   <>
-                    <Loader2
+                    <CircleNotch
                       size={16}
                       className="animate-spin"
                     />
@@ -2162,7 +2162,7 @@ function ReviewBids() {
                   </>
                 ) : (
                   <>
-                    <CheckCircle2
+                    <CheckCircle
                       size={16}
                     />
                     Accept Bid

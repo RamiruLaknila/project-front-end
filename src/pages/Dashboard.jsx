@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Calculator,
-  ChevronRight,
+  CaretRight,
   Info,
-  Search,
-  Ship,
+  MagnifyingGlass,
+  Boat,
   Users,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
 
 import AppNavbar from "../components/ui/AppNavbar";
@@ -83,7 +83,7 @@ function Dashboard() {
     {
       title: "HS Code Search",
       description: "Find the correct tariff code and duty rates.",
-      icon: Search,
+      icon: MagnifyingGlass,
       to: "/hs-code-search",
       iconStyle: "bg-blue-50 text-blue-700",
     },
@@ -105,7 +105,7 @@ function Dashboard() {
     {
       title: "Track Shipment",
       description: "Check the current status of your shipment.",
-      icon: Ship,
+      icon: Boat,
       to: "/track-shipment",
       iconStyle: "bg-indigo-50 text-indigo-700",
     },
@@ -134,7 +134,7 @@ function Dashboard() {
           <div>
           
 
-            <h1 className="text-3xl font-bold tracking-tight text-[#14213D] sm:text-4xl lg:text-[42px]">
+            <h1 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
               Welcome back, {dashboardName}.
             </h1>
 
@@ -155,9 +155,8 @@ function Dashboard() {
                 <div className="flex items-center gap-4">
 
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
-                    <Ship
+                    <Boat
                       size={22}
-                      strokeWidth={2}
                       aria-hidden="true"
                     />
                   </div>
@@ -185,7 +184,7 @@ function Dashboard() {
                 >
                   View shipments
 
-                  <ChevronRight
+                  <CaretRight
                     size={16}
                     aria-hidden="true"
                   />
@@ -229,7 +228,6 @@ function Dashboard() {
                   >
                     <Icon
                       size={20}
-                      strokeWidth={2}
                       aria-hidden="true"
                     />
                   </div>
@@ -245,7 +243,7 @@ function Dashboard() {
                   <div className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#173B6C]">
                     Open tool
 
-                    <ChevronRight
+                    <CaretRight
                       size={15}
                       className="transition-transform group-hover:translate-x-0.5"
                       aria-hidden="true"

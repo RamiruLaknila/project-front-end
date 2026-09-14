@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Building2,
-  CheckCircle2,
-  Clock3,
-  LogOut,
-  RefreshCw,
+  Buildings,
+  CheckCircle,
+  Clock,
+  SignOut,
+  ArrowsClockwise,
   ShieldCheck,
   XCircle,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 function AgencyWaitingApproval() {
   const navigate = useNavigate();
@@ -97,7 +97,7 @@ function AgencyWaitingApproval() {
     localStorage.removeItem("agentOnboardingType");
     localStorage.removeItem("agentOnboardingComplete");
 
-    navigate("/agent-signin");
+    navigate("/");
   };
 
   /* =========================================================
@@ -167,21 +167,21 @@ function AgencyWaitingApproval() {
           >
 
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-9 w-9 object-contain mix-blend-multiply"
             />
 
             <div>
 
-              <p className="text-[16px] font-bold tracking-tight text-[#173563]">
+              <p className="text-[17px] font-bold tracking-tight text-[#173563]">
                 Import
                 <span className="text-slate-900">
                   Ease
                 </span>
               </p>
 
-              <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                 Agent Platform
               </p>
 
@@ -194,7 +194,7 @@ function AgencyWaitingApproval() {
             onClick={handleLogout}
             className="ml-auto inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
           >
-            <LogOut size={15} />
+            <SignOut size={15} />
             Sign Out
           </button>
 
@@ -219,7 +219,7 @@ function AgencyWaitingApproval() {
                   className="text-red-600"
                 />
 
-                <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-red-600">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-red-600">
                   Request Rejected
                 </span>
 
@@ -235,7 +235,7 @@ function AgencyWaitingApproval() {
                 <XCircle size={27} />
               </div>
 
-              <h1 className="mt-5 text-[26px] font-bold tracking-[-0.04em] text-[#14213D]">
+              <h1 className="mt-5 text-[28px] font-bold tracking-[-0.04em] text-[#14213D]">
                 Request not approved
               </h1>
 
@@ -287,7 +287,7 @@ function AgencyWaitingApproval() {
 
             </div>
 
-            <p className="mt-6 text-center text-[10px] text-slate-400">
+            <p className="mt-6 text-center text-[11px] text-slate-400">
               ImportEase · Clearing Agency Platform
             </p>
 
@@ -319,21 +319,21 @@ function AgencyWaitingApproval() {
         >
 
           <img
-            src="/logo.jpeg"
+            src="/logo.png"
             alt="ImportEase"
             className="h-9 w-9 object-contain mix-blend-multiply"
           />
 
           <div>
 
-            <p className="text-[16px] font-bold tracking-tight text-[#173563]">
+            <p className="text-[17px] font-bold tracking-tight text-[#173563]">
               Import
               <span className="text-slate-900">
                 Ease
               </span>
             </p>
 
-            <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+            <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
               Agent Platform
             </p>
 
@@ -349,13 +349,13 @@ function AgencyWaitingApproval() {
               {applicantName}
             </p>
 
-            <p className="text-[9px] text-slate-400">
+            <p className="text-[10px] text-slate-400">
               Agency Member
             </p>
 
           </div>
 
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#173563] text-[10px] font-bold text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#173563] text-[11px] font-bold text-white">
             {getInitials(applicantName)}
           </div>
 
@@ -365,7 +365,7 @@ function AgencyWaitingApproval() {
             className="ml-1 flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-50 hover:text-red-600"
             title="Sign out"
           >
-            <LogOut size={16} />
+            <SignOut size={16} />
           </button>
 
         </div>
@@ -391,7 +391,7 @@ function AgencyWaitingApproval() {
                 className="text-blue-600"
               />
 
-              <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-blue-600">
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">
                 Agency Membership
               </span>
 
@@ -409,9 +409,8 @@ function AgencyWaitingApproval() {
 
               <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
 
-                <Clock3
+                <Clock
                   size={30}
-                  strokeWidth={1.8}
                 />
 
                 <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-amber-500">
@@ -426,11 +425,11 @@ function AgencyWaitingApproval() {
 
             <div className="mt-5 text-center">
 
-              <h1 className="text-[28px] font-bold leading-tight tracking-[-0.04em] text-[#14213D] sm:text-[32px]">
+              <h1 className="text-[30px] font-bold leading-tight tracking-[-0.04em] text-[#14213D] sm:text-[35px]">
                 Waiting for Approval
               </h1>
 
-              <p className="mx-auto mt-2 max-w-lg text-[13px] leading-6 text-slate-500 sm:text-sm">
+              <p className="mx-auto mt-2 max-w-lg text-[14px] leading-6 text-slate-500 sm:text-sm">
                 Your request to join{" "}
                 <span className="font-semibold text-slate-700">
                   {agencyName}
@@ -447,7 +446,7 @@ function AgencyWaitingApproval() {
               <div className="flex items-center gap-3">
 
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
-                  <Clock3 size={19} />
+                  <Clock size={19} />
                 </div>
 
                 <div>
@@ -456,7 +455,7 @@ function AgencyWaitingApproval() {
                     Pending Approval
                   </p>
 
-                  <p className="mt-0.5 text-[10px] leading-5 text-amber-700/80">
+                  <p className="mt-0.5 text-[11px] leading-5 text-amber-700/80">
                     The agency administrator needs to
                     review your request.
                   </p>
@@ -473,7 +472,7 @@ function AgencyWaitingApproval() {
 
               <div className="mb-4 flex items-center gap-2">
 
-                <Building2
+                <Buildings
                   size={15}
                   className="text-slate-500"
                 />
@@ -530,7 +529,7 @@ function AgencyWaitingApproval() {
                 className="mt-0.5 shrink-0 text-blue-600"
               />
 
-              <p className="text-[10px] leading-5 text-blue-700">
+              <p className="text-[11px] leading-5 text-blue-700">
                 You will get access to the agent workspace
                 once the agency administrator approves
                 your membership request.
@@ -547,7 +546,7 @@ function AgencyWaitingApproval() {
               className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#173563] px-4 py-3 text-xs font-bold text-white transition hover:bg-[#102547] disabled:cursor-not-allowed disabled:opacity-60"
             >
 
-              <RefreshCw
+              <ArrowsClockwise
                 size={15}
                 className={
                   checking
@@ -570,7 +569,7 @@ function AgencyWaitingApproval() {
               className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
             >
 
-              <LogOut size={14} />
+              <SignOut size={14} />
 
               Sign Out
 
@@ -580,7 +579,7 @@ function AgencyWaitingApproval() {
 
           {/* FOOTER */}
 
-          <p className="mt-6 text-center text-[10px] text-slate-400">
+          <p className="mt-6 text-center text-[11px] text-slate-400">
             ImportEase · Clearing Agency Platform
           </p>
 
@@ -604,7 +603,7 @@ function DetailRow({
   return (
     <div className="min-w-0">
 
-      <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
         {label}
       </p>
 

@@ -1,30 +1,31 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Bell,
-  Building2,
+  Buildings,
   Check,
-  CheckCircle2,
+  CheckCircle,
   Copy,
-  KeyRound,
-  RefreshCw,
+  Key,
+  ArrowsClockwise,
   ShieldCheck,
   User,
   Users,
-  ChevronRight,
-  Mail,
+  CaretRight,
+  EnvelopeSimple,
   Phone,
   MapPin,
-  AlertTriangle,
+  Warning,
   Camera,
-  Upload,
-  Trash2,
-} from "lucide-react";
+  UploadSimple,
+  Trash,
+} from "@phosphor-icons/react";
 
 import AgentAdminSidebar from "../components/AgentAdminSidebar";
 
 function AgentAdminSettings() {
+  const navigate = useNavigate();
   const [agency, setAgency] = useState(null);
   const [admin, setAdmin] = useState(null);
 
@@ -517,7 +518,7 @@ function AgentAdminSettings() {
           <div className="flex items-center gap-3">
 
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
+              <p className="text-[12px] font-bold uppercase tracking-[0.15em] text-slate-400">
                 Agency Workspace
               </p>
 
@@ -538,20 +539,19 @@ function AgentAdminSettings() {
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
               title="Refresh"
             >
-              <RefreshCw
+              <ArrowsClockwise
                 size={18}
-                strokeWidth={1.8}
               />
             </button>
 
             <button
               type="button"
+              onClick={() => navigate("/agent-admin-notifications")}
               className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
               title="Notifications"
             >
               <Bell
                 size={18}
-                strokeWidth={1.8}
               />
 
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full " />
@@ -575,7 +575,6 @@ function AgentAdminSettings() {
           >
             <ArrowLeft
               size={16}
-              strokeWidth={1.8}
             />
 
             Agency Dashboard
@@ -587,11 +586,11 @@ function AgentAdminSettings() {
 
             <div>
 
-              <h2 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+              <h2 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
                 Settings
               </h2>
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[16px]">
                 Manage your agency information,
                 administrator profile, member access,
                 notifications and security preferences.
@@ -606,9 +605,8 @@ function AgentAdminSettings() {
             >
               {saved ? (
                 <>
-                  <CheckCircle2
+                  <CheckCircle
                     size={17}
-                    strokeWidth={1.8}
                   />
 
                   Saved
@@ -617,7 +615,6 @@ function AgentAdminSettings() {
                 <>
                   <Check
                     size={17}
-                    strokeWidth={1.8}
                   />
 
                   Save Changes
@@ -634,7 +631,7 @@ function AgentAdminSettings() {
           <section className="mb-6 rounded-2xl border border-slate-200 bg-white shadow-[0_2px_10px_rgba(15,23,42,.02)]">
 
             <SectionHeader
-              icon={Building2}
+              icon={Buildings}
               title="Agency Information"
               description="Update the official information associated with your clearing agency."
             />
@@ -681,7 +678,7 @@ function AgentAdminSettings() {
 
               <FormField
                 label="Agency Email"
-                icon={Mail}
+                icon={EnvelopeSimple}
                 type="email"
                 value={agencyForm.email}
                 placeholder="agency@example.com"
@@ -791,9 +788,8 @@ function AgentAdminSettings() {
                         className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full border border-red-100 bg-white text-red-500 shadow-sm transition hover:bg-red-50"
                         title="Remove photo"
                       >
-                        <Trash2
+                        <Trash
                           size={14}
-                          strokeWidth={2}
                         />
                       </button>
                     )}
@@ -808,7 +804,6 @@ function AgentAdminSettings() {
 
                       <Camera
                         size={17}
-                        strokeWidth={1.8}
                         className="text-[#173563]"
                       />
 
@@ -827,9 +822,8 @@ function AgentAdminSettings() {
 
                       <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#173563] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#10294d]">
 
-                        <Upload
+                        <UploadSimple
                           size={16}
-                          strokeWidth={1.8}
                         />
 
                         {adminForm.photo
@@ -856,9 +850,8 @@ function AgentAdminSettings() {
                           className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50"
                         >
 
-                          <Trash2
+                          <Trash
                             size={16}
-                            strokeWidth={1.8}
                           />
 
                           Remove
@@ -968,7 +961,6 @@ function AgentAdminSettings() {
 
                         <Users
                           size={18}
-                          strokeWidth={1.8}
                         />
 
                       </div>
@@ -1007,14 +999,12 @@ function AgentAdminSettings() {
                       title="Copy invitation code"
                     >
                       {copied ? (
-                        <CheckCircle2
+                        <CheckCircle
                           size={20}
-                          strokeWidth={1.8}
                         />
                       ) : (
                         <Copy
                           size={20}
-                          strokeWidth={1.8}
                         />
                       )}
                     </button>
@@ -1035,9 +1025,8 @@ function AgentAdminSettings() {
                     onClick={handleRegenerateCode}
                     className="inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB] transition hover:text-blue-700"
                   >
-                    <RefreshCw
+                    <ArrowsClockwise
                       size={16}
-                      strokeWidth={1.8}
                     />
 
                     Regenerate Code
@@ -1058,7 +1047,6 @@ function AgentAdminSettings() {
 
                     <Users
                       size={19}
-                      strokeWidth={1.8}
                     />
 
                   </div>
@@ -1077,9 +1065,8 @@ function AgentAdminSettings() {
 
                 </div>
 
-                <ChevronRight
+                <CaretRight
                   size={18}
-                  strokeWidth={1.8}
                   className="text-slate-400"
                 />
 
@@ -1190,9 +1177,8 @@ function AgentAdminSettings() {
 
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
 
-                    <KeyRound
+                    <Key
                       size={18}
-                      strokeWidth={1.8}
                     />
 
                   </div>
@@ -1211,9 +1197,8 @@ function AgentAdminSettings() {
 
                 </div>
 
-                <ChevronRight
+                <CaretRight
                   size={18}
-                  strokeWidth={1.8}
                   className="text-slate-400"
                 />
 
@@ -1225,7 +1210,6 @@ function AgentAdminSettings() {
 
                   <ShieldCheck
                     size={19}
-                    strokeWidth={1.8}
                     className="mt-0.5 shrink-0 text-emerald-600"
                   />
 
@@ -1264,9 +1248,8 @@ function AgentAdminSettings() {
 
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600">
 
-                  <AlertTriangle
+                  <Warning
                     size={20}
-                    strokeWidth={1.8}
                   />
 
                 </div>
@@ -1323,7 +1306,7 @@ function AgentAdminSettings() {
                     );
 
                     window.location.href =
-                      "/agent-signin";
+                      "/";
                   }}
                   className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-600 transition hover:bg-red-50"
                 >
@@ -1352,9 +1335,8 @@ function AgentAdminSettings() {
 
               {saved ? (
                 <>
-                  <CheckCircle2
+                  <CheckCircle
                     size={17}
-                    strokeWidth={1.8}
                   />
 
                   Changes Saved
@@ -1363,7 +1345,6 @@ function AgentAdminSettings() {
                 <>
                   <Check
                     size={17}
-                    strokeWidth={1.8}
                   />
 
                   Save Changes
@@ -1431,7 +1412,6 @@ function SectionHeader({
 
           <Icon
             size={19}
-            strokeWidth={1.8}
           />
 
         </div>
@@ -1474,7 +1454,6 @@ function FormField({
         {Icon && (
           <Icon
             size={15}
-            strokeWidth={1.8}
           />
         )}
 

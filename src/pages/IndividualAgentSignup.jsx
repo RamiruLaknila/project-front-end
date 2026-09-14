@@ -3,16 +3,16 @@ import { useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
-  BriefcaseBusiness,
+  Briefcase,
   User,
-  Mail,
+  EnvelopeSimple,
   Phone,
   MapPin,
   CreditCard,
   ShieldCheck,
-  CheckCircle2,
+  CheckCircle,
   Lock,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 import { useAuth } from "../context/AuthContext";
 import { authErrorMessage } from "../lib/authErrors";
@@ -160,12 +160,12 @@ function IndividualAgentSignup() {
             className="flex items-center gap-3"
           >
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
             />
 
-            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
               Import
               <span className="text-[#173563]">
                 Ease
@@ -182,14 +182,14 @@ function IndividualAgentSignup() {
 
             <div className="mb-4 flex justify-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#173563] shadow-md shadow-[#173563]/15">
-                <BriefcaseBusiness
+                <Briefcase
                   size={23}
                   className="text-white"
                 />
               </div>
             </div>
 
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[27px]">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
               Individual Agent Registration
             </h1>
 
@@ -278,7 +278,7 @@ function IndividualAgentSignup() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="you@example.com"
-                  icon={<Mail size={17} />}
+                  icon={<EnvelopeSimple size={17} />}
                   error={errors.email}
                   required
                   autoComplete="off"
@@ -653,14 +653,14 @@ function Step({
         }`}
       >
         {active ? (
-          <CheckCircle2 size={16} />
+          <CheckCircle size={16} />
         ) : (
           number
         )}
       </div>
 
       <span
-        className={`mt-2 hidden text-[10px] font-semibold sm:block ${
+        className={`mt-2 hidden text-[11px] font-semibold sm:block ${
           active
             ? "text-[#173563]"
             : "text-slate-400"

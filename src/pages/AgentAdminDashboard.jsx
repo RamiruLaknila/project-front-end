@@ -3,17 +3,17 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Bell,
-  CheckCircle2,
-  Clock3,
+  CheckCircle,
+  Clock,
   Copy,
-  RefreshCw,
-  Search,
+  ArrowsClockwise,
+  MagnifyingGlass,
   UserCheck,
   UserPlus,
   Users,
   X,
   XCircle,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 import AgentAdminSidebar from "../components/AgentAdminSidebar";
 
@@ -355,7 +355,7 @@ function AgentAdminDashboard() {
 
             <div>
 
-              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
+              <p className="text-[12px] font-bold uppercase tracking-[0.15em] text-slate-400">
                 Agency Workspace
               </p>
 
@@ -375,11 +375,12 @@ function AgentAdminDashboard() {
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
               title="Refresh"
             >
-              <RefreshCw size={18} />
+              <ArrowsClockwise size={18} />
             </button>
 
             <button
               type="button"
+              onClick={() => navigate("/agent-admin-notifications")}
               className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
             >
               <Bell size={18} />
@@ -406,11 +407,11 @@ function AgentAdminDashboard() {
 
             <div>
 
-              <h2 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+              <h2 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
                 Welcome back
               </h2>
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[16px]">
                 Manage your clearing agency, agents and SME
                 requests from one place.
               </p>
@@ -441,7 +442,7 @@ function AgentAdminDashboard() {
             />
 
             <SummaryCard
-              icon={Clock3}
+              icon={Clock}
               label="Pending Requests"
               value={pendingCount}
               description="Waiting for approval"
@@ -506,7 +507,7 @@ function AgentAdminDashboard() {
                   title="Copy invitation code"
                 >
                   {copied ? (
-                    <CheckCircle2 size={20} />
+                    <CheckCircle size={20} />
                   ) : (
                     <Copy size={20} />
                   )}
@@ -547,7 +548,7 @@ function AgentAdminDashboard() {
                   onClick={handleRefresh}
                   className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50"
                 >
-                  <RefreshCw size={16} />
+                  <ArrowsClockwise size={16} />
                 </button>
 
               </div>
@@ -561,7 +562,7 @@ function AgentAdminDashboard() {
                 />
 
                 <ActivityItem
-                  icon={Search}
+                  icon={MagnifyingGlass}
                   title="SME marketplace"
                   description="Check new SME requests from the marketplace."
                 />
@@ -589,7 +590,7 @@ function AgentAdminDashboard() {
                 </div>
 
                 {pendingCount > 0 && (
-                  <span className="rounded-full bg-amber-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
+                  <span className="rounded-full bg-amber-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-amber-700">
                     Pending
                   </span>
                 )}
@@ -637,21 +638,21 @@ function AgentAdminDashboard() {
                     <div>
 
                       {joinStatus === "pending" && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-700">
-                          <Clock3 size={12} />
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-700">
+                          <Clock size={12} />
                           Pending
                         </span>
                       )}
 
                       {joinStatus === "approved" && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
-                          <CheckCircle2 size={12} />
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-700">
+                          <CheckCircle size={12} />
                           Approved
                         </span>
                       )}
 
                       {joinStatus === "rejected" && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-red-600">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-red-600">
                           <XCircle size={12} />
                           Rejected
                         </span>
@@ -680,7 +681,7 @@ function AgentAdminDashboard() {
                         disabled={processing}
                         className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#10294d] disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        <CheckCircle2 size={16} />
+                        <CheckCircle size={16} />
                         Approve
                       </button>
 
@@ -742,7 +743,7 @@ function SummaryCard({
             {value}
           </p>
 
-          <p className="mt-1 text-[11px] text-slate-400">
+          <p className="mt-1 text-[12px] text-slate-400">
             {description}
           </p>
 
@@ -752,7 +753,6 @@ function SummaryCard({
 
           <Icon
             size={19}
-            strokeWidth={1.8}
           />
 
         </div>
@@ -779,7 +779,6 @@ function ActivityItem({
 
         <Icon
           size={16}
-          strokeWidth={1.8}
         />
 
       </div>
@@ -816,7 +815,6 @@ function EmptyState({
 
         <Icon
           size={20}
-          strokeWidth={1.8}
         />
 
       </div>
@@ -853,7 +851,6 @@ function QuickAction({
 
         <Icon
           size={19}
-          strokeWidth={1.8}
         />
 
       </div>

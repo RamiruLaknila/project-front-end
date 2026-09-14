@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
-  CheckCircle2,
-  LockKeyhole,
-  Mail,
-} from "lucide-react";
+  CheckCircle,
+  LockKey,
+  EnvelopeSimple,
+} from "@phosphor-icons/react";
 
 import { useAuth } from "../context/AuthContext";
 import { authErrorMessage } from "../lib/authErrors";
@@ -59,12 +59,12 @@ function ForgotPassword() {
         <div className="mb-7 flex justify-center">
           <Link to="/" className="flex items-center gap-3">
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
             />
 
-            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
               Import
               <span className="text-[#173563]">Ease</span>
             </span>
@@ -77,7 +77,7 @@ function ForgotPassword() {
           {/* ICON */}
           <div className="mb-5 flex justify-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50">
-              <LockKeyhole
+              <LockKey
                 size={26}
                 className="text-[#173563]"
               />
@@ -86,7 +86,7 @@ function ForgotPassword() {
 
           {/* HEADING */}
           <div className="mb-7 text-center">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
               Forgot your password?
             </h1>
 
@@ -99,7 +99,7 @@ function ForgotPassword() {
           {/* SUCCESS */}
           {submitted && (
             <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-              <CheckCircle2
+              <CheckCircle
                 size={18}
                 className="mt-0.5 shrink-0"
               />
@@ -131,7 +131,7 @@ function ForgotPassword() {
               </label>
 
               <div className="relative">
-                <Mail
+                <EnvelopeSimple
                   size={17}
                   className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                 />

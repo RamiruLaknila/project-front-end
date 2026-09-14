@@ -2,17 +2,17 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  Search,
+  MagnifyingGlass,
   Package,
-  Clock3,
-  DollarSign,
-  Building2,
-  MessageSquare,
-  CheckCircle2,
+  Clock,
+  CurrencyDollar,
+  Buildings,
+  ChatText,
+  CheckCircle,
   X,
   MapPin,
   ShieldCheck,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 function AgentBids() {
   const navigate = useNavigate();
@@ -187,7 +187,7 @@ function AgentBids() {
         {/* Search */}
         <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
           <div className="relative">
-            <Search
+            <MagnifyingGlass
               size={19}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
             />
@@ -254,7 +254,7 @@ function AgentBids() {
                   <div className="flex-1">
                     <div className="flex items-start gap-4">
                       <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
-                        <Building2
+                        <Buildings
                           size={23}
                           className="text-blue-600"
                         />
@@ -284,7 +284,7 @@ function AgentBids() {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
                       <div className="border border-gray-100 rounded-xl p-4">
                         <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <DollarSign size={15} />
+                          <CurrencyDollar size={15} />
                           Clearance Fee
                         </div>
 
@@ -297,7 +297,7 @@ function AgentBids() {
 
                       <div className="border border-gray-100 rounded-xl p-4">
                         <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <DollarSign size={15} />
+                          <CurrencyDollar size={15} />
                           Additional Charges
                         </div>
 
@@ -310,7 +310,7 @@ function AgentBids() {
 
                       <div className="border border-gray-100 rounded-xl p-4">
                         <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <Clock3 size={15} />
+                          <Clock size={15} />
                           Processing Time
                         </div>
 
@@ -325,7 +325,7 @@ function AgentBids() {
                     {bid.message && (
                       <div className="mt-5 bg-gray-50 rounded-xl p-4">
                         <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                          <MessageSquare size={16} />
+                          <ChatText size={16} />
                           Message from agent
                         </div>
 
@@ -363,7 +363,7 @@ function AgentBids() {
                       onClick={() => selectAgent(bid)}
                       className="flex items-center justify-center gap-2 px-5 py-3 bg-[#2563EB] text-white rounded-lg text-sm font-semibold hover:bg-blue-700"
                     >
-                      <CheckCircle2 size={18} />
+                      <CheckCircle size={18} />
                       Select Agent
                     </button>
                   </div>
@@ -420,7 +420,7 @@ function AgentBids() {
             <div className="p-6 space-y-5">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
-                  <Building2
+                  <Buildings
                     size={23}
                     className="text-blue-600"
                   />
@@ -491,7 +491,7 @@ function AgentBids() {
                 onClick={() => selectAgent(selectedBid)}
                 className="w-full flex items-center justify-center gap-2 bg-[#2563EB] text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
               >
-                <CheckCircle2 size={18} />
+                <CheckCircle size={18} />
                 Select This Agent
               </button>
             </div>

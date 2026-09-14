@@ -3,19 +3,19 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
-  Building2,
+  Buildings,
   Check,
-  CheckCircle2,
-  Clock3,
-  DollarSign,
+  CheckCircle,
+  Clock,
+  CurrencyDollar,
   FileText,
-  Globe2,
+  Globe,
   MapPin,
   Package,
   ShieldCheck,
   Truck,
   UserCheck,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 function ShipmentConfirmation() {
   const navigate = useNavigate();
@@ -583,7 +583,7 @@ function ShipmentConfirmation() {
               <div className="flex items-start gap-3">
 
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
-                  <CheckCircle2 size={21} />
+                  <CheckCircle size={21} />
                 </div>
 
                 <div>
@@ -603,7 +603,7 @@ function ShipmentConfirmation() {
 
               <div className="rounded-xl bg-white px-4 py-3 text-center">
 
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
                   Shipment ID
                 </p>
 
@@ -626,7 +626,7 @@ function ShipmentConfirmation() {
 
           <div className="flex items-center gap-2">
 
-            <CheckCircle2
+            <CheckCircle
               size={22}
               className="text-emerald-500"
             />
@@ -677,7 +677,7 @@ function ShipmentConfirmation() {
                       Shipment details
                     </h3>
 
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[12px] text-slate-400">
                       Information provided with your import request
                     </p>
 
@@ -710,7 +710,7 @@ function ShipmentConfirmation() {
                 <div className="rounded-xl border border-slate-100 p-4">
 
                   <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
-                    <Globe2 size={14} />
+                    <Globe size={14} />
                     Origin
                   </div>
 
@@ -758,7 +758,7 @@ function ShipmentConfirmation() {
                 <div className="rounded-xl border border-slate-100 p-4">
 
                   <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
-                    <DollarSign size={14} />
+                    <CurrencyDollar size={14} />
                     Shipment Value
                   </div>
 
@@ -794,7 +794,7 @@ function ShipmentConfirmation() {
                       Selected clearing agent
                     </h3>
 
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[12px] text-slate-400">
                       Your chosen customs clearance partner
                     </p>
 
@@ -810,7 +810,7 @@ function ShipmentConfirmation() {
 
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
 
-                    <Building2 size={26} />
+                    <Buildings size={26} />
 
                   </div>
 
@@ -824,9 +824,9 @@ function ShipmentConfirmation() {
                           "Clearing Agent"}
                       </h4>
 
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-600">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-600">
 
-                        <CheckCircle2 size={11} />
+                        <CheckCircle size={11} />
 
                         Selected
 
@@ -855,7 +855,7 @@ function ShipmentConfirmation() {
 
                   <div className="rounded-xl bg-slate-50 p-4">
 
-                    <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                       Clearance Fee
                     </p>
 
@@ -869,7 +869,7 @@ function ShipmentConfirmation() {
 
                   <div className="rounded-xl bg-slate-50 p-4">
 
-                    <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                       Additional
                     </p>
 
@@ -883,7 +883,7 @@ function ShipmentConfirmation() {
 
                   <div className="rounded-xl bg-blue-50 p-4">
 
-                    <p className="text-[10px] font-medium uppercase tracking-wide text-blue-500">
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-blue-500">
                       Total Fee
                     </p>
 
@@ -899,7 +899,7 @@ function ShipmentConfirmation() {
 
                 <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
 
-                  <Clock3 size={14} />
+                  <Clock size={14} />
 
                   Estimated processing:
                   <span className="font-semibold text-slate-700">
@@ -929,7 +929,7 @@ function ShipmentConfirmation() {
                   Confirmation summary
                 </h3>
 
-                <p className="mt-1 text-[11px] text-slate-400">
+                <p className="mt-1 text-[12px] text-slate-400">
                   Review the final selection
                 </p>
 
@@ -939,7 +939,7 @@ function ShipmentConfirmation() {
 
                 <div>
 
-                  <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                     Shipment
                   </p>
 
@@ -951,7 +951,7 @@ function ShipmentConfirmation() {
 
                 <div>
 
-                  <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                     Clearing Agent
                   </p>
 
@@ -1001,7 +1001,7 @@ function ShipmentConfirmation() {
                       </>
                     ) : (
                       <>
-                        <CheckCircle2 size={17} />
+                        <CheckCircle size={17} />
                         Confirm Shipment
                       </>
                     )}
@@ -1035,7 +1035,7 @@ function ShipmentConfirmation() {
                     className="mt-0.5 shrink-0 text-emerald-500"
                   />
 
-                  <p className="text-[10px] leading-5 text-slate-500">
+                  <p className="text-[11px] leading-5 text-slate-500">
                     {confirmed
                       ? "Your shipment has been securely recorded and is ready for the clearance process."
                       : "By confirming, you agree to proceed with the selected clearing agent for this shipment."}

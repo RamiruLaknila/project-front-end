@@ -1,19 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Bell,
-  CheckCircle2,
-  ChevronRight,
-  Clock3,
+  CheckCircle,
+  CaretRight,
+  Clock,
   FileText,
   Package,
-  RefreshCw,
-  Search,
+  ArrowsClockwise,
+  MagnifyingGlass,
   Truck,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import IndividualAgentSidebar from "../components/IndividualAgentSidebar";
 
 function IndividualAgentShipments() {
+  const navigate = useNavigate();
   const [agentName, setAgentName] = useState("Individual Agent");
   const [shipments, setShipments] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -116,14 +117,14 @@ function IndividualAgentShipments() {
 
   const getStatusIcon = (status) => {
     if (status === "Completed") {
-      return <CheckCircle2 size={14} />;
+      return <CheckCircle size={14} />;
     }
 
     if (status === "In Progress") {
       return <Truck size={14} />;
     }
 
-    return <Clock3 size={14} />;
+    return <Clock size={14} />;
   };
 
   return (
@@ -143,7 +144,7 @@ function IndividualAgentShipments() {
         <header className="sticky top-[68px] z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:top-0">
           <div className="flex items-center">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
                 Individual Agent Workspace
               </p>
 
@@ -161,11 +162,12 @@ function IndividualAgentShipments() {
               onClick={() => window.location.reload()}
               className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-[#2563EB]"
             >
-              <RefreshCw size={17} />
+              <ArrowsClockwise size={17} />
             </button>
 
             <button
               type="button"
+              onClick={() => navigate("/individual-agent-notifications")}
               title="Notifications"
               className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-[#2563EB]"
             >
@@ -183,12 +185,12 @@ function IndividualAgentShipments() {
           {/* TITLE */}
           <section className="mb-7">
         
-            <h1 className="mt-1 text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+            <h1 className="mt-1 text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
               My Shipments
             </h1>
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+              <p className="mt-2 max-w-2xl text-[14px] leading-6 text-slate-500 sm:text-[16px]">
                 Manage shipments assigned to you as an independent clearing
                 agent.
               </p>
@@ -215,14 +217,14 @@ function IndividualAgentShipments() {
             />
 
             <ShipmentStat
-              icon={<Clock3 size={19} />}
+              icon={<Clock size={19} />}
               label="Active Shipments"
               value={activeShipments}
               iconClass="bg-amber-50 text-amber-600"
             />
 
             <ShipmentStat
-              icon={<CheckCircle2 size={19} />}
+              icon={<CheckCircle size={19} />}
               label="Completed"
               value={completedShipments}
               iconClass="bg-emerald-50 text-emerald-600"
@@ -242,7 +244,7 @@ function IndividualAgentShipments() {
           <section className="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
             <div className="flex flex-col gap-3 md:flex-row">
               <div className="relative flex-1">
-                <Search
+                <MagnifyingGlass
                   size={17}
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
                 />
@@ -293,7 +295,7 @@ function IndividualAgentShipments() {
                           </h3>
 
                           <span
-                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getStatusStyle(
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] font-semibold ${getStatusStyle(
                               shipment.status
                             )}`}
                           >
@@ -353,7 +355,7 @@ function IndividualAgentShipments() {
                       className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#173563] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#10294d]"
                     >
                       View Shipment
-                      <ChevronRight size={16} />
+                      <CaretRight size={16} />
                     </button>
                   </div>
 
@@ -375,7 +377,7 @@ function IndividualAgentShipments() {
 
                     <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                       <div
-                        className="h-full rounded-full bg-[#2563EB] transition-all"
+                        className="h-full rounded-full bg-emerald-600 transition-all"
                         style={{
                           width:
                             shipment.status === "Completed"
@@ -387,7 +389,7 @@ function IndividualAgentShipments() {
                       />
                     </div>
 
-                    <div className="mt-2 flex items-center justify-between text-[10px] text-slate-400">
+                    <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400">
                       <span>Assigned</span>
                       <span>Clearance</span>
                       <span>Completed</span>
@@ -419,7 +421,7 @@ function IndividualAgentShipments() {
                 className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#173563] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#10294d]"
               >
                 View My Bids
-                <ChevronRight size={16} />
+                <CaretRight size={16} />
               </Link>
             </section>
           )}
@@ -469,7 +471,7 @@ function ShipmentDetail({
 }) {
   return (
     <div>
-      <p className="text-[11px] font-medium text-slate-400">
+      <p className="text-[12px] font-medium text-slate-400">
         {label}
       </p>
 

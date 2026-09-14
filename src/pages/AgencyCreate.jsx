@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
-  Building2,
-  CheckCircle2,
+  Buildings,
+  CheckCircle,
   Eye,
-  EyeOff,
+  EyeSlash,
   FileText,
-  UserRound,
+  UserCircle,
   ShieldCheck,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
@@ -216,7 +216,7 @@ function AgencyCreate() {
 
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#173563]">
-              <Building2
+              <Buildings
                 size={21}
                 className="text-white"
               />
@@ -272,7 +272,7 @@ function AgencyCreate() {
           {step === 1 && (
             <div>
               <SectionHeader
-                icon={Building2}
+                icon={Buildings}
                 title="Agency Details"
                 description="Enter the basic information about your clearing agency."
               />
@@ -408,7 +408,7 @@ function AgencyCreate() {
           {step === 3 && (
             <div>
               <SectionHeader
-                icon={UserRound}
+                icon={UserCircle}
                 title="Owner Details"
                 description="Tell us about the person responsible for this agency."
               />
@@ -508,7 +508,7 @@ function AgencyCreate() {
               {/* Review Information */}
               <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
                 <div className="flex gap-3">
-                  <CheckCircle2
+                  <CheckCircle
                     size={18}
                     className="mt-0.5 shrink-0 text-emerald-600"
                   />
@@ -591,7 +591,7 @@ function StepIndicator({
         }`}
       >
         {completed ? (
-          <CheckCircle2 size={15} />
+          <CheckCircle size={15} />
         ) : (
           number
         )}
@@ -676,7 +676,7 @@ function InputField({
       />
 
       {error && (
-        <p className="mt-1.5 text-[11px] text-red-500">
+        <p className="mt-1.5 text-[12px] text-red-500">
           {error}
         </p>
       )}
@@ -738,7 +738,7 @@ function PasswordField({
           }
         >
           {showPassword ? (
-            <EyeOff size={18} />
+            <EyeSlash size={18} />
           ) : (
             <Eye size={18} />
           )}
@@ -746,7 +746,7 @@ function PasswordField({
       </div>
 
       {error && (
-        <p className="mt-1.5 text-[11px] text-red-500">
+        <p className="mt-1.5 text-[12px] text-red-500">
           {error}
         </p>
       )}

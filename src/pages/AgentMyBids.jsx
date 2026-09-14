@@ -3,15 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Bell,
-  CheckCircle2,
-  Clock3,
-  DollarSign,
+  CheckCircle,
+  Clock,
+  CurrencyDollar,
   FileText,
   Package,
-  RefreshCw,
-  Search,
+  ArrowsClockwise,
+  MagnifyingGlass,
   X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import AgentMemberSidebar from "../components/AgentMemberSidebar";
 
 function AgentMyBids() {
@@ -130,14 +130,14 @@ function AgentMyBids() {
   const getStatusIcon = (status) => {
     switch (status) {
       case "Accepted":
-        return <CheckCircle2 size={15} />;
+        return <CheckCircle size={15} />;
 
       case "Rejected":
         return <X size={15} />;
 
       case "Pending":
       default:
-        return <Clock3 size={15} />;
+        return <Clock size={15} />;
     }
   };
 
@@ -169,7 +169,7 @@ function AgentMyBids() {
         <header className="sticky top-[68px] z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:top-0">
           <div className="flex items-center gap-3">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                 Agency Member Workspace
               </p>
 
@@ -187,15 +187,16 @@ function AgentMyBids() {
               title="Refresh bids"
               className="rounded-xl p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
             >
-              <RefreshCw size={18} strokeWidth={1.8} />
+              <ArrowsClockwise size={18} />
             </button>
 
             <button
               type="button"
+              onClick={() => navigate("/agent-notifications")}
               title="Notifications"
               className="relative rounded-xl p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
             >
-              <Bell size={19} strokeWidth={1.8} />
+              <Bell size={19} />
 
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#2563EB]" />
             </button>
@@ -213,11 +214,11 @@ function AgentMyBids() {
 
             <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
               <div>
-                <h2 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+                <h2 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
                   My Bids
                 </h2>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[16px]">
                   Track quotations submitted to SME import requests and manage
                   your active bids.
                 </p>
@@ -231,7 +232,7 @@ function AgentMyBids() {
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
-                  <FileText size={19} strokeWidth={1.8} />
+                  <FileText size={19} />
                 </div>
 
                 <span className="text-xs font-medium text-slate-400">
@@ -252,7 +253,7 @@ function AgentMyBids() {
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-                  <Clock3 size={19} strokeWidth={1.8} />
+                  <Clock size={19} />
                 </div>
 
                 <span className="text-xs font-medium text-slate-400">
@@ -273,7 +274,7 @@ function AgentMyBids() {
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                  <CheckCircle2 size={19} strokeWidth={1.8} />
+                  <CheckCircle size={19} />
                 </div>
 
                 <span className="text-xs font-medium text-slate-400">
@@ -294,7 +295,7 @@ function AgentMyBids() {
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
-                  <DollarSign size={19} strokeWidth={1.8} />
+                  <CurrencyDollar size={19} />
                 </div>
 
                 <span className="text-xs font-medium text-slate-400">
@@ -344,7 +345,7 @@ function AgentMyBids() {
             {bids.length === 0 ? (
               <div className="px-6 py-16 text-center">
                 <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-                  <DollarSign size={22} strokeWidth={1.8} />
+                  <CurrencyDollar size={22} />
                 </div>
 
                 <h3 className="text-base font-semibold text-slate-800">
@@ -452,7 +453,7 @@ function AgentMyBids() {
               className="group rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-[0_2px_10px_rgba(15,23,42,.02)] transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
             >
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
-                <Search size={19} strokeWidth={1.8} />
+                <MagnifyingGlass size={19} />
               </div>
 
               <div className="flex items-center justify-between">
@@ -480,7 +481,7 @@ function AgentMyBids() {
               className="group rounded-2xl border border-blue-200 bg-blue-50/50 p-5 text-left shadow-[0_2px_10px_rgba(15,23,42,.02)]"
             >
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#2563EB]">
-                <DollarSign size={19} strokeWidth={1.8} />
+                <CurrencyDollar size={19} />
               </div>
 
               <div className="flex items-center justify-between">
@@ -505,7 +506,7 @@ function AgentMyBids() {
               className="group rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-[0_2px_10px_rgba(15,23,42,.02)] transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
             >
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                <Package size={19} strokeWidth={1.8} />
+                <Package size={19} />
               </div>
 
               <div className="flex items-center justify-between">

@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  CheckCircle2,
-  Clock3,
-  FileCheck2,
-  RefreshCw,
+  CheckCircle,
+  Clock,
+  FileMagnifyingGlass,
+  ArrowsClockwise,
   ShieldCheck,
-  Upload,
+  UploadSimple,
   UserCheck,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
@@ -92,12 +92,12 @@ function AgentPending() {
             className="flex items-center gap-3"
           >
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
             />
 
-            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
               Import
               <span className="text-[#173563]">
                 Ease
@@ -112,10 +112,9 @@ function AgentPending() {
           {/* Status icon */}
           <div className="flex justify-center">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-amber-50 ring-8 ring-amber-50/50">
-              <Clock3
+              <Clock
                 size={38}
                 className="text-amber-500"
-                strokeWidth={1.8}
               />
             </div>
           </div>
@@ -131,7 +130,7 @@ function AgentPending() {
               </span>
             </div>
 
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
               Application submitted successfully
             </h1>
 
@@ -202,7 +201,7 @@ function AgentPending() {
 
               {/* Always completed by the time this page can be reached */}
               <StatusStep
-                icon={<CheckCircle2 size={18} />}
+                icon={<CheckCircle size={18} />}
                 title="Registration completed"
                 description="Your personal and professional information was submitted."
                 completed
@@ -210,7 +209,7 @@ function AgentPending() {
 
               {isIndependent && (
                 <StatusStep
-                  icon={<FileCheck2 size={18} />}
+                  icon={<FileMagnifyingGlass size={18} />}
                   title="Documents submitted"
                   description={
                     hasDocuments
@@ -223,7 +222,7 @@ function AgentPending() {
               )}
 
               <StatusStep
-                icon={<Clock3 size={18} />}
+                icon={<Clock size={18} />}
                 title={
                   isIndependent
                     ? "Pending platform review"
@@ -253,7 +252,7 @@ function AgentPending() {
             <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4">
               <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
-                  <Upload size={19} className="mt-0.5 shrink-0 text-amber-600" />
+                  <UploadSimple size={19} className="mt-0.5 shrink-0 text-amber-600" />
                   <div>
                     <h3 className="text-sm font-bold text-amber-900">
                       Documents needed
@@ -327,7 +326,7 @@ function AgentPending() {
               disabled={checking}
               className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition hover:bg-[#122b50] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <RefreshCw size={16} className={checking ? "animate-spin" : ""} />
+              <ArrowsClockwise size={16} className={checking ? "animate-spin" : ""} />
               {checking ? "Checking…" : "Check approval status"}
             </button>
 
@@ -359,7 +358,7 @@ function InfoItem({ label, value }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
 
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
         {label}
       </p>
 
@@ -423,13 +422,13 @@ function StatusStep({
           </h3>
 
           {completed && (
-            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600">
+            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600">
               COMPLETED
             </span>
           )}
 
           {active && (
-            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-600">
+            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-600">
               CURRENT
             </span>
           )}

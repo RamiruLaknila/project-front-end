@@ -1,21 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  Search,
-  Filter,
+  MagnifyingGlass,
+  Funnel,
   Package,
   MapPin,
-  Clock3,
-  DollarSign,
-  ChevronRight,
+  Clock,
+  CurrencyDollar,
+  CaretRight,
   X,
-  Send,
-  CheckCircle2,
-  RefreshCw,
+  PaperPlaneTilt,
+  CheckCircle,
+  ArrowsClockwise,
   Bell,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import AgentMemberSidebar from "../components/AgentMemberSidebar";
 
 function AgentMarketplace() {
+  const navigate = useNavigate();
   const [agency, setAgency] = useState(null);
   const [currentAgent, setCurrentAgent] = useState(null);
 
@@ -323,7 +325,7 @@ function AgentMarketplace() {
         <header className="sticky top-[68px] z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:top-0">
           <div className="flex items-center">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
                 Agency Member Workspace
               </p>
 
@@ -340,11 +342,12 @@ function AgentMarketplace() {
               className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50"
               aria-label="Refresh marketplace"
             >
-              <RefreshCw size={17} />
+              <ArrowsClockwise size={17} />
             </button>
 
             <button
               type="button"
+              onClick={() => navigate("/agent-notifications")}
               className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50"
               aria-label="Notifications"
             >
@@ -359,7 +362,7 @@ function AgentMarketplace() {
           <div className="mb-6">
             <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
               <div>
-                <h2 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+                <h2 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
                   Find New Import Requests
                 </h2>
 
@@ -425,7 +428,7 @@ function AgentMarketplace() {
                 </div>
 
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                  <Send size={20} />
+                  <PaperPlaneTilt size={20} />
                 </div>
               </div>
             </div>
@@ -445,7 +448,7 @@ function AgentMarketplace() {
                 </div>
 
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                  <CheckCircle2 size={20} />
+                  <CheckCircle size={20} />
                 </div>
               </div>
             </div>
@@ -454,7 +457,7 @@ function AgentMarketplace() {
           <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
             <div className="flex flex-col gap-4 lg:flex-row">
               <div className="relative flex-1">
-                <Search
+                <MagnifyingGlass
                   size={18}
                   className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                 />
@@ -472,7 +475,7 @@ function AgentMarketplace() {
 
               <div className="flex flex-col gap-3 sm:flex-row">
                 <div className="relative">
-                  <Filter
+                  <Funnel
                     size={16}
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                   />
@@ -540,14 +543,14 @@ function AgentMarketplace() {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span
-                          className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getUrgencyClass(
+                          className={`rounded-full border px-2.5 py-1 text-[12px] font-semibold ${getUrgencyClass(
                             request.urgency
                           )}`}
                         >
                           {request.urgency} Priority
                         </span>
 
-                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-500">
+                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-semibold text-slate-500">
                           {request.category}
                         </span>
 
@@ -576,7 +579,7 @@ function AgentMarketplace() {
                           </div>
 
                           <div>
-                            <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                               Route
                             </p>
 
@@ -593,7 +596,7 @@ function AgentMarketplace() {
                           </div>
 
                           <div>
-                            <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                               Quantity
                             </p>
 
@@ -605,11 +608,11 @@ function AgentMarketplace() {
 
                         <div className="flex items-center gap-2.5">
                           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-                            <DollarSign size={15} />
+                            <CurrencyDollar size={15} />
                           </div>
 
                           <div>
-                            <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                               Cargo Value
                             </p>
 
@@ -623,11 +626,11 @@ function AgentMarketplace() {
 
                         <div className="flex items-center gap-2.5">
                           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-                            <Clock3 size={15} />
+                            <Clock size={15} />
                           </div>
 
                           <div>
-                            <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                               Required
                             </p>
 
@@ -646,7 +649,7 @@ function AgentMarketplace() {
                         className="flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                       >
                         View Details
-                        <ChevronRight size={16} />
+                        <CaretRight size={16} />
                       </button>
 
                       {hasAgentBid(request.id) ? (
@@ -655,7 +658,7 @@ function AgentMarketplace() {
                           disabled
                           className="flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-50 px-5 text-sm font-semibold text-emerald-600"
                         >
-                          <CheckCircle2 size={17} />
+                          <CheckCircle size={17} />
                           Bid Submitted
                         </button>
                       ) : (
@@ -665,7 +668,7 @@ function AgentMarketplace() {
                           className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#10294d]"
                         >
                           Submit Bid
-                          <Send size={16} />
+                          <PaperPlaneTilt size={16} />
                         </button>
                       )}
                     </div>
@@ -678,7 +681,7 @@ function AgentMarketplace() {
           <div className="mt-8 rounded-2xl border border-blue-100 bg-blue-50 p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#2563EB] shadow-sm">
-                <Send size={18} />
+                <PaperPlaneTilt size={18} />
               </div>
 
               <div>
@@ -824,7 +827,7 @@ function AgentMarketplace() {
                     disabled
                     className="flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-50 px-5 text-sm font-semibold text-emerald-600"
                   >
-                    <CheckCircle2 size={17} />
+                    <CheckCircle size={17} />
                     Bid Already Submitted
                   </button>
                 ) : (
@@ -836,7 +839,7 @@ function AgentMarketplace() {
                     className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 text-sm font-semibold text-white hover:bg-[#10294d]"
                   >
                     Submit Bid
-                    <Send size={16} />
+                    <PaperPlaneTilt size={16} />
                   </button>
                 )}
               </div>
@@ -878,7 +881,7 @@ function AgentMarketplace() {
                 </label>
 
                 <div className="relative">
-                  <DollarSign
+                  <CurrencyDollar
                     size={17}
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                   />
@@ -961,7 +964,7 @@ function AgentMarketplace() {
                   className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#173563] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#10294d]"
                 >
                   Submit Bid
-                  <Send size={16} />
+                  <PaperPlaneTilt size={16} />
                 </button>
               </div>
             </form>

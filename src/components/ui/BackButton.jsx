@@ -1,4 +1,7 @@
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import {
+  ArrowLeft,
+  CaretRight,
+} from "@phosphor-icons/react";
 import { Link, useLocation } from "react-router-dom";
 
 function BackButton({ current }) {
@@ -20,7 +23,6 @@ function BackButton({ current }) {
       >
         <ArrowLeft
           size={14}
-          strokeWidth={1.8}
           className="transition-transform duration-200 group-hover:-translate-x-0.5"
         />
 
@@ -29,7 +31,7 @@ function BackButton({ current }) {
 
       {/* Separator */}
 
-      <ChevronRight
+      <CaretRight
         size={13}
         className="text-slate-300"
       />

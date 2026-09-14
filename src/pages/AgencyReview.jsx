@@ -2,18 +2,18 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft,
-  CheckCircle2,
+  CheckCircle,
   XCircle,
   ShieldCheck,
   User,
-  Mail,
+  EnvelopeSimple,
   Phone,
   MapPin,
   FileText,
-  Clock3,
-  BriefcaseBusiness,
-  AlertTriangle,
-} from "lucide-react";
+  Clock,
+  Briefcase,
+  Warning,
+} from "@phosphor-icons/react";
 
 function AgencyReview() {
   const navigate = useNavigate();
@@ -108,7 +108,7 @@ function AgencyReview() {
           >
 
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-10 w-10 object-contain mix-blend-multiply"
             />
@@ -121,7 +121,7 @@ function AgencyReview() {
                 </span>
               </p>
 
-              <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
                 Agency Administration
               </p>
             </div>
@@ -224,7 +224,7 @@ function AgencyReview() {
                   />
 
                   <Detail
-                    icon={<Mail size={16} />}
+                    icon={<EnvelopeSimple size={16} />}
                     label="Email Address"
                     value={agent.email}
                   />
@@ -236,7 +236,7 @@ function AgencyReview() {
                   />
 
                   <Detail
-                    icon={<BriefcaseBusiness size={16} />}
+                    icon={<Briefcase size={16} />}
                     label="Agent ID"
                     value={agent.agentId}
                   />
@@ -287,19 +287,19 @@ function AgencyReview() {
                   />
 
                   <Detail
-                    icon={<Clock3 size={16} />}
+                    icon={<Clock size={16} />}
                     label="License Expiry"
                     value={agent.licenseExpiry}
                   />
 
                   <Detail
-                    icon={<BriefcaseBusiness size={16} />}
+                    icon={<Briefcase size={16} />}
                     label="Experience"
                     value={formatExperience(agent.experience)}
                   />
 
                   <Detail
-                    icon={<CheckCircle2 size={16} />}
+                    icon={<CheckCircle size={16} />}
                     label="Verification"
                     value="Documents Submitted"
                   />
@@ -382,7 +382,7 @@ function AgencyReview() {
                       onClick={handleApprove}
                       className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-600/10 transition hover:bg-emerald-700"
                     >
-                      <CheckCircle2 size={18} />
+                      <CheckCircle size={18} />
                       Approve Agent
                     </button>
 
@@ -403,7 +403,7 @@ function AgencyReview() {
 
                     <div className="flex items-center gap-2 text-emerald-700">
 
-                      <CheckCircle2 size={18} />
+                      <CheckCircle size={18} />
 
                       <span className="text-sm font-bold">
                         Application Approved
@@ -489,7 +489,7 @@ function AgencyReview() {
 
                 <div className="flex items-start gap-3">
 
-                  <AlertTriangle
+                  <Warning
                     size={18}
                     className="mt-0.5 shrink-0 text-amber-600"
                   />
@@ -595,7 +595,7 @@ function Detail({
       <div className="flex items-center gap-2 text-slate-400">
         {icon}
 
-        <span className="text-[10px] font-bold uppercase tracking-wide">
+        <span className="text-[11px] font-bold uppercase tracking-wide">
           {label}
         </span>
       </div>
@@ -641,7 +641,7 @@ function DocumentRow({
       </div>
 
       {file && (
-        <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-1 text-[9px] font-bold text-emerald-600">
+        <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-600">
           SUBMITTED
         </span>
       )}
@@ -669,7 +669,7 @@ function ChecklistItem({
             : "bg-slate-100 text-slate-400"
         }`}
       >
-        {checked && <CheckCircle2 size={13} />}
+        {checked && <CheckCircle size={13} />}
       </div>
 
       <span
@@ -695,7 +695,7 @@ function StatusBadge({ status }) {
   if (status === "approved") {
     return (
       <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
-        <CheckCircle2 size={14} />
+        <CheckCircle size={14} />
         Approved
       </span>
     );
@@ -712,7 +712,7 @@ function StatusBadge({ status }) {
 
   return (
     <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700">
-      <Clock3 size={14} />
+      <Clock size={14} />
       Pending Review
     </span>
   );

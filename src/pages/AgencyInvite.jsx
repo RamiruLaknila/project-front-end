@@ -3,17 +3,17 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Bell,
-  Building2,
+  Buildings,
   Check,
-  CheckCircle2,
+  CheckCircle,
   Copy,
-  Mail,
-  RefreshCw,
-  Send,
+  EnvelopeSimple,
+  ArrowsClockwise,
+  PaperPlaneTilt,
   Users,
   UserPlus,
   X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import AgentAdminSidebar from "../components/AgentAdminSidebar";
 
 function AgencyInvite() {
@@ -328,7 +328,7 @@ function AgencyInvite() {
 
             <div>
 
-              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
+              <p className="text-[12px] font-bold uppercase tracking-[0.15em] text-slate-400">
                 Agency Workspace
               </p>
 
@@ -350,11 +350,12 @@ function AgencyInvite() {
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
               title="Refresh"
             >
-              <RefreshCw size={18} />
+              <ArrowsClockwise size={18} />
             </button>
 
             <button
               type="button"
+              onClick={() => navigate("/agent-admin-notifications")}
               className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
               title="Notifications"
             >
@@ -394,11 +395,11 @@ function AgencyInvite() {
 
               <div>
 
-                <h2 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+                <h2 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
                   Invite Agents
                 </h2>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[16px]">
                   Invite clearing agents to join your agency and collaborate
                   on SME import requests.
                 </p>
@@ -430,7 +431,7 @@ function AgencyInvite() {
                 <div className="mb-6">
 
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
-                    <Mail size={19} />
+                    <EnvelopeSimple size={19} />
                   </div>
 
                   <h3 className="text-base font-bold text-slate-800">
@@ -463,7 +464,7 @@ function AgencyInvite() {
                 {sent && (
                   <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
 
-                    <CheckCircle2
+                    <CheckCircle
                       size={18}
                       className="mt-0.5 shrink-0 text-emerald-600"
                     />
@@ -552,7 +553,7 @@ function AgencyInvite() {
                     type="submit"
                     className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 text-sm font-semibold text-white transition hover:bg-[#10294d]"
                   >
-                    <Send size={17} />
+                    <PaperPlaneTilt size={17} />
                     Send Invitation
                   </button>
 
@@ -576,7 +577,7 @@ function AgencyInvite() {
 
                     <div>
 
-                      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                      <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-slate-400">
                         Your Agency
                       </p>
 
@@ -589,7 +590,7 @@ function AgencyInvite() {
                     </div>
 
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-500">
-                      <Building2 size={18} />
+                      <Buildings size={18} />
                     </div>
 
                   </div>
@@ -600,7 +601,7 @@ function AgencyInvite() {
 
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
 
-                    <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+                    <p className="mb-1 text-[12px] font-semibold uppercase tracking-[0.1em] text-slate-400">
                       Agency Code
                     </p>
 

@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft,
-  Building2,
+  Buildings,
   Check,
-  ChevronRight,
-  UserRound,
-} from "lucide-react";
+  CaretRight,
+  UserCircle,
+} from "@phosphor-icons/react";
 
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
@@ -207,7 +207,7 @@ function CompleteProfile() {
             className="flex items-center gap-3"
           >
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-16 w-16 rounded-xl object-contain"
             />
@@ -235,10 +235,10 @@ function CompleteProfile() {
           <div className="mb-7 text-center">
 
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-[#173563]">
-              <UserRound size={26} />
+              <UserCircle size={26} />
             </div>
 
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
               Complete your profile
             </h1>
 
@@ -258,7 +258,7 @@ function CompleteProfile() {
             <div className="flex items-start gap-3">
 
               <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
-                <Check size={14} strokeWidth={3} />
+                <Check size={14} />
               </div>
 
               <div>
@@ -403,7 +403,7 @@ function CompleteProfile() {
 
                   {accountType === "individual" && (
                     <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white">
-                      <Check size={12} strokeWidth={3} />
+                      <Check size={12} />
                     </div>
                   )}
 
@@ -414,7 +414,7 @@ function CompleteProfile() {
                         : "bg-blue-50 text-blue-600"
                     }`}
                   >
-                    <UserRound size={19} />
+                    <UserCircle size={19} />
                   </div>
 
                   <h3 className="mt-3 text-sm font-semibold text-slate-900">
@@ -443,7 +443,7 @@ function CompleteProfile() {
 
                   {accountType === "business" && (
                     <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white">
-                      <Check size={12} strokeWidth={3} />
+                      <Check size={12} />
                     </div>
                   )}
 
@@ -454,7 +454,7 @@ function CompleteProfile() {
                         : "bg-blue-50 text-blue-600"
                     }`}
                   >
-                    <Building2 size={19} />
+                    <Buildings size={19} />
                   </div>
 
                   <h3 className="mt-3 text-sm font-semibold text-slate-900">
@@ -657,7 +657,7 @@ function CompleteProfile() {
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#173563] py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-[#102547] focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting ? "Saving…" : "Save & Continue"}
-                <ChevronRight size={17} />
+                <CaretRight size={17} />
               </button>
 
               <button

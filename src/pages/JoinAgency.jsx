@@ -3,16 +3,16 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
-  Building2,
-  CheckCircle2,
-  Search,
+  Buildings,
+  CheckCircle,
+  MagnifyingGlass,
   ShieldCheck,
-  UserRound,
+  UserCircle,
   FileText,
   Lock,
   Eye,
-  EyeOff,
-} from "lucide-react";
+  EyeSlash,
+} from "@phosphor-icons/react";
 
 import { useAuth } from "../context/AuthContext";
 import { authErrorMessage } from "../lib/authErrors";
@@ -187,14 +187,14 @@ function JoinAgency() {
 
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#173563]">
-              <Building2
+              <Buildings
                 size={21}
                 className="text-white"
               />
             </div>
 
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                 Join an Existing Agency
               </h1>
               <p className="mt-1 text-sm text-slate-500">
@@ -244,13 +244,13 @@ function JoinAgency() {
           {step === 1 && (
             <div>
               <SectionHeader
-                icon={Search}
+                icon={MagnifyingGlass}
                 title="Enter Your Agency Code"
                 description="Your agency administrator has a unique code (e.g. AG-7X3K9P). Enter it to request to join."
               />
 
               <div className="relative mt-7">
-                <Building2
+                <Buildings
                   size={18}
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
                 />
@@ -302,7 +302,7 @@ function JoinAgency() {
           {step === 2 && (
             <div>
               <SectionHeader
-                icon={UserRound}
+                icon={UserCircle}
                 title="Personal Details & Security"
                 description="Enter your personal credentials and set up an account password."
               />
@@ -382,7 +382,7 @@ function JoinAgency() {
               </div>
 
               <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-600">
+                <p className="text-[12px] font-semibold uppercase tracking-wide text-blue-600">
                   Joining agency
                 </p>
                 <p className="mt-1 text-sm font-bold text-slate-900">
@@ -458,7 +458,7 @@ function JoinAgency() {
           {step === 4 && (
             <div>
               <SectionHeader
-                icon={CheckCircle2}
+                icon={CheckCircle}
                 title="Review Application"
                 description="Check your information before submitting."
               />
@@ -553,7 +553,7 @@ function StepIndicator({ number, title, active, completed }) {
             : "bg-slate-100 text-slate-400"
         }`}
       >
-        {completed ? <CheckCircle2 size={15} /> : number}
+        {completed ? <CheckCircle size={15} /> : number}
       </div>
 
       <span
@@ -619,7 +619,7 @@ function InputField({
         }`}
       />
 
-      {error && <p className="mt-1.5 text-[11px] text-red-500">{error}</p>}
+      {error && <p className="mt-1.5 text-[12px] text-red-500">{error}</p>}
     </div>
   );
 }
@@ -669,11 +669,11 @@ function PasswordField({
           onClick={() => setShowPassword(!showPassword)}
           className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600"
         >
-          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+          {showPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
         </button>
       </div>
 
-      {error && <p className="mt-1.5 text-[11px] text-red-500">{error}</p>}
+      {error && <p className="mt-1.5 text-[12px] text-red-500">{error}</p>}
     </div>
   );
 }
@@ -702,7 +702,7 @@ function SelectField({ label, value, onChange, children, error, required = false
         {children}
       </select>
 
-      {error && <p className="mt-1.5 text-[11px] text-red-500">{error}</p>}
+      {error && <p className="mt-1.5 text-[12px] text-red-500">{error}</p>}
     </div>
   );
 }

@@ -4,14 +4,14 @@ import {
   ArrowLeft,
   Bell,
   Check,
-  CheckCircle2,
-  Clock3,
-  Mail,
-  RefreshCw,
+  CheckCircle,
+  Clock,
+  EnvelopeSimple,
+  ArrowsClockwise,
   UserPlus,
   Users,
   X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import AgentAdminSidebar from "../components/AgentAdminSidebar";
 
 function AgencyAgents() {
@@ -469,7 +469,7 @@ function AgencyAgents() {
 
             <div>
 
-              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
+              <p className="text-[12px] font-bold uppercase tracking-[0.15em] text-slate-400">
                 Agency Workspace
               </p>
 
@@ -491,11 +491,12 @@ function AgencyAgents() {
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
               title="Refresh"
             >
-              <RefreshCw size={18} />
+              <ArrowsClockwise size={18} />
             </button>
 
             <button
               type="button"
+              onClick={() => navigate("/agent-admin-notifications")}
               className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
               title="Notifications"
             >
@@ -532,11 +533,11 @@ function AgencyAgents() {
 
               <div>
 
-                <h2 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+                <h2 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
                   Manage Agents
                 </h2>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[16px]">
                   Review membership requests and
                   manage the agents in your agency.
                 </p>
@@ -572,14 +573,14 @@ function AgencyAgents() {
             />
 
             <SummaryCard
-              icon={Clock3}
+              icon={Clock}
               label="Pending Requests"
               value={agencyPendingRequests.length}
               iconStyle="bg-amber-50 text-amber-700"
             />
 
             <SummaryCard
-              icon={CheckCircle2}
+              icon={CheckCircle}
               label="Active Agents"
               value={activeAgents.length}
               iconStyle="bg-emerald-50 text-emerald-700"
@@ -612,7 +613,7 @@ function AgencyAgents() {
                 onClick={loadData}
                 className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
               >
-                <RefreshCw size={15} />
+                <ArrowsClockwise size={15} />
                 Refresh
               </button>
 
@@ -623,7 +624,7 @@ function AgencyAgents() {
               {agencyPendingRequests.length === 0 ? (
 
                 <EmptyState
-                  icon={CheckCircle2}
+                  icon={CheckCircle}
                   title="No pending requests"
                   description="New agent membership requests will appear here."
                 />
@@ -768,15 +769,15 @@ function AgentRow({
 
             {pending ? (
 
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-700">
-                <Clock3 size={11} />
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
+                <Clock size={11} />
                 Pending
               </span>
 
             ) : (
 
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">
-                <CheckCircle2 size={11} />
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                <CheckCircle size={11} />
                 Active
               </span>
 
@@ -787,7 +788,7 @@ function AgentRow({
           <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-slate-400">
 
             <span className="inline-flex items-center gap-1.5">
-              <Mail size={12} />
+              <EnvelopeSimple size={12} />
               {agent.email || "No email"}
             </span>
 
@@ -873,7 +874,6 @@ function SummaryCard({
 
           <Icon
             size={19}
-            strokeWidth={1.8}
           />
 
         </div>

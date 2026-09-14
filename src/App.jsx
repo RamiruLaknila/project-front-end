@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { AuthProvider } from "./context/AuthContext";
 import RequireAuth from "./components/RequireAuth";
+import RequireSmeAccess from "./components/RequireSmeAccess";
+import ScrollToTop from "./components/ScrollToTop";
 import AdminAgentApprovals from "./pages/AdminAgentApprovals";
 
 // =====================================================
@@ -24,6 +26,7 @@ import CompleteProfile from "./pages/CompleteProfile";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import SMEGuest from "./pages/SMEGuest";
+import Notifications from "./pages/Notifications";
 import IndividualAgentSettings from "./pages/IndividualAgentSettings";
 // =====================================================
 // CLEARING AGENT AUTH
@@ -83,11 +86,15 @@ import IndividualAgentBids from "./pages/IndividualAgentBids";
 import AgentAdminSettings from "./pages/AgentAdminSettings";
 import IndividualAgentShipments from "./pages/IndividualAgentShipments";
 import AgentSettings from "./pages/AgentSettings";
+import AgentNotifications from "./pages/AgentNotifications";
+import IndividualAgentNotifications from "./pages/IndividualAgentNotifications";
+import AgentAdminNotifications from "./pages/AgentAdminNotifications";
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <ScrollToTop />
         <Routes>
 
         {/* =====================================================
@@ -196,7 +203,11 @@ function App() {
 
         <Route
           path="/new-import"
-          element={<NewImport />}
+          element={
+            <RequireSmeAccess pageName="Starting a new import">
+              <NewImport />
+            </RequireSmeAccess>
+          }
         />
 
         <Route
@@ -216,12 +227,20 @@ function App() {
 
         <Route
           path="/find-agent"
-          element={<FindAgent />}
+          element={
+            <RequireSmeAccess pageName="Find Agent">
+              <FindAgent />
+            </RequireSmeAccess>
+          }
         />
 
         <Route
           path="/shipment-confirmation"
-          element={<ShipmentConfirmation />}
+          element={
+            <RequireSmeAccess pageName="Shipment confirmation">
+              <ShipmentConfirmation />
+            </RequireSmeAccess>
+          }
         />
 
 
@@ -231,12 +250,20 @@ function App() {
 
         <Route
           path="/shipments"
-          element={<Shipments />}
+          element={
+            <RequireSmeAccess pageName="Shipments">
+              <Shipments />
+            </RequireSmeAccess>
+          }
         />
 
         <Route
           path="/track-shipment"
-          element={<TrackShipment />}
+          element={
+            <RequireSmeAccess pageName="Track Shipment">
+              <TrackShipment />
+            </RequireSmeAccess>
+          }
         />
 
 
@@ -246,7 +273,11 @@ function App() {
 
         <Route
           path="/documents"
-          element={<Documents />}
+          element={
+            <RequireSmeAccess pageName="Documents">
+              <Documents />
+            </RequireSmeAccess>
+          }
         />
 
 
@@ -256,17 +287,38 @@ function App() {
 
         <Route
           path="/profile"
-          element={<Profile />}
+          element={
+            <RequireSmeAccess pageName="Profile">
+              <Profile />
+            </RequireSmeAccess>
+          }
         />
 
         <Route
           path="/settings"
-          element={<Settings />}
+          element={
+            <RequireSmeAccess pageName="Settings">
+              <Settings />
+            </RequireSmeAccess>
+          }
         />
 
         <Route
           path="/messages"
-          element={<Messages />}
+          element={
+            <RequireSmeAccess pageName="Messages">
+              <Messages />
+            </RequireSmeAccess>
+          }
+        />
+
+        <Route
+          path="/notifications"
+          element={
+            <RequireSmeAccess pageName="Notifications">
+              <Notifications />
+            </RequireSmeAccess>
+          }
         />
 
 
@@ -467,6 +519,25 @@ function App() {
   path="/agent-shipments"
   element={<AgentShipments />}
 />
+
+        {/* =====================================================
+            NOTIFICATIONS
+        ===================================================== */}
+
+        <Route
+          path="/agent-notifications"
+          element={<AgentNotifications />}
+        />
+
+        <Route
+          path="/individual-agent-notifications"
+          element={<IndividualAgentNotifications />}
+        />
+
+        <Route
+          path="/agent-admin-notifications"
+          element={<AgentAdminNotifications />}
+        />
 
         </Routes>
       </AuthProvider>

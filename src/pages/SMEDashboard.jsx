@@ -1,28 +1,28 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Search,
+  SquaresFour,
+  MagnifyingGlass,
   Calculator,
   Package,
   FileText,
   Users,
-  Settings,
+  Gear,
   Bell,
-  ChevronDown,
-  ChevronRight,
+  CaretDown,
+  CaretRight,
   Plus,
   ArrowUpRight,
-  Clock3,
-  CheckCircle2,
-  CircleAlert,
-  Menu,
+  Clock,
+  CheckCircle,
+  WarningCircle,
+  List,
   X,
-  LogOut,
-  Ship,
-  MoreHorizontal,
-  TrendingUp,
-} from "lucide-react";
+  SignOut,
+  Boat,
+  DotsThree,
+  TrendUp,
+} from "@phosphor-icons/react";
 
 function SMEDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -88,9 +88,9 @@ function SMEDashboard() {
             className="flex items-center gap-2.5"
           >
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
-              className="h-10 w-10 object-contain mix-blend-multiply"
+              className="h-10 w-10 object-contain"
             />
 
             <span className="text-xl font-bold tracking-tight text-[#173563]">
@@ -111,7 +111,7 @@ function SMEDashboard() {
 
         <div className="mx-4 mt-5 rounded-xl bg-[#F4F7FB] px-3 py-3">
 
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             Account
           </p>
 
@@ -126,7 +126,7 @@ function SMEDashboard() {
                 SME / Importer
               </p>
 
-              <p className="text-[10px] text-slate-400">
+              <p className="text-[11px] text-slate-400">
                 Business Account
               </p>
             </div>
@@ -139,19 +139,19 @@ function SMEDashboard() {
 
         <nav className="mt-6 flex-1 px-4">
 
-          <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             Main Menu
           </p>
 
           <NavItem
-            icon={<LayoutDashboard size={17} />}
+            icon={<SquaresFour size={17} />}
             label="Dashboard"
             active
           />
 
           <NavItem
             to="/hs-search"
-            icon={<Search size={17} />}
+            icon={<MagnifyingGlass size={17} />}
             label="HS Code Search"
           />
 
@@ -167,7 +167,7 @@ function SMEDashboard() {
           
 
           <NavItem
-            icon={<Ship size={17} />}
+            icon={<Boat size={17} />}
             label="My Shipments"
           />
 
@@ -176,12 +176,12 @@ function SMEDashboard() {
             label="Documents"
           />
 
-          <p className="mb-2 mt-7 px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+          <p className="mb-2 mt-7 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             Account
           </p>
 
           <NavItem
-            icon={<Settings size={17} />}
+            icon={<Gear size={17} />}
             label="Settings"
           />
 
@@ -213,7 +213,7 @@ function SMEDashboard() {
               onClick={() => setSidebarOpen(true)}
               className="rounded-lg p-2 text-slate-500 transition duration-200 hover:bg-slate-100 hover:text-slate-800 lg:hidden"
             >
-              <Menu size={21} />
+              <List size={21} />
             </button>
 
             <div className="hidden sm:block">
@@ -236,11 +236,11 @@ function SMEDashboard() {
 
             <button className="hidden rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-400 transition duration-200 hover:border-slate-300 hover:bg-slate-50 sm:flex sm:items-center sm:gap-2">
 
-              <Search size={15} />
+              <MagnifyingGlass size={15} />
 
-              Search
+              MagnifyingGlass
 
-              <span className="rounded border border-slate-200 px-1.5 py-0.5 text-[9px]">
+              <span className="rounded border border-slate-200 px-1.5 py-0.5 text-[10px]">
                 /
               </span>
 
@@ -270,13 +270,13 @@ function SMEDashboard() {
                   My Business
                 </p>
 
-                <p className="text-[10px] text-slate-400">
+                <p className="text-[11px] text-slate-400">
                   SME Account
                 </p>
 
               </div>
 
-              <ChevronDown
+              <CaretDown
                 size={15}
                 className="hidden text-slate-400 md:block"
               />
@@ -305,7 +305,7 @@ function SMEDashboard() {
                 Wednesday, August 19, 2026
               </p>
 
-              <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+              <h1 className="mt-1 text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
                 Good morning, My Business
               </h1>
 
@@ -355,7 +355,7 @@ function SMEDashboard() {
                 title="Pending Clearances"
                 value="2"
                 description="Awaiting action"
-                icon={<Clock3 size={19} />}
+                icon={<Clock size={19} />}
                 trend="Needs attention"
                 warning
               />
@@ -369,7 +369,7 @@ function SMEDashboard() {
                 title="Completed"
                 value="12"
                 description="Successfully cleared"
-                icon={<CheckCircle2 size={19} />}
+                icon={<CheckCircle size={19} />}
                 trend="+3 this month"
               />
             </div>
@@ -422,7 +422,7 @@ function SMEDashboard() {
 
                   View all
 
-                  <ChevronRight size={14} />
+                  <CaretRight size={14} />
 
                 </button>
 
@@ -438,19 +438,19 @@ function SMEDashboard() {
 
                     <tr className="border-b border-slate-100 bg-slate-50/70">
 
-                      <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                         Shipment
                       </th>
 
-                      <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                         Origin
                       </th>
 
-                      <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                         Status
                       </th>
 
-                      <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                         Progress
                       </th>
 
@@ -483,7 +483,7 @@ function SMEDashboard() {
                                 {shipment.product}
                               </p>
 
-                              <p className="mt-0.5 text-[10px] text-slate-400">
+                              <p className="mt-0.5 text-[11px] text-slate-400">
                                 {shipment.id}
                               </p>
 
@@ -508,7 +508,7 @@ function SMEDashboard() {
                             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
 
                               <div
-                                className="dashboard-progress h-full rounded-full bg-[#173563]"
+                                className="dashboard-progress h-full rounded-full bg-emerald-600"
                                 style={{
                                   width: `${shipment.progress}%`,
                                   animationDelay: "500ms",
@@ -517,7 +517,7 @@ function SMEDashboard() {
 
                             </div>
 
-                            <span className="text-[10px] font-semibold text-slate-500">
+                            <span className="text-[11px] font-semibold text-slate-500">
                               {shipment.progress}%
                             </span>
 
@@ -529,7 +529,7 @@ function SMEDashboard() {
 
                           <button className="rounded-lg p-1.5 text-slate-400 transition duration-200 hover:bg-slate-100 hover:text-slate-700">
 
-                            <MoreHorizontal size={17} />
+                            <DotsThree size={17} />
 
                           </button>
 
@@ -570,7 +570,7 @@ function SMEDashboard() {
                             {shipment.product}
                           </p>
 
-                          <p className="text-[10px] text-slate-400">
+                          <p className="text-[11px] text-slate-400">
                             {shipment.id}
                           </p>
 
@@ -586,11 +586,11 @@ function SMEDashboard() {
 
                       <div className="mb-1.5 flex justify-between">
 
-                        <span className="text-[10px] text-slate-400">
+                        <span className="text-[11px] text-slate-400">
                           Clearance progress
                         </span>
 
-                        <span className="text-[10px] font-semibold text-slate-600">
+                        <span className="text-[11px] font-semibold text-slate-600">
                           {shipment.progress}%
                         </span>
 
@@ -599,7 +599,7 @@ function SMEDashboard() {
                       <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
 
                         <div
-                          className="dashboard-progress h-full rounded-full bg-[#173563]"
+                          className="dashboard-progress h-full rounded-full bg-emerald-600"
                           style={{
                             width: `${shipment.progress}%`,
                           }}
@@ -635,7 +635,7 @@ function SMEDashboard() {
                 <div className="flex items-start gap-3">
 
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#173563] shadow-sm">
-                    <CircleAlert size={17} />
+                    <WarningCircle size={17} />
                   </div>
 
                   <div>
@@ -683,7 +683,7 @@ function SMEDashboard() {
                   </div>
 
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EEF3F9] text-[#173563]">
-                    <TrendingUp size={17} />
+                    <TrendUp size={17} />
                   </div>
 
                 </div>
@@ -722,7 +722,7 @@ function SMEDashboard() {
                     <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
 
                       <div
-                        className="dashboard-progress h-full rounded-full bg-[#173563]"
+                        className="dashboard-progress h-full rounded-full bg-emerald-600"
                         style={{ width: "72%" }}
                       />
 
@@ -779,7 +779,7 @@ function SMEDashboard() {
               FOOTER
           ===================================================== */}
 
-          <footer className="mt-8 flex flex-col justify-between gap-2 border-t border-slate-200 pt-5 text-[10px] text-slate-400 sm:flex-row">
+          <footer className="mt-8 flex flex-col justify-between gap-2 border-t border-slate-200 pt-5 text-[11px] text-slate-400 sm:flex-row">
 
             <p>
               © 2026 ImportEase. All rights reserved.
@@ -797,7 +797,7 @@ function SMEDashboard() {
 
               <button className="flex items-center gap-1 transition hover:text-slate-600">
 
-                <LogOut size={11} />
+                <SignOut size={11} />
 
                 Sign out
 
@@ -873,7 +873,7 @@ function StatCard({
         </div>
 
         <span
-          className={`rounded-full px-2 py-1 text-[9px] font-semibold ${
+          className={`rounded-full px-2 py-1 text-[10px] font-semibold ${
             warning
               ? "bg-amber-50 text-amber-600"
               : "bg-emerald-50 text-emerald-600"
@@ -886,7 +886,7 @@ function StatCard({
 
       <div className="mt-4">
 
-        <p className="text-[11px] font-medium text-slate-400">
+        <p className="text-[12px] font-medium text-slate-400">
           {title}
         </p>
 
@@ -894,7 +894,7 @@ function StatCard({
           {value}
         </p>
 
-        <p className="mt-1 text-[10px] text-slate-400">
+        <p className="mt-1 text-[11px] text-slate-400">
           {description}
         </p>
 
@@ -919,7 +919,7 @@ function StatusBadge({ status }) {
 
   return (
     <span
-      className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-[9px] font-semibold ${
+      className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-semibold ${
         styles[status] || "bg-slate-100 text-slate-500"
       }`}
     >

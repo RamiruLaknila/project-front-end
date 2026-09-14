@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Bell,
-  Building2,
-  CalendarDays,
-  CheckCircle2,
-  Clock3,
+  Buildings,
+  CalendarDots,
+  CheckCircle,
+  Clock,
   FileText,
   Package,
-  Search,
-} from "lucide-react";
+  MagnifyingGlass,
+} from "@phosphor-icons/react";
 import AgentMemberSidebar from "../components/AgentMemberSidebar";
 
 /* =========================================================
@@ -209,7 +209,7 @@ function AgentShipments() {
         <header className="sticky top-[68px] z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur-xl sm:px-6 lg:top-0">
           <div className="flex items-center">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                 Agency Member Workspace
               </p>
 
@@ -222,6 +222,7 @@ function AgentShipments() {
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={() => navigate("/agent-notifications")}
               className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-[#2563EB]"
             >
               <Bell size={17} />
@@ -255,11 +256,11 @@ function AgentShipments() {
 
             <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
               <div>
-                <h2 className="text-[32px] font-bold leading-tight tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+                <h2 className="text-[35px] font-bold leading-tight tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
                   My Shipments
                 </h2>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[16px]">
                   View shipments assigned to you and
                   monitor their current progress.
                 </p>
@@ -273,7 +274,7 @@ function AgentShipments() {
                 }}
                 className="inline-flex w-fit items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-[#2563EB] hover:bg-blue-50 hover:text-[#2563EB]"
               >
-                <Clock3 size={15} />
+                <Clock size={15} />
                 Reset
               </button>
             </div>
@@ -291,7 +292,7 @@ function AgentShipments() {
             />
 
             <SummaryCard
-              icon={Clock3}
+              icon={Clock}
               label="Pending"
               value={pendingShipments}
               description="Awaiting processing"
@@ -307,7 +308,7 @@ function AgentShipments() {
             />
 
             <SummaryCard
-              icon={CheckCircle2}
+              icon={CheckCircle}
               label="Completed"
               value={completedShipments}
               description="Successfully completed"
@@ -320,7 +321,7 @@ function AgentShipments() {
           <section className="mb-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
             <div className="flex flex-col gap-3 md:flex-row">
               <div className="relative flex-1">
-                <Search
+                <MagnifyingGlass
                   size={16}
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                 />
@@ -371,7 +372,7 @@ function AgentShipments() {
                   Assigned Shipments
                 </h2>
 
-                <p className="mt-1 text-[11px] text-slate-500">
+                <p className="mt-1 text-[12px] text-slate-500">
                   {filteredShipments.length} shipment
                   {filteredShipments.length !== 1
                     ? "s"
@@ -400,7 +401,7 @@ function AgentShipments() {
 
           {/* FOOTER */}
 
-          <div className="mt-9 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-[10px] text-slate-400">
+          <div className="mt-9 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-[11px] text-slate-400">
             ImportEase · Agency Member Platform
           </div>
         </div>
@@ -424,7 +425,7 @@ function SummaryCard({
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)] transition hover:-translate-y-0.5 hover:border-blue-100 hover:shadow-md">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[11px] font-semibold text-slate-400">
+          <p className="text-[12px] font-semibold text-slate-400">
             {label}
           </p>
 
@@ -432,7 +433,7 @@ function SummaryCard({
             {value}
           </p>
 
-          <p className="mt-1 text-[10px] text-slate-400">
+          <p className="mt-1 text-[11px] text-slate-400">
             {description}
           </p>
         </div>
@@ -442,7 +443,6 @@ function SummaryCard({
         >
           <Icon
             size={18}
-            strokeWidth={1.8}
           />
         </div>
       </div>
@@ -463,8 +463,8 @@ function ShipmentCard({ shipment }) {
 
   const StatusIcon =
     shipment.status === "Completed"
-      ? CheckCircle2
-      : Clock3;
+      ? CheckCircle
+      : Clock;
 
   return (
     <div className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)] transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/30 hover:shadow-md">
@@ -475,7 +475,6 @@ function ShipmentCard({ shipment }) {
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition group-hover:bg-blue-100">
             <Package
               size={21}
-              strokeWidth={1.8}
             />
           </div>
 
@@ -486,7 +485,7 @@ function ShipmentCard({ shipment }) {
               </h3>
 
               <span
-                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-bold ${
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold ${
                   statusStyles[shipment.status] ||
                   "bg-slate-100 text-slate-600"
                 }`}
@@ -496,13 +495,13 @@ function ShipmentCard({ shipment }) {
               </span>
             </div>
 
-            <p className="mt-1 text-[10px] font-semibold text-slate-400">
+            <p className="mt-1 text-[11px] font-semibold text-slate-400">
               {shipment.id}
             </p>
 
-            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-[10px] text-slate-500">
+            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-[11px] text-slate-500">
               <span className="inline-flex items-center gap-1.5">
-                <Building2 size={11} />
+                <Buildings size={11} />
                 {shipment.company}
               </span>
 
@@ -513,7 +512,7 @@ function ShipmentCard({ shipment }) {
               </span>
 
               <span className="inline-flex items-center gap-1.5">
-                <CalendarDays size={11} />
+                <CalendarDots size={11} />
                 {formatDate(shipment.date)}
               </span>
             </div>
@@ -524,18 +523,18 @@ function ShipmentCard({ shipment }) {
 
         <div className="w-full lg:w-[230px]">
           <div className="mb-1.5 flex items-center justify-between">
-            <span className="text-[10px] font-medium text-slate-400">
+            <span className="text-[11px] font-medium text-slate-400">
               Progress
             </span>
 
-            <span className="text-[10px] font-bold text-slate-600">
+            <span className="text-[11px] font-bold text-slate-600">
               {shipment.progress}%
             </span>
           </div>
 
           <div className="h-2 overflow-hidden rounded-full bg-slate-100">
             <div
-              className="h-full rounded-full bg-[#173563] transition-all duration-500"
+              className="h-full rounded-full bg-emerald-600 transition-all duration-500"
               style={{
                 width: `${shipment.progress}%`,
               }}
@@ -571,7 +570,7 @@ function EmptyState({
             : "No shipments yet"}
         </h3>
 
-        <p className="mt-1 max-w-sm text-[11px] leading-5 text-slate-400">
+        <p className="mt-1 max-w-sm text-[12px] leading-5 text-slate-400">
           {hasFilter
             ? "Try changing your search or status filter."
             : "Shipments assigned to you will appear here."}

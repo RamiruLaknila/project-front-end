@@ -4,15 +4,15 @@ import {
   ArrowLeft,
   ArrowRight,
   Calculator,
-  CircleHelp,
+  Question,
   Info,
   Package,
-  RefreshCcw,
+  ArrowsCounterClockwise,
   ShieldCheck,
-  Sparkles,
+  Sparkle,
   Truck,
-  CheckCircle2,
-} from "lucide-react";
+  CheckCircle,
+} from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
 import BackButton from "../components/ui/BackButton";
@@ -321,11 +321,11 @@ function ImportCalculator() {
 
           <div className="flex flex-col items-center justify-center text-center">
 
-            <h1 className="text-[30px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[40px]">
+            <h1 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
               Estimate your import cost
             </h1>
 
-            <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+            <p className="mx-auto mt-2 max-w-2xl text-[14px] leading-6 text-slate-500 sm:text-[16px]">
               Estimate customs duty, VAT, freight, and other
               import costs before placing your order.
             </p>
@@ -356,7 +356,6 @@ function ImportCalculator() {
 
                   <Package
                     size={18}
-                    strokeWidth={1.8}
                   />
 
                 </div>
@@ -367,7 +366,7 @@ function ImportCalculator() {
                     Import information
                   </h2>
 
-                  <p className="mt-1 text-[13px] text-slate-500">
+                  <p className="mt-1 text-[14px] text-slate-500">
                     Enter the estimated costs for your shipment.
                   </p>
 
@@ -419,7 +418,7 @@ function ImportCalculator() {
                     Tax assumptions
                   </h3>
 
-                  <p className="mt-1 text-[11px] leading-5 text-slate-400">
+                  <p className="mt-1 text-[12px] leading-5 text-slate-400">
                     Adjust these values based on the applicable
                     tariff information.
                   </p>
@@ -492,7 +491,7 @@ function ImportCalculator() {
                   className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-600 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
                 >
 
-                  <RefreshCcw size={15} />
+                  <ArrowsCounterClockwise size={15} />
 
                   Reset
 
@@ -522,11 +521,11 @@ function ImportCalculator() {
 
                   <div>
 
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-blue-200">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-200">
                       Estimated total
                     </p>
 
-                    <h2 className="mt-2 text-[26px] font-bold tracking-[-0.03em]">
+                    <h2 className="mt-2 text-[28px] font-bold tracking-[-0.03em]">
                       LKR{" "}
                       {formatCurrency(
                         values.totalImportCost
@@ -537,13 +536,13 @@ function ImportCalculator() {
 
                   <div className="pulse-soft flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
 
-                    <Sparkles size={19} />
+                    <Sparkle size={19} />
 
                   </div>
 
                 </div>
 
-                <p className="mt-2 text-[11px] leading-4 text-blue-100">
+                <p className="mt-2 text-[12px] leading-4 text-blue-100">
                   Estimated landed import cost
                 </p>
 
@@ -609,7 +608,7 @@ function ImportCalculator() {
 
                   <div className="slide-down mt-5 rounded-xl border border-slate-100 bg-slate-50 p-4 text-center">
 
-                    <p className="text-[11px] leading-5 text-slate-400">
+                    <p className="text-[12px] leading-5 text-slate-400">
                       Enter your values and calculate to
                       generate your estimate.
                     </p>
@@ -629,7 +628,7 @@ function ImportCalculator() {
                       className="mt-0.5 shrink-0 text-emerald-600"
                     />
 
-                    <p className="text-[11px] leading-5 text-emerald-700">
+                    <p className="text-[12px] leading-5 text-emerald-700">
                       Estimate generated successfully. Review
                       the result before continuing.
                     </p>
@@ -696,17 +695,17 @@ function ImportCalculator() {
 
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-blue-700 shadow-sm">
 
-                <CircleHelp size={17} />
+                <Question size={17} />
 
               </div>
 
               <div className="min-w-0 flex-1">
 
-                <p className="text-[11px] font-bold text-blue-900">
+                <p className="text-[12px] font-bold text-blue-900">
                   Not sure about your duty rate?
                 </p>
 
-                <p className="mt-1 text-[10px] leading-4 text-blue-700">
+                <p className="mt-1 text-[11px] leading-4 text-blue-700">
                   Search your product to review its HS code
                   and applicable tariff information.
                 </p>
@@ -771,7 +770,7 @@ function ImportCalculator() {
             FOOTER NOTE
         ==================================================== */}
 
-        <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[11px] text-slate-400">
+        <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[12px] text-slate-400">
 
           <ShieldCheck
             size={14}
@@ -824,7 +823,7 @@ function InputField({
 
         </label>
 
-        <span className="hidden text-[10px] text-slate-400 sm:block">
+        <span className="hidden text-[11px] text-slate-400 sm:block">
           {help}
         </span>
 
@@ -845,13 +844,13 @@ function InputField({
           className="h-12 w-full rounded-xl border border-slate-300 bg-white px-3.5 pr-14 text-sm font-medium text-slate-800 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
         />
 
-        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">
+        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">
           {suffix}
         </span>
 
       </div>
 
-      <p className="mt-1.5 text-[10px] text-slate-400 sm:hidden">
+      <p className="mt-1.5 text-[11px] text-slate-400 sm:hidden">
         {help}
       </p>
 
@@ -867,11 +866,11 @@ function ResultRow({ label, value }) {
   return (
     <div className="flex items-center justify-between gap-4">
 
-      <span className="text-[11px] text-slate-500">
+      <span className="text-[12px] text-slate-500">
         {label}
       </span>
 
-      <span className="text-[11px] font-semibold text-slate-700">
+      <span className="text-[12px] font-semibold text-slate-700">
         LKR {formatCurrency(value)}
       </span>
 
@@ -891,17 +890,17 @@ function Formula({
   return (
     <div className="flex gap-3">
 
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[9px] font-bold text-slate-500">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[10px] font-bold text-slate-500">
         {number}
       </div>
 
       <div>
 
-        <p className="text-[10px] font-bold text-slate-700">
+        <p className="text-[11px] font-bold text-slate-700">
           {title}
         </p>
 
-        <p className="mt-0.5 text-[9px] text-slate-400">
+        <p className="mt-0.5 text-[10px] text-slate-400">
           {text}
         </p>
 

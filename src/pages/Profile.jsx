@@ -4,15 +4,15 @@ import {
   ArrowLeft,
   ArrowRight,
   Camera,
-  CheckCircle2,
-  Mail,
+  CheckCircle,
+  EnvelopeSimple,
   MapPin,
   Phone,
-  Save,
+  FloppyDisk,
   ShieldCheck,
-  UserRound,
+  UserCircle,
   X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import AppNavbar from "../components/ui/AppNavbar";
 
 function Profile() {
@@ -264,11 +264,10 @@ function Profile() {
         {/* Back */}
         <Link
           to="/dashboard"
-          className="group mb-8 inline-flex items-center gap-2 text-[15px] font-semibold text-slate-600 transition hover:text-[#173563]"
+          className="group mb-8 inline-flex items-center gap-2 text-[16px] font-semibold text-slate-600 transition hover:text-[#173563]"
         >
           <ArrowLeft
             size={18}
-            strokeWidth={2}
             className="transition-transform duration-200 group-hover:-translate-x-1"
           />
 
@@ -278,15 +277,15 @@ function Profile() {
         {/* Page Heading */}
         <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="mb-2 text-[13px] font-bold uppercase tracking-[0.14em] text-blue-600">
+            <p className="mb-2 text-[14px] font-bold uppercase tracking-[0.14em] text-blue-600">
               Account
             </p>
 
-            <h1 className="text-[34px] font-bold tracking-[-0.035em] text-[#14233d] sm:text-[38px]">
+            <h1 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
               My Profile
             </h1>
 
-            <p className="mt-2 text-[16px] leading-7 text-slate-500">
+            <p className="mt-2 max-w-2xl text-[14px] leading-6 text-slate-500 sm:text-[16px]">
               Manage your personal and business information
             </p>
           </div>
@@ -296,7 +295,7 @@ function Profile() {
             <button
               type="button"
               onClick={handleEdit}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 text-[15px] font-semibold text-white shadow-[0_8px_20px_rgba(23,53,99,0.14)] transition hover:bg-[#214777] hover:shadow-[0_10px_24px_rgba(23,53,99,0.2)]"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 text-[16px] font-semibold text-white shadow-[0_8px_20px_rgba(23,53,99,0.14)] transition hover:bg-[#214777] hover:shadow-[0_10px_24px_rgba(23,53,99,0.2)]"
             >
               Edit Profile
               <ArrowRight size={17} />
@@ -306,7 +305,7 @@ function Profile() {
               <button
                 type="button"
                 onClick={handleCancel}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-[15px] font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-[16px] font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50"
               >
                 <X size={17} />
                 Cancel
@@ -315,9 +314,9 @@ function Profile() {
               <button
                 type="button"
                 onClick={handleSave}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 text-[15px] font-semibold text-white shadow-[0_8px_20px_rgba(23,53,99,0.14)] transition hover:bg-[#214777] hover:shadow-[0_10px_24px_rgba(23,53,99,0.2)]"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 text-[16px] font-semibold text-white shadow-[0_8px_20px_rgba(23,53,99,0.14)] transition hover:bg-[#214777] hover:shadow-[0_10px_24px_rgba(23,53,99,0.2)]"
               >
-                <Save size={17} />
+                <FloppyDisk size={17} />
                 Save Changes
               </button>
             </div>
@@ -326,8 +325,8 @@ function Profile() {
 
         {/* Success Message */}
         {saved && (
-          <div className="mb-6 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[14px] font-semibold text-emerald-700">
-            <CheckCircle2 size={18} />
+          <div className="mb-6 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[15px] font-semibold text-emerald-700">
+            <CheckCircle size={18} />
 
             Profile updated successfully.
           </div>
@@ -345,7 +344,7 @@ function Profile() {
           <div className="relative z-10 flex flex-col gap-7 sm:flex-row sm:items-center">
             {/* Profile Photo */}
             <div className="relative shrink-0">
-              <div className="flex h-[100px] w-[100px] items-center justify-center overflow-hidden rounded-[27px] border border-white/30 bg-white/10 text-[27px] font-bold tracking-wide text-white shadow-[0_12px_35px_rgba(0,0,0,0.18)] backdrop-blur-md">
+              <div className="flex h-[100px] w-[100px] items-center justify-center overflow-hidden rounded-[27px] border border-white/30 bg-white/10 text-[29px] font-bold tracking-wide text-white shadow-[0_12px_35px_rgba(0,0,0,0.18)] backdrop-blur-md">
                 {profile.photo ? (
                   <img
                     src={profile.photo}
@@ -377,7 +376,6 @@ function Profile() {
                   >
                     <Camera
                       size={17}
-                      strokeWidth={2.2}
                     />
                   </button>
 
@@ -394,24 +392,24 @@ function Profile() {
 
             {/* Profile Details */}
             <div className="min-w-0">
-              <p className="mb-1 text-[13px] font-semibold uppercase tracking-[0.14em] text-blue-100/75">
+              <p className="mb-1 text-[14px] font-semibold uppercase tracking-[0.14em] text-blue-100/75">
                 ImportEase Workspace
               </p>
 
-              <h2 className="truncate text-[28px] font-bold tracking-[-0.03em] text-white sm:text-[31px]">
+              <h2 className="truncate text-[30px] font-bold tracking-[-0.03em] text-white sm:text-[33px]">
                 {profile.businessName || "My Business"}
               </h2>
 
-              <p className="mt-1 text-[16px] font-medium text-blue-100">
+              <p className="mt-1 text-[17px] font-medium text-blue-100">
                 {profile.fullName || "Business Owner"}
               </p>
 
               <div className="mt-4 flex flex-wrap items-center gap-3">
-                <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-[13px] font-semibold text-white backdrop-blur-sm">
+                <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-[14px] font-semibold text-white backdrop-blur-sm">
                   {profile.businessType || "SME"}
                 </span>
 
-                <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3.5 py-1.5 text-[13px] font-medium text-emerald-100 backdrop-blur-sm">
+                <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3.5 py-1.5 text-[14px] font-medium text-emerald-100 backdrop-blur-sm">
                   <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
 
                   Active account
@@ -424,7 +422,7 @@ function Profile() {
                   <button
                     type="button"
                     onClick={handlePhotoClick}
-                    className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-3.5 py-2 text-[13px] font-semibold text-white backdrop-blur-sm transition hover:bg-white/15"
+                    className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-3.5 py-2 text-[14px] font-semibold text-white backdrop-blur-sm transition hover:bg-white/15"
                   >
                     <Camera size={15} />
 
@@ -437,7 +435,7 @@ function Profile() {
                     <button
                       type="button"
                       onClick={handleRemovePhoto}
-                      className="inline-flex items-center rounded-lg border border-white/10 bg-transparent px-3.5 py-2 text-[13px] font-medium text-blue-100 transition hover:bg-white/10"
+                      className="inline-flex items-center rounded-lg border border-white/10 bg-transparent px-3.5 py-2 text-[14px] font-medium text-blue-100 transition hover:bg-white/10"
                     >
                       Remove photo
                     </button>
@@ -452,15 +450,15 @@ function Profile() {
         <section className="mb-6 rounded-[22px] border border-slate-200/80 bg-white p-7 shadow-[0_4px_20px_rgba(15,23,42,0.04)] sm:p-8">
           <div className="mb-7 flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-              <UserRound size={19} />
+              <UserCircle size={19} />
             </div>
 
             <div>
-              <h2 className="text-[21px] font-bold tracking-[-0.02em] text-[#172033]">
+              <h2 className="text-[23px] font-bold tracking-[-0.02em] text-[#172033]">
                 Personal Information
               </h2>
 
-              <p className="mt-1.5 text-[15px] text-slate-500">
+              <p className="mt-1.5 text-[16px] text-slate-500">
                 Your primary account information
               </p>
             </div>
@@ -471,7 +469,7 @@ function Profile() {
             <div>
               <label
                 htmlFor="fullName"
-                className="mb-2 block text-[14px] font-semibold text-slate-600"
+                className="mb-2 block text-[15px] font-semibold text-slate-600"
               >
                 Full Name
               </label>
@@ -484,11 +482,11 @@ function Profile() {
                   value={profile.fullName}
                   onChange={handleChange}
                   autoComplete="name"
-                  className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white px-4 text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white px-4 text-[17px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   placeholder="Enter your full name"
                 />
               ) : (
-                <div className="flex min-h-[52px] items-center rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[16px] font-medium text-slate-800">
+                <div className="flex min-h-[52px] items-center rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[17px] font-medium text-slate-800">
                   {profile.fullName || "Not added"}
                 </div>
               )}
@@ -498,14 +496,14 @@ function Profile() {
             <div>
               <label
                 htmlFor="email"
-                className="mb-2 block text-[14px] font-semibold text-slate-600"
+                className="mb-2 block text-[15px] font-semibold text-slate-600"
               >
                 Email Address
               </label>
 
               {isEditing ? (
                 <div className="relative">
-                  <Mail
+                  <EnvelopeSimple
                     size={17}
                     className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                   />
@@ -517,13 +515,13 @@ function Profile() {
                     value={profile.email}
                     onChange={handleChange}
                     autoComplete="email"
-                    className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                    className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-[17px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                     placeholder="Enter your email"
                   />
                 </div>
               ) : (
-                <div className="flex min-h-[52px] items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[16px] font-medium text-slate-800">
-                  <Mail
+                <div className="flex min-h-[52px] items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[17px] font-medium text-slate-800">
+                  <EnvelopeSimple
                     size={17}
                     className="shrink-0 text-slate-400"
                   />
@@ -539,7 +537,7 @@ function Profile() {
             <div>
               <label
                 htmlFor="phone"
-                className="mb-2 block text-[14px] font-semibold text-slate-600"
+                className="mb-2 block text-[15px] font-semibold text-slate-600"
               >
                 Phone Number
               </label>
@@ -558,12 +556,12 @@ function Profile() {
                     value={profile.phone}
                     onChange={handleChange}
                     autoComplete="tel"
-                    className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                    className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-[17px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                     placeholder="Enter your phone number"
                   />
                 </div>
               ) : (
-                <div className="flex min-h-[52px] items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[16px] font-medium text-slate-800">
+                <div className="flex min-h-[52px] items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[17px] font-medium text-slate-800">
                   <Phone
                     size={17}
                     className="shrink-0 text-slate-400"
@@ -578,7 +576,7 @@ function Profile() {
             <div>
               <label
                 htmlFor="businessType"
-                className="mb-2 block text-[14px] font-semibold text-slate-600"
+                className="mb-2 block text-[15px] font-semibold text-slate-600"
               >
                 Account Type
               </label>
@@ -590,10 +588,10 @@ function Profile() {
                   type="text"
                   value={profile.businessType}
                   onChange={handleChange}
-                  className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white px-4 text-[16px] font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white px-4 text-[17px] font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                 />
               ) : (
-                <div className="flex min-h-[52px] items-center rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[16px] font-semibold text-[#173563]">
+                <div className="flex min-h-[52px] items-center rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[17px] font-semibold text-[#173563]">
                   {profile.businessType || "SME"}
                 </div>
               )}
@@ -604,11 +602,11 @@ function Profile() {
         {/* Business Information */}
         <section className="mb-6 rounded-[22px] border border-slate-200/80 bg-white p-7 shadow-[0_4px_20px_rgba(15,23,42,0.04)] sm:p-8">
           <div className="mb-7">
-            <h2 className="text-[21px] font-bold tracking-[-0.02em] text-[#172033]">
+            <h2 className="text-[23px] font-bold tracking-[-0.02em] text-[#172033]">
               Business Information
             </h2>
 
-            <p className="mt-1.5 text-[15px] text-slate-500">
+            <p className="mt-1.5 text-[16px] text-slate-500">
               Details used for your import activities
             </p>
           </div>
@@ -618,7 +616,7 @@ function Profile() {
             <div>
               <label
                 htmlFor="businessName"
-                className="mb-2 block text-[14px] font-semibold text-slate-600"
+                className="mb-2 block text-[15px] font-semibold text-slate-600"
               >
                 Business Name
               </label>
@@ -631,11 +629,11 @@ function Profile() {
                   value={profile.businessName}
                   onChange={handleChange}
                   autoComplete="organization"
-                  className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white px-4 text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white px-4 text-[17px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   placeholder="Enter business name"
                 />
               ) : (
-                <div className="flex min-h-[52px] items-center rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[16px] font-medium text-slate-800">
+                <div className="flex min-h-[52px] items-center rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[17px] font-medium text-slate-800">
                   {profile.businessName || "Not added"}
                 </div>
               )}
@@ -645,7 +643,7 @@ function Profile() {
             <div>
               <label
                 htmlFor="businessTypeBusiness"
-                className="mb-2 block text-[14px] font-semibold text-slate-600"
+                className="mb-2 block text-[15px] font-semibold text-slate-600"
               >
                 Business Type
               </label>
@@ -657,10 +655,10 @@ function Profile() {
                   type="text"
                   value={profile.businessType}
                   onChange={handleChange}
-                  className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white px-4 text-[16px] font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white px-4 text-[17px] font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                 />
               ) : (
-                <div className="flex min-h-[52px] items-center rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[16px] font-medium text-slate-800">
+                <div className="flex min-h-[52px] items-center rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[17px] font-medium text-slate-800">
                   {profile.businessType || "SME"}
                 </div>
               )}
@@ -670,7 +668,7 @@ function Profile() {
             <div>
               <label
                 htmlFor="registrationNumber"
-                className="mb-2 block text-[14px] font-semibold text-slate-600"
+                className="mb-2 block text-[15px] font-semibold text-slate-600"
               >
                 Registration Number
               </label>
@@ -682,12 +680,12 @@ function Profile() {
                   type="text"
                   value={profile.registrationNumber}
                   onChange={handleChange}
-                  className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white px-4 text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white px-4 text-[17px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   placeholder="Enter registration number"
                 />
               ) : (
                 <div
-                  className={`flex min-h-[52px] items-center rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[16px] font-medium ${
+                  className={`flex min-h-[52px] items-center rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[17px] font-medium ${
                     profile.registrationNumber
                       ? "text-slate-800"
                       : "text-slate-400"
@@ -703,7 +701,7 @@ function Profile() {
             <div>
               <label
                 htmlFor="address"
-                className="mb-2 block text-[14px] font-semibold text-slate-600"
+                className="mb-2 block text-[15px] font-semibold text-slate-600"
               >
                 Business Address
               </label>
@@ -722,12 +720,12 @@ function Profile() {
                     value={profile.address}
                     onChange={handleChange}
                     autoComplete="street-address"
-                    className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                    className="min-h-[52px] w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-[17px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                     placeholder="Enter business address"
                   />
                 </div>
               ) : (
-                <div className="flex min-h-[52px] items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[16px] font-medium text-slate-800">
+                <div className="flex min-h-[52px] items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-[17px] font-medium text-slate-800">
                   <MapPin
                     size={17}
                     className="shrink-0 text-slate-400"
@@ -746,15 +744,15 @@ function Profile() {
         <section className="mb-6 rounded-[22px] border border-slate-200/80 bg-white p-7 shadow-[0_4px_20px_rgba(15,23,42,0.04)] sm:p-8">
           <div className="mb-7 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-              <Mail size={19} />
+              <EnvelopeSimple size={19} />
             </div>
 
             <div>
-              <h2 className="text-[21px] font-bold tracking-[-0.02em] text-[#172033]">
+              <h2 className="text-[23px] font-bold tracking-[-0.02em] text-[#172033]">
                 Contact Information
               </h2>
 
-              <p className="mt-1 text-[14px] text-slate-500">
+              <p className="mt-1 text-[15px] text-slate-500">
                 Your account contact details
               </p>
             </div>
@@ -763,7 +761,7 @@ function Profile() {
           <div className="grid gap-5 sm:grid-cols-2">
             {/* Email */}
             <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-5">
-              <p className="mb-2 text-[13px] font-semibold uppercase tracking-wide text-slate-400">
+              <p className="mb-2 text-[14px] font-semibold uppercase tracking-wide text-slate-400">
                 Email Address
               </p>
 
@@ -774,11 +772,11 @@ function Profile() {
                   value={profile.email}
                   onChange={handleChange}
                   autoComplete="email"
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-[16px] font-semibold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-[17px] font-semibold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   placeholder="Email address"
                 />
               ) : (
-                <p className="break-all text-[16px] font-semibold text-slate-800">
+                <p className="break-all text-[17px] font-semibold text-slate-800">
                   {profile.email || "Not added"}
                 </p>
               )}
@@ -786,7 +784,7 @@ function Profile() {
 
             {/* Phone */}
             <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-5">
-              <p className="mb-2 text-[13px] font-semibold uppercase tracking-wide text-slate-400">
+              <p className="mb-2 text-[14px] font-semibold uppercase tracking-wide text-slate-400">
                 Phone Number
               </p>
 
@@ -797,11 +795,11 @@ function Profile() {
                   value={profile.phone}
                   onChange={handleChange}
                   autoComplete="tel"
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-[16px] font-semibold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-[17px] font-semibold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   placeholder="Phone number"
                 />
               ) : (
-                <p className="text-[16px] font-semibold text-slate-800">
+                <p className="text-[17px] font-semibold text-slate-800">
                   {profile.phone || "Not added"}
                 </p>
               )}
@@ -819,16 +817,16 @@ function Profile() {
 
               <div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <h2 className="text-[21px] font-bold tracking-[-0.02em] text-[#172033]">
+                  <h2 className="text-[23px] font-bold tracking-[-0.02em] text-[#172033]">
                     Account Security
                   </h2>
 
-                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-[12px] font-bold uppercase tracking-wide text-emerald-700">
+                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-[13px] font-bold uppercase tracking-wide text-emerald-700">
                     Active
                   </span>
                 </div>
 
-                <p className="mt-2 text-[15px] leading-6 text-slate-500">
+                <p className="mt-2 text-[16px] leading-6 text-slate-500">
                   Your ImportEase account is active and secure.
                 </p>
               </div>
@@ -836,7 +834,7 @@ function Profile() {
 
             <Link
               to="/settings"
-              className="inline-flex shrink-0 items-center gap-2 text-[15px] font-semibold text-[#2563eb] transition hover:text-[#173563]"
+              className="inline-flex shrink-0 items-center gap-2 text-[16px] font-semibold text-[#2563eb] transition hover:text-[#173563]"
             >
               Manage security settings
               <ArrowRight size={16} />
@@ -846,12 +844,12 @@ function Profile() {
 
         {/* Footer */}
         <footer className="border-t border-slate-200 pt-7 text-center">
-          <p className="text-[14px] font-medium text-slate-400">
+          <p className="text-[15px] font-medium text-slate-400">
             ImportEase · SME Import Platform
           </p>
 
-          <div className="mt-2 flex items-center justify-center gap-2 text-[13px] text-slate-400">
-            <CheckCircle2
+          <div className="mt-2 flex items-center justify-center gap-2 text-[14px] text-slate-400">
+            <CheckCircle
               size={15}
               className="text-emerald-500"
             />

@@ -2,17 +2,17 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Bell,
-  BriefcaseBusiness,
-  CheckCircle2,
-  ChevronRight,
+  Briefcase,
+  CheckCircle,
+  CaretRight,
   FileText,
-  Filter,
+  Funnel,
   MapPin,
   Package,
-  RefreshCw,
-  Search,
+  ArrowsClockwise,
+  MagnifyingGlass,
   X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import IndividualAgentSidebar from "../components/IndividualAgentSidebar";
 
 function IndividualAgentRequests() {
@@ -209,7 +209,7 @@ function IndividualAgentRequests() {
           <header className="sticky top-[68px] z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:top-0">
             <div className="flex items-center">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+                <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
                   Individual Agent Workspace
                 </p>
 
@@ -226,11 +226,12 @@ function IndividualAgentRequests() {
                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-[#2563EB]"
                 title="Refresh"
               >
-                <RefreshCw size={17} />
+                <ArrowsClockwise size={17} />
               </button>
 
               <button
                 type="button"
+                onClick={() => navigate("/individual-agent-notifications")}
                 className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-[#2563EB]"
                 title="Notifications"
               >
@@ -251,11 +252,11 @@ function IndividualAgentRequests() {
                 <div>
                   
 
-                  <h2 className="mt-1 text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+                  <h2 className="mt-1 text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
                     SME Import Requests
                   </h2>
 
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[16px]">
                     Browse import requests from SMEs and submit competitive
                     clearing service bids.
                   </p>
@@ -263,11 +264,11 @@ function IndividualAgentRequests() {
 
                 <div className="flex w-fit items-center gap-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[#2563EB] shadow-sm">
-                    <CheckCircle2 size={18} />
+                    <CheckCircle size={18} />
                   </div>
 
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-500">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-500">
                       Open Requests
                     </p>
 
@@ -290,7 +291,7 @@ function IndividualAgentRequests() {
               <div className="flex flex-col gap-3 lg:flex-row">
                 {/* Search */}
                 <div className="relative flex-1">
-                  <Search
+                  <MagnifyingGlass
                     size={18}
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                   />
@@ -326,7 +327,7 @@ function IndividualAgentRequests() {
                       : "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-[#2563EB]"
                   }`}
                 >
-                  <Filter size={17} />
+                  <Funnel size={17} />
                   Filters
                 </button>
               </div>
@@ -430,7 +431,7 @@ function IndividualAgentRequests() {
               {filteredRequests.length === 0 && (
                 <div className="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-[0_2px_10px_rgba(15,23,42,.02)]">
                   <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                    <Search size={20} />
+                    <MagnifyingGlass size={20} />
                   </div>
 
                   <h3 className="mt-4 text-sm font-bold text-[#173563]">
@@ -455,7 +456,7 @@ function IndividualAgentRequests() {
 
             {/* Footer */}
             <footer className="mt-10 border-t border-slate-200 pt-5">
-              <div className="flex flex-col gap-2 text-[11px] text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-2 text-[12px] text-slate-400 sm:flex-row sm:items-center sm:justify-between">
                 <p>
                   © {new Date().getFullYear()} ImportEase. All rights
                   reserved.
@@ -493,7 +494,7 @@ function RequestCard({ request, navigate }) {
               </h3>
 
               <span
-                className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                   isOpen
                     ? "bg-green-50 text-green-600"
                     : "bg-slate-100 text-slate-500"
@@ -536,7 +537,7 @@ function RequestCard({ request, navigate }) {
         />
 
         <DetailItem
-          icon={<BriefcaseBusiness size={15} />}
+          icon={<Briefcase size={15} />}
           label="Import Value"
           value={request.value || "Not specified"}
         />
@@ -576,7 +577,7 @@ function RequestCard({ request, navigate }) {
             }`}
           >
             {isOpen ? "Submit Bid" : "Closed"}
-            <ChevronRight size={15} />
+            <CaretRight size={15} />
           </button>
         </div>
       </div>
@@ -595,7 +596,7 @@ function DetailItem({ icon, label, value }) {
       </div>
 
       <div className="min-w-0">
-        <p className="text-[10px] font-medium text-slate-400">{label}</p>
+        <p className="text-[11px] font-medium text-slate-400">{label}</p>
 
         <p className="mt-0.5 truncate text-xs font-semibold text-[#173563]">
           {value}

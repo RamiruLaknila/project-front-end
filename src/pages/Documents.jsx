@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  CheckCircle2,
-  ChevronRight,
-  Download,
+  CheckCircle,
+  CaretRight,
+  DownloadSimple,
   FileText,
   FolderOpen,
-  MoreHorizontal,
+  DotsThree,
   Package,
   Plus,
-  Search,
+  MagnifyingGlass,
   ShieldCheck,
-  Trash2,
-  Upload,
+  Trash,
+  UploadSimple,
   X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
 import BackButton from "../components/ui/BackButton";
@@ -210,20 +210,20 @@ function Documents() {
                 className="text-violet-700"
               />
 
-              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-700">
+              <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-violet-700">
                 Import documents
               </span>
             </div>
 
             {/* TITLE */}
 
-            <h1 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[40px]">
+            <h1 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
               Documents
             </h1>
 
             {/* DESCRIPTION */}
 
-            <p className="mx-auto mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-sm">
+            <p className="mx-auto mt-2 max-w-2xl text-[14px] leading-6 text-slate-500 sm:text-[16px]">
               Keep all documents related to your imports
               organized and accessible in one place.
             </p>
@@ -231,12 +231,12 @@ function Documents() {
             {/* STATUS */}
 
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
-              <CheckCircle2
+              <CheckCircle
                 size={14}
                 className="text-emerald-600"
               />
 
-              <span className="text-[10px] font-semibold text-emerald-700">
+              <span className="text-[11px] font-semibold text-emerald-700">
                 Secure document storage
               </span>
             </div>
@@ -252,11 +252,11 @@ function Documents() {
             {/* STEP 1 */}
 
             <div className="flex shrink-0 items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#173B6C] text-[11px] font-bold text-white shadow-sm">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#173B6C] text-[12px] font-bold text-white shadow-sm">
                 1
               </div>
 
-              <span className="hidden text-[11px] font-semibold text-[#173B6C] sm:block">
+              <span className="hidden text-[12px] font-semibold text-[#173B6C] sm:block">
                 Documents
               </span>
             </div>
@@ -266,11 +266,11 @@ function Documents() {
             {/* STEP 2 */}
 
             <div className="flex shrink-0 items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-400">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[12px] font-bold text-slate-400">
                 2
               </div>
 
-              <span className="hidden text-[11px] font-medium text-slate-400 sm:block">
+              <span className="hidden text-[12px] font-medium text-slate-400 sm:block">
                 Verification
               </span>
             </div>
@@ -280,11 +280,11 @@ function Documents() {
             {/* STEP 3 */}
 
             <div className="flex shrink-0 items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-400">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[12px] font-bold text-slate-400">
                 3
               </div>
 
-              <span className="hidden text-[11px] font-medium text-slate-400 sm:block">
+              <span className="hidden text-[12px] font-medium text-slate-400 sm:block">
                 Shipment Ready
               </span>
             </div>
@@ -302,11 +302,11 @@ function Documents() {
           />
 
           <div>
-            <p className="text-[10px] font-bold text-blue-800">
+            <p className="text-[11px] font-bold text-blue-800">
               Keep your import documents organized
             </p>
 
-            <p className="mt-1 text-[11px] leading-5 text-blue-700">
+            <p className="mt-1 text-[12px] leading-5 text-blue-700">
               Upload invoices, packing lists, shipping
               documents, permits and other files required
               for your import.
@@ -326,7 +326,7 @@ function Documents() {
               </div>
 
               <div>
-                <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                   Active shipment
                 </p>
 
@@ -338,10 +338,10 @@ function Documents() {
 
             <Link
               to="/track-shipment"
-              className="flex items-center gap-1 text-[10px] font-bold text-blue-700 transition hover:text-blue-800"
+              className="flex items-center gap-1 text-[11px] font-bold text-blue-700 transition hover:text-blue-800"
             >
               View shipment
-              <ChevronRight size={13} />
+              <CaretRight size={13} />
             </Link>
           </div>
         </section>
@@ -358,7 +358,7 @@ function Documents() {
           />
 
           <StatCard
-            icon={<CheckCircle2 size={16} />}
+            icon={<CheckCircle size={16} />}
             label="Verified"
             value={
               documents.filter(
@@ -368,7 +368,7 @@ function Documents() {
           />
 
           <StatCard
-            icon={<Upload size={16} />}
+            icon={<UploadSimple size={16} />}
             label="Uploaded"
             value={documents.length}
           />
@@ -395,12 +395,12 @@ function Documents() {
                     Your documents
                   </h2>
 
-                  <div className="hidden rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-500 sm:block">
+                  <div className="hidden rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500 sm:block">
                     {documents.length} files
                   </div>
                 </div>
 
-                <p className="mt-1 text-[11px] leading-5 text-slate-500">
+                <p className="mt-1 text-[12px] leading-5 text-slate-500">
                   Documents associated with your import.
                 </p>
               </div>
@@ -410,9 +410,9 @@ function Documents() {
               <button
                 type="button"
                 onClick={() => setShowUpload(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-4 py-2.5 text-[10px] font-bold text-white shadow-[0_6px_18px_rgba(23,59,108,.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#12315B] hover:shadow-[0_10px_24px_rgba(23,59,108,.18)]"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-4 py-2.5 text-[11px] font-bold text-white shadow-[0_6px_18px_rgba(23,59,108,.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#12315B] hover:shadow-[0_10px_24px_rgba(23,59,108,.18)]"
               >
-                <Upload size={14} />
+                <UploadSimple size={14} />
                 Upload document
               </button>
             </div>
@@ -420,7 +420,7 @@ function Documents() {
             {/* SEARCH */}
 
             <div className="relative mt-5">
-              <Search
+              <MagnifyingGlass
                 size={15}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
               />
@@ -430,7 +430,7 @@ function Documents() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search documents..."
-                className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-4 text-[10px] text-slate-700 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-300 focus:border-[#173B6C] focus:bg-white focus:ring-4 focus:ring-[#173B6C]/10"
+                className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-4 text-[11px] text-slate-700 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-300 focus:border-[#173B6C] focus:bg-white focus:ring-4 focus:ring-[#173B6C]/10"
               />
             </div>
           </div>
@@ -443,27 +443,27 @@ function Documents() {
             <table className="w-full">
               <thead className="border-b border-slate-100 bg-slate-50/70">
                 <tr>
-                  <th className="px-5 py-3 text-left text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                  <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Document
                   </th>
 
-                  <th className="px-5 py-3 text-left text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                  <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Type
                   </th>
 
-                  <th className="px-5 py-3 text-left text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                  <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Size
                   </th>
 
-                  <th className="px-5 py-3 text-left text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                  <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Uploaded
                   </th>
 
-                  <th className="px-5 py-3 text-left text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                  <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Status
                   </th>
 
-                  <th className="px-5 py-3 text-right text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                  <th className="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Actions
                   </th>
                 </tr>
@@ -509,16 +509,16 @@ function Documents() {
                 No documents found
               </h3>
 
-              <p className="mt-1 text-[10px] text-slate-400">
+              <p className="mt-1 text-[11px] text-slate-400">
                 Try another search or upload a new document.
               </p>
 
               <button
                 type="button"
                 onClick={() => setShowUpload(true)}
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#173B6C] px-4 py-2.5 text-[10px] font-bold text-white transition hover:bg-[#12315B]"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#173B6C] px-4 py-2.5 text-[11px] font-bold text-white transition hover:bg-[#12315B]"
               >
-                <Upload size={13} />
+                <UploadSimple size={13} />
                 Upload document
               </button>
             </div>
@@ -531,14 +531,14 @@ function Documents() {
 
         <section className="fade-up documents-delay-5 mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-center">
           <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
-            <Upload size={18} />
+            <UploadSimple size={18} />
           </div>
 
           <h3 className="mt-4 text-sm font-bold text-slate-800">
             Need to add another document?
           </h3>
 
-          <p className="mx-auto mt-1 max-w-md text-[10px] leading-5 text-slate-400">
+          <p className="mx-auto mt-1 max-w-md text-[11px] leading-5 text-slate-400">
             Upload invoices, packing lists, permits,
             shipping documents, or other files required
             for your import.
@@ -547,7 +547,7 @@ function Documents() {
           <button
             type="button"
             onClick={() => setShowUpload(true)}
-            className="mt-4 inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-[10px] font-bold text-slate-600 transition hover:bg-slate-50"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-[11px] font-bold text-slate-600 transition hover:bg-slate-50"
           >
             <Plus size={14} />
             Add document
@@ -558,7 +558,7 @@ function Documents() {
             FOOTER SECURITY NOTE
         ==================================================== */}
 
-        <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[10px] text-slate-400">
+        <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[11px] text-slate-400">
           <ShieldCheck
             size={13}
             className="text-emerald-600"
@@ -611,7 +611,7 @@ function StatCard({ icon, label, value }) {
         </span>
       </div>
 
-      <p className="mt-3 text-[9px] font-medium text-slate-400">
+      <p className="mt-3 text-[10px] font-medium text-slate-400">
         {label}
       </p>
     </div>
@@ -634,11 +634,11 @@ function DocumentRow({ document, onDelete }) {
           </div>
 
           <div>
-            <p className="text-[10px] font-bold text-slate-800">
+            <p className="text-[11px] font-bold text-slate-800">
               {document.name}
             </p>
 
-            <p className="mt-0.5 text-[8px] text-slate-400">
+            <p className="mt-0.5 text-[9px] text-slate-400">
               PDF document
             </p>
           </div>
@@ -647,19 +647,19 @@ function DocumentRow({ document, onDelete }) {
 
       {/* TYPE */}
 
-      <td className="px-5 py-4 text-[9px] text-slate-500">
+      <td className="px-5 py-4 text-[10px] text-slate-500">
         {document.type}
       </td>
 
       {/* SIZE */}
 
-      <td className="px-5 py-4 text-[9px] text-slate-500">
+      <td className="px-5 py-4 text-[10px] text-slate-500">
         {document.size}
       </td>
 
       {/* DATE */}
 
-      <td className="px-5 py-4 text-[9px] text-slate-500">
+      <td className="px-5 py-4 text-[10px] text-slate-500">
         {document.date}
       </td>
 
@@ -678,7 +678,7 @@ function DocumentRow({ document, onDelete }) {
             className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
             title="Download"
           >
-            <Download size={13} />
+            <DownloadSimple size={13} />
           </button>
 
           <button
@@ -687,7 +687,7 @@ function DocumentRow({ document, onDelete }) {
             className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-600"
             title="Delete"
           >
-            <Trash2 size={13} />
+            <Trash size={13} />
           </button>
 
           <button
@@ -695,7 +695,7 @@ function DocumentRow({ document, onDelete }) {
             className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
             title="More"
           >
-            <MoreHorizontal size={14} />
+            <DotsThree size={14} />
           </button>
         </div>
       </td>
@@ -724,7 +724,7 @@ function MobileDocumentCard({ document, onDelete }) {
                 {document.name}
               </p>
 
-              <p className="mt-1 text-[9px] text-slate-400">
+              <p className="mt-1 text-[10px] text-slate-400">
                 {document.type} • {document.size}
               </p>
             </div>
@@ -732,25 +732,25 @@ function MobileDocumentCard({ document, onDelete }) {
             <StatusBadge status={document.status} />
           </div>
 
-          <p className="mt-3 text-[9px] text-slate-400">
+          <p className="mt-3 text-[10px] text-slate-400">
             Uploaded {document.date}
           </p>
 
           <div className="mt-3 flex gap-2">
             <button
               type="button"
-              className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-[9px] font-bold text-slate-600 transition hover:bg-slate-50"
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-bold text-slate-600 transition hover:bg-slate-50"
             >
-              <Download size={12} />
-              Download
+              <DownloadSimple size={12} />
+              DownloadSimple
             </button>
 
             <button
               type="button"
               onClick={() => onDelete(document.id)}
-              className="flex items-center gap-1.5 rounded-lg border border-red-100 px-3 py-2 text-[9px] font-bold text-red-600 transition hover:bg-red-50"
+              className="flex items-center gap-1.5 rounded-lg border border-red-100 px-3 py-2 text-[10px] font-bold text-red-600 transition hover:bg-red-50"
             >
-              <Trash2 size={12} />
+              <Trash size={12} />
               Delete
             </button>
           </div>
@@ -769,14 +769,14 @@ function StatusBadge({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-[8px] font-bold ${
+      className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-[9px] font-bold ${
         verified
           ? "bg-emerald-50 text-emerald-700"
           : "bg-amber-50 text-amber-700"
       }`}
     >
       {verified ? (
-        <CheckCircle2 size={10} />
+        <CheckCircle size={10} />
       ) : (
         <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
       )}
@@ -839,7 +839,7 @@ function UploadModal({ onClose, onUpload }) {
               Upload document
             </h2>
 
-            <p className="mt-1 text-[9px] text-slate-400">
+            <p className="mt-1 text-[10px] text-slate-400">
               Add a document to this import
             </p>
           </div>
@@ -863,14 +863,14 @@ function UploadModal({ onClose, onUpload }) {
           {/* DOCUMENT TYPE */}
 
           <label className="block">
-            <span className="mb-2 block text-[10px] font-semibold text-slate-600">
+            <span className="mb-2 block text-[11px] font-semibold text-slate-600">
               Document type
             </span>
 
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-[10px] text-slate-700 outline-none transition focus:border-[#173B6C] focus:ring-2 focus:ring-blue-100"
+              className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-[11px] text-slate-700 outline-none transition focus:border-[#173B6C] focus:ring-2 focus:ring-blue-100"
             >
               <option>Commercial Invoice</option>
               <option>Packing List</option>
@@ -884,12 +884,12 @@ function UploadModal({ onClose, onUpload }) {
           {/* FILE */}
 
           <label className="mt-4 block cursor-pointer">
-            <span className="mb-2 block text-[10px] font-semibold text-slate-600">
+            <span className="mb-2 block text-[11px] font-semibold text-slate-600">
               Select file
             </span>
 
             <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-7 text-center transition hover:border-blue-300 hover:bg-blue-50/30">
-              <Upload
+              <UploadSimple
                 size={22}
                 className="mx-auto text-slate-400"
               />
@@ -898,7 +898,7 @@ function UploadModal({ onClose, onUpload }) {
                 {file ? file.name : "Choose a document"}
               </p>
 
-              <p className="mt-1 text-[9px] text-slate-400">
+              <p className="mt-1 text-[10px] text-slate-400">
                 PDF, JPG, PNG up to 10 MB
               </p>
 
@@ -919,7 +919,7 @@ function UploadModal({ onClose, onUpload }) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-xl border border-slate-200 py-3 text-[10px] font-bold text-slate-600 transition hover:bg-slate-50"
+              className="flex-1 rounded-xl border border-slate-200 py-3 text-[11px] font-bold text-slate-600 transition hover:bg-slate-50"
             >
               Cancel
             </button>
@@ -927,10 +927,10 @@ function UploadModal({ onClose, onUpload }) {
             <button
               type="submit"
               disabled={!file}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#173B6C] py-3 text-[10px] font-bold text-white transition hover:bg-[#102A4D] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#173B6C] py-3 text-[11px] font-bold text-white transition hover:bg-[#102A4D] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <Upload size={13} />
-              Upload
+              <UploadSimple size={13} />
+              UploadSimple
             </button>
           </div>
         </form>

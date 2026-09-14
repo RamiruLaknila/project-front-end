@@ -2,11 +2,11 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
-  Building2,
-  CheckCircle2,
+  Buildings,
+  CheckCircle,
   ShieldCheck,
-  Store,
-} from "lucide-react";
+  Storefront,
+} from "@phosphor-icons/react";
 
 function SignUp() {
   const navigate = useNavigate();
@@ -35,12 +35,12 @@ function SignUp() {
             className="group flex items-center gap-2.5 rounded-lg p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#173563] focus-visible:ring-offset-2"
           >
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-11 w-11 object-contain mix-blend-multiply sm:h-12 sm:w-12"
             />
 
-            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[30px]">
               Import
               <span className="text-[#173563]">Ease</span>
             </span>
@@ -72,7 +72,7 @@ function SignUp() {
               {/* ICON + ARROW */}
               <div className="flex items-center justify-between">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-[#173563] transition-all duration-200 group-hover:border-[#173563] group-hover:bg-[#173563] group-hover:text-white">
-                  <Store className="h-5 w-5" />
+                  <Storefront className="h-5 w-5" />
                 </div>
 
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 transition-all duration-200 group-hover:bg-blue-50">
@@ -82,7 +82,7 @@ function SignUp() {
 
               {/* TITLE */}
               <div className="mt-6">
-                <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-[22px]">
+                <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-[24px]">
                   SME / Importer
                 </h2>
 
@@ -95,7 +95,7 @@ function SignUp() {
 
               {/* FEATURES */}
               <div className="mt-6 border-t border-slate-100 pt-5">
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                <p className="mb-3 text-[12px] font-semibold uppercase tracking-wider text-slate-400">
                   With your SME account
                 </p>
 
@@ -127,7 +127,7 @@ function SignUp() {
               {/* ICON + ARROW */}
               <div className="flex items-center justify-between">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-[#173563] transition-all duration-200 group-hover:border-[#173563] group-hover:bg-[#173563] group-hover:text-white">
-                  <Building2 className="h-5 w-5" />
+                  <Buildings className="h-5 w-5" />
                 </div>
 
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 transition-all duration-200 group-hover:bg-blue-50">
@@ -137,7 +137,7 @@ function SignUp() {
 
               {/* TITLE */}
               <div className="mt-6">
-                <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-[22px]">
+                <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-[24px]">
                   Clearing Agent
                 </h2>
 
@@ -149,7 +149,7 @@ function SignUp() {
 
               {/* FEATURES */}
               <div className="mt-6 border-t border-slate-100 pt-5">
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                <p className="mb-3 text-[12px] font-semibold uppercase tracking-wider text-slate-400">
                   With your agent account
                 </p>
 
@@ -205,7 +205,7 @@ function SignUp() {
 function RoleFeature({ text }) {
   return (
     <div className="flex items-center gap-2.5">
-      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+      <CheckCircle className="h-4 w-4 shrink-0 text-emerald-600" />
 
       <span className="text-sm font-medium text-slate-600">
         {text}

@@ -3,12 +3,12 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Eye,
-  EyeOff,
-  LockKeyhole,
-  Mail,
+  EyeSlash,
+  LockKey,
+  EnvelopeSimple,
   ShieldCheck,
-  HelpCircle,
-} from "lucide-react";
+  Question,
+} from "@phosphor-icons/react";
 
 import { useAuth } from "../context/AuthContext";
 import { authErrorMessage, landingPathForProfile } from "../lib/authErrors";
@@ -110,12 +110,12 @@ function SignIn() {
           >
 
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-14 w-14 object-contain mix-blend-multiply sm:h-16 sm:w-16"
             />
 
-            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[25px]">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[27px]">
               Import
               <span className="text-[#173563]">
                 Ease
@@ -138,7 +138,7 @@ function SignIn() {
 
           <div className="mb-6 text-center">
 
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
               Welcome back
             </h1>
 
@@ -184,7 +184,7 @@ function SignIn() {
 
               <div className="relative">
 
-                <Mail
+                <EnvelopeSimple
                   size={17}
                   className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                 />
@@ -230,7 +230,7 @@ function SignIn() {
 
               <div className="relative">
 
-                <LockKeyhole
+                <LockKey
                   size={17}
                   className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                 />
@@ -260,7 +260,7 @@ function SignIn() {
                 >
 
                   {showPassword ? (
-                    <EyeOff size={17} />
+                    <EyeSlash size={17} />
                   ) : (
                     <Eye size={17} />
                   )}
@@ -413,7 +413,7 @@ function SignIn() {
             FOOTER NAVIGATION
         ==================================================== */}
 
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-slate-400">
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px] text-slate-400">
 
           <Link
             to="/privacy"
@@ -438,7 +438,7 @@ function SignIn() {
             className="flex items-center gap-1 transition-colors hover:text-slate-700"
           >
 
-            <HelpCircle size={12} />
+            <Question size={12} />
 
             Help / Contact Support
 
@@ -450,7 +450,7 @@ function SignIn() {
             COPYRIGHT
         ==================================================== */}
 
-        <p className="mt-3 pb-2 text-center text-[10px] text-slate-400">
+        <p className="mt-3 pb-2 text-center text-[11px] text-slate-400">
           © {new Date().getFullYear()} ImportEase. All rights reserved.
         </p>
 

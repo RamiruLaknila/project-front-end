@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  BadgeCheck,
-  Clock3,
-  ExternalLink,
+  SealCheck,
+  Clock,
+  ArrowSquareOut,
   FileText,
-  Mail,
+  EnvelopeSimple,
   Phone,
   MapPin,
   ShieldCheck,
   XCircle,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 import { api, getBlob } from "../lib/api";
 import { authErrorMessage } from "../lib/authErrors";
@@ -125,7 +125,7 @@ export default function AdminAgentApprovals() {
           </div>
         ) : agents.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center">
-            <BadgeCheck className="mx-auto h-10 w-10 text-emerald-500" />
+            <SealCheck className="mx-auto h-10 w-10 text-emerald-500" />
             <p className="mt-3 text-sm font-semibold text-slate-700">
               No pending applications
             </p>
@@ -143,13 +143,13 @@ export default function AdminAgentApprovals() {
                       <h2 className="text-base font-bold text-slate-900">
                         {agent.name || "Unnamed agent"}
                       </h2>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">
-                        <Clock3 size={11} /> Pending
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-700">
+                        <Clock size={11} /> Pending
                       </span>
                     </div>
                     <div className="mt-2 grid gap-1.5 text-xs text-slate-600 sm:grid-cols-2">
                       <span className="flex items-center gap-1.5">
-                        <Mail size={13} className="text-slate-400" />
+                        <EnvelopeSimple size={13} className="text-slate-400" />
                         {agent.email || "—"}
                       </span>
                       <span className="flex items-center gap-1.5">
@@ -162,7 +162,7 @@ export default function AdminAgentApprovals() {
                         {agent.licenseExpiry ? ` (exp ${agent.licenseExpiry})` : ""}
                       </span>
                       <span className="flex items-center gap-1.5">
-                        <BadgeCheck size={13} className="text-slate-400" />
+                        <SealCheck size={13} className="text-slate-400" />
                         Agent ID: {agent.agentId || "—"}
                       </span>
                       <span className="flex items-center gap-1.5">
@@ -190,7 +190,7 @@ export default function AdminAgentApprovals() {
                           >
                             <FileText size={13} />
                             {DOCUMENT_LABELS[doc.documentType] || doc.documentType}
-                            <ExternalLink size={12} />
+                            <ArrowSquareOut size={12} />
                           </button>
                         ))
                       )}
@@ -204,7 +204,7 @@ export default function AdminAgentApprovals() {
                       onClick={() => decide(agent.id, "approved")}
                       className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
                     >
-                      <BadgeCheck size={15} /> Approve
+                      <SealCheck size={15} /> Approve
                     </button>
                     <button
                       type="button"

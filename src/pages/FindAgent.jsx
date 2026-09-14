@@ -3,29 +3,29 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
-  Search,
+  MagnifyingGlass,
   SlidersHorizontal,
   MapPin,
   Star,
   ShieldCheck,
   Package,
-  Clock3,
-  Building2,
-  CheckCircle2,
+  Clock,
+  Buildings,
+  CheckCircle,
   X,
-  Send,
-  Sparkles,
-  BriefcaseBusiness,
-  ChevronDown,
+  PaperPlaneTilt,
+  Sparkle,
+  Briefcase,
+  CaretDown,
   Laptop,
-  Shirt,
+  TShirt,
   Car,
-  Apple,
+  Orange,
   Factory,
   Pill,
-  Home,
+  House,
   ShoppingBag,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
 import BackButton from "../components/ui/BackButton";
@@ -367,7 +367,7 @@ function FindAgent() {
     },
     {
       name: "Textiles & Apparel",
-      icon: Shirt,
+      icon: TShirt,
     },
     {
       name: "Automotive",
@@ -375,7 +375,7 @@ function FindAgent() {
     },
     {
       name: "Food & Agriculture",
-      icon: Apple,
+      icon: Orange,
     },
     {
       name: "Machinery",
@@ -387,7 +387,7 @@ function FindAgent() {
     },
     {
       name: "Household Goods",
-      icon: Home,
+      icon: House,
     },
     {
       name: "Other Goods",
@@ -1061,11 +1061,11 @@ function FindAgent() {
 
         <section className="fade-up -mt-8 mb-7">
           <div className="text-center">
-            <h1 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+            <h1 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
               Find a clearing agent
             </h1>
 
-            <p className="mx-auto mt-2 max-w-2xl text-[13px] leading-6 text-slate-500 sm:text-[15px]">
+            <p className="mx-auto mt-2 max-w-2xl text-[14px] leading-6 text-slate-500 sm:text-[16px]">
               Search and compare verified clearing
               agents based on experience, ratings,
               location, and import specializations.
@@ -1083,16 +1083,16 @@ function FindAgent() {
                 <div className="flex items-center gap-2">
 
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-[#2563EB]">
-                    <Search size={16} />
+                    <MagnifyingGlass size={16} />
                   </div>
 
-                  <h2 className="text-[17px] font-bold text-slate-900">
+                  <h2 className="text-[18px] font-bold text-slate-900">
                     Search clearing agents
                   </h2>
 
                 </div>
 
-                <p className="mt-2 text-[13px] text-slate-500">
+                <p className="mt-2 text-[14px] text-slate-500">
                   Find an agent that matches your
                   shipment requirements.
                 </p>
@@ -1105,7 +1105,7 @@ function FindAgent() {
                     !showFilters
                   )
                 }
-                className={`flex shrink-0 items-center gap-2 rounded-xl border px-3.5 py-2.5 text-[12px] font-bold transition ${
+                className={`flex shrink-0 items-center gap-2 rounded-xl border px-3.5 py-2.5 text-[13px] font-bold transition ${
                   showFilters
                     ? "border-[#173B6C] bg-[#173B6C] text-white"
                     : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
@@ -1119,7 +1119,7 @@ function FindAgent() {
 
             <div className="relative">
 
-              <Search
+              <MagnifyingGlass
                 size={19}
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
               />
@@ -1133,7 +1133,7 @@ function FindAgent() {
                   )
                 }
                 placeholder="Search by agency, agent, location or specialization..."
-                className="h-12 w-full rounded-xl border border-slate-300 bg-white pl-11 pr-11 text-[13px] font-medium text-slate-800 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
+                className="h-12 w-full rounded-xl border border-slate-300 bg-white pl-11 pr-11 text-[14px] font-medium text-slate-800 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
               />
 
               {searchQuery && (
@@ -1213,7 +1213,7 @@ function FindAgent() {
                   <button
                     type="button"
                     onClick={clearFilters}
-                    className="text-[12px] font-bold text-[#2563EB] hover:underline"
+                    className="text-[13px] font-bold text-[#2563EB] hover:underline"
                   >
                     Clear all filters
                   </button>
@@ -1227,7 +1227,7 @@ function FindAgent() {
 
             <div className="flex items-center gap-2 overflow-x-auto">
 
-              <span className="shrink-0 text-[12px] font-semibold text-slate-400">
+              <span className="shrink-0 text-[13px] font-semibold text-slate-400">
                 Popular:
               </span>
 
@@ -1253,7 +1253,7 @@ function FindAgent() {
                           : category
                       )
                     }
-                    className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-bold transition ${
+                    className={`shrink-0 rounded-full border px-3 py-1.5 text-[12px] font-bold transition ${
                       active
                         ? "border-[#173B6C] bg-[#173B6C] text-white"
                         : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-700"
@@ -1274,11 +1274,11 @@ function FindAgent() {
 
           <div>
 
-            <h2 className="text-[18px] font-bold text-slate-900">
+            <h2 className="text-[19px] font-bold text-slate-900">
               Available clearing agents
             </h2>
 
-            <p className="mt-1 text-[13px] text-slate-400">
+            <p className="mt-1 text-[14px] text-slate-400">
               {filteredAgents.length}{" "}
               agent
               {filteredAgents.length !== 1
@@ -1289,7 +1289,7 @@ function FindAgent() {
 
           </div>
 
-          <div className="hidden items-center gap-2 text-[12px] text-slate-400 sm:flex">
+          <div className="hidden items-center gap-2 text-[13px] text-slate-400 sm:flex">
 
             <ShieldCheck
               size={15}
@@ -1340,14 +1340,14 @@ function FindAgent() {
           <section className="scale-in rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center">
 
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-              <Search size={22} />
+              <MagnifyingGlass size={22} />
             </div>
 
-            <h3 className="mt-4 text-[17px] font-bold text-[#173B6C]">
+            <h3 className="mt-4 text-[18px] font-bold text-[#173B6C]">
               No agents found
             </h3>
 
-            <p className="mx-auto mt-2 max-w-md text-[13px] leading-5 text-slate-400">
+            <p className="mx-auto mt-2 max-w-md text-[14px] leading-5 text-slate-400">
               Try changing your search or
               filters to find more clearing
               agents.
@@ -1356,7 +1356,7 @@ function FindAgent() {
             <button
               type="button"
               onClick={clearFilters}
-              className="mt-4 rounded-xl bg-[#173B6C] px-4 py-2.5 text-[12px] font-bold text-white transition hover:bg-[#12315B]"
+              className="mt-4 rounded-xl bg-[#173B6C] px-4 py-2.5 text-[13px] font-bold text-white transition hover:bg-[#12315B]"
             >
               Clear filters
             </button>
@@ -1374,20 +1374,20 @@ function FindAgent() {
               <div className="flex items-center gap-3">
 
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#2563EB] shadow-sm">
-                  <CheckCircle2 size={19} />
+                  <CheckCircle size={19} />
                 </div>
 
                 <div>
 
-                  <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-blue-500">
+                  <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-blue-500">
                     Selected agent
                   </p>
 
-                  <h3 className="mt-0.5 text-[15px] font-bold text-[#173B6C]">
+                  <h3 className="mt-0.5 text-[16px] font-bold text-[#173B6C]">
                     {selectedAgent.agencyName}
                   </h3>
 
-                  <p className="mt-0.5 text-[12px] text-slate-500">
+                  <p className="mt-0.5 text-[13px] text-slate-500">
                     {selectedAgent.location} ·{" "}
                     {selectedAgent.experience}{" "}
                     years experience
@@ -1402,9 +1402,9 @@ function FindAgent() {
                 onClick={() =>
                   setShowRequestForm(true)
                 }
-                className="flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-4 py-3 text-[13px] font-bold text-white transition hover:bg-[#12315B]"
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-4 py-3 text-[14px] font-bold text-white transition hover:bg-[#12315B]"
               >
-                <Send size={15} />
+                <PaperPlaneTilt size={15} />
                 Request a Quote
                 <ArrowRight size={15} />
               </button>
@@ -1422,20 +1422,20 @@ function FindAgent() {
             <div className="flex gap-3">
 
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white">
-                <Sparkles size={19} />
+                <Sparkle size={19} />
               </div>
 
               <div>
 
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-blue-200">
+                <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-blue-200">
                   Need more options?
                 </p>
 
-                <h3 className="mt-1 text-[17px] font-bold text-white">
+                <h3 className="mt-1 text-[18px] font-bold text-white">
                   Let clearing agents compete for your shipment
                 </h3>
 
-                <p className="mt-1 max-w-xl text-[12px] leading-5 text-blue-100">
+                <p className="mt-1 max-w-xl text-[13px] leading-5 text-blue-100">
                   Post your shipment details and
                   receive bids from qualified
                   clearing agents. Compare their
@@ -1453,9 +1453,9 @@ function FindAgent() {
                 setSelectedAgent(null);
                 setShowRequestForm(true);
               }}
-              className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-[13px] font-bold text-[#173B6C] transition hover:bg-blue-50"
+              className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-[14px] font-bold text-[#173B6C] transition hover:bg-blue-50"
             >
-              <Send size={15} />
+              <PaperPlaneTilt size={15} />
               Post Shipment Request
             </button>
 
@@ -1478,7 +1478,7 @@ function FindAgent() {
           />
 
           <InfoCard
-            icon={Send}
+            icon={PaperPlaneTilt}
             title="Receive bids"
             text="Post your shipment and compare offers from agents."
           />
@@ -1489,7 +1489,7 @@ function FindAgent() {
 
           <Link
             to="/import-calculator"
-            className="flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-[13px] font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 sm:justify-start"
+            className="flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-[14px] font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 sm:justify-start"
           >
             <ArrowLeft size={18} />
             Back to Import Calculator
@@ -1501,7 +1501,7 @@ function FindAgent() {
               setSelectedAgent(null);
               setShowRequestForm(true);
             }}
-            className="group flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-6 py-3.5 text-[13px] font-semibold text-white shadow-[0_6px_18px_rgba(23,59,108,.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#12315B] hover:shadow-[0_10px_24px_rgba(23,59,108,.18)]"
+            className="group flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-6 py-3.5 text-[14px] font-semibold text-white shadow-[0_6px_18px_rgba(23,59,108,.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#12315B] hover:shadow-[0_10px_24px_rgba(23,59,108,.18)]"
           >
             Post Shipment Request
 
@@ -1513,7 +1513,7 @@ function FindAgent() {
 
         </div>
 
-        <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[12px] text-slate-400">
+        <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[13px] text-slate-400">
 
           <ShieldCheck
             size={15}
@@ -1546,11 +1546,11 @@ function FindAgent() {
 
               <div>
 
-                <h2 className="text-[20px] font-bold text-[#173B6C]">
+                <h2 className="text-[22px] font-bold text-[#173B6C]">
                   Review bids
                 </h2>
 
-                <p className="mt-3 text-[12px] leading-5 text-slate-500">
+                <p className="mt-3 text-[13px] leading-5 text-slate-500">
                   Compare offers from clearing agents and choose the one that best fits your shipment.
                 </p>
 
@@ -1571,32 +1571,32 @@ function FindAgent() {
             <div className="mt-5 grid gap-3 sm:grid-cols-3">
 
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <p className="text-[10px] font-bold uppercase text-slate-400">
+                <p className="text-[11px] font-bold uppercase text-slate-400">
                   Offers received
                 </p>
 
-                <p className="mt-1 text-[18px] font-bold text-[#173B6C]">
+                <p className="mt-1 text-[19px] font-bold text-[#173B6C]">
                   {bids.length}
                 </p>
               </div>
 
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <p className="text-[10px] font-bold uppercase text-slate-400">
+                <p className="text-[11px] font-bold uppercase text-slate-400">
                   Product
                 </p>
 
-                <p className="mt-1 truncate text-[12px] font-semibold text-slate-700">
+                <p className="mt-1 truncate text-[13px] font-semibold text-slate-700">
                   {productDetails ||
                     "Your shipment"}
                 </p>
               </div>
 
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <p className="text-[10px] font-bold uppercase text-slate-400">
+                <p className="text-[11px] font-bold uppercase text-slate-400">
                   Destination
                 </p>
 
-                <p className="mt-1 text-[12px] font-semibold text-slate-700">
+                <p className="mt-1 text-[13px] font-semibold text-slate-700">
                   Colombo, Sri Lanka
                 </p>
               </div>
@@ -1608,21 +1608,21 @@ function FindAgent() {
               <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center">
 
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-white text-[#2563EB] shadow-sm">
-                  <Clock3 size={22} />
+                  <Clock size={22} />
                 </div>
 
-                <h3 className="mt-4 text-[16px] font-bold text-[#173B6C]">
+                <h3 className="mt-4 text-[17px] font-bold text-[#173B6C]">
                   Waiting for agent bids
                 </h3>
 
-                <p className="mx-auto mt-2 max-w-md text-[12px] leading-5 text-slate-500">
+                <p className="mx-auto mt-2 max-w-md text-[13px] leading-5 text-slate-500">
                   Your request has been posted. This window checks automatically for new agent bids.
                 </p>
 
                 <button
                   type="button"
                   onClick={loadBids}
-                  className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[12px] font-bold text-[#173B6C] hover:bg-slate-50"
+                  className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-bold text-[#173B6C] hover:bg-slate-50"
                 >
                   Check for new bids
                 </button>
@@ -1678,14 +1678,14 @@ function FindAgent() {
                             <div className="flex items-start gap-3">
 
                               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
-                                <Building2 size={18} />
+                                <Buildings size={18} />
                               </div>
 
                               <div className="min-w-0">
 
                                 <div className="flex flex-wrap items-center gap-2">
 
-                                  <h3 className="text-[15px] font-bold text-[#173B6C]">
+                                  <h3 className="text-[16px] font-bold text-[#173B6C]">
                                     {bid.agencyName ||
                                       bid.companyName ||
                                       bid.name ||
@@ -1694,7 +1694,7 @@ function FindAgent() {
 
                                   {(bid.verified ??
                                     true) && (
-                                    <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">
+                                    <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700">
                                       <ShieldCheck size={11} />
                                       Verified
                                     </span>
@@ -1702,7 +1702,7 @@ function FindAgent() {
 
                                 </div>
 
-                                <p className="mt-1 text-[12px] text-slate-400">
+                                <p className="mt-1 text-[13px] text-slate-400">
                                   {bid.agentName ||
                                     bid.name ||
                                     "Clearing Agent"}
@@ -1720,11 +1720,11 @@ function FindAgent() {
 
                               <div className="rounded-lg bg-slate-50 p-2.5">
 
-                                <p className="text-[9px] uppercase text-slate-400">
+                                <p className="text-[10px] uppercase text-slate-400">
                                   Clearance fee
                                 </p>
 
-                                <p className="mt-0.5 text-[12px] font-bold text-slate-700">
+                                <p className="mt-0.5 text-[13px] font-bold text-slate-700">
                                   USD{" "}
                                   {Number(
                                     bid.clearanceFee ||
@@ -1736,11 +1736,11 @@ function FindAgent() {
 
                               <div className="rounded-lg bg-slate-50 p-2.5">
 
-                                <p className="text-[9px] uppercase text-slate-400">
+                                <p className="text-[10px] uppercase text-slate-400">
                                   Additional
                                 </p>
 
-                                <p className="mt-0.5 text-[12px] font-bold text-slate-700">
+                                <p className="mt-0.5 text-[13px] font-bold text-slate-700">
                                   USD{" "}
                                   {Number(
                                     bid.additionalCharges ||
@@ -1752,11 +1752,11 @@ function FindAgent() {
 
                               <div className="rounded-lg bg-blue-50 p-2.5">
 
-                                <p className="text-[9px] uppercase text-blue-500">
+                                <p className="text-[10px] uppercase text-blue-500">
                                   Total offer
                                 </p>
 
-                                <p className="mt-0.5 text-[12px] font-bold text-[#173B6C]">
+                                <p className="mt-0.5 text-[13px] font-bold text-[#173B6C]">
                                   USD{" "}
                                   {total.toLocaleString()}
                                 </p>
@@ -1765,11 +1765,11 @@ function FindAgent() {
 
                             </div>
 
-                            <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-slate-500">
+                            <div className="mt-3 flex flex-wrap gap-3 text-[12px] text-slate-500">
 
                               {bid.processingTime && (
                                 <span className="flex items-center gap-1.5">
-                                  <Clock3
+                                  <Clock
                                     size={13}
                                     className="text-[#2563EB]"
                                   />
@@ -1790,7 +1790,7 @@ function FindAgent() {
                             </div>
 
                             {bid.message && (
-                              <p className="mt-3 rounded-xl bg-slate-50 p-3 text-[11px] leading-5 text-slate-500">
+                              <p className="mt-3 rounded-xl bg-slate-50 p-3 text-[12px] leading-5 text-slate-500">
                                 {bid.message}
                               </p>
                             )}
@@ -1804,7 +1804,7 @@ function FindAgent() {
                                 bid
                               )
                             }
-                            className={`shrink-0 rounded-xl px-4 py-3 text-[13px] font-bold ${
+                            className={`shrink-0 rounded-xl px-4 py-3 text-[14px] font-bold ${
                               selected
                                 ? "bg-[#2563EB] text-white"
                                 : "border border-slate-200 bg-white text-[#173B6C] hover:bg-slate-50"
@@ -1833,7 +1833,7 @@ function FindAgent() {
                 onClick={() =>
                   setShowBidReview(false)
                 }
-                className="rounded-xl border border-slate-200 px-4 py-3 text-[12px] font-bold text-slate-600 hover:bg-slate-50"
+                className="rounded-xl border border-slate-200 px-4 py-3 text-[13px] font-bold text-slate-600 hover:bg-slate-50"
               >
                 Back to Find Agents
               </button>
@@ -1843,9 +1843,9 @@ function FindAgent() {
                   type="button"
                   onClick={handleAcceptBid}
                   disabled={isAccepting}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-5 py-3 text-[12px] font-bold text-white hover:bg-[#12315B] disabled:opacity-60"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-5 py-3 text-[13px] font-bold text-white hover:bg-[#12315B] disabled:opacity-60"
                 >
-                  <CheckCircle2 size={15} />
+                  <CheckCircle size={15} />
 
                   {isAccepting
                     ? "Accepting bid..."
@@ -1879,19 +1879,19 @@ function FindAgent() {
                 <div className="flex gap-3">
 
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
-                    <Building2 size={20} />
+                    <Buildings size={20} />
                   </div>
 
                   <div>
 
                     <div className="flex flex-wrap items-center gap-2">
 
-                      <h2 className="text-[18px] font-bold text-[#173B6C]">
+                      <h2 className="text-[19px] font-bold text-[#173B6C]">
                         {selectedAgent.agencyName}
                       </h2>
 
                       {selectedAgent.verified && (
-                        <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">
+                        <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700">
                           <ShieldCheck size={11} />
                           Verified
                         </span>
@@ -1899,7 +1899,7 @@ function FindAgent() {
 
                     </div>
 
-                    <p className="mt-1 text-[13px] text-slate-400">
+                    <p className="mt-1 text-[14px] text-slate-400">
                       {selectedAgent.agentName}
                     </p>
 
@@ -1928,7 +1928,7 @@ function FindAgent() {
                 />
 
                 <StatBox
-                  icon={BriefcaseBusiness}
+                  icon={Briefcase}
                   value={`${selectedAgent.experience} yrs`}
                   label="Experience"
                 />
@@ -1949,11 +1949,11 @@ function FindAgent() {
 
               <div className="mt-5">
 
-                <h3 className="text-[14px] font-bold text-slate-800">
+                <h3 className="text-[15px] font-bold text-slate-800">
                   About this agent
                 </h3>
 
-                <p className="mt-2 text-[13px] leading-5 text-slate-500">
+                <p className="mt-2 text-[14px] leading-5 text-slate-500">
                   {selectedAgent.description}
                 </p>
 
@@ -1961,7 +1961,7 @@ function FindAgent() {
 
               <div className="mt-5">
 
-                <h3 className="text-[14px] font-bold text-slate-800">
+                <h3 className="text-[15px] font-bold text-slate-800">
                   Import specializations
                 </h3>
 
@@ -1971,7 +1971,7 @@ function FindAgent() {
                     (category) => (
                       <span
                         key={category}
-                        className="rounded-full bg-blue-50 px-2.5 py-1 text-[12px] font-semibold text-[#2563EB]"
+                        className="rounded-full bg-blue-50 px-2.5 py-1 text-[13px] font-semibold text-[#2563EB]"
                       >
                         {category}
                       </span>
@@ -1984,12 +1984,12 @@ function FindAgent() {
 
               <div className="mt-5 flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 p-3">
 
-                <Clock3
+                <Clock
                   size={16}
                   className="text-emerald-600"
                 />
 
-                <p className="text-[13px] font-semibold text-emerald-700">
+                <p className="text-[14px] font-semibold text-emerald-700">
                   {selectedAgent.responseTime}
                 </p>
 
@@ -2003,9 +2003,9 @@ function FindAgent() {
                     setShowProfile(false);
                     setShowRequestForm(true);
                   }}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-4 py-3 text-[13px] font-bold text-white transition hover:bg-[#12315B]"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-4 py-3 text-[14px] font-bold text-white transition hover:bg-[#12315B]"
                 >
-                  <Send size={15} />
+                  <PaperPlaneTilt size={15} />
                   Request a Quote
                 </button>
 
@@ -2014,7 +2014,7 @@ function FindAgent() {
                   onClick={() =>
                     setShowProfile(false)
                   }
-                  className="rounded-xl border border-slate-200 px-5 py-3 text-[13px] font-bold text-slate-600 hover:bg-slate-50"
+                  className="rounded-xl border border-slate-200 px-5 py-3 text-[14px] font-bold text-slate-600 hover:bg-slate-50"
                 >
                   Close
                 </button>
@@ -2050,14 +2050,14 @@ function FindAgent() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-[#2563EB]">
 
                   {selectedAgent ? (
-                    <Send size={18} />
+                    <PaperPlaneTilt size={18} />
                   ) : (
                     <Package size={18} />
                   )}
 
                 </div>
 
-                <h2 className="mt-4 text-[19px] font-bold text-[#173B6C]">
+                <h2 className="mt-4 text-[21px] font-bold text-[#173B6C]">
 
                   {selectedAgent
                     ? "Request a quote"
@@ -2065,7 +2065,7 @@ function FindAgent() {
 
                 </h2>
 
-                <p className="mt-1 max-w-lg text-[12px] leading-5 text-slate-400">
+                <p className="mt-1 max-w-lg text-[13px] leading-5 text-slate-400">
 
                   {selectedAgent
                     ? `Send your shipment details to ${selectedAgent.agencyName}.`
@@ -2092,16 +2092,16 @@ function FindAgent() {
               <div className="mt-5 flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50 p-3">
 
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[#2563EB]">
-                  <Building2 size={17} />
+                  <Buildings size={17} />
                 </div>
 
                 <div>
 
-                  <p className="text-[14px] font-bold text-[#173B6C]">
+                  <p className="text-[15px] font-bold text-[#173B6C]">
                     {selectedAgent.agencyName}
                   </p>
 
-                  <p className="mt-0.5 text-[12px] text-slate-400">
+                  <p className="mt-0.5 text-[13px] text-slate-400">
                     {selectedAgent.location} ·{" "}
                     {selectedAgent.experience}{" "}
                     years experience
@@ -2109,7 +2109,7 @@ function FindAgent() {
 
                 </div>
 
-                <CheckCircle2
+                <CheckCircle
                   size={17}
                   className="ml-auto text-emerald-500"
                 />
@@ -2134,7 +2134,7 @@ function FindAgent() {
                   }
                   rows={3}
                   placeholder="e.g. 50 laptops and computer accessories"
-                  className="w-full resize-none rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-[13px] font-medium text-slate-800 outline-none transition focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
+                  className="w-full resize-none rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-[14px] font-medium text-slate-800 outline-none transition focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
                 />
 
               </FormField>
@@ -2153,7 +2153,7 @@ function FindAgent() {
                     )
                   }
                   placeholder="e.g. China"
-                  className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-[13px] font-medium text-slate-800 outline-none transition focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
+                  className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-[14px] font-medium text-slate-800 outline-none transition focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
                 />
 
               </FormField>
@@ -2176,10 +2176,10 @@ function FindAgent() {
                       )
                     }
                     placeholder="e.g. 15000"
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 pr-16 text-[13px] font-medium text-slate-800 outline-none transition focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
+                    className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 pr-16 text-[14px] font-medium text-slate-800 outline-none transition focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
                   />
 
-                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[12px] font-bold text-slate-400">
                     USD
                   </span>
 
@@ -2196,7 +2196,7 @@ function FindAgent() {
                 className="mt-0.5 shrink-0 text-[#2563EB]"
               />
 
-              <p className="text-[11px] leading-5 text-slate-500">
+              <p className="text-[12px] leading-5 text-slate-500">
 
                 {selectedAgent
                   ? "The selected agent will receive these shipment details to prepare a quote."
@@ -2213,17 +2213,17 @@ function FindAgent() {
                 onClick={() =>
                   setShowRequestForm(false)
                 }
-                className="rounded-xl border border-slate-200 px-5 py-3 text-[13px] font-bold text-slate-600 transition hover:bg-slate-50"
+                className="rounded-xl border border-slate-200 px-5 py-3 text-[14px] font-bold text-slate-600 transition hover:bg-slate-50"
               >
                 Cancel
               </button>
 
               <button
                 type="submit"
-                className="flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-5 py-3 text-[13px] font-bold text-white transition hover:bg-[#12315B]"
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-5 py-3 text-[14px] font-bold text-white transition hover:bg-[#12315B]"
               >
 
-                <Send size={15} />
+                <PaperPlaneTilt size={15} />
 
                 {selectedAgent
                   ? "Send Quote Request"
@@ -2256,7 +2256,7 @@ function FilterSelect({
   return (
     <div>
 
-      <label className="mb-1.5 block text-[12px] font-bold text-slate-600">
+      <label className="mb-1.5 block text-[13px] font-bold text-slate-600">
         {label}
       </label>
 
@@ -2269,7 +2269,7 @@ function FilterSelect({
               e.target.value
             )
           }
-          className="h-10 w-full appearance-none rounded-xl border border-slate-300 bg-white px-3 pr-8 text-[12px] font-semibold text-slate-700 outline-none transition focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
+          className="h-10 w-full appearance-none rounded-xl border border-slate-300 bg-white px-3 pr-8 text-[13px] font-semibold text-slate-700 outline-none transition focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
         >
 
           {options.map(
@@ -2285,7 +2285,7 @@ function FilterSelect({
 
         </select>
 
-        <ChevronDown
+        <CaretDown
           size={15}
           className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
         />
@@ -2327,7 +2327,7 @@ function AgentCard({
         <div className="flex min-w-0 gap-3">
 
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
-            <Building2 size={20} />
+            <Buildings size={20} />
           </div>
 
           <div className="min-w-0">
@@ -2335,7 +2335,7 @@ function AgentCard({
             <div className="flex flex-wrap items-center gap-1.5">
 
               {/* INCREASED AGENCY NAME */}
-              <h3 className="truncate text-[16px] font-bold text-[#173B6C]">
+              <h3 className="truncate text-[17px] font-bold text-[#173B6C]">
                 {agent.agencyName}
               </h3>
 
@@ -2349,7 +2349,7 @@ function AgentCard({
             </div>
 
             {/* INCREASED AGENT NAME */}
-            <p className="mt-1 text-[12px] text-slate-400">
+            <p className="mt-1 text-[13px] text-slate-400">
               {agent.agentName}
             </p>
 
@@ -2364,7 +2364,7 @@ function AgentCard({
             className="fill-amber-400 text-amber-400"
           />
 
-          <span className="text-[12px] font-bold text-amber-700">
+          <span className="text-[13px] font-bold text-amber-700">
             {agent.rating}
           </span>
 
@@ -2377,16 +2377,16 @@ function AgentCard({
       <div className="mt-3 flex items-center gap-2">
 
         {agent.verified && (
-          <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700">
+          <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[12px] font-bold text-emerald-700">
 
-            <CheckCircle2 size={12} />
+            <CheckCircle size={12} />
 
             Verified agent
 
           </span>
         )}
 
-        <span className="text-[12px] text-slate-400">
+        <span className="text-[13px] text-slate-400">
           {agent.reviews} reviews
         </span>
 
@@ -2403,7 +2403,7 @@ function AgentCard({
         />
 
         <AgentInfo
-          icon={BriefcaseBusiness}
+          icon={Briefcase}
           label="Experience"
           value={`${agent.experience} years`}
         />
@@ -2415,7 +2415,7 @@ function AgentCard({
         />
 
         <AgentInfo
-          icon={Clock3}
+          icon={Clock}
           label="Response"
           value={agent.responseTime.replace(
             "Usually responds within ",
@@ -2427,7 +2427,7 @@ function AgentCard({
 
       {/* DESCRIPTION */}
 
-      <p className="mt-4 text-[13px] leading-5 text-slate-500">
+      <p className="mt-4 text-[14px] leading-5 text-slate-500">
         {agent.description}
       </p>
 
@@ -2435,7 +2435,7 @@ function AgentCard({
 
       <div className="mt-3">
 
-        <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-400">
+        <p className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-slate-400">
           Specializations
         </p>
 
@@ -2445,7 +2445,7 @@ function AgentCard({
             (category) => (
               <span
                 key={category}
-                className="rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-semibold text-slate-500"
+                className="rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[12px] font-semibold text-slate-500"
               >
                 {category}
               </span>
@@ -2465,7 +2465,7 @@ function AgentCard({
           onClick={() =>
             onViewProfile(agent)
           }
-          className="rounded-xl border border-slate-200 px-3 py-2.5 text-[13px] font-bold text-[#173B6C] transition hover:border-slate-300 hover:bg-slate-50"
+          className="rounded-xl border border-slate-200 px-3 py-2.5 text-[14px] font-bold text-[#173B6C] transition hover:border-slate-300 hover:bg-slate-50"
         >
           View Profile
         </button>
@@ -2475,7 +2475,7 @@ function AgentCard({
           onClick={() =>
             onSelectAgent(agent)
           }
-          className={`flex items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-[13px] font-bold transition ${
+          className={`flex items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-[14px] font-bold transition ${
             selected
               ? "bg-emerald-600 text-white hover:bg-emerald-700"
               : "bg-[#173B6C] text-white hover:bg-[#12315B]"
@@ -2484,7 +2484,7 @@ function AgentCard({
 
           {selected ? (
             <>
-              <CheckCircle2 size={15} />
+              <CheckCircle size={15} />
               Selected
             </>
           ) : (
@@ -2521,11 +2521,11 @@ function AgentInfo({
 
       <div className="min-w-0">
 
-        <p className="text-[10px] uppercase tracking-wide text-slate-400">
+        <p className="text-[11px] uppercase tracking-wide text-slate-400">
           {label}
         </p>
 
-        <p className="mt-0.5 truncate text-[12px] font-semibold text-slate-600">
+        <p className="mt-0.5 truncate text-[13px] font-semibold text-slate-600">
           {value}
         </p>
 
@@ -2555,11 +2555,11 @@ function InfoCard({
 
         <div>
 
-          <h3 className="text-[13px] font-bold text-slate-800">
+          <h3 className="text-[14px] font-bold text-slate-800">
             {title}
           </h3>
 
-          <p className="mt-1 text-[10px] leading-4 text-slate-400">
+          <p className="mt-1 text-[11px] leading-4 text-slate-400">
             {text}
           </p>
 
@@ -2588,11 +2588,11 @@ function StatBox({
         className="mx-auto text-[#2563EB]"
       />
 
-      <p className="mt-1.5 text-[14px] font-bold text-[#173B6C]">
+      <p className="mt-1.5 text-[15px] font-bold text-[#173B6C]">
         {value}
       </p>
 
-      <p className="mt-0.5 text-[10px] text-slate-400">
+      <p className="mt-0.5 text-[11px] text-slate-400">
         {label}
       </p>
 
@@ -2612,7 +2612,7 @@ function FormField({
   return (
     <div>
 
-      <label className="mb-1.5 block text-[12px] font-bold text-slate-700">
+      <label className="mb-1.5 block text-[13px] font-bold text-slate-700">
 
         {label}
 

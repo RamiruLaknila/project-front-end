@@ -1,19 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Bell,
-  ChevronRight,
+  CaretRight,
   FileText,
   Package,
-  RefreshCw,
-  Search,
+  ArrowsClockwise,
+  MagnifyingGlass,
   ShieldCheck,
   Users,
-  TrendingUp,
-} from "lucide-react";
+  TrendUp,
+} from "@phosphor-icons/react";
 import IndividualAgentSidebar from "../components/IndividualAgentSidebar";
 
 function IndividualAgentDashboard() {
+  const navigate = useNavigate();
   const [agent, setAgent] = useState(null);
   const [requests, setRequests] = useState([]);
 
@@ -91,7 +92,7 @@ function IndividualAgentDashboard() {
           <header className="sticky top-[68px] z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:top-0">
             <div className="flex items-center">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+                <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
                   Individual Agent Workspace
                 </p>
 
@@ -109,11 +110,12 @@ function IndividualAgentDashboard() {
                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-[#2563EB]"
                 title="Refresh"
               >
-                <RefreshCw size={17} />
+                <ArrowsClockwise size={17} />
               </button>
 
               <button
                 type="button"
+                onClick={() => navigate("/individual-agent-notifications")}
                 className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-[#2563EB]"
                 title="Notifications"
               >
@@ -138,11 +140,11 @@ function IndividualAgentDashboard() {
             
                   </p>
 
-                  <h2 className="mt-1 text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+                  <h2 className="mt-1 text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
                    Welcome back, {displayName}
                   </h2>
 
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[16px]">
                     Manage SME import requests, submit bids, and keep track of
                     your shipments from one place.
                   </p>
@@ -152,7 +154,7 @@ function IndividualAgentDashboard() {
                   to="/individual-agent-requests"
                   className="inline-flex w-fit items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#10294d]"
                 >
-                  <Search size={17} />
+                  <MagnifyingGlass size={17} />
                   Browse Requests
                 </Link>
               </div>
@@ -207,7 +209,7 @@ function IndividualAgentDashboard() {
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <QuickAction
-                  icon={<Search size={20} />}
+                  icon={<MagnifyingGlass size={20} />}
                   title="Browse SME Requests"
                   description="Find import requests that match your services."
                   to="/individual-agent-requests"
@@ -249,7 +251,7 @@ function IndividualAgentDashboard() {
                   className="hidden items-center gap-1 text-xs font-semibold text-[#2563EB] sm:flex"
                 >
                   View all
-                  <ChevronRight size={15} />
+                  <CaretRight size={15} />
                 </Link>
               </div>
 
@@ -280,7 +282,7 @@ function IndividualAgentDashboard() {
                 className="mt-3 flex items-center justify-center gap-1 text-xs font-semibold text-[#2563EB] sm:hidden"
               >
                 View all requests
-                <ChevronRight size={15} />
+                <CaretRight size={15} />
               </Link>
             </section>
 
@@ -313,7 +315,7 @@ function IndividualAgentDashboard() {
                     className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#173563] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#10294d]"
                   >
                     View Profile
-                    <ChevronRight size={15} />
+                    <CaretRight size={15} />
                   </Link>
                 </div>
               </div>
@@ -323,7 +325,7 @@ function IndividualAgentDashboard() {
                 FOOTER
             ===================================================== */}
             <footer className="mt-10 border-t border-slate-200 pt-5">
-              <div className="flex flex-col gap-2 text-[11px] text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-2 text-[12px] text-slate-400 sm:flex-row sm:items-center sm:justify-between">
                 <p>
                   © {new Date().getFullYear()} ImportEase. All rights
                   reserved.
@@ -358,7 +360,7 @@ function StatCard({ icon, title, value, description }) {
           {value}
         </p>
 
-        <p className="mt-1 text-[11px] text-slate-400">{description}</p>
+        <p className="mt-1 text-[12px] text-slate-400">{description}</p>
       </div>
     </div>
   );
@@ -378,7 +380,7 @@ function QuickAction({ icon, title, description, to }) {
           {icon}
         </div>
 
-        <ChevronRight
+        <CaretRight
           size={18}
           className="text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-[#2563EB]"
         />
@@ -408,12 +410,12 @@ function RequestRow({ request }) {
               {request.product}
             </h3>
 
-            <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-600">
+            <span className="rounded-full bg-green-50 px-2 py-0.5 text-[11px] font-semibold text-green-600">
               {request.status || "Open"}
             </span>
           </div>
 
-          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-400">
+          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[12px] text-slate-400">
             <span>{request.id}</span>
             <span>{request.category}</span>
             <span>{request.destination}</span>
@@ -423,7 +425,7 @@ function RequestRow({ request }) {
 
       <div className="flex items-center justify-between gap-4 sm:justify-end">
         <div className="text-left sm:text-right">
-          <p className="text-[10px] font-medium text-slate-400">
+          <p className="text-[11px] font-medium text-slate-400">
             Estimated Value
           </p>
 
@@ -437,7 +439,7 @@ function RequestRow({ request }) {
           className="flex h-9 items-center gap-1 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-[#173563] transition hover:border-blue-200 hover:bg-blue-50 hover:text-[#2563EB]"
         >
           View
-          <ChevronRight size={14} />
+          <CaretRight size={14} />
         </Link>
       </div>
     </div>

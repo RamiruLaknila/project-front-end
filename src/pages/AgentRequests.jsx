@@ -2,15 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Bell,
-  CheckCircle2,
-  ChevronDown,
-  ChevronRight,
+  CheckCircle,
+  CaretDown,
+  CaretRight,
   FileText,
   Package,
-  RefreshCw,
-  Search,
+  ArrowsClockwise,
+  MagnifyingGlass,
   Users,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import AgentMemberSidebar from "../components/AgentMemberSidebar";
 
 function AgentRequests() {
@@ -203,7 +203,7 @@ function AgentRequests() {
         <header className="sticky top-[68px] z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:top-0">
           <div className="flex items-center">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
                 Agency Member Workspace
               </p>
 
@@ -224,7 +224,7 @@ function AgentRequests() {
               className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50"
               aria-label="Refresh requests"
             >
-              <RefreshCw
+              <ArrowsClockwise
                 size={17}
                 className={
                   loading ? "animate-spin" : ""
@@ -236,6 +236,7 @@ function AgentRequests() {
 
             <button
               type="button"
+              onClick={() => navigate("/agent-notifications")}
               className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50"
               aria-label="Notifications"
             >
@@ -256,7 +257,7 @@ function AgentRequests() {
           <button
             type="button"
             onClick={goToDashboard}
-            className="mb-5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 transition hover:text-[#173563]"
+            className="mb-5 inline-flex items-center gap-1.5 text-[12px] font-semibold text-slate-400 transition hover:text-[#173563]"
           >
             ← Back to Dashboard
           </button>
@@ -272,11 +273,11 @@ function AgentRequests() {
               
                 </div>
 
-                <h2 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+                <h2 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
                   Find Import Requests
                 </h2>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[16px]">
                   Browse import requests from SMEs and find
                   opportunities that match your clearing
                   services.
@@ -288,7 +289,7 @@ function AgentRequests() {
                 onClick={loadRequests}
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 shadow-sm transition hover:bg-slate-50"
               >
-                <RefreshCw
+                <ArrowsClockwise
                   size={17}
                   className={
                     loading ? "animate-spin" : ""
@@ -312,7 +313,7 @@ function AgentRequests() {
             />
 
             <SummaryCard
-              icon={CheckCircle2}
+              icon={CheckCircle}
               label="Open Requests"
               value={openRequestsCount}
               iconStyle="bg-emerald-50 text-emerald-600"
@@ -328,7 +329,7 @@ function AgentRequests() {
               {/* SEARCH */}
 
               <div className="relative flex-1">
-                <Search
+                <MagnifyingGlass
                   size={17}
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
                 />
@@ -366,7 +367,7 @@ function AgentRequests() {
                   ))}
                 </select>
 
-                <ChevronDown
+                <CaretDown
                   size={16}
                   className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
                 />
@@ -395,7 +396,7 @@ function AgentRequests() {
                   </option>
                 </select>
 
-                <ChevronDown
+                <CaretDown
                   size={16}
                   className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
                 />
@@ -445,7 +446,7 @@ function AgentRequests() {
 
           {loading ? (
             <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-[0_2px_10px_rgba(15,23,42,.02)]">
-              <RefreshCw
+              <ArrowsClockwise
                 size={25}
                 className="mx-auto animate-spin text-blue-600"
               />
@@ -502,7 +503,7 @@ function AgentRequests() {
               FOOTER
           ================================================= */}
 
-          <div className="mt-9 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-[10px] text-slate-400">
+          <div className="mt-9 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-[11px] text-slate-400">
             ImportEase · Agency Member Platform
           </div>
         </div>
@@ -525,7 +526,7 @@ function SummaryCard({
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-semibold text-slate-400">
+          <p className="text-[11px] font-semibold text-slate-400">
             {label}
           </p>
 
@@ -539,7 +540,6 @@ function SummaryCard({
         >
           <Icon
             size={19}
-            strokeWidth={1.8}
           />
         </div>
       </div>
@@ -612,7 +612,6 @@ function RequestCard({
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
             <Package
               size={20}
-              strokeWidth={1.8}
             />
           </div>
 
@@ -622,7 +621,7 @@ function RequestCard({
                 {productName}
               </h3>
 
-              <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-bold text-blue-600">
+              <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600">
                 {category}
               </span>
             </div>
@@ -636,7 +635,7 @@ function RequestCard({
           </div>
         </div>
 
-        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-bold text-emerald-700">
+        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
           {status}
         </span>
@@ -646,7 +645,7 @@ function RequestCard({
 
       <div className="mt-5 flex flex-col gap-3 rounded-xl bg-slate-50 p-4 sm:flex-row sm:items-center">
         <div className="min-w-0 flex-1">
-          <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
             Origin
           </p>
 
@@ -660,7 +659,7 @@ function RequestCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
             Destination
           </p>
 
@@ -697,7 +696,7 @@ function RequestCard({
       {/* CARD FOOTER */}
 
       <div className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-[10px] text-slate-400">
+        <p className="text-[11px] text-slate-400">
           Posted {postedDate}
         </p>
 
@@ -707,7 +706,7 @@ function RequestCard({
           className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#173563] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#102547]"
         >
           View Request
-          <ChevronRight size={14} />
+          <CaretRight size={14} />
         </button>
       </div>
     </div>
@@ -724,7 +723,7 @@ function RequestDetail({
 }) {
   return (
     <div className="min-w-0">
-      <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
         {label}
       </p>
 

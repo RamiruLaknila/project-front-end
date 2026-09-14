@@ -3,18 +3,18 @@ import { Link } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowUpRight,
-  BadgeCheck,
+  SealCheck,
   Check,
-  ChevronRight,
-  Clock3,
+  CaretRight,
+  Clock,
   FileText,
   MapPin,
   Package,
-  RefreshCw,
+  ArrowsClockwise,
   ShieldCheck,
   Truck,
-  UserRound,
-} from "lucide-react";
+  UserCircle,
+} from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
 
@@ -140,7 +140,7 @@ function Shipments() {
 
       <main className="mx-auto w-full max-w-[1000px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
         {/* Breadcrumb */}
-        <div className="fade-up mb-6 flex items-center gap-2 text-[12px] font-medium text-slate-400">
+        <div className="fade-up mb-6 flex items-center gap-2 text-[13px] font-medium text-slate-400">
           <Link
             to="/dashboard"
             className="transition-colors hover:text-[#173B6C]"
@@ -148,18 +148,18 @@ function Shipments() {
             Dashboard
           </Link>
 
-          <ChevronRight className="h-3.5 w-3.5" />
+          <CaretRight className="h-3.5 w-3.5" />
 
           <span className="text-[#173B6C]">Shipment Tracking</span>
         </div>
 
         {/* Header */}
         <section className="fade-up -mt-6 mb-7 text-center">
-          <h1 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+          <h1 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
             Track your import
           </h1>
 
-          <p className="mx-auto mt-2 max-w-[650px] text-[13px] leading-6 text-slate-500 sm:text-[15px]">
+          <p className="mx-auto mt-2 max-w-[650px] text-[14px] leading-6 text-slate-500 sm:text-[16px]">
             Follow your import shipment from agent selection through customs
             clearance and completion.
           </p>
@@ -167,9 +167,9 @@ function Shipments() {
           <button
             type="button"
             onClick={loadShipment}
-            className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-[12px] font-bold text-slate-600 shadow-[0_2px_10px_rgba(15,23,42,.02)] transition-all hover:border-[#173B6C] hover:text-[#173B6C]"
+            className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-[13px] font-bold text-slate-600 shadow-[0_2px_10px_rgba(15,23,42,.02)] transition-all hover:border-[#173B6C] hover:text-[#173B6C]"
           >
-            <RefreshCw className="h-3.5 w-3.5" />
+            <ArrowsClockwise className="h-3.5 w-3.5" />
             Refresh status
           </button>
         </section>
@@ -184,15 +184,15 @@ function Shipments() {
                 </div>
 
                 <div>
-                  <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                  <p className="mb-1 text-[12px] font-bold uppercase tracking-[0.08em] text-slate-400">
                     Current shipment
                   </p>
 
-                  <h2 className="text-[17px] font-bold text-[#173B6C]">
+                  <h2 className="text-[18px] font-bold text-[#173B6C]">
                     {product}
                   </h2>
 
-                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-slate-500">
+                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-slate-500">
                     <span>Reference: {reference}</span>
 
                     <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block" />
@@ -202,8 +202,8 @@ function Shipments() {
                 </div>
               </div>
 
-              <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-amber-100 bg-amber-50 px-3 py-1.5 text-[11px] font-bold text-amber-700">
-                <Clock3 className="h-3.5 w-3.5" />
+              <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-amber-100 bg-amber-50 px-3 py-1.5 text-[12px] font-bold text-amber-700">
+                <Clock className="h-3.5 w-3.5" />
                 {status}
               </div>
             </div>
@@ -211,37 +211,37 @@ function Shipments() {
 
           <div className="grid grid-cols-2 divide-x divide-slate-100 sm:grid-cols-4">
             <div className="p-4 sm:p-5">
-              <p className="text-[11px] font-semibold text-slate-400">
+              <p className="text-[12px] font-semibold text-slate-400">
                 Shipment
               </p>
-              <p className="mt-1 text-[13px] font-bold text-[#173B6C]">
+              <p className="mt-1 text-[14px] font-bold text-[#173B6C]">
                 {reference}
               </p>
             </div>
 
             <div className="p-4 sm:p-5">
-              <p className="text-[11px] font-semibold text-slate-400">
+              <p className="text-[12px] font-semibold text-slate-400">
                 HS Code
               </p>
-              <p className="mt-1 text-[13px] font-bold text-[#173B6C]">
+              <p className="mt-1 text-[14px] font-bold text-[#173B6C]">
                 {hsCode}
               </p>
             </div>
 
             <div className="p-4 sm:p-5">
-              <p className="text-[11px] font-semibold text-slate-400">
+              <p className="text-[12px] font-semibold text-slate-400">
                 Status
               </p>
-              <p className="mt-1 text-[13px] font-bold text-[#173B6C]">
+              <p className="mt-1 text-[14px] font-bold text-[#173B6C]">
                 {status}
               </p>
             </div>
 
             <div className="p-4 sm:p-5">
-              <p className="text-[11px] font-semibold text-slate-400">
+              <p className="text-[12px] font-semibold text-slate-400">
                 Last updated
               </p>
-              <p className="mt-1 text-[13px] font-bold text-[#173B6C]">
+              <p className="mt-1 text-[14px] font-bold text-[#173B6C]">
                 {lastUpdated.toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -255,16 +255,16 @@ function Shipments() {
         <section className="fade-up mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_12px_rgba(15,23,42,.025)] sm:p-6">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h2 className="text-[17px] font-bold text-[#173B6C]">
+              <h2 className="text-[18px] font-bold text-[#173B6C]">
                 Shipment progress
               </h2>
 
-              <p className="mt-1 text-[12px] text-slate-500">
+              <p className="mt-1 text-[13px] text-slate-500">
                 Your shipment clearance journey
               </p>
             </div>
 
-            <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-[#2563EB]">
+            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[12px] font-bold text-emerald-700">
               20% complete
             </span>
           </div>
@@ -306,19 +306,19 @@ function Shipments() {
         <div className="fade-up mt-8 flex items-center justify-between border-t border-slate-200 pt-5">
           <Link
             to="/dashboard"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-bold text-slate-600 transition-all hover:border-[#173B6C] hover:text-[#173B6C]"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[14px] font-bold text-slate-600 transition-all hover:border-[#173B6C] hover:text-[#173B6C]"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to dashboard
           </Link>
 
-          <div className="hidden items-center gap-1.5 text-[11px] text-slate-400 sm:flex">
+          <div className="hidden items-center gap-1.5 text-[12px] text-slate-400 sm:flex">
             <ShieldCheck className="h-3.5 w-3.5" />
             ImportEase shipment tracking
           </div>
         </div>
 
-        <p className="mt-6 text-center text-[12px] text-slate-400">
+        <p className="mt-6 text-center text-[13px] text-slate-400">
           Shipment information is updated based on the latest available
           clearance status.
         </p>
@@ -358,7 +358,7 @@ function TimelineItem({
         <div
           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 ${
             completed
-              ? "border-[#173B6C] bg-[#173B6C] text-white"
+              ? "border-emerald-600 bg-emerald-600 text-white"
               : current
               ? "border-[#2563EB] bg-blue-50 text-[#2563EB]"
               : "border-slate-200 bg-white text-slate-300"
@@ -367,7 +367,7 @@ function TimelineItem({
           {completed ? (
             <Check className="h-4 w-4" />
           ) : current ? (
-            <Clock3 className="h-4 w-4" />
+            <Clock className="h-4 w-4" />
           ) : (
             <span className="h-2 w-2 rounded-full bg-current" />
           )}
@@ -376,7 +376,7 @@ function TimelineItem({
         {!isLast && (
           <div
             className={`my-1 w-px flex-1 min-h-[52px] ${
-              completed ? "bg-[#173B6C]" : "bg-slate-200"
+              completed ? "bg-emerald-600" : "bg-slate-200"
             }`}
           />
         )}
@@ -385,7 +385,7 @@ function TimelineItem({
       <div className={`pb-6 ${isLast ? "pb-0" : ""}`}>
         <div className="flex flex-wrap items-center gap-2">
           <h3
-            className={`text-[13px] font-bold ${
+            className={`text-[14px] font-bold ${
               current || completed ? "text-[#173B6C]" : "text-slate-400"
             }`}
           >
@@ -393,7 +393,7 @@ function TimelineItem({
           </h3>
 
           <span
-            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+            className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
               completed
                 ? "bg-emerald-50 text-emerald-700"
                 : current
@@ -405,7 +405,7 @@ function TimelineItem({
           </span>
         </div>
 
-        <p className="mt-1 max-w-[560px] text-[12px] leading-5 text-slate-500">
+        <p className="mt-1 max-w-[560px] text-[13px] leading-5 text-slate-500">
           {description}
         </p>
       </div>
@@ -424,18 +424,18 @@ function DocumentRow({ name, status }) {
         </div>
 
         <div className="min-w-0">
-          <p className="truncate text-[12px] font-bold text-[#173B6C]">
+          <p className="truncate text-[13px] font-bold text-[#173B6C]">
             {name}
           </p>
 
-          <p className="mt-0.5 text-[10px] text-slate-400">
+          <p className="mt-0.5 text-[11px] text-slate-400">
             Shipment document
           </p>
         </div>
       </div>
 
       <span
-        className={`ml-3 shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${
+        className={`ml-3 shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${
           uploaded
             ? "bg-emerald-50 text-emerald-700"
             : "bg-amber-50 text-amber-700"
@@ -450,11 +450,11 @@ function DocumentRow({ name, status }) {
 function InfoRow({ label, value }) {
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-3.5">
-      <span className="text-[11px] font-semibold text-slate-400">
+      <span className="text-[12px] font-semibold text-slate-400">
         {label}
       </span>
 
-      <span className="min-w-0 max-w-[60%] break-words text-right text-[12px] font-bold text-[#173B6C] sm:max-w-[190px]">
+      <span className="min-w-0 max-w-[60%] break-words text-right text-[13px] font-bold text-[#173B6C] sm:max-w-[190px]">
         {value}
       </span>
     </div>

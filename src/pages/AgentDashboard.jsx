@@ -2,16 +2,16 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Bell,
-  CheckCircle2,
-  ChevronRight,
-  DollarSign,
+  CheckCircle,
+  CaretRight,
+  CurrencyDollar,
   FileText,
   Package,
-  RefreshCw,
-  Search,
-  TrendingUp,
+  ArrowsClockwise,
+  MagnifyingGlass,
+  TrendUp,
   User,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import AgentMemberSidebar from "../components/AgentMemberSidebar";
 
 const demoRequests = [
@@ -167,7 +167,7 @@ function AgentDashboard() {
 <main className="min-h-screen pt-[68px] lg:ml-[260px] lg:pt-0 border-l border-slate-200 lg:border-l-0">        <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6">
           <div className="flex items-center">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
                 Agency Member Workspace
               </p>
 
@@ -184,7 +184,7 @@ function AgentDashboard() {
               className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50"
               aria-label="Refresh dashboard"
             >
-              <RefreshCw
+              <ArrowsClockwise
                 size={17}
                 className={refreshing ? "animate-spin" : ""}
               />
@@ -192,6 +192,7 @@ function AgentDashboard() {
 
             <button
               type="button"
+              onClick={() => navigate("/agent-notifications")}
               className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50"
               aria-label="Notifications"
             >
@@ -211,11 +212,11 @@ function AgentDashboard() {
                  
                 </div>
 
-                <h2 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+                <h2 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
                   Welcome back, {firstName}
                 </h2>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[16px]">
                   Manage SME import requests, submit competitive bids and
                   track your assigned clearing work from your agency
                   workspace.
@@ -227,7 +228,7 @@ function AgentDashboard() {
                 onClick={goToAgentRequests}
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#10294d]"
               >
-                <Search size={17} />
+                <MagnifyingGlass size={17} />
                 Browse Requests
               </button>
             </div>
@@ -235,7 +236,7 @@ function AgentDashboard() {
 
           <section className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <SummaryCard
-              icon={Search}
+              icon={MagnifyingGlass}
               label="New SME Requests"
               value="12"
               iconStyle="bg-blue-50 text-blue-600"
@@ -249,7 +250,7 @@ function AgentDashboard() {
             />
 
             <SummaryCard
-              icon={CheckCircle2}
+              icon={CheckCircle}
               label="Won Requests"
               value="24"
               iconStyle="bg-emerald-50 text-emerald-600"
@@ -281,7 +282,7 @@ function AgentDashboard() {
                   className="inline-flex items-center gap-1 text-xs font-bold text-[#173563] hover:text-blue-700"
                 >
                   View all
-                  <ChevronRight size={15} />
+                  <CaretRight size={15} />
                 </Link>
               </div>
 
@@ -307,7 +308,7 @@ function AgentDashboard() {
 
               <div className="mt-5 space-y-2">
                 <QuickAction
-                  icon={Search}
+                  icon={MagnifyingGlass}
                   title="Browse SME Requests"
                   description="Find new import opportunities"
                   onClick={goToAgentRequests}
@@ -359,7 +360,7 @@ function AgentDashboard() {
                   className="inline-flex items-center gap-1 text-xs font-bold text-[#173563] hover:text-blue-700"
                 >
                   View all
-                  <ChevronRight size={15} />
+                  <CaretRight size={15} />
                 </Link>
               </div>
 
@@ -391,7 +392,7 @@ function AgentDashboard() {
                   className="inline-flex items-center gap-1 text-xs font-bold text-[#173563] hover:text-blue-700"
                 >
                   View all
-                  <ChevronRight size={15} />
+                  <CaretRight size={15} />
                 </button>
               </div>
 
@@ -406,7 +407,7 @@ function AgentDashboard() {
             </section>
           </div>
 
-          <div className="mt-9 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-[10px] text-slate-400">
+          <div className="mt-9 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-[11px] text-slate-400">
             ImportEase · Agency Member Platform
           </div>
         </div>
@@ -425,7 +426,7 @@ function SummaryCard({
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-semibold text-slate-400">
+          <p className="text-[11px] font-semibold text-slate-400">
             {label}
           </p>
 
@@ -439,7 +440,6 @@ function SummaryCard({
         >
           <Icon
             size={19}
-            strokeWidth={1.8}
           />
         </div>
       </div>
@@ -467,7 +467,7 @@ function RequestRow({
             {request.product}
           </p>
 
-          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-bold text-blue-600">
+          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600">
             NEW
           </span>
         </div>
@@ -476,7 +476,7 @@ function RequestRow({
           {request.company} · {request.origin} → {request.destination}
         </p>
 
-        <p className="mt-1 text-[10px] text-slate-400">
+        <p className="mt-1 text-[11px] text-slate-400">
           {request.id} · {request.posted}
         </p>
       </div>
@@ -486,12 +486,12 @@ function RequestRow({
           {request.value}
         </p>
 
-        <p className="mt-1 text-[10px] text-slate-400">
+        <p className="mt-1 text-[11px] text-slate-400">
           Cargo value
         </p>
       </div>
 
-      <ChevronRight
+      <CaretRight
         size={17}
         className="shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-[#173563]"
       />
@@ -517,7 +517,6 @@ function QuickAction({
       >
         <Icon
           size={17}
-          strokeWidth={1.8}
         />
       </div>
 
@@ -526,12 +525,12 @@ function QuickAction({
           {title}
         </p>
 
-        <p className="mt-0.5 text-[10px] text-slate-400">
+        <p className="mt-0.5 text-[11px] text-slate-400">
           {description}
         </p>
       </div>
 
-      <ChevronRight
+      <CaretRight
         size={15}
         className="text-slate-300 transition group-hover:translate-x-1"
       />
@@ -549,7 +548,7 @@ function BidRow({ bid }) {
   return (
     <div className="flex items-center gap-4 p-5">
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
-        <DollarSign size={19} />
+        <CurrencyDollar size={19} />
       </div>
 
       <div className="min-w-0 flex-1">
@@ -557,7 +556,7 @@ function BidRow({ bid }) {
           {bid.company}
         </p>
 
-        <p className="mt-1 text-[10px] text-slate-400">
+        <p className="mt-1 text-[11px] text-slate-400">
           {bid.id} · {bid.request}
         </p>
       </div>
@@ -568,7 +567,7 @@ function BidRow({ bid }) {
         </p>
 
         <span
-          className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[9px] font-semibold ${
+          className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${
             statusStyles[bid.status] || "bg-slate-100 text-slate-500"
           }`}
         >
@@ -594,30 +593,30 @@ function ShipmentRow({ shipment }) {
                 {shipment.product}
               </p>
 
-              <p className="mt-1 text-[10px] text-slate-400">
+              <p className="mt-1 text-[11px] text-slate-400">
                 {shipment.id} · {shipment.company}
               </p>
             </div>
 
-            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-semibold text-blue-700">
+            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
               {shipment.status}
             </span>
           </div>
 
           <div className="mt-4">
             <div className="mb-1.5 flex justify-between">
-              <span className="text-[10px] font-medium text-slate-400">
+              <span className="text-[11px] font-medium text-slate-400">
                 Progress
               </span>
 
-              <span className="text-[10px] font-bold text-slate-600">
+              <span className="text-[11px] font-bold text-slate-600">
                 {shipment.progress}%
               </span>
             </div>
 
             <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
               <div
-                className="h-full rounded-full bg-[#173563]"
+                className="h-full rounded-full bg-emerald-600"
                 style={{
                   width: `${shipment.progress}%`,
                 }}

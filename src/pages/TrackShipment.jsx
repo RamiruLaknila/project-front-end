@@ -3,15 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Check,
-  ChevronRight,
-  Clock3,
+  CaretRight,
+  Clock,
   FileText,
   MapPin,
-  MessageSquare,
+  ChatText,
   Package,
-  RefreshCw,
+  ArrowsClockwise,
   ShieldCheck,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
 import BackButton from "../components/ui/BackButton";
@@ -224,11 +224,11 @@ function TrackShipment() {
 
         <section className="fade-up -mt-8 mb-7">
           <div className="flex flex-col items-center justify-center text-center">
-            <h1 className="text-[30px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[40px]">
+            <h1 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
               Track your Shipment
             </h1>
 
-            <p className="mx-auto mt-2 max-w-2xl text-[15px] leading-6 text-slate-500 sm:text-base">
+            <p className="mx-auto mt-2 max-w-2xl text-[14px] leading-6 text-slate-500 sm:text-[16px]">
               Follow your import and customs clearance progress
               from one place.
             </p>
@@ -238,7 +238,7 @@ function TrackShipment() {
               onClick={() => window.location.reload()}
               className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-600 shadow-sm transition hover:bg-slate-50"
             >
-              <RefreshCw size={14} />
+              <ArrowsClockwise size={14} />
               Refresh status
             </button>
           </div>
@@ -252,11 +252,11 @@ function TrackShipment() {
           <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
-                <Package size={23} strokeWidth={1.8} />
+                <Package size={23} />
               </div>
 
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                <p className="text-[12px] font-semibold uppercase tracking-wider text-slate-400">
                   Shipment ID
                 </p>
 
@@ -265,7 +265,7 @@ function TrackShipment() {
                     {shipmentId}
                   </h2>
 
-                  <span className="rounded-md bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700">
+                  <span className="rounded-md bg-amber-50 px-2.5 py-1 text-[12px] font-bold text-amber-700">
                     IN PROGRESS
                   </span>
                 </div>
@@ -388,7 +388,7 @@ function TrackShipment() {
 
                     <div className="mt-4 rounded-xl bg-slate-50 p-3.5">
                       <div className="flex items-center gap-2">
-                        <Clock3
+                        <Clock
                           size={15}
                           className="text-blue-600"
                         />
@@ -405,7 +405,7 @@ function TrackShipment() {
                       onClick={() => navigate("/messages")}
                       className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 hover:text-[#173563]"
                     >
-                      <MessageSquare size={15} />
+                      <ChatText size={15} />
                       Contact agent
                     </button>
                   </>
@@ -429,7 +429,7 @@ function TrackShipment() {
                       className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-blue-700 hover:text-blue-800"
                     >
                       Find an agent
-                      <ChevronRight size={14} />
+                      <CaretRight size={14} />
                     </Link>
                   </div>
                 )}
@@ -592,7 +592,7 @@ function TimelineItem({
         }`}
       >
         {completed ? (
-          <Check size={14} strokeWidth={3} />
+          <Check size={14} />
         ) : active ? (
           <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-blue-600" />
         ) : (
@@ -621,7 +621,7 @@ function TimelineItem({
           </h3>
 
           {active && (
-            <span className="rounded-md bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">
+            <span className="rounded-md bg-blue-50 px-2 py-1 text-[11px] font-bold text-blue-700">
               CURRENT
             </span>
           )}
@@ -645,7 +645,7 @@ function TimelineItem({
 
         {active && (
           <div className="mt-3 flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2.5">
-            <Clock3
+            <Clock
               size={14}
               className="text-blue-600"
             />
