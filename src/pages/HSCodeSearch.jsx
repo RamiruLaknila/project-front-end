@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -7,18 +7,18 @@ import {
   Package,
   CheckCircle,
   Info,
-  ShieldCheck,
-  Sparkle,
   FileText,
   X,
   CaretRight,
   CaretDown,
   Question,
   SlidersHorizontal,
+  WarningCircle,
 } from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
 import BackButton from "../components/ui/BackButton";
+import { api, ApiError } from "../lib/api";
 
 function HSCodeSearch() {
   const navigate = useNavigate();
@@ -370,100 +370,6 @@ function HSCodeSearch() {
   ];
 
   /* =====================================================
-     DEMO HS CODE DATABASE
-  ====================================================== */
-
-  const hsCodes = [
-    {
-      code: "8541.43",
-      title: "Solar panels and photovoltaic modules",
-      category: "Solar & Renewable Energy",
-      keywords: [
-        "solar",
-        "solar panel",
-        "solar panels",
-        "photovoltaic",
-        "pv",
-        "panel",
-      ],
-      description:
-        "Used for certain solar panels and photovoltaic modules that generate electricity from sunlight.",
-    },
-
-    {
-      code: "8471.30",
-      title: "Laptops and portable computers",
-      category: "Electronics & Computers",
-      keywords: [
-        "laptop",
-        "computer",
-        "notebook",
-        "portable computer",
-      ],
-      description:
-        "Used for certain portable computers such as laptops and notebooks.",
-    },
-
-    {
-      code: "8471.49",
-      title: "Desktop computers and computer systems",
-      category: "Electronics & Computers",
-      keywords: [
-        "desktop",
-        "computer",
-        "pc",
-        "server",
-        "computer system",
-      ],
-      description:
-        "Used for certain desktop computers and computer systems.",
-    },
-
-    {
-      code: "6109.10",
-      title: "Cotton T-shirts and similar clothing",
-      category: "Textiles & Apparel",
-      keywords: [
-        "shirt",
-        "t-shirt",
-        "tshirt",
-        "cotton shirt",
-        "clothing",
-      ],
-      description:
-        "Used for certain cotton T-shirts, singlets and similar knitted clothing.",
-    },
-
-    {
-      code: "8703.23",
-      title: "Passenger cars and similar motor vehicles",
-      category: "Motor Vehicles & Parts",
-      keywords: [
-        "car",
-        "vehicle",
-        "motor car",
-        "automobile",
-      ],
-      description:
-        "Used for certain passenger cars and motor vehicles designed to carry people.",
-    },
-
-    {
-      code: "8504.40",
-      title: "Electrical converters and inverters",
-      category: "Electrical Equipment",
-      keywords: [
-        "inverter",
-        "converter",
-        "power converter",
-        "solar inverter",
-      ],
-      description:
-        "Used for certain electrical converters, including some types of power and solar inverters.",
-    },
-  ];
-
-  /* =====================================================
      LOAD PRODUCT NAME FROM PREVIOUS IMPORT
   ====================================================== */
 
@@ -474,63 +380,55 @@ function HSCodeSearch() {
   }, [importData]);
 
   /* =====================================================
-     SEARCH + RANK RESULTS
+     SEARCH — GET /hscodes/search (public, semantic search)
+     Only runs when the user explicitly asks for it (Enter / the search
+     button / a category or suggestion click) -- never on every keystroke.
   ====================================================== */
 
-  const results = useMemo(() => {
-    const query = search.trim().toLowerCase();
+  const [results, setResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState(null);
+
+  // Guards against a slow, stale request overwriting a newer one if the
+  // user searches again before the first request comes back.
+  const searchRequestId = useRef(0);
+
+  const runSearch = async (rawQuery) => {
+    const query = rawQuery.trim();
+    const requestId = ++searchRequestId.current;
 
     if (!query) {
-      return hsCodes;
+      setResults([]);
+      setSearchError(null);
+      return;
     }
 
-    const words = query.split(/\s+/).filter(Boolean);
+    setSearching(true);
+    setSearchError(null);
 
-    return hsCodes
-      .map((item) => {
-        let score = 0;
+    try {
+      const data = await api.get(
+        `/hscodes/search?q=${encodeURIComponent(query)}`,
+        { auth: false }
+      );
+      if (searchRequestId.current === requestId) setResults(data);
+    } catch (err) {
+      if (searchRequestId.current !== requestId) return;
+      setResults([]);
+      setSearchError(
+        err instanceof ApiError
+          ? err.message
+          : "Could not search HS codes. Is the backend running?"
+      );
+    } finally {
+      if (searchRequestId.current === requestId) setSearching(false);
+    }
+  };
 
-        const title = item.title.toLowerCase();
-        const category = item.category.toLowerCase();
-
-        const keywords = item.keywords.map((keyword) =>
-          keyword.toLowerCase()
-        );
-
-        if (title.includes(query)) {
-          score += 10;
-        }
-
-        if (category.includes(query)) {
-          score += 6;
-        }
-
-        words.forEach((word) => {
-          if (title.includes(word)) {
-            score += 4;
-          }
-
-          if (category.includes(word)) {
-            score += 3;
-          }
-
-          if (
-            keywords.some((keyword) =>
-              keyword.includes(word)
-            )
-          ) {
-            score += 7;
-          }
-        });
-
-        return {
-          ...item,
-          score,
-        };
-      })
-      .filter((item) => item.score > 0)
-      .sort((a, b) => b.score - a.score);
-  }, [search]);
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    runSearch(search);
+  };
 
   /* =====================================================
      SELECT CODE
@@ -552,8 +450,8 @@ function HSCodeSearch() {
     const updatedImport = {
       ...(importData || {}),
       hsCode: selectedCode.code,
-      hsCodeTitle: selectedCode.title,
-      hsCodeCategory: selectedCode.category,
+      hsCodeTitle: selectedCode.description || selectedCode.headingDescription,
+      hsCodeCategory: selectedCode.chapterTitle,
       hsCodeDescription: selectedCode.description,
       status: "HS Code Selected",
     };
@@ -582,6 +480,7 @@ function HSCodeSearch() {
   const handleCategoryClick = (category) => {
     setSearch(category.search);
     setSelectedCode(null);
+    runSearch(category.search);
 
     // Close the category dropdown after selecting
     setShowCategories(false);
@@ -801,37 +700,60 @@ function HSCodeSearch() {
                 SEARCH INPUT
             ================================================== */}
 
-            <div className="relative">
+            <form
+              onSubmit={handleSearchSubmit}
+              className="flex items-stretch gap-2"
+            >
 
-              <MagnifyingGlass
-                size={18}
-                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-              />
+              <div className="relative flex-1">
 
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setSelectedCode(null);
-                }}
-                placeholder="Search your product..."
-                aria-label="Search product for HS code"
-                className="h-12 w-full rounded-xl border border-slate-300 bg-white pl-11 pr-11 text-sm text-slate-900 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173B6C] focus:ring-4 focus:ring-[#173B6C]/10"
-              />
+                <MagnifyingGlass
+                  size={18}
+                  className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                />
 
-              {search && (
-                <button
-                  type="button"
-                  onClick={clearSearch}
-                  aria-label="Clear search"
-                  className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                >
-                  <X size={15} />
-                </button>
-              )}
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setSelectedCode(null);
+                  }}
+                  placeholder="Search your product..."
+                  aria-label="Search product for HS code"
+                  className="h-12 w-full rounded-xl border border-slate-300 bg-white pl-11 pr-11 text-sm text-slate-900 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173B6C] focus:ring-4 focus:ring-[#173B6C]/10"
+                />
 
-            </div>
+                {search && (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    aria-label="Clear search"
+                    className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                  >
+                    <X size={15} />
+                  </button>
+                )}
+
+              </div>
+
+              <button
+                type="submit"
+                aria-label="Search"
+                disabled={searching}
+                className="flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#173B6C] px-5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(23,59,108,.16)] transition-all duration-200 hover:bg-[#12315B] disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {searching ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                ) : (
+                  <MagnifyingGlass size={17} />
+                )}
+                <span className="hidden sm:inline">
+                  {searching ? "Searching…" : "Search"}
+                </span>
+              </button>
+
+            </form>
 
             {/* =================================================
                 SEARCH HELP
@@ -850,7 +772,10 @@ function HSCodeSearch() {
 
                 <button
                   type="button"
-                  onClick={() => setSearch("solar panels")}
+                  onClick={() => {
+                    setSearch("solar panels");
+                    runSearch("solar panels");
+                  }}
                   className="font-semibold text-slate-500 transition hover:text-[#173B6C]"
                 >
                   solar panels
@@ -860,7 +785,10 @@ function HSCodeSearch() {
 
                 <button
                   type="button"
-                  onClick={() => setSearch("laptop computer")}
+                  onClick={() => {
+                    setSearch("laptop computer");
+                    runSearch("laptop computer");
+                  }}
                   className="font-semibold text-slate-500 transition hover:text-[#173B6C]"
                 >
                   laptop computer
@@ -870,7 +798,10 @@ function HSCodeSearch() {
 
                 <button
                   type="button"
-                  onClick={() => setSearch("cotton t-shirt")}
+                  onClick={() => {
+                    setSearch("cotton t-shirt");
+                    runSearch("cotton t-shirt");
+                  }}
                   className="font-semibold text-slate-500 transition hover:text-[#173B6C]"
                 >
                   cotton t-shirt
@@ -880,7 +811,10 @@ function HSCodeSearch() {
 
                 <button
                   type="button"
-                  onClick={() => setSearch("motor car")}
+                  onClick={() => {
+                    setSearch("motor car");
+                    runSearch("motor car");
+                  }}
                   className="font-semibold text-slate-500 transition hover:text-[#173B6C]"
                 >
                   motor car
@@ -1171,33 +1105,78 @@ function HSCodeSearch() {
                 <div>
 
                   <h3 className="text-sm font-bold text-[#14213D]">
-                    {search.trim()
-                      ? "Matching HS codes"
-                      : "Available HS codes"}
+                    Matching HS codes
                   </h3>
 
                   <p className="mt-0.5 text-[11px] text-slate-400">
                     {search.trim()
                       ? `Results for "${search}"`
-                      : "Select the HS code that best matches your product"}
+                      : "Type a product name or browse a category above to search"}
                   </p>
 
                 </div>
 
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-500">
-                  {results.length} result
-                  {results.length !== 1 ? "s" : ""}
-                </span>
+                {search.trim() && !searching && !searchError && (
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-500">
+                    {results.length} result
+                    {results.length !== 1 ? "s" : ""}
+                  </span>
+                )}
 
               </div>
 
-              {results.length > 0 ? (
+              {!search.trim() ? (
+                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/60 px-5 py-8 text-center">
+
+                  <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm">
+                    <MagnifyingGlass size={17} />
+                  </div>
+
+                  <p className="mx-auto mt-3 max-w-md text-[11px] leading-5 text-slate-400">
+                    Start typing above, or pick a category, to search the HS
+                    code catalogue.
+                  </p>
+
+                </div>
+              ) : searching ? (
+                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/60 px-5 py-8 text-center">
+
+                  <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-[#173B6C]" />
+
+                  <p className="mt-3 text-[12px] text-slate-400">
+                    Searching the HS code catalogue…
+                  </p>
+
+                </div>
+              ) : searchError ? (
+                <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-5 py-4">
+
+                  <WarningCircle
+                    size={16}
+                    className="mt-0.5 shrink-0 text-red-600"
+                  />
+
+                  <p className="text-[12px] leading-5 text-red-700">
+                    {searchError}
+                  </p>
+
+                </div>
+              ) : results.length > 0 ? (
                 <div className="space-y-3">
 
-                  {results.map((item) => {
+                  {results.map((item, index) => {
 
                     const isSelected =
                       selectedCode?.code === item.code;
+
+                    // results are already ordered by score, highest first --
+                    // see hscode_routes.py's search_hscodes().
+                    const matchLabel =
+                      index === 0
+                        ? "Best match"
+                        : index <= 2
+                          ? "Strong match"
+                          : null;
 
                     return (
                       <button
@@ -1235,6 +1214,18 @@ function HSCodeSearch() {
                                 {item.code}
                               </span>
 
+                              {matchLabel && (
+                                <span
+                                  className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${
+                                    index === 0
+                                      ? "border-blue-200 bg-blue-50 text-blue-700"
+                                      : "border-slate-200 bg-slate-50 text-slate-500"
+                                  }`}
+                                >
+                                  {matchLabel}
+                                </span>
+                              )}
+
                               {isSelected && (
                                 <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-700">
                                   Selected
@@ -1244,16 +1235,27 @@ function HSCodeSearch() {
                             </div>
 
                             <h4 className="mt-1 text-[14px] font-bold leading-5 text-slate-800">
-                              {item.title}
+                              {item.description || item.headingDescription}
                             </h4>
 
-                            <p className="mt-1 text-[11px] font-semibold text-slate-400">
-                              Category: {item.category}
-                            </p>
+                            {item.classificationPath?.length > 0 && (
+                              <p className="mt-1 text-[11px] font-semibold text-slate-400">
+                                {item.classificationPath.join(" › ")}
+                              </p>
+                            )}
 
-                            <p className="mt-2 text-[12px] leading-5 text-slate-500">
-                              {item.description}
-                            </p>
+                            {item.chapterTitle && (
+                              <div className="mt-2 inline-block rounded-lg border border-slate-200 bg-slate-50/60 px-2.5 py-1 text-[11px] text-slate-500">
+                                Ch. {item.chapter} · {item.chapterTitle}
+                              </div>
+                            )}
+
+                            {item.headingDescription &&
+                              item.headingDescription !== item.description && (
+                                <p className="mt-2 text-[10px] leading-4 text-slate-400">
+                                  {item.headingDescription}
+                                </p>
+                              )}
 
                           </div>
 
@@ -1345,16 +1347,27 @@ function HSCodeSearch() {
                   </div>
 
                   <h3 className="mt-1 text-[14px] font-bold leading-5 text-slate-800 sm:text-sm">
-                    {selectedCode.title}
+                    {selectedCode.description || selectedCode.headingDescription}
                   </h3>
 
-                  <p className="mt-1 text-[11px] font-semibold text-slate-400">
-                    Category: {selectedCode.category}
-                  </p>
+                  {selectedCode.classificationPath?.length > 0 && (
+                    <p className="mt-1 text-[11px] font-semibold text-slate-400">
+                      {selectedCode.classificationPath.join(" › ")}
+                    </p>
+                  )}
 
-                  <p className="mt-2 text-[12px] leading-5 text-slate-500">
-                    {selectedCode.description}
-                  </p>
+                  {selectedCode.chapterTitle && (
+                    <div className="mt-2 inline-block rounded-lg border border-slate-200 bg-slate-50/60 px-2.5 py-1 text-[11px] text-slate-500">
+                      Ch. {selectedCode.chapter} · {selectedCode.chapterTitle}
+                    </div>
+                  )}
+
+                  {selectedCode.headingDescription &&
+                    selectedCode.headingDescription !== selectedCode.description && (
+                      <p className="mt-2 text-[10px] leading-4 text-slate-400">
+                        {selectedCode.headingDescription}
+                      </p>
+                    )}
 
                   <p className="mt-2 text-[11px] leading-5 text-slate-400">
                     This classification will be carried forward to the
