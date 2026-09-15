@@ -1,2 +1,14 @@
 when creating a SME account,the country should be fixed as Sri Lanka 
-when the user is trying to sign up without agreeing to the terms and conditions, screen must move the error message
+when the user is trying to sign up without agreeing to the terms and conditions, screen must move the error message\
+post shipment button should be removed
+In profile settings the "Password & Security" option doesn't work
+On the shipment dashboard the refresh button doesn't work
+find agent-clearing agent option clicking "View Profile" also marks the agent as selected,it should only open the profile
+
+The phone number / ID number field allows letters to be entered — should be restricted to numbers only
+There's no option for a clearing agent to join an existing company after they've already registered as an individual
+When registering a clearing agency, there's no document verification step
+Agency registration has no application review step
+The invitation code copied from the Dashboard doesn't match the one shown & on the Invite Agent page — copying works, but the code itself is wrong
+The clearing agent sign-in flow needs to be changed — there's no field to enter the agency code
+Agent can sign up even with an expired license (the system should show an error or block the agent from proceeding to the next step if the license has expired))
