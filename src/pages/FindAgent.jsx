@@ -504,6 +504,8 @@ function TenderCard({ tender, expanded, onToggle, onAccepted, onDeleted, onViewP
   const [error, setError] = useState("");
   const [acceptingId, setAcceptingId] = useState(null);
   const [acceptError, setAcceptError] = useState("");
+  const [rejectingId, setRejectingId] = useState(null);
+  const [rejectError, setRejectError] = useState("");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
@@ -561,6 +563,26 @@ function TenderCard({ tender, expanded, onToggle, onAccepted, onDeleted, onViewP
       setAcceptError(err instanceof ApiError ? err.message : "Could not accept this bid.");
     } finally {
       setAcceptingId(null);
+    }
+  };
+
+  const handleReject = async (bidId) => {
+    if (rejectingId) return;
+    setRejectingId(bidId);
+    setRejectError("");
+    try {
+      await api.post(`/tenders/${tender.id}/bids/${bidId}/reject`);
+      const [tenderData, bidsData] = await Promise.all([
+        api.get(`/tenders/${tender.id}`),
+        api.get(`/tenders/${tender.id}/bids`),
+      ]);
+      setLiveTender(tenderData);
+      setBids(bidsData);
+      onAccepted();
+    } catch (err) {
+      setRejectError(err instanceof ApiError ? err.message : "Could not reject this bid.");
+    } finally {
+      setRejectingId(null);
     }
   };
 
@@ -692,10 +714,10 @@ function TenderCard({ tender, expanded, onToggle, onAccepted, onDeleted, onViewP
             </div>
           </div>
 
-          {acceptError && (
+          {(acceptError || rejectError) && (
             <div className="mx-5 mb-5 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[14px] font-semibold text-red-600 sm:mx-6">
               <Warning size={17} />
-              {acceptError}
+              {acceptError || rejectError}
             </div>
           )}
 
@@ -780,15 +802,28 @@ function TenderCard({ tender, expanded, onToggle, onAccepted, onDeleted, onViewP
                       </div>
 
                       {liveTender?.status === "open" && bid.status === "pending" && (
-                        <button
-                          type="button"
-                          onClick={() => handleAccept(bid.id)}
-                          disabled={acceptingId === bid.id}
-                          className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#173563] px-4 py-3 text-[14px] font-bold text-white transition hover:bg-[#214777] disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          <CheckCircle size={15} />
-                          {acceptingId === bid.id ? "Accepting..." : "Accept Bid"}
-                        </button>
+                        <div className="flex shrink-0 items-center gap-2">
+                          {liveTender?.targetAgencyId && (
+                            <button
+                              type="button"
+                              onClick={() => handleReject(bid.id)}
+                              disabled={rejectingId === bid.id || acceptingId === bid.id}
+                              className="flex items-center justify-center gap-2 rounded-xl border border-red-200 px-4 py-3 text-[14px] font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              <X size={15} />
+                              {rejectingId === bid.id ? "Rejecting..." : "Reject"}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleAccept(bid.id)}
+                            disabled={acceptingId === bid.id || rejectingId === bid.id}
+                            className="flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-4 py-3 text-[14px] font-bold text-white transition hover:bg-[#214777] disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <CheckCircle size={15} />
+                            {acceptingId === bid.id ? "Accepting..." : "Accept Bid"}
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>

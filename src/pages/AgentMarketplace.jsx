@@ -432,7 +432,7 @@ function AgentMarketplace() {
                               onClick={() => openBidForm(tender)}
                               className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#10294d]"
                             >
-                              {tender.targetAgencyId ? "Submit Pitch" : "Submit Bid"}
+                              Submit Bid
                               <PaperPlaneTilt size={16} />
                             </button>
                           )}
@@ -574,7 +574,7 @@ function AgentMarketplace() {
                     onClick={() => openBidForm(selectedTender)}
                     className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 text-sm font-semibold text-white hover:bg-[#10294d]"
                   >
-                    {selectedTender.targetAgencyId ? "Submit Pitch" : "Submit Bid"}
+                    Submit Bid
                     <PaperPlaneTilt size={16} />
                   </button>
                 )}
@@ -590,9 +590,7 @@ function AgentMarketplace() {
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
               <div>
                 <p className="text-xs font-medium text-slate-400">
-                  {selectedTender.targetAgencyId
-                    ? editingBidId ? "Update Your Pitch" : "Submit Your Pitch"
-                    : editingBidId ? "Update Your Bid" : "Submit Your Bid"}
+                  {editingBidId ? "Update Your Bid" : "Submit Your Bid"}
                 </p>
                 <h2 className="mt-1 text-lg font-bold text-slate-900">
                   {selectedTender.description || "Shipment request"}
@@ -686,11 +684,7 @@ function AgentMarketplace() {
                   disabled={bidSubmitting}
                   className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#173563] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#10294d] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {bidSubmitting
-                    ? "Saving..."
-                    : selectedTender.targetAgencyId
-                      ? editingBidId ? "Update Pitch" : "Submit Pitch"
-                      : editingBidId ? "Update Bid" : "Submit Bid"}
+                  {bidSubmitting ? "Saving..." : editingBidId ? "Update Bid" : "Submit Bid"}
                   <PaperPlaneTilt size={16} />
                 </button>
               </div>

@@ -18,7 +18,6 @@ import NewImport from "./pages/NewImport";
 import HSCodeSearch from "./pages/HSCodeSearch";
 import Calculator from "./pages/Calculator";
 import FindAgent from "./pages/FindAgent";
-import Shipments from "./pages/Shipments";
 import TrackShipment from "./pages/TrackShipment";
 import Documents from "./pages/Documents";
 import CompleteProfile from "./pages/CompleteProfile";
@@ -235,15 +234,6 @@ function App() {
         {/* =====================================================
             SME SHIPMENTS
         ===================================================== */}
-
-        <Route
-          path="/shipments"
-          element={
-            <RequireSmeAccess pageName="Shipments">
-              <Shipments />
-            </RequireSmeAccess>
-          }
-        />
 
         <Route
           path="/track-shipment"

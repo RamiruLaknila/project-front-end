@@ -57,16 +57,6 @@ const ORIGIN_COUNTRY_ORDER = [
 function ImportCalculator() {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    cifUsd: "",
-    origin: "",
-    otherCharges: "",
-  });
-
-  const [result, setResult] = useState(null);
-  const [calculating, setCalculating] = useState(false);
-  const [calcError, setCalcError] = useState("");
-
   /* =========================================================
      LOAD THE HS CODE PICKED IN THE PREVIOUS STEP
      Read once, lazily, as the initial state -- no effect needed, and
@@ -86,6 +76,28 @@ function ImportCalculator() {
   });
 
   const hsCodeMissing = !importData?.hsCode;
+
+  // A calculation from an earlier visit is only good for restoring the form
+  // if it was run for THIS same HS code -- picking a different code in HS
+  // Code Search leaves the old `calculator` snapshot sitting on the carried
+  // import data, and showing its numbers next to a different code's summary
+  // would be actively wrong, not just stale.
+  const savedCalc =
+    importData?.calculator?.hsCode === importData?.hsCode ? importData.calculator : null;
+
+  const [form, setForm] = useState(() =>
+    savedCalc
+      ? {
+          cifUsd: savedCalc.form?.cifUsd ?? "",
+          origin: savedCalc.form?.origin ?? "",
+          otherCharges: savedCalc.form?.otherCharges ?? "",
+        }
+      : { cifUsd: "", origin: "", otherCharges: "" }
+  );
+
+  const [result, setResult] = useState(() => savedCalc?.result ?? null);
+  const [calculating, setCalculating] = useState(false);
+  const [calcError, setCalcError] = useState("");
 
   /* =========================================================
      FULL HS CODE DETAIL -- fetched fresh from Firestore (via the backend),
@@ -130,7 +142,7 @@ function ImportCalculator() {
   const [countries, setCountries] = useState([]);
   const [exchangeRate, setExchangeRate] = useState(null); // { rate, asOf }
   const [rateError, setRateError] = useState("");
-  const [manualRate, setManualRate] = useState("");
+  const [manualRate, setManualRate] = useState(() => savedCalc?.manualRate ?? "");
   const [editingRate, setEditingRate] = useState(false);
 
   useEffect(() => {
@@ -233,7 +245,9 @@ function ImportCalculator() {
 
       const updatedImport = {
         ...importData,
-        calculator: { ...form, cifLkr, exchangeRate: effectiveRate, ...data },
+        // Tagged with the HS code it was calculated for, so a later visit
+        // only restores this if the carried HS code hasn't changed since.
+        calculator: { hsCode: importData.hsCode, form: { ...form }, result: data, manualRate },
         status: "Cost Estimated",
       };
       localStorage.setItem("currentImport", JSON.stringify(updatedImport));
@@ -263,6 +277,16 @@ function ImportCalculator() {
 
     setResult(null);
     setCalcError("");
+    setManualRate("");
+
+    // Also drop the persisted snapshot -- otherwise navigating away and
+    // back would restore the very numbers Reset just cleared.
+    if (importData?.calculator) {
+      const rest = { ...importData };
+      delete rest.calculator;
+      localStorage.setItem("currentImport", JSON.stringify(rest));
+      setImportData(rest);
+    }
   };
 
   /* =========================================================

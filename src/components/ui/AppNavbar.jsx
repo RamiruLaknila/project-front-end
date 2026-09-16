@@ -234,8 +234,8 @@ function AppNavbar() {
 
           {/* Shipments */}
           <Link
-            to="/shipments"
-            className={desktopNavClass("/shipments")}
+            to="/track-shipment"
+            className={desktopNavClass("/track-shipment")}
           >
             Shipments
           </Link>
@@ -533,9 +533,9 @@ function AppNavbar() {
 
             {/* Shipments */}
             <Link
-              to="/shipments"
+              to="/track-shipment"
               onClick={closeMobileMenu}
-              className={mobileNavClass("/shipments")}
+              className={mobileNavClass("/track-shipment")}
             >
               Shipments
             </Link>

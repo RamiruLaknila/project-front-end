@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, CheckCircle, Clock, Warning } from "@phosphor-icons/react";
+import { Bell, CheckCircle, Clock, Trash, Warning } from "@phosphor-icons/react";
 
 import AgentMemberSidebar from "../components/AgentMemberSidebar";
 import { api, ApiError } from "../lib/api";
@@ -49,6 +49,8 @@ function AgentNotifications() {
   const [actionError, setActionError] = useState("");
   const [filter, setFilter] = useState("all");
   const [reloadKey, setReloadKey] = useState(0);
+  const [confirmingClear, setConfirmingClear] = useState(false);
+  const [clearingAll, setClearingAll] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -115,6 +117,21 @@ function AgentNotifications() {
     }
   };
 
+  const clearAll = async () => {
+    setClearingAll(true);
+    setActionError("");
+    try {
+      await api.del("/notifications");
+      setItems([]);
+      setConfirmingClear(false);
+      window.dispatchEvent(new Event("notificationsUpdated"));
+    } catch (err) {
+      setActionError(err instanceof ApiError ? err.message : "Could not clear notifications.");
+    } finally {
+      setClearingAll(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
       <AgentMemberSidebar />
@@ -128,19 +145,57 @@ function AgentNotifications() {
             <h1 className="text-base font-bold text-slate-800">Notifications</h1>
           </div>
 
-          {unreadCount > 0 && (
-            <button
-              type="button"
-              onClick={markAllRead}
-              className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-[13px] font-semibold text-[#173563] transition hover:border-slate-300 hover:bg-slate-50"
-            >
-              <CheckCircle size={15} />
-              Mark all as read
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {unreadCount > 0 && (
+              <button
+                type="button"
+                onClick={markAllRead}
+                className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-[13px] font-semibold text-[#173563] transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                <CheckCircle size={15} />
+                Mark all as read
+              </button>
+            )}
+            {items.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setConfirmingClear(true)}
+                className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-[13px] font-semibold text-red-600 transition hover:border-red-200 hover:bg-red-50"
+              >
+                <Trash size={15} />
+                Clear all
+              </button>
+            )}
+          </div>
         </header>
 
         <div className="mx-auto max-w-[880px] px-5 py-7 sm:px-8 lg:py-9">
+          {confirmingClear && (
+            <div className="mb-5 flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-[13px] font-semibold text-red-700">
+                Clear all notifications? This can't be undone.
+              </p>
+              <div className="flex shrink-0 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmingClear(false)}
+                  disabled={clearingAll}
+                  className="rounded-lg border border-red-200 bg-white px-3 py-2 text-[12px] font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={clearAll}
+                  disabled={clearingAll}
+                  className="rounded-lg bg-red-600 px-3 py-2 text-[12px] font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {clearingAll ? "Clearing..." : "Yes, Clear All"}
+                </button>
+              </div>
+            </div>
+          )}
+
           {actionError && (
             <div className="mb-5 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[14px] font-semibold text-red-600">
               <Warning size={17} />
@@ -205,7 +260,7 @@ function AgentNotifications() {
                 </div>
                 <p className="text-sm font-semibold text-slate-700">You're all caught up</p>
                 <p className="mt-1 max-w-xs text-[13px] leading-5 text-slate-400">
-                  New requests, bids and pitches will show up here.
+                  New requests and bids will show up here.
                 </p>
               </div>
             ) : (

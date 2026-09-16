@@ -288,7 +288,7 @@ function RequestCard({ tender, alreadyBid, navigate }) {
         {alreadyBid ? (
           <span className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-50 px-4 py-2.5 text-xs font-semibold text-emerald-600">
             <CheckCircle size={15} />
-            {tender.targetAgencyId ? "Pitch Submitted" : "Bid Submitted"}
+            Bid Submitted
           </span>
         ) : (
           <button
@@ -296,7 +296,7 @@ function RequestCard({ tender, alreadyBid, navigate }) {
             onClick={() => navigate("/individual-agent-bids", { state: { request: tender } })}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#10294d]"
           >
-            {tender.targetAgencyId ? "Submit Pitch" : "Submit Bid"}
+            Submit Bid
             <CaretRight size={15} />
           </button>
         )}

@@ -194,7 +194,7 @@ function IndividualAgentBids() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-blue-500">
-                      {selectedRequest.targetAgencyId ? "Send Your Pitch" : "Submit New Bid"}
+                      Submit New Bid
                     </p>
                     <h2 className="mt-1 text-lg font-bold text-[#173563]">
                       {selectedRequest.description || "Shipment request"}
@@ -313,11 +313,7 @@ function IndividualAgentBids() {
                     disabled={bidSubmitting}
                     className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#10294d] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {bidSubmitting
-                      ? "Saving..."
-                      : selectedRequest.targetAgencyId
-                        ? isEditing ? "Update Pitch" : "Send Pitch"
-                        : isEditing ? "Update Bid" : "Submit Bid"}
+                    {bidSubmitting ? "Saving..." : isEditing ? "Update Bid" : "Submit Bid"}
                     <CaretRight size={15} />
                   </button>
                 </div>
@@ -369,7 +365,7 @@ function IndividualAgentBids() {
                       onClick={startEdit}
                       className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-[#173563] transition hover:bg-slate-50"
                     >
-                      {selectedRequest.targetAgencyId ? "Edit Pitch" : "Edit Bid"}
+                      Edit Bid
                       <CaretRight size={15} />
                     </button>
                   )}

@@ -14,3 +14,4 @@ Agency registration has no application review step
 The invitation code copied from the Dashboard doesn't match the one shown & on the Invite Agent page — copying works, but the code itself is wrong
 The clearing agent sign-in flow needs to be changed — there's no field to enter the agency code
 Agent can sign up even with an expired license (the system should show an error or block the agent from proceeding to the next step if the license has expired))
+go to Calculator button should be at a place where it is convenient.right now user needs to scroll all the way down to click it

@@ -1,241 +1,117 @@
-import { useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowRight,
-  Check,
+  ArrowsClockwise,
+  CalendarBlank,
+  CaretDown,
   CaretRight,
+  Check,
+  ChatText,
   Clock,
   FileText,
   MapPin,
-  ChatText,
   Package,
-  ArrowsClockwise,
   ShieldCheck,
 } from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
 import BackButton from "../components/ui/BackButton";
+import { api, ApiError } from "../lib/api";
+import { STAGE_DESCRIPTIONS, STAGE_LABELS, STAGE_ORDER, stageIndex } from "../lib/shipmentStages";
 
-/* =========================================================
-   SHIPMENT STAGES
-========================================================= */
-
-const stages = [
-  {
-    id: "request",
-    title: "Agent request submitted",
-    description: "Your clearing agent request has been sent.",
-  },
-  {
-    id: "review",
-    title: "Agent reviewing request",
-    description:
-      "The selected agent is reviewing your import details.",
-  },
-  {
-    id: "documents",
-    title: "Documents & clearance preparation",
-    description:
-      "Required documents and customs information are being prepared.",
-  },
-  {
-    id: "customs",
-    title: "Customs clearance",
-    description:
-      "Your shipment is going through the customs clearance process.",
-  },
-  {
-    id: "completed",
-    title: "Import completed",
-    description:
-      "Your shipment has successfully completed the import process.",
-  },
-];
+function formatDate(iso) {
+  if (!iso) return "Not specified";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "Not specified";
+  return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
 
 /* =========================================================
    MAIN COMPONENT
 ========================================================= */
 
 function TrackShipment() {
-  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const linkedShipmentId = searchParams.get("shipmentId");
 
-  /* =======================================================
-     LOAD CURRENT SHIPMENT
-  ======================================================= */
+  const [shipments, setShipments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [expandedId, setExpandedId] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
-  const shipment = useMemo(() => {
-    try {
-      return JSON.parse(
-        localStorage.getItem("currentShipment") || "null"
-      );
-    } catch {
-      return null;
-    }
-  }, []);
+  useEffect(() => {
+    let active = true;
 
-  const importData = shipment?.importData || null;
-  const agent = shipment?.agent || null;
+    (async () => {
+      try {
+        const data = await api.get("/shipments");
+        if (!active) return;
+        setShipments([...data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+        setError("");
+      } catch (err) {
+        if (active) {
+          setError(err instanceof ApiError ? err.message : "Could not load your shipments. Is the backend running?");
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
 
-  /*
-    0 = request submitted
-    1 = agent reviewing
-    2 = documents
-    3 = customs
-    4 = completed
-  */
-  const currentStage = 1;
+    return () => {
+      active = false;
+    };
+  }, [reloadKey]);
 
-  const shipmentId = shipment?.id || "IMP-204821";
+  useEffect(() => {
+    if (!linkedShipmentId || shipments.length === 0) return undefined;
+    if (!shipments.some((shipment) => shipment.id === linkedShipmentId)) return undefined;
 
-  const createdDate = shipment?.createdAt
-    ? new Date(shipment.createdAt).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
-    : "20 Aug 2026";
+    const timer = setTimeout(() => setExpandedId(linkedShipmentId), 0);
+    return () => clearTimeout(timer);
+  }, [linkedShipmentId, shipments]);
+
+  const refresh = () => setReloadKey((key) => key + 1);
+
+  const activeCount = shipments.filter((s) => s.currentStage !== "cargo_released").length;
 
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
-      {/* =====================================================
-          ANIMATIONS
-      ====================================================== */}
-
       <style>{`
         @keyframes fadeUp {
-          from {
-            opacity: 0;
-            transform: translateY(8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-
-        @keyframes scaleIn {
-          from {
-            opacity: 0;
-            transform: scale(0.98);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-6px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes pulseSoft {
-          0%, 100% {
-            box-shadow: 0 0 0 0 rgba(23, 59, 108, 0);
-          }
-          50% {
-            box-shadow: 0 0 0 6px rgba(23, 59, 108, 0.05);
-          }
-        }
-
-        .fade-up {
-          animation:
-            fadeUp 0.5s
-            cubic-bezier(0.22, 1, 0.36, 1)
-            both;
-        }
-
-        .scale-in {
-          animation:
-            scaleIn 0.35s
-            cubic-bezier(0.22, 1, 0.36, 1)
-            both;
-        }
-
-        .slide-down {
-          animation:
-            slideDown 0.25s
-            cubic-bezier(0.22, 1, 0.36, 1)
-            both;
-        }
-
-        .pulse-soft {
-          animation: pulseSoft 2.5s ease-in-out infinite;
-        }
-
-        .delay-1 {
-          animation-delay: 0.05s;
-        }
-
-        .delay-2 {
-          animation-delay: 0.10s;
-        }
-
-        .delay-3 {
-          animation-delay: 0.15s;
-        }
-
-        .delay-4 {
-          animation-delay: 0.20s;
-        }
-
-        .delay-5 {
-          animation-delay: 0.25s;
-        }
-
+        .fade-up { animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        .delay-1 { animation-delay: 0.05s; }
+        .delay-2 { animation-delay: 0.10s; }
         @media (prefers-reduced-motion: reduce) {
-          .fade-up,
-          .scale-in,
-          .slide-down,
-          .pulse-soft {
-            animation: none;
-          }
+          .fade-up { animation: none; }
         }
       `}</style>
 
-      {/* =====================================================
-          NAVBAR
-      ====================================================== */}
-
       <AppNavbar />
 
-      {/* =====================================================
-          MAIN CONTENT
-      ====================================================== */}
-
       <main className="mx-auto w-full max-w-[1000px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
-        {/* ===================================================
-            BACK BUTTON
-        ==================================================== */}
-
         <div className="fade-up mb-6">
           <BackButton current="Track Shipment" />
         </div>
 
-        {/* ===================================================
-            PAGE HEADER
-        ==================================================== */}
-
         <section className="fade-up -mt-8 mb-7">
           <div className="flex flex-col items-center justify-center text-center">
             <h1 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
-              Track your Shipment
+              Track your Shipments
             </h1>
 
             <p className="mx-auto mt-2 max-w-2xl text-[14px] leading-6 text-slate-500 sm:text-[16px]">
-              Follow your import and customs clearance progress
-              from one place.
+              Follow every import and customs clearance in progress, from one
+              place.
             </p>
 
             <button
               type="button"
-              onClick={() => window.location.reload()}
+              onClick={refresh}
               className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-600 shadow-sm transition hover:bg-slate-50"
             >
               <ArrowsClockwise size={14} />
@@ -244,249 +120,58 @@ function TrackShipment() {
           </div>
         </section>
 
-        {/* ===================================================
-            SHIPMENT HEADER CARD
-        ==================================================== */}
-
-        <section className="fade-up delay-1 mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,.025)]">
-          <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
-                <Package size={23} />
-              </div>
-
-              <div className="min-w-0">
-                <p className="text-[12px] font-semibold uppercase tracking-wider text-slate-400">
-                  Shipment ID
-                </p>
-
-                <div className="mt-1 flex flex-wrap items-center gap-2">
-                  <h2 className="text-lg font-bold tracking-tight text-slate-900">
-                    {shipmentId}
-                  </h2>
-
-                  <span className="rounded-md bg-amber-50 px-2.5 py-1 text-[12px] font-bold text-amber-700">
-                    IN PROGRESS
-                  </span>
-                </div>
-
-                <p className="mt-1 text-xs text-slate-400">
-                  Request submitted {createdDate}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="hidden h-10 w-px bg-slate-100 sm:block" />
-
-              <div>
-                <p className="text-xs text-slate-400">
-                  Current stage
-                </p>
-
-                <p className="mt-0.5 text-sm font-bold text-[#173563]">
-                  Agent review
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ===================================================
-            MAIN GRID
-        ==================================================== */}
-
-        <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-          {/* =================================================
-              LEFT - TIMELINE
-          ================================================== */}
-
-          <section className="fade-up delay-2 rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,.025)]">
-            <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
-              <h2 className="text-lg font-bold text-slate-900">
-                Import progress
-              </h2>
-
-              <p className="mt-1 text-sm leading-6 text-slate-500">
-                Your shipment status will be updated as it moves
-                through the process.
-              </p>
-            </div>
-
-            <div className="p-5 sm:p-6">
-              <div className="relative">
-                {stages.map((stage, index) => {
-                  const completed = index < currentStage;
-                  const active = index === currentStage;
-
-                  return (
-                    <TimelineItem
-                      key={stage.id}
-                      stage={stage}
-                      completed={completed}
-                      active={active}
-                      last={index === stages.length - 1}
-                    />
-                  );
-                })}
-              </div>
-            </div>
+        {!loading && !error && shipments.length > 0 && (
+          <section className="fade-up delay-1 mb-5 flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-[0_2px_12px_rgba(15,23,42,.025)] sm:px-6">
+            <p className="text-sm font-semibold text-slate-600">
+              {shipments.length} shipment{shipments.length !== 1 ? "s" : ""} total
+            </p>
+            <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+              {activeCount} active
+            </span>
           </section>
+        )}
 
-          {/* =================================================
-              RIGHT COLUMN
-          ================================================== */}
-
-          <div className="space-y-6">
-            {/* CLEARING AGENT */}
-
-            <section className="fade-up delay-3 rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,.025)]">
-              <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
-                <h2 className="text-lg font-bold text-slate-900">
-                  Your clearing agent
-                </h2>
-              </div>
-
-              <div className="p-5 sm:p-6">
-                {agent ? (
-                  <>
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#173563] text-sm font-bold text-white">
-                        {agent.initials || "AG"}
-                      </div>
-
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <h3 className="truncate text-sm font-bold text-slate-900">
-                            {agent.name || "Clearing Agent"}
-                          </h3>
-
-                          {agent.verified && (
-                            <ShieldCheck
-                              size={16}
-                              className="shrink-0 text-emerald-600"
-                            />
-                          )}
-                        </div>
-
-                        <div className="mt-1 flex items-center gap-2">
-                          <span className="flex items-center gap-1 text-xs text-slate-400">
-                            <MapPin size={12} />
-                            {agent.location || "Sri Lanka"}
-                          </span>
-
-                          <span className="text-xs text-slate-300">
-                            •
-                          </span>
-
-                          <span className="text-xs text-slate-400">
-                            ★ {agent.rating || "4.8"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 rounded-xl bg-slate-50 p-3.5">
-                      <div className="flex items-center gap-2">
-                        <Clock
-                          size={15}
-                          className="text-blue-600"
-                        />
-
-                        <p className="text-sm font-semibold text-slate-600">
-                          {agent.response ||
-                            "Response time varies"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => navigate("/messages")}
-                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 hover:text-[#173563]"
-                    >
-                      <ChatText size={15} />
-                      Contact agent
-                    </button>
-                  </>
-                ) : (
-                  <div className="py-2">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-                      <ShieldCheck size={19} />
-                    </div>
-
-                    <p className="mt-3 text-sm font-semibold text-slate-800">
-                      Agent information unavailable
-                    </p>
-
-                    <p className="mt-1 text-xs leading-5 text-slate-400">
-                      Your selected clearing agent information
-                      could not be loaded.
-                    </p>
-
-                    <Link
-                      to="/find-agent"
-                      className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-blue-700 hover:text-blue-800"
-                    >
-                      Find an agent
-                      <CaretRight size={14} />
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </section>
-
-            {/* IMPORT SUMMARY */}
-
-            <section className="fade-up delay-4 rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,.025)]">
-              <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
-                <h2 className="text-lg font-bold text-slate-900">
-                  Import summary
-                </h2>
-              </div>
-
-              <div className="divide-y divide-slate-100">
-                <SummaryRow
-                  label="Product"
-                  value={
-                    importData?.productName || "Not specified"
-                  }
-                />
-
-                <SummaryRow
-                  label="HS Code"
-                  value={
-                    importData?.hsCode || "Not specified"
-                  }
-                />
-
-                <SummaryRow
-                  label="Origin"
-                  value={
-                    importData?.country || "Not specified"
-                  }
-                />
-
-                <SummaryRow
-                  label="Quantity"
-                  value={
-                    importData
-                      ? `${importData.quantity || 0} ${
-                          importData.unit || ""
-                        }`
-                      : "Not specified"
-                  }
-                />
-              </div>
-            </section>
+        {loading ? (
+          <div className="flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-16">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-[#2563EB]" aria-label="Loading" />
           </div>
-        </div>
+        ) : error ? (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-10 text-center text-[14px] font-semibold text-red-600">
+            {error}
+          </div>
+        ) : shipments.length === 0 ? (
+          <section className="fade-up delay-1 rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-[0_2px_12px_rgba(15,23,42,.025)]">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-slate-300">
+              <Package size={22} />
+            </div>
+            <h3 className="mt-4 text-[16px] font-bold text-[#173563]">No shipments yet</h3>
+            <p className="mx-auto mt-2 max-w-md text-[13px] leading-5 text-slate-500">
+              Once you post a request and an agent is assigned, your shipment's
+              clearance progress will show up here.
+            </p>
+            <Link
+              to="/find-agent"
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#173563] px-5 py-2.5 text-[14px] font-bold text-white transition hover:bg-[#214777]"
+            >
+              Find a clearing agent
+              <CaretRight size={16} />
+            </Link>
+          </section>
+        ) : (
+          <div className="space-y-4">
+            {shipments.map((shipment, index) => (
+              <ShipmentCard
+                key={shipment.id}
+                shipment={shipment}
+                expanded={expandedId === shipment.id}
+                onToggle={() => setExpandedId((current) => (current === shipment.id ? null : shipment.id))}
+                delayClass={index === 0 ? "delay-1" : "delay-2"}
+              />
+            ))}
+          </div>
+        )}
 
-        {/* ===================================================
-            DOCUMENTS / ACTIONS
-        ==================================================== */}
-
-        <section className="fade-up delay-5 mt-6 grid gap-4 sm:grid-cols-2">
+        <section className="fade-up delay-2 mt-6 grid gap-4 sm:grid-cols-2">
           <Link
             to="/documents"
             className="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md"
@@ -494,21 +179,13 @@ function TrackShipment() {
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-700">
               <FileText size={19} />
             </div>
-
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-slate-800">
-                Shipment documents
-              </p>
-
+              <p className="text-sm font-bold text-slate-800">Shipment documents</p>
               <p className="mt-1 text-xs leading-5 text-slate-400">
-                View and manage documents related to this import.
+                View and manage documents related to your imports.
               </p>
             </div>
-
-            <ArrowRight
-              size={16}
-              className="text-slate-300 transition group-hover:translate-x-1 group-hover:text-blue-600"
-            />
+            <ArrowRight size={16} className="text-slate-300 transition group-hover:translate-x-1 group-hover:text-blue-600" />
           </Link>
 
           <Link
@@ -518,38 +195,19 @@ function TrackShipment() {
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
               <Package size={19} />
             </div>
-
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-slate-800">
-                Back to dashboard
-              </p>
-
+              <p className="text-sm font-bold text-slate-800">Back to dashboard</p>
               <p className="mt-1 text-xs leading-5 text-slate-400">
                 View all your imports and available tools.
               </p>
             </div>
-
-            <ArrowRight
-              size={16}
-              className="text-slate-300 transition group-hover:translate-x-1 group-hover:text-blue-600"
-            />
+            <ArrowRight size={16} className="text-slate-300 transition group-hover:translate-x-1 group-hover:text-blue-600" />
           </Link>
         </section>
 
-        {/* ===================================================
-            SECURITY
-        ==================================================== */}
-
         <div className="mt-8 flex items-center justify-center gap-2 text-center text-xs text-slate-400">
-          <ShieldCheck
-            size={15}
-            className="text-emerald-600"
-          />
-
-          <span>
-            Your import information is securely managed by
-            ImportEase.
-          </span>
+          <ShieldCheck size={15} className="text-emerald-600" />
+          <span>Your import information is securely managed by ImportEase.</span>
         </div>
       </main>
     </div>
@@ -557,30 +215,163 @@ function TrackShipment() {
 }
 
 /* =========================================================
+   ONE SHIPMENT (collapsible: summary + full stage timeline)
+========================================================= */
+
+function ShipmentCard({ shipment, expanded, onToggle, delayClass }) {
+  const currentIndex = stageIndex(shipment.currentStage);
+  const isFinal = shipment.currentStage === "cargo_released";
+
+  return (
+    <section className={`fade-up ${delayClass} overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,.025)]`}>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full flex-col gap-3 p-5 text-left sm:flex-row sm:items-center sm:justify-between sm:p-6"
+      >
+        <div className="flex min-w-0 items-center gap-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+            <Package size={20} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-[15px] font-bold text-slate-900">
+                {shipment.reference || shipment.id}
+              </h2>
+              <span
+                className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${
+                  isFinal ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
+                }`}
+              >
+                {isFinal ? "COMPLETED" : "IN PROGRESS"}
+              </span>
+            </div>
+            <p className="mt-1 truncate text-[13px] text-slate-500">
+              {shipment.description || "Shipment"}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-3">
+          <div className="text-right">
+            <p className="text-[11px] text-slate-400">Current stage</p>
+            <p className="text-[13px] font-bold text-[#173563]">{STAGE_LABELS[shipment.currentStage] || shipment.currentStage}</p>
+          </div>
+          <CaretDown size={16} className={`text-slate-400 transition-transform ${expanded ? "rotate-180" : ""}`} />
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="border-t border-slate-100">
+          <div className="grid gap-6 p-5 sm:p-6 lg:grid-cols-[1fr_320px]">
+            {/* TIMELINE */}
+            <div>
+              <h3 className="mb-4 text-[14px] font-bold text-slate-900">Clearance progress</h3>
+              <div className="relative">
+                {STAGE_ORDER.map((stage, index) => (
+                  <TimelineItem
+                    key={stage}
+                    stage={stage}
+                    completed={index < currentIndex || (index === currentIndex && isFinal)}
+                    active={index === currentIndex && !isFinal}
+                    last={index === STAGE_ORDER.length - 1}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* SIDE INFO */}
+            <div className="space-y-4">
+              <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4">
+                <h4 className="text-[12px] font-bold uppercase tracking-wide text-slate-400">Your clearing agent</h4>
+                {shipment.agentName ? (
+                  <div className="mt-2">
+                    <p className="text-[14px] font-bold text-slate-800">{shipment.agentName}</p>
+                    <p className="text-[12px] text-slate-500">{shipment.agencyName || "Independent agent"}</p>
+                    {(shipment.feeLkr || shipment.clearanceTimelineHours) && (
+                      <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-slate-500">
+                        {shipment.feeLkr && (
+                          <span className="rounded-md bg-white px-2 py-1 font-semibold">
+                            Rs. {Number(shipment.feeLkr).toLocaleString()}
+                          </span>
+                        )}
+                        {shipment.clearanceTimelineHours && (
+                          <span className="rounded-md bg-white px-2 py-1 font-semibold">
+                            {shipment.clearanceTimelineHours}h clearance
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <Link
+                      to="/messages"
+                      className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2.5 text-[13px] font-bold text-slate-700 transition hover:bg-slate-50 hover:text-[#173563]"
+                    >
+                      <ChatText size={14} />
+                      Contact agent
+                    </Link>
+                  </div>
+                ) : (
+                  <p className="mt-2 text-[12px] leading-5 text-slate-500">
+                    Not assigned yet -- this appears once you accept a bid on{" "}
+                    <Link to="/find-agent" className="font-semibold text-[#2563EB] hover:underline">
+                      Find a clearing agent
+                    </Link>
+                    .
+                  </p>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4">
+                <h4 className="text-[12px] font-bold uppercase tracking-wide text-slate-400">Shipment details</h4>
+                <div className="mt-2 space-y-2 text-[13px]">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="flex items-center gap-1.5 text-slate-500">
+                      <MapPin size={13} /> Route
+                    </span>
+                    <span className="font-semibold text-slate-700">
+                      {shipment.origin || "-"} → {shipment.destination || "-"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-slate-500">HS Code</span>
+                    <span className="font-semibold text-slate-700">
+                      {shipment.hsCode || "No HS code provided"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="flex items-center gap-1.5 text-slate-500">
+                      <CalendarBlank size={13} /> Est. arrival
+                    </span>
+                    <span className="font-semibold text-slate-700">{formatDate(shipment.estimatedArrival)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-slate-500">Must release by</span>
+                    <span className="font-semibold text-slate-700">{formatDate(shipment.mustReleaseBy)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+/* =========================================================
    TIMELINE ITEM
 ========================================================= */
 
-function TimelineItem({
-  stage,
-  completed,
-  active,
-  last,
-}) {
+function TimelineItem({ stage, completed, active, last }) {
   return (
     <div className="relative flex gap-4">
-      {/* CONNECTOR */}
-
       {!last && (
         <div
           className={`absolute left-[15px] top-[32px] h-[calc(100%-8px)] w-px ${
-            completed
-              ? "bg-emerald-300"
-              : "bg-slate-200"
+            completed ? "bg-emerald-300" : "bg-slate-200"
           }`}
         />
       )}
-
-      {/* CIRCLE */}
 
       <div
         className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 ${
@@ -600,24 +391,14 @@ function TimelineItem({
         )}
       </div>
 
-      {/* CONTENT */}
-
-      <div
-        className={`min-w-0 flex-1 ${
-          last ? "pb-0" : "pb-8"
-        }`}
-      >
+      <div className={`min-w-0 flex-1 ${last ? "pb-0" : "pb-8"}`}>
         <div className="flex flex-wrap items-center gap-2">
           <h3
             className={`text-sm font-bold ${
-              active
-                ? "text-[#173563]"
-                : completed
-                ? "text-slate-800"
-                : "text-slate-400"
+              active ? "text-[#173563]" : completed ? "text-slate-800" : "text-slate-400"
             }`}
           >
-            {stage.title}
+            {STAGE_LABELS[stage]}
           </h3>
 
           {active && (
@@ -627,53 +408,23 @@ function TimelineItem({
           )}
 
           {completed && (
-            <span className="text-xs font-medium text-emerald-600">
-              Completed
-            </span>
+            <span className="text-xs font-medium text-emerald-600">Completed</span>
           )}
         </div>
 
-        <p
-          className={`mt-1.5 max-w-lg text-xs leading-5 ${
-            active
-              ? "text-slate-600"
-              : "text-slate-400"
-          }`}
-        >
-          {stage.description}
+        <p className={`mt-1.5 max-w-lg text-xs leading-5 ${active ? "text-slate-600" : "text-slate-400"}`}>
+          {STAGE_DESCRIPTIONS[stage]}
         </p>
 
         {active && (
           <div className="mt-3 flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2.5">
-            <Clock
-              size={14}
-              className="text-blue-600"
-            />
-
+            <Clock size={14} className="text-blue-600" />
             <span className="text-xs font-medium text-blue-700">
-              Waiting for the clearing agent to respond.
+              Waiting for the clearing agent to move this forward.
             </span>
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-/* =========================================================
-   SUMMARY ROW
-========================================================= */
-
-function SummaryRow({ label, value }) {
-  return (
-    <div className="flex items-center justify-between gap-4 px-5 py-4 sm:px-6">
-      <span className="text-sm text-slate-500">
-        {label}
-      </span>
-
-      <span className="min-w-0 max-w-[60%] break-words text-right text-sm font-bold text-slate-800 sm:max-w-[200px]">
-        {value}
-      </span>
     </div>
   );
 }

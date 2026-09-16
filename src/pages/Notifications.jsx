@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Bell, CheckCircle, Clock, Warning } from "@phosphor-icons/react";
+import { Bell, CheckCircle, Clock, Trash, Warning } from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
 import BackButton from "../components/ui/BackButton";
@@ -37,7 +37,7 @@ function notificationLink(item) {
     case "new_bid":
       return item.tenderId ? `/find-agent?tenderId=${item.tenderId}` : "/find-agent";
     case "stage_update":
-      return "/track-shipment";
+      return item.shipmentId ? `/track-shipment?shipmentId=${item.shipmentId}` : "/track-shipment";
     default:
       return null;
   }
@@ -51,6 +51,8 @@ function Notifications() {
   const [actionError, setActionError] = useState("");
   const [filter, setFilter] = useState("all");
   const [reloadKey, setReloadKey] = useState(0);
+  const [confirmingClear, setConfirmingClear] = useState(false);
+  const [clearingAll, setClearingAll] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -122,6 +124,21 @@ function Notifications() {
     }
   };
 
+  const clearAll = async () => {
+    setClearingAll(true);
+    setActionError("");
+    try {
+      await api.del("/notifications");
+      setItems([]);
+      setConfirmingClear(false);
+      window.dispatchEvent(new Event("notificationsUpdated"));
+    } catch (err) {
+      setActionError(err instanceof ApiError ? err.message : "Could not clear notifications.");
+    } finally {
+      setClearingAll(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
       <AppNavbar />
@@ -141,17 +158,55 @@ function Notifications() {
             </p>
           </div>
 
-          {unreadCount > 0 && (
-            <button
-              type="button"
-              onClick={markAllRead}
-              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-[#173563] transition hover:border-slate-300 hover:bg-slate-50"
-            >
-              <CheckCircle size={16} />
-              Mark all as read
-            </button>
-          )}
+          <div className="flex shrink-0 items-center gap-2 self-start">
+            {unreadCount > 0 && (
+              <button
+                type="button"
+                onClick={markAllRead}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-[#173563] transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                <CheckCircle size={16} />
+                Mark all as read
+              </button>
+            )}
+            {items.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setConfirmingClear(true)}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-red-600 transition hover:border-red-200 hover:bg-red-50"
+              >
+                <Trash size={16} />
+                Clear all
+              </button>
+            )}
+          </div>
         </section>
+
+        {confirmingClear && (
+          <div className="mb-5 flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-[13px] font-semibold text-red-700">
+              Clear all notifications? This can't be undone.
+            </p>
+            <div className="flex shrink-0 gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmingClear(false)}
+                disabled={clearingAll}
+                className="rounded-lg border border-red-200 bg-white px-3 py-2 text-[12px] font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={clearAll}
+                disabled={clearingAll}
+                className="rounded-lg bg-red-600 px-3 py-2 text-[12px] font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {clearingAll ? "Clearing..." : "Yes, Clear All"}
+              </button>
+            </div>
+          </div>
+        )}
 
         {actionError && (
           <div className="mb-5 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[14px] font-semibold text-red-600">
@@ -257,7 +312,7 @@ function Notifications() {
 
         <p className="mt-6 text-center text-[12px] text-slate-400">
           Looking for older activity? Visit your{" "}
-          <Link to="/shipments" className="font-semibold text-[#2563EB] hover:underline">
+          <Link to="/track-shipment" className="font-semibold text-[#2563EB] hover:underline">
             shipments
           </Link>{" "}
           or{" "}
