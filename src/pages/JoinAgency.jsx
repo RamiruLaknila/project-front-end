@@ -15,6 +15,7 @@ import {
 } from "@phosphor-icons/react";
 
 import { useAuth } from "../context/AuthContext";
+import { api } from "../lib/api";
 import { authErrorMessage } from "../lib/authErrors";
 
 function JoinAgency() {
@@ -23,6 +24,7 @@ function JoinAgency() {
 
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const [checkingCode, setCheckingCode] = useState(false);
   const [formError, setFormError] = useState("");
 
   const [formData, setFormData] = useState({
@@ -32,7 +34,6 @@ function JoinAgency() {
     phone: "",
     address: "",
     licenseNumber: "",
-    licenseType: "",
     licenseExpiry: "",
     password: "",
     confirmPassword: "",
@@ -54,6 +55,10 @@ function JoinAgency() {
     setFormError("");
   };
 
+  const updateDigitsField = (field, value, maxLength) => {
+    updateField(field, value.replace(/\D/g, "").slice(0, maxLength));
+  };
+
   const validateStep = () => {
     const newErrors = {};
 
@@ -73,9 +78,8 @@ function JoinAgency() {
         newErrors.email = "Email is required.";
       }
 
-      if (!formData.phone.trim()) {
-        newErrors.phone =
-          "Phone number is required.";
+      if (formData.phone.length !== 10) {
+        newErrors.phone = "Phone number must be 10 digits.";
       }
 
       if (!formData.address.trim()) {
@@ -100,14 +104,12 @@ function JoinAgency() {
           "License number is required.";
       }
 
-      if (!formData.licenseType) {
-        newErrors.licenseType =
-          "Please select a license type.";
-      }
-
       if (!formData.licenseExpiry) {
         newErrors.licenseExpiry =
           "License expiry date is required.";
+      } else if (formData.licenseExpiry < new Date().toISOString().slice(0, 10)) {
+        newErrors.licenseExpiry =
+          "This license has expired. Please provide a valid license.";
       }
     }
 
@@ -116,9 +118,30 @@ function JoinAgency() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
-    if (submitting) return;
+  const handleNext = async () => {
+    if (submitting || checkingCode) return;
     if (!validateStep()) return;
+
+    if (step === 1) {
+      setCheckingCode(true);
+      try {
+        await api.get(
+          `/agencies/by-code/${encodeURIComponent(formData.agencyCode.trim())}`,
+          { auth: false }
+        );
+      } catch (err) {
+        setErrors((previous) => ({
+          ...previous,
+          agencyCode:
+            err?.status === 404
+              ? "That agency code doesn't match any registered agency. Double-check it and try again."
+              : authErrorMessage(err, "Could not verify that code. Try again."),
+        }));
+        setCheckingCode(false);
+        return;
+      }
+      setCheckingCode(false);
+    }
 
     if (step < 4) {
       setStep((previous) => previous + 1);
@@ -282,7 +305,7 @@ function JoinAgency() {
                     className="mt-0.5 shrink-0 text-blue-600"
                   />
                   <p className="text-xs leading-5 text-blue-800">
-                    The code is checked when you submit. Don't have one? Ask your
+                    The code is checked before you continue. Don't have one? Ask your
                     agency admin, or{" "}
                     <button
                       type="button"
@@ -334,11 +357,12 @@ function JoinAgency() {
 
                 <InputField
                   label="Phone Number"
+                  type="tel"
                   value={formData.phone}
                   onChange={(value) =>
-                    updateField("phone", value)
+                    updateDigitsField("phone", value, 10)
                   }
-                  placeholder="+94 77 123 4567"
+                  placeholder="0771234567"
                   error={errors.phone}
                   required
                 />
@@ -413,21 +437,6 @@ function JoinAgency() {
                   required
                 />
 
-                <SelectField
-                  label="License Type"
-                  value={formData.licenseType}
-                  onChange={(value) =>
-                    updateField("licenseType", value)
-                  }
-                  error={errors.licenseType}
-                  required
-                >
-                  <option value="">Select license type</option>
-                  <option value="clearing-agent">Clearing Agent License</option>
-                  <option value="customs-broker">Customs Broker License</option>
-                  <option value="other">Other</option>
-                </SelectField>
-
                 <InputField
                   label="License Expiry Date"
                   type="date"
@@ -478,7 +487,6 @@ function JoinAgency() {
 
                 <ReviewSection title="License Details">
                   <ReviewRow label="License Number" value={formData.licenseNumber} />
-                  <ReviewRow label="License Type" value={formData.licenseType} />
                   <ReviewRow label="License Expiry" value={formData.licenseExpiry} />
                 </ReviewSection>
 
@@ -512,10 +520,12 @@ function JoinAgency() {
             <button
               type="button"
               onClick={handleNext}
-              disabled={submitting}
+              disabled={submitting || checkingCode}
               className="inline-flex items-center gap-2 rounded-xl bg-[#173563] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#10294d] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {submitting
+              {checkingCode
+                ? "Checking code…"
+                : submitting
                 ? "Submitting…"
                 : step === 4
                 ? "Submit Application"
@@ -672,35 +682,6 @@ function PasswordField({
           {showPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
         </button>
       </div>
-
-      {error && <p className="mt-1.5 text-[12px] text-red-500">{error}</p>}
-    </div>
-  );
-}
-
-/* =========================================================
-   SELECT
-========================================================= */
-
-function SelectField({ label, value, onChange, children, error, required = false }) {
-  return (
-    <div>
-      <label className="mb-2 block text-xs font-semibold text-slate-700">
-        {label}
-        {required && <span className="ml-1 text-red-500">*</span>}
-      </label>
-
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className={`w-full rounded-xl border bg-white px-3.5 py-3 text-sm outline-none transition ${
-          error
-            ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100"
-            : "border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-        }`}
-      >
-        {children}
-      </select>
 
       {error && <p className="mt-1.5 text-[12px] text-red-500">{error}</p>}
     </div>

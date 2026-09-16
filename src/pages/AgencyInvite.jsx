@@ -114,8 +114,8 @@ function AgencyInvite() {
   ========================================================= */
 
   const agencyCode =
+    agency?.agencyCode ||
     agency?.code ||
-    agency?.id ||
     "AG-000000";
 
   /* =========================================================

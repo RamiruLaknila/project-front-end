@@ -19,7 +19,6 @@ import {
 } from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
-import BackButton from "../components/ui/BackButton";
 import { api, ApiError } from "../lib/api";
 
 // Labels for every levy the backend's duty_calculator.py can return, in the
@@ -424,9 +423,6 @@ function ImportCalculator() {
             BACK BUTTON
         ==================================================== */}
 
-        <div className="fade-up mb-6">
-          <BackButton current="Import Calculator" />
-        </div>
 
         {/* ===================================================
             PAGE HEADER

@@ -17,7 +17,6 @@ import {
 } from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
-import BackButton from "../components/ui/BackButton";
 import { api, ApiError } from "../lib/api";
 
 function HSCodeSearch() {
@@ -621,9 +620,6 @@ function HSCodeSearch() {
             BACK BUTTON
         ==================================================== */}
 
-        <div className="mb-6">
-          <BackButton current="HS Code Search" />
-        </div>
 
         {/* ===================================================
             PAGE HEADER

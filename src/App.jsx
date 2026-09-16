@@ -451,7 +451,11 @@ function App() {
 
         <Route
           path="/agency-agents"
-          element={<AgencyAgents />}
+          element={
+            <RequireAuth roles={["clearing_agent"]}>
+              <AgencyAgents />
+            </RequireAuth>
+          }
         />
 
         <Route

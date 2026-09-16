@@ -16,7 +16,6 @@ import {
 } from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
-import BackButton from "../components/ui/BackButton";
 import { api, ApiError } from "../lib/api";
 import { STAGE_DESCRIPTIONS, STAGE_LABELS, STAGE_ORDER, stageIndex } from "../lib/shipmentStages";
 
@@ -94,9 +93,6 @@ function TrackShipment() {
       <AppNavbar />
 
       <main className="mx-auto w-full max-w-[1000px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
-        <div className="fade-up mb-6">
-          <BackButton current="Track Shipment" />
-        </div>
 
         <section className="fade-up -mt-8 mb-7">
           <div className="flex flex-col items-center justify-center text-center">

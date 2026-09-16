@@ -18,6 +18,8 @@ function IndividualAgentDashboard() {
   const [agent, setAgent] = useState(null);
   const [openTenders, setOpenTenders] = useState([]);
   const [myBids, setMyBids] = useState([]);
+  const [shipments, setShipments] = useState([]);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     const savedAgent = localStorage.getItem("clearingAgent");
@@ -36,22 +38,35 @@ function IndividualAgentDashboard() {
 
     (async () => {
       try {
-        const [tenders, bids] = await Promise.all([
+        const [tenders, bids, shipmentsData] = await Promise.all([
           api.get("/tenders?status=open"),
           api.get("/bids/mine"),
+          api.get("/shipments"),
         ]);
         if (!active) return;
         setOpenTenders(tenders);
         setMyBids(bids);
+        setShipments(shipmentsData);
       } catch {
-        /* Dashboard widgets just stay empty -- Requests/My Bids show the real error. */
+        /* Dashboard widgets just stay empty -- Requests/My Bids/Shipments show the real error. */
       }
     })();
 
     return () => {
       active = false;
     };
-  }, []);
+  }, [reloadKey]);
+
+  const refresh = () => setReloadKey((key) => key + 1);
+
+  const activeShipmentsCount = useMemo(
+    () => shipments.filter((s) => s.currentStage !== "cargo_released").length,
+    [shipments]
+  );
+  const completedShipmentsCount = useMemo(
+    () => shipments.filter((s) => s.currentStage === "cargo_released").length,
+    [shipments]
+  );
 
   const availableRequests = useMemo(
     () => [...openTenders].sort((a, b) => new Date(b.postedAt) - new Date(a.postedAt)),
@@ -93,7 +108,7 @@ function IndividualAgentDashboard() {
             <div className="ml-auto flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => window.location.reload()}
+                onClick={refresh}
                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-[#2563EB]"
                 title="Refresh"
               >
@@ -168,14 +183,14 @@ function IndividualAgentDashboard() {
               <StatCard
                 icon={<Package size={20} />}
                 title="Active Shipments"
-                value="3"
+                value={activeShipmentsCount}
                 description="Currently handling"
               />
 
               <StatCard
                 icon={<ShieldCheck size={20} />}
                 title="Completed"
-                value="8"
+                value={completedShipmentsCount}
                 description="Completed shipments"
               />
             </section>

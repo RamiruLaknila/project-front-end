@@ -10,6 +10,7 @@ import {
 } from "@phosphor-icons/react";
 
 import { useAuth } from "../context/AuthContext";
+import { api } from "../lib/api";
 import { authErrorMessage, landingPathForProfile } from "../lib/authErrors";
 
 function AgentSignIn() {
@@ -83,16 +84,41 @@ function AgentSignIn() {
         })
       );
 
-      if (agentType !== "individual-agent" && !localStorage.getItem("clearingAgency")) {
-        localStorage.setItem(
-          "clearingAgency",
-          JSON.stringify({
-            id: profile.agencyId || "",
-            code: profile.agencyId || "",
-            agencyName: profile.agencyName || profile.businessName || "Your Agency",
-            name: profile.agencyName || profile.businessName || "Your Agency",
-          })
-        );
+      if (agentType !== "individual-agent") {
+        if (!localStorage.getItem("clearingAgency")) {
+          localStorage.setItem(
+            "clearingAgency",
+            JSON.stringify({
+              id: profile.agencyId || "",
+              code: profile.agencyId || "",
+              agencyName: profile.agencyName || profile.businessName || "Your Agency",
+              name: profile.agencyName || profile.businessName || "Your Agency",
+            })
+          );
+        }
+
+        // Neither branch above ever carries the agency's REAL join code --
+        // the agencyCode field on the agencies doc, which is the only thing
+        // /agencies/register -> find_agency_by_code actually recognizes.
+        // Refresh it here from the backend every sign-in so pages that read
+        // it (AgencyInvite, AgentAdminDashboard, AgentAdminSettings) can't
+        // drift out of sync or show a fabricated/stale code.
+        if (profile.agencyId) {
+          try {
+            const agencyDoc = await api.get(`/agencies/${profile.agencyId}`);
+            const stored = JSON.parse(localStorage.getItem("clearingAgency") || "{}");
+            localStorage.setItem(
+              "clearingAgency",
+              JSON.stringify({
+                ...stored,
+                code: agencyDoc.agencyCode || stored.code || "",
+                agencyCode: agencyDoc.agencyCode || "",
+              })
+            );
+          } catch {
+            /* keep whatever was already cached */
+          }
+        }
       }
 
       // The backend profile tied to this email/password decides the destination.

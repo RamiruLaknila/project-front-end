@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -33,6 +33,16 @@ function SMESignUp() {
   });
 
   const [error, setError] = useState("");
+  const errorRef = useRef(null);
+
+  // Whenever an error appears, bring it into view -- the field that caused
+  // it (e.g. the Terms checkbox) can be well below the error banner, so a
+  // scrolled-down user would otherwise never see why submission failed.
+  useEffect(() => {
+    if (error) {
+      errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [error]);
 
   /* =========================================================
       HANDLE INPUT
@@ -173,7 +183,10 @@ function SMESignUp() {
           ================================================= */}
 
           {error && (
-            <div className="mb-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3.5">
+            <div
+              ref={errorRef}
+              className="mb-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3.5"
+            >
               <p className="text-sm font-medium leading-5 text-red-600">
                 {error}
               </p>

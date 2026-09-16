@@ -61,6 +61,11 @@ function AgencyCreate() {
     }));
   };
 
+  const updateDigitsField = (field, value, maxLength) => {
+    const digits = value.replace(/\D/g, "").slice(0, maxLength);
+    updateField(field, digits);
+  };
+
   const validateStep = () => {
     const newErrors = {};
 
@@ -82,8 +87,8 @@ function AgencyCreate() {
         newErrors.city = "City is required";
       }
 
-      if (!formData.phone.trim()) {
-        newErrors.phone = "Agency phone number is required";
+      if (formData.phone.length !== 10) {
+        newErrors.phone = "Phone number must be 10 digits";
       }
 
       if (!formData.email.trim()) {
@@ -98,6 +103,8 @@ function AgencyCreate() {
 
       if (!formData.licenseExpiry) {
         newErrors.licenseExpiry = "License expiry date is required";
+      } else if (formData.licenseExpiry < new Date().toISOString().slice(0, 10)) {
+        newErrors.licenseExpiry = "This license has expired. Please provide a valid license.";
       }
     }
 
@@ -110,8 +117,8 @@ function AgencyCreate() {
         newErrors.ownerEmail = "Owner email is required";
       }
 
-      if (!formData.ownerPhone.trim()) {
-        newErrors.ownerPhone = "Owner phone number is required";
+      if (formData.ownerPhone.length !== 10) {
+        newErrors.ownerPhone = "Phone number must be 10 digits";
       }
 
       if (!formData.ownerNic.trim()) {
@@ -165,8 +172,9 @@ function AgencyCreate() {
         password: formData.password,
       });
 
-      // 2. Complete the agency profile so it becomes "active" (agents can only
-      //    bid once their agency's profileStatus is "active").
+      // 2. Complete the agency profile -- this moves it from "incomplete" to
+      //    "pending", awaiting a platform admin's review (agents can only
+      //    bid once profileStatus is "active", set on approval).
       const address = [formData.agencyAddress.trim(), formData.city.trim()]
         .filter(Boolean)
         .join(", ");
@@ -181,7 +189,7 @@ function AgencyCreate() {
         /* profile can be finished later from agency settings */
       }
 
-      navigate("/agent-admin-dashboard", { replace: true });
+      navigate("/agent-pending", { replace: true });
     } catch (err) {
       setFormError(authErrorMessage(err, "Could not create the agency."));
       if (/email/i.test(err?.message || "")) setStep(3);
@@ -330,11 +338,12 @@ function AgencyCreate() {
 
                 <InputField
                   label="Phone Number"
+                  type="tel"
                   value={formData.phone}
                   onChange={(value) =>
-                    updateField("phone", value)
+                    updateDigitsField("phone", value, 10)
                   }
-                  placeholder="+94 77 123 4567"
+                  placeholder="0771234567"
                   error={errors.phone}
                   required
                 />
@@ -440,11 +449,12 @@ function AgencyCreate() {
 
                 <InputField
                   label="Owner Phone"
+                  type="tel"
                   value={formData.ownerPhone}
                   onChange={(value) =>
-                    updateField("ownerPhone", value)
+                    updateDigitsField("ownerPhone", value, 10)
                   }
-                  placeholder="+94 77 123 4567"
+                  placeholder="0771234567"
                   error={errors.ownerPhone}
                   required
                 />
@@ -453,7 +463,7 @@ function AgencyCreate() {
                   label="NIC / ID Number"
                   value={formData.ownerNic}
                   onChange={(value) =>
-                    updateField("ownerNic", value)
+                    updateDigitsField("ownerNic", value, 12)
                   }
                   placeholder="Enter NIC / ID number"
                   error={errors.ownerNic}

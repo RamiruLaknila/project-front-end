@@ -23,7 +23,6 @@ function CompleteProfile() {
 
   const [formData, setFormData] = useState({
     phone: "",
-    country: "Sri Lanka",
 
     businessName: "",
     businessRegistrationNumber: "",
@@ -54,7 +53,6 @@ function CompleteProfile() {
     setFormData((prev) => ({
       ...prev,
       phone: user.phone || prefill.phone || prev.phone,
-      country: user.country || prev.country,
       businessName: user.businessName || prefill.businessName || "",
       businessRegistrationNumber: user.businessRegNumber || "",
       businessType: user.businessCategory || "",
@@ -355,10 +353,10 @@ function CompleteProfile() {
                     id="country"
                     name="country"
                     type="text"
-                    value={formData.country}
-                    onChange={handleChange}
-                    placeholder="Sri Lanka"
-                    className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                    value="Sri Lanka"
+                    disabled
+                    readOnly
+                    className="h-11 w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-3.5 text-sm text-slate-500 outline-none"
                   />
 
                 </div>

@@ -1,305 +1,122 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  ArrowLeft,
   Bell,
+  Check,
   CheckCircle,
   Clock,
   Copy,
   ArrowsClockwise,
+  EnvelopeSimple,
   MagnifyingGlass,
   UserCheck,
   UserPlus,
   Users,
+  Warning,
   X,
-  XCircle,
 } from "@phosphor-icons/react";
 
 import AgentAdminSidebar from "../components/AgentAdminSidebar";
+import { useAuth } from "../context/AuthContext";
+import { api, ApiError } from "../lib/api";
+import { authErrorMessage, landingPathForProfile } from "../lib/authErrors";
 
 function AgentAdminDashboard() {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
 
-   const [agency, setAgency] = useState(() => {
-    try {
-      const storedAgency = localStorage.getItem("clearingAgency");
-      return storedAgency ? JSON.parse(storedAgency) : null;
-    } catch {
-      return null;
-    }
-  });
+  const agencyId = user?.agencyId;
+  // A real (multi-agent) agency admin -- an independent solo agent is also
+  // flagged isAgencyAdmin, but this dashboard isn't for them.
+  const isRealAgencyAdmin = !!user?.isAgencyAdmin && !user?.isIndependent;
 
-  const [currentAdmin, setCurrentAdmin] = useState(() => {
-    try {
-      const storedAgent = localStorage.getItem("clearingAgent");
-      const parsed = storedAgent ? JSON.parse(storedAgent) : null;
-      return parsed && parsed.agentType === "agency-admin" ? parsed : null;
-    } catch {
-      return null;
-    }
-  });
-  const [joinApplication, setJoinApplication] = useState(null);
-  const [joinStatus, setJoinStatus] = useState("pending");
+  const [agency, setAgency] = useState(null);
+  const [agents, setAgents] = useState([]);
+  const [openTenders, setOpenTenders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [processingId, setProcessingId] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [processing, setProcessing] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  // Anyone who lands here but isn't a genuine agency admin gets sent to
+  // wherever their own profile actually belongs.
+  useEffect(() => {
+    if (authLoading || !user || isRealAgencyAdmin) return undefined;
+    const timer = setTimeout(() => {
+      navigate(landingPathForProfile(user), { replace: true });
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [authLoading, user, isRealAgencyAdmin, navigate]);
 
   useEffect(() => {
-    loadAgencyData();
-    loadJoinApplication();
-  }, []);
+    if (!agencyId || !isRealAgencyAdmin) return undefined;
+    let active = true;
 
-  /* ============================================================
-     LOAD AGENCY DATA
-  ============================================================ */
-
-  const loadAgencyData = () => {
-    const storedAgency = localStorage.getItem("clearingAgency");
-    const storedAgent = localStorage.getItem("clearingAgent");
-
-    if (!storedAgent) {
-      navigate("/agent-signin");
-      return;
-    }
-
-    try {
-      const parsedAgent = JSON.parse(storedAgent);
-
-      if (parsedAgent.agentType !== "agency-admin") {
-        navigate("/agent-signin");
-        return;
+    (async () => {
+      try {
+        const [agencyData, agentsData, tendersData] = await Promise.all([
+          api.get(`/agencies/${agencyId}`),
+          api.get(`/agencies/${agencyId}/agents`),
+          api.get("/tenders?status=open"),
+        ]);
+        if (active) {
+          setAgency(agencyData);
+          setAgents(agentsData);
+          setOpenTenders(tendersData);
+          setLoadError("");
+        }
+      } catch (err) {
+        if (active) {
+          setLoadError(authErrorMessage(err, "Could not load your agency's data."));
+        }
+      } finally {
+        if (active) setLoading(false);
       }
+    })();
 
-      if (!storedAgency) {
-        navigate("/agency-choice");
-        return;
-      }
+    return () => {
+      active = false;
+    };
+  }, [agencyId, isRealAgencyAdmin, reloadKey]);
 
-      const parsedAgency = JSON.parse(storedAgency);
+  const pendingAgents = useMemo(
+    () => agents.filter((agent) => agent.agentStatus === "pending"),
+    [agents]
+  );
+  const activeAgents = useMemo(
+    () => agents.filter((agent) => agent.agentStatus === "approved"),
+    [agents]
+  );
+  const totalAgents = activeAgents.length + pendingAgents.length;
+  const smeRequestCount = useMemo(
+    () => openTenders.filter((tender) => tender.targetAgencyId === agencyId).length,
+    [openTenders, agencyId]
+  );
 
-      setAgency(parsedAgency);
-      setCurrentAdmin(parsedAgent);
-    } catch (error) {
-      console.error("Failed to load agency data:", error);
-      navigate("/agent-signin");
-    }
-  };
+  const refresh = () => setReloadKey((key) => key + 1);
 
-  /* ============================================================
-     LOAD JOIN APPLICATION
-  ============================================================ */
-
-  const loadJoinApplication = () => {
+  const decide = async (agentId, decision) => {
+    setProcessingId(agentId);
+    setActionError("");
     try {
-      const storedApplication = localStorage.getItem(
-        "agencyJoinApplication"
-      );
-
-      const storedStatus =
-        localStorage.getItem("agencyJoinStatus") || "pending";
-
-      if (storedApplication) {
-        setJoinApplication(JSON.parse(storedApplication));
-      } else {
-        setJoinApplication(null);
-      }
-
-      setJoinStatus(storedStatus);
-    } catch (error) {
-      console.error("Failed to load join application:", error);
-    }
-  };
-
-  /* ============================================================
-     REFRESH
-  ============================================================ */
-
-  const handleRefresh = () => {
-    loadAgencyData();
-    loadJoinApplication();
-  };
-
-  /* ============================================================
-     TOTAL AGENTS
-  ============================================================ */
-
-  const totalAgents = useMemo(() => {
-    if (!agency) {
-      return 0;
-    }
-
-    try {
-      const storedAgents =
-        JSON.parse(localStorage.getItem("agencyAgents")) || [];
-
-      const agencyId = agency.id || agency.code;
-
-      return storedAgents.filter(
-        (agent) =>
-          (agent.agencyId || agent.agencyCode) === agencyId
-      ).length;
-    } catch {
-      return 0;
-    }
-  }, [agency]);
-
-  /* ============================================================
-     PENDING REQUEST COUNT
-  ============================================================ */
-
-  const pendingCount =
-    joinApplication && joinStatus === "pending" ? 1 : 0;
-
-  /* ============================================================
-     APPROVE JOIN REQUEST
-  ============================================================ */
-
-  const handleApproveJoin = () => {
-    if (!joinApplication || !agency || processing) {
-      return;
-    }
-
-    setProcessing(true);
-
-    try {
-      const approvedApplication = {
-        ...joinApplication,
-        status: "approved",
-        approvedAt: new Date().toISOString(),
-      };
-
-      localStorage.setItem(
-        "agencyJoinApplication",
-        JSON.stringify(approvedApplication)
-      );
-
-      localStorage.setItem(
-        "agencyJoinStatus",
-        "approved"
-      );
-
-      const existingAgents =
-        JSON.parse(localStorage.getItem("agencyAgents")) || [];
-
-      const newAgent = {
-        id:
-          joinApplication.id ||
-          `agent-${Date.now()}`,
-
-        name:
-          joinApplication.name ||
-          joinApplication.fullName ||
-          "Agency Agent",
-
-        email:
-          joinApplication.email || "",
-
-        phone:
-          joinApplication.phone || "",
-
-        agencyId:
-          agency.id ||
-          agency.code ||
-          "",
-
-        agencyName:
-          agency.agencyName ||
-          agency.name ||
-          "Your Agency",
-
-        agencyCode:
-          agency.code ||
-          agency.agencyCode ||
-          "",
-
-        licenseNumber:
-          joinApplication.licenseNumber || "",
-
-        role: "agent",
-
-        status: "active",
-
-        agentStatus: "approved",
-
-        requestedAt:
-          joinApplication.requestedAt ||
-          new Date().toISOString(),
-
-        joinedAt:
-          new Date().toISOString(),
-
-        approvedAt:
-          new Date().toISOString(),
-      };
-
-      const filteredAgents = existingAgents.filter(
-        (agent) =>
-          agent.email?.toLowerCase() !==
-          newAgent.email?.toLowerCase()
-      );
-
-      localStorage.setItem(
-        "agencyAgents",
-        JSON.stringify([
-          ...filteredAgents,
-          newAgent,
-        ])
-      );
-
-      setJoinStatus("approved");
-      setJoinApplication(approvedApplication);
-    } catch (error) {
-      console.error("Failed to approve agent:", error);
+      await api.put(`/agencies/${agencyId}/agents/${agentId}/approve`, { decision });
+      refresh();
+    } catch (err) {
+      setActionError(err instanceof ApiError ? err.message : "Could not update this agent.");
     } finally {
-      setProcessing(false);
+      setProcessingId(null);
     }
   };
 
-  /* ============================================================
-     REJECT JOIN REQUEST
-  ============================================================ */
-
-  const handleRejectJoin = () => {
-    if (!joinApplication || processing) {
-      return;
-    }
-
-    setProcessing(true);
-
-    try {
-      const rejectedApplication = {
-        ...joinApplication,
-        status: "rejected",
-        rejectedAt: new Date().toISOString(),
-      };
-
-      localStorage.setItem(
-        "agencyJoinApplication",
-        JSON.stringify(rejectedApplication)
-      );
-
-      localStorage.setItem(
-        "agencyJoinStatus",
-        "rejected"
-      );
-
-      setJoinStatus("rejected");
-      setJoinApplication(rejectedApplication);
-    } catch (error) {
-      console.error("Failed to reject agent:", error);
-    } finally {
-      setProcessing(false);
-    }
-  };
+  const invitationCode = agency?.agencyCode || "AG-000000";
 
   /* ============================================================
      COPY INVITATION CODE
   ============================================================ */
 
   const handleCopyCode = async () => {
-    const invitationCode =
-      localStorage.getItem("agencyInviteCode") ||
-      "ABC001";
-
     try {
       await navigator.clipboard.writeText(invitationCode);
 
@@ -320,15 +137,9 @@ function AgentAdminDashboard() {
      WAIT UNTIL DATA LOADS
   ============================================================ */
 
-  if (!agency || !currentAdmin) {
+  if (authLoading || !user || !isRealAgencyAdmin) {
     return null;
   }
-
-  const invitationCode =
-    localStorage.getItem("agencyInviteCode") ||
-    agency.code ||
-    agency.agencyCode ||
-    "ABC001";
 
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
@@ -371,7 +182,7 @@ function AgentAdminDashboard() {
 
             <button
               type="button"
-              onClick={handleRefresh}
+              onClick={refresh}
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
               title="Refresh"
             >
@@ -428,6 +239,20 @@ function AgentAdminDashboard() {
 
           </div>
 
+          {loadError && (
+            <div className="mb-5 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+              <Warning size={17} />
+              {loadError}
+            </div>
+          )}
+
+          {actionError && (
+            <div className="mb-5 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+              <Warning size={17} />
+              {actionError}
+            </div>
+          )}
+
           {/* =====================================================
               SUMMARY CARDS
           ===================================================== */}
@@ -437,22 +262,22 @@ function AgentAdminDashboard() {
             <SummaryCard
               icon={Users}
               label="Total Agents"
-              value={totalAgents}
+              value={loading ? "—" : totalAgents}
               description="Active agency agents"
             />
 
             <SummaryCard
               icon={Clock}
               label="Pending Requests"
-              value={pendingCount}
+              value={loading ? "—" : pendingAgents.length}
               description="Waiting for approval"
             />
 
             <SummaryCard
               icon={UserCheck}
               label="SME Requests"
-              value="0"
-              description="New requests"
+              value={loading ? "—" : smeRequestCount}
+              description="Direct requests to your agency"
             />
 
           </div>
@@ -545,7 +370,7 @@ function AgentAdminDashboard() {
 
                 <button
                   type="button"
-                  onClick={handleRefresh}
+                  onClick={refresh}
                   className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50"
                 >
                   <ArrowsClockwise size={16} />
@@ -589,105 +414,109 @@ function AgentAdminDashboard() {
 
                 </div>
 
-                {pendingCount > 0 && (
+                {pendingAgents.length > 0 && (
                   <span className="rounded-full bg-amber-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-amber-700">
-                    Pending
+                    {pendingAgents.length} Pending
                   </span>
                 )}
 
               </div>
 
-              {joinApplication ? (
+              {loading ? (
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-center justify-center py-10">
+                  <div
+                    className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-[#2563EB]"
+                    aria-label="Loading"
+                  />
+                </div>
 
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              ) : pendingAgents.length > 0 ? (
 
-                    <div className="flex items-start gap-3">
+                <div className="space-y-3">
+                  {pendingAgents.map((agent) => {
+                    const platformApproved = agent.platformStatus === "approved";
+                    const platformRejected = agent.platformStatus === "rejected";
 
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#173563] text-sm font-bold text-white">
-                        {getInitials(
-                          joinApplication.name ||
-                          joinApplication.fullName
-                        )}
-                      </div>
+                    return (
+                      <div
+                        key={agent.id}
+                        className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                      >
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 
-                      <div>
+                          <div className="flex items-start gap-3">
 
-                        <h4 className="text-base font-bold text-slate-900">
-                          {joinApplication.name ||
-                            joinApplication.fullName ||
-                            "Agent"}
-                        </h4>
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#173563] text-sm font-bold text-white">
+                              {getInitials(agent.name)}
+                            </div>
 
-                        <p className="mt-1 text-xs text-slate-500">
-                          {joinApplication.email ||
-                            "No email provided"}
-                        </p>
+                            <div>
+                              <h4 className="text-base font-bold text-slate-900">
+                                {agent.name || "Agent"}
+                              </h4>
 
-                        {joinApplication.phone && (
-                          <p className="mt-1 text-xs text-slate-500">
-                            {joinApplication.phone}
+                              <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
+                                <EnvelopeSimple size={12} />
+                                {agent.email || "No email provided"}
+                              </p>
+
+                              {!platformApproved && !platformRejected && (
+                                <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-500">
+                                  Awaiting ImportEase review
+                                </span>
+                              )}
+
+                              {platformRejected && (
+                                <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-600">
+                                  Rejected by ImportEase
+                                </span>
+                              )}
+                            </div>
+
+                          </div>
+
+                          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-700">
+                            <Clock size={12} />
+                            Pending
+                          </span>
+
+                        </div>
+
+                        {platformApproved ? (
+                          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
+
+                            <button
+                              type="button"
+                              onClick={() => decide(agent.id, "rejected")}
+                              disabled={processingId === agent.id}
+                              className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <X size={16} />
+                              Reject
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => decide(agent.id, "approved")}
+                              disabled={processingId === agent.id}
+                              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#10294d] disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <Check size={16} />
+                              {processingId === agent.id ? "Updating…" : "Approve"}
+                            </button>
+
+                          </div>
+                        ) : (
+                          <p className="mt-3 text-right text-xs italic leading-5 text-slate-400">
+                            {platformRejected
+                              ? "This applicant was rejected by ImportEase -- you can't approve them."
+                              : "You can approve this agent once ImportEase completes their platform review."}
                           </p>
                         )}
-
                       </div>
-
-                    </div>
-
-                    <div>
-
-                      {joinStatus === "pending" && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-700">
-                          <Clock size={12} />
-                          Pending
-                        </span>
-                      )}
-
-                      {joinStatus === "approved" && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-700">
-                          <CheckCircle size={12} />
-                          Approved
-                        </span>
-                      )}
-
-                      {joinStatus === "rejected" && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-red-600">
-                          <XCircle size={12} />
-                          Rejected
-                        </span>
-                      )}
-
-                    </div>
-
-                  </div>
-
-                  {joinStatus === "pending" && (
-                    <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
-
-                      <button
-                        type="button"
-                        onClick={handleRejectJoin}
-                        disabled={processing}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <X size={16} />
-                        Reject
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleApproveJoin}
-                        disabled={processing}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#10294d] disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <CheckCircle size={16} />
-                        Approve
-                      </button>
-
-                    </div>
-                  )}
-
+                    );
+                  })}
                 </div>
 
               ) : (

@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { Bell, CheckCircle, Clock, Trash, Warning } from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
-import BackButton from "../components/ui/BackButton";
 import { api, ApiError } from "../lib/api";
 
 const FILTERS = [
@@ -144,9 +143,6 @@ function Notifications() {
       <AppNavbar />
 
       <main className="mx-auto w-full max-w-[880px] px-5 py-8 sm:px-8 lg:py-10">
-        <div className="fade-up mb-6">
-          <BackButton current="Notifications" />
-        </div>
 
         <section className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>

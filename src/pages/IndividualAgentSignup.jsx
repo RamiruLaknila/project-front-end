@@ -8,7 +8,6 @@ import {
   EnvelopeSimple,
   Phone,
   MapPin,
-  CreditCard,
   ShieldCheck,
   CheckCircle,
   Lock,
@@ -28,7 +27,6 @@ function IndividualAgentSignup() {
     email: "",
     phone: "",
     address: "",
-    agentId: "",
     licenseNumber: "",
     licenseExpiry: "",
     experience: "",
@@ -73,16 +71,14 @@ function IndividualAgentSignup() {
       newErrors.address = "Address is required";
     }
 
-    if (!formData.agentId.trim()) {
-      newErrors.agentId = "Agent ID is required";
-    }
-
     if (!formData.licenseNumber.trim()) {
       newErrors.licenseNumber = "License number is required";
     }
 
     if (!formData.licenseExpiry) {
       newErrors.licenseExpiry = "License expiry date is required";
+    } else if (formData.licenseExpiry < new Date().toISOString().slice(0, 10)) {
+      newErrors.licenseExpiry = "This license has expired. Please provide a valid license.";
     }
 
     if (!formData.experience) {
@@ -128,7 +124,6 @@ function IndividualAgentSignup() {
         licenseNumber: formData.licenseNumber,
         licenseExpiry: formData.licenseExpiry,
         experience: formData.experience,
-        agentId: formData.agentId,
         address: formData.address,
       });
 
@@ -293,18 +288,6 @@ function IndividualAgentSignup() {
                   placeholder="+94 7X XXX XXXX"
                   icon={<Phone size={17} />}
                   error={errors.phone}
-                  required
-                />
-
-                {/* Agent ID */}
-                <InputField
-                  label="Agent ID / Registration ID"
-                  name="agentId"
-                  value={formData.agentId}
-                  onChange={handleChange}
-                  placeholder="Enter your agent ID"
-                  icon={<CreditCard size={17} />}
-                  error={errors.agentId}
                   required
                 />
 

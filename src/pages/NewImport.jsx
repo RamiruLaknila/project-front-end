@@ -16,7 +16,6 @@ import {
 } from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
-import BackButton from "../components/ui/BackButton";
 
 function NewImport() {
   const navigate = useNavigate();
@@ -191,9 +190,6 @@ function NewImport() {
             BACK
         ======================================================== */}
 
-        <div className="page-fade mb-6">
-          <BackButton current="New Import" />
-        </div>
 
         {/* =======================================================
             HEADER

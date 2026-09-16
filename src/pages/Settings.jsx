@@ -11,15 +11,33 @@ import {
 } from "@phosphor-icons/react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
+import { authErrorMessage } from "../lib/authErrors";
 import AppNavbar from "../components/ui/AppNavbar";
 
 function Settings() {
   const navigate = useNavigate();
 
   const { darkMode, toggleDarkMode } = useTheme();
+  const { user, resetPassword } = useAuth();
 
   const [notifications, setNotifications] = useState(true);
   const [emailUpdates, setEmailUpdates] = useState(true);
+  const [pwStatus, setPwStatus] = useState("idle"); // idle | sending | sent | error
+  const [pwError, setPwError] = useState("");
+
+  const handleChangePassword = async () => {
+    if (!user?.email || pwStatus === "sending") return;
+    setPwStatus("sending");
+    setPwError("");
+    try {
+      await resetPassword(user.email);
+      setPwStatus("sent");
+    } catch (err) {
+      setPwError(authErrorMessage(err, "Could not send the reset email."));
+      setPwStatus("error");
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("currentUser");
@@ -109,31 +127,49 @@ function Settings() {
                 />
               </Link>
 
-              <button
-                type="button"
-                className="flex w-full items-center justify-between px-5 py-4 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800/60"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 text-violet-700 dark:bg-violet-950/50 dark:text-violet-400">
-                    <Lock size={17} />
+              <div>
+                <button
+                  type="button"
+                  onClick={handleChangePassword}
+                  disabled={pwStatus === "sending"}
+                  className="flex w-full items-center justify-between px-5 py-4 text-left transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-slate-800/60"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 text-violet-700 dark:bg-violet-950/50 dark:text-violet-400">
+                      <Lock size={17} />
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-semibold text-slate-800 dark:text-slate-100">
+                        Password & security
+                      </p>
+
+                      <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
+                        {pwStatus === "sending"
+                          ? "Sending reset link…"
+                          : "Send a password reset link to your email"}
+                      </p>
+                    </div>
                   </div>
 
-                  <div>
-                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-100">
-                      Password & security
-                    </p>
+                  <CaretRight
+                    size={16}
+                    className="text-slate-400 dark:text-slate-600"
+                  />
+                </button>
 
-                    <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
-                      Manage your login security
-                    </p>
-                  </div>
-                </div>
+                {pwStatus === "sent" && (
+                  <p className="px-5 pb-4 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                    Reset link sent to {user?.email}. Check your inbox.
+                  </p>
+                )}
 
-                <CaretRight
-                  size={16}
-                  className="text-slate-400 dark:text-slate-600"
-                />
-              </button>
+                {pwStatus === "error" && (
+                  <p className="px-5 pb-4 text-[11px] font-medium text-red-500">
+                    {pwError}
+                  </p>
+                )}
+              </div>
             </div>
           </section>
 

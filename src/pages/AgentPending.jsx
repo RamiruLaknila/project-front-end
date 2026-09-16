@@ -22,13 +22,25 @@ function AgentPending() {
   const [checking, setChecking] = useState(false);
   const [checkedOnce, setCheckedOnce] = useState(false);
 
-  // Only independent agents go through document verification -- an agent who
-  // joined an existing agency is reviewed by that agency's admin instead.
   const isIndependent = user?.role === "clearing_agent" && !!user?.isIndependent;
+  // A real (non-independent) agency's own admin has no agency admin above
+  // them -- they're waiting on the ImportEase platform to review the
+  // agency itself, same as an independent agent waits on their own review.
+  const isRealAgencyAdmin =
+    user?.role === "clearing_agent" && !!user?.isAgencyAdmin && !user?.isIndependent;
+  // A regular member who joined a real agency (not its admin, not independent).
+  const isAgencyMember =
+    user?.role === "clearing_agent" && !user?.isIndependent && !user?.isAgencyAdmin;
+  const awaitingPlatformReview = isIndependent || isRealAgencyAdmin;
+  // Individual humans being personally reviewed by ImportEase -- independent
+  // agents and agency-member agents alike -- upload verification documents.
+  // A real agency admin doesn't: their agency's own license/registration
+  // fields (collected at signup) are what gets reviewed for them.
+  const needsDocuments = isIndependent || isAgencyMember;
   const [docCount, setDocCount] = useState(null); // null = not loaded yet
 
   useEffect(() => {
-    if (!isIndependent || !user?.id) return;
+    if (!needsDocuments || !user?.id) return;
     let active = true;
     api
       .get(`/users/${user.id}/verification-documents`)
@@ -41,7 +53,7 @@ function AgentPending() {
     return () => {
       active = false;
     };
-  }, [isIndependent, user?.id]);
+  }, [needsDocuments, user?.id]);
 
   const hasDocuments = docCount !== null && docCount > 0;
 
@@ -135,8 +147,9 @@ function AgentPending() {
             </h1>
 
             <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-500">
-              Your individual clearing agent application has been
-              submitted and is currently waiting for verification.
+              {isRealAgencyAdmin
+                ? "Your clearing agency application has been submitted and is currently waiting for verification."
+                : "Your individual clearing agent application has been submitted and is currently waiting for verification."}
             </p>
 
           </div>
@@ -207,7 +220,7 @@ function AgentPending() {
                 completed
               />
 
-              {isIndependent && (
+              {needsDocuments && (
                 <StatusStep
                   icon={<FileMagnifyingGlass size={18} />}
                   title="Documents submitted"
@@ -224,16 +237,18 @@ function AgentPending() {
               <StatusStep
                 icon={<Clock size={18} />}
                 title={
-                  isIndependent
+                  awaitingPlatformReview
                     ? "Pending platform review"
                     : "Pending agency admin review"
                 }
                 description={
                   isIndependent
                     ? "An ImportEase platform admin will review your application and documents."
-                    : "Your agency's administrator will approve or reject your request."
+                    : isRealAgencyAdmin
+                    ? "An ImportEase platform admin will review your agency's application."
+                    : "An ImportEase platform admin will review your documents, then your agency's administrator will approve or reject your request."
                 }
-                active={!isIndependent || hasDocuments}
+                active={!needsDocuments || hasDocuments}
               />
 
               {/* Future */}
@@ -247,8 +262,8 @@ function AgentPending() {
 
           </div>
 
-          {/* Upload documents CTA -- independent agents only, until submitted */}
-          {isIndependent && docCount !== null && !hasDocuments && (
+          {/* Upload documents CTA -- independent and agency-member agents, until submitted */}
+          {needsDocuments && docCount !== null && !hasDocuments && (
             <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4">
               <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
@@ -293,7 +308,9 @@ function AgentPending() {
                 <p className="mt-1 text-xs leading-5 text-blue-800">
                   {isIndependent
                     ? "Your application will be reviewed by the ImportEase platform team. Once approved, your clearing agent dashboard will become available."
-                    : "Your agency's administrator will review your application. Once approved, your clearing agent dashboard will become available."}
+                    : isRealAgencyAdmin
+                    ? "Your agency's application will be reviewed by the ImportEase platform team. Once approved, your agency admin dashboard will become available."
+                    : "An ImportEase platform admin will review your documents, then your agency's administrator will review your application. Once both approve, your clearing agent dashboard will become available."}
                 </p>
 
               </div>

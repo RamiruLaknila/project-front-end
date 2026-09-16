@@ -23,7 +23,6 @@ import {
 } from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
-import BackButton from "../components/ui/BackButton";
 import { useAuth } from "../context/AuthContext";
 import { api, ApiError } from "../lib/api";
 
@@ -341,9 +340,6 @@ function FindAgent() {
       <AppNavbar />
 
       <main className="mx-auto w-full max-w-[820px] px-5 py-8 sm:px-8 lg:py-10">
-        <div className="mb-6">
-          <BackButton current="Find Clearing Agent" />
-        </div>
 
         <section className="mb-7 text-center">
           <h1 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
@@ -403,6 +399,7 @@ function FindAgent() {
             loading={agenciesLoading}
             error={agenciesError}
             onRequest={requestFromAgency}
+            onViewProfile={setProfileAgentId}
           />
         ) : (
           <RequestsList
@@ -841,7 +838,7 @@ function TenderCard({ tender, expanded, onToggle, onAccepted, onDeleted, onViewP
    BROWSE AGENTS (direct request)
 ========================================================= */
 
-function BrowseAgents({ agencies, loading, error, onRequest }) {
+function BrowseAgents({ agencies, loading, error, onRequest, onViewProfile }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-16">
@@ -888,14 +885,25 @@ function BrowseAgents({ agencies, loading, error, onRequest }) {
               </p>
             )}
           </div>
-          <button
-            type="button"
-            onClick={() => onRequest(agency)}
-            className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-4 py-2.5 text-[13px] font-bold text-white transition hover:bg-[#214777]"
-          >
-            <PaperPlaneTilt size={14} />
-            Send Direct Request
-          </button>
+          <div className="mt-4 flex flex-col gap-2">
+            {agency.isIndependent && agency.adminUid && (
+              <button
+                type="button"
+                onClick={() => onViewProfile(agency.adminUid)}
+                className="flex items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 px-4 py-2 text-[12.5px] font-bold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-[#2563EB]"
+              >
+                View Profile
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => onRequest(agency)}
+              className="flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#173563] px-4 py-2 text-[12.5px] font-bold text-white transition hover:bg-[#214777]"
+            >
+              <PaperPlaneTilt size={13} />
+              Send Direct Request
+            </button>
+          </div>
         </div>
       ))}
     </div>
@@ -978,6 +986,12 @@ function AgentProfileModal({ agentId, onClose }) {
                   <p className="mt-1 text-[14px] font-bold text-slate-700">{profile?.completedJobs ?? 0}</p>
                 </div>
               </div>
+
+              {profile?.experience && (
+                <p className="mt-4 text-[13px] text-slate-500">
+                  <span className="font-semibold text-slate-700">Experience:</span> {profile.experience}
+                </p>
+              )}
 
               {profile?.businessAddress && (
                 <p className="mt-4 flex items-start gap-1.5 text-[13px] text-slate-500">

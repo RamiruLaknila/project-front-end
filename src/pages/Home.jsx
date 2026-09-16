@@ -400,6 +400,24 @@ function Home() {
                   Create an account
                 </Link>
               </p>
+
+              <p className="mt-2 text-[13.5px] text-gray-500">
+                <Link
+                  to="/sme-guest"
+                  className="font-semibold text-[#173563] transition-colors hover:text-blue-600 hover:underline"
+                >
+                  Continue as Guest
+                </Link>
+              </p>
+
+              <p className="mt-2 text-[12px] text-gray-400">
+                <Link
+                  to="/admin/agent-approvals"
+                  className="font-semibold text-gray-400 transition-colors hover:text-[#173563] hover:underline"
+                >
+                  Admin login
+                </Link>
+              </p>
             </motion.div>
           </motion.div>
         </section>

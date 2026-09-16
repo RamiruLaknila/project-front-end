@@ -101,21 +101,13 @@ function AgentAdminSettings() {
           address: parsedAgency.address || "",
         });
 
-        const storedInviteCode =
-          localStorage.getItem("agencyInviteCode");
-
-        const generatedCode =
-          "IMP-" +
-          Math.random()
-            .toString(36)
-            .substring(2, 8)
-            .toUpperCase();
-
+        // The agency's real join code -- the one /agencies/register ->
+        // find_agency_by_code actually recognizes -- lives in agencyCode.
+        // (The signed-in shim also mirrors it onto `code` for older pages.)
         setInviteCode(
-          parsedAgency.inviteCode ||
-            parsedAgency.agencyCode ||
-            storedInviteCode ||
-            generatedCode
+          parsedAgency.agencyCode ||
+            parsedAgency.code ||
+            ""
         );
       } catch (error) {
         console.error(
@@ -123,20 +115,6 @@ function AgentAdminSettings() {
           error
         );
       }
-    } else {
-      const storedInviteCode =
-        localStorage.getItem("agencyInviteCode");
-
-      const generatedCode =
-        "IMP-" +
-        Math.random()
-          .toString(36)
-          .substring(2, 8)
-          .toUpperCase();
-
-      setInviteCode(
-        storedInviteCode || generatedCode
-      );
     }
 
     if (storedAdmin) {
@@ -224,54 +202,6 @@ function AgentAdminSettings() {
         "Unable to copy invite code:",
         error
       );
-    }
-  };
-
-  /* ============================================================
-     REGENERATE INVITE CODE
-  ============================================================ */
-
-  const handleRegenerateCode = () => {
-    const newCode =
-      "IMP-" +
-      Math.random()
-        .toString(36)
-        .substring(2, 8)
-        .toUpperCase();
-
-    setInviteCode(newCode);
-
-    localStorage.setItem(
-      "agencyInviteCode",
-      newCode
-    );
-
-    const storedAgency =
-      localStorage.getItem("clearingAgency");
-
-    if (storedAgency) {
-      try {
-        const parsedAgency =
-          JSON.parse(storedAgency);
-
-        const updatedAgency = {
-          ...parsedAgency,
-          inviteCode: newCode,
-          agencyCode: newCode,
-        };
-
-        localStorage.setItem(
-          "clearingAgency",
-          JSON.stringify(updatedAgency)
-        );
-
-        setAgency(updatedAgency);
-      } catch (error) {
-        console.error(
-          "Unable to update invite code:",
-          error
-        );
-      }
     }
   };
 
@@ -987,7 +917,7 @@ function AgentAdminSettings() {
                       </p>
 
                       <p className="mt-1 text-xl font-bold tracking-[0.2em] text-[#173563]">
-                        {inviteCode || "IMP-------"}
+                        {inviteCode || "—"}
                       </p>
 
                     </div>
@@ -1010,27 +940,6 @@ function AgentAdminSettings() {
                     </button>
 
                   </div>
-
-                </div>
-
-                <div className="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-
-                  <p className="text-sm text-slate-500">
-                    Regenerating the code creates a new
-                    code for future agent registrations.
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={handleRegenerateCode}
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB] transition hover:text-blue-700"
-                  >
-                    <ArrowsClockwise
-                      size={16}
-                    />
-
-                    Regenerate Code
-                  </button>
 
                 </div>
 

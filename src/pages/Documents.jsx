@@ -17,7 +17,6 @@ import {
 } from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
-import BackButton from "../components/ui/BackButton";
 
 function Documents() {
   const [search, setSearch] = useState("");
@@ -192,9 +191,6 @@ function Documents() {
             BACK BUTTON
         ==================================================== */}
 
-        <div className="fade-up mb-6">
-          <BackButton current="Documents" />
-        </div>
 
         {/* ===================================================
             PAGE HEADER

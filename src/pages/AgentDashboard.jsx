@@ -14,6 +14,7 @@ import {
 } from "@phosphor-icons/react";
 import AgentMemberSidebar from "../components/AgentMemberSidebar";
 import { api } from "../lib/api";
+import { STAGE_LABELS, STAGE_ORDER, stageIndex } from "../lib/shipmentStages";
 
 function timeAgo(iso) {
   const date = new Date(iso);
@@ -27,23 +28,6 @@ function timeAgo(iso) {
   const diffDay = Math.floor(diffHour / 24);
   return diffDay === 1 ? "Yesterday" : `${diffDay} days ago`;
 }
-
-const demoShipments = [
-  {
-    id: "IMP-1024",
-    company: "Metro Supplies",
-    product: "Industrial Equipment",
-    status: "Customs Clearance",
-    progress: 68,
-  },
-  {
-    id: "IMP-1021",
-    company: "Global Merchants",
-    product: "Electronic Goods",
-    status: "Documents Verified",
-    progress: 42,
-  },
-];
 
 function AgentDashboard() {
   const navigate = useNavigate();
@@ -91,6 +75,7 @@ function AgentDashboard() {
 
   const [openTenders, setOpenTenders] = useState([]);
   const [myBids, setMyBids] = useState([]);
+  const [shipments, setShipments] = useState([]);
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
@@ -98,15 +83,17 @@ function AgentDashboard() {
 
     (async () => {
       try {
-        const [tenders, bids] = await Promise.all([
+        const [tenders, bids, shipmentsData] = await Promise.all([
           api.get("/tenders?status=open"),
           api.get("/bids/mine"),
+          api.get("/shipments"),
         ]);
         if (!active) return;
         setOpenTenders(tenders);
         setMyBids(bids);
+        setShipments(shipmentsData);
       } catch {
-        /* Dashboard widgets just stay empty -- Marketplace/My Bids show the real error. */
+        /* Dashboard widgets just stay empty -- Marketplace/My Bids/Shipments show the real error. */
       }
     })();
 
@@ -114,6 +101,11 @@ function AgentDashboard() {
       active = false;
     };
   }, [reloadKey]);
+
+  const activeShipments = useMemo(
+    () => shipments.filter((s) => s.currentStage !== "cargo_released"),
+    [shipments]
+  );
 
   const recentTenders = useMemo(
     () =>
@@ -262,7 +254,7 @@ function AgentDashboard() {
             <SummaryCard
               icon={Package}
               label="Active Shipments"
-              value="6"
+              value={String(activeShipments.length)}
               iconStyle="bg-amber-50 text-amber-600"
             />
           </section>
@@ -399,12 +391,24 @@ function AgentDashboard() {
               </div>
 
               <div className="divide-y divide-slate-100">
-                {demoShipments.map((shipment) => (
-                  <ShipmentRow
-                    key={shipment.id}
-                    shipment={shipment}
-                  />
-                ))}
+                {activeShipments.length === 0 ? (
+                  <p className="px-5 py-8 text-center text-sm text-slate-400">No active shipments right now.</p>
+                ) : (
+                  activeShipments.slice(0, 3).map((shipment) => (
+                    <ShipmentRow
+                      key={shipment.id}
+                      shipment={{
+                        id: shipment.reference || shipment.id,
+                        company: shipment.importerName || "—",
+                        product: shipment.description || "Shipment",
+                        status: STAGE_LABELS[shipment.currentStage] || shipment.currentStage,
+                        progress: Math.round(
+                          ((stageIndex(shipment.currentStage) + 1) / STAGE_ORDER.length) * 100
+                        ),
+                      }}
+                    />
+                  ))
+                )}
               </div>
             </section>
           </div>
