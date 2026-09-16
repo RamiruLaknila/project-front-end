@@ -14,7 +14,8 @@ import {
 
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import { api } from "../../lib/api";
+import { useUnreadNotifications } from "../../hooks/useUnreadNotifications";
+import NotificationBanner from "./NotificationBanner";
 
 function AppNavbar() {
   const navigate = useNavigate();
@@ -25,36 +26,8 @@ function AppNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [photo, setPhoto] = useState("");
-  const [hasUnread, setHasUnread] = useState(false);
-
-  // Re-checked on mount (so every page load reflects the current state) and
-  // whenever Notifications.jsx marks something read, via the
-  // "notificationsUpdated" event -- same cross-component pattern as the
-  // profile photo above.
-  useEffect(() => {
-    if (!user?.id) {
-      return;
-    }
-
-    let active = true;
-
-    const loadUnread = async () => {
-      try {
-        const data = await api.get("/notifications?unreadOnly=true");
-        if (active) setHasUnread(data.length > 0);
-      } catch {
-        if (active) setHasUnread(false);
-      }
-    };
-
-    loadUnread();
-    window.addEventListener("notificationsUpdated", loadUnread);
-
-    return () => {
-      active = false;
-      window.removeEventListener("notificationsUpdated", loadUnread);
-    };
-  }, [user?.id]);
+  const unreadCount = useUnreadNotifications(user?.id);
+  const hasUnread = unreadCount > 0;
 
   // Profile photos have no backend field -- Profile.jsx stores them in
   // localStorage keyed by user id and fires "profilePhotoUpdated" whenever it
@@ -183,6 +156,11 @@ function AppNavbar() {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
+      <NotificationBanner
+        userId={user?.id}
+        count={unreadCount}
+        notificationsPath="/notifications"
+      />
       <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-6 lg:px-10">
 
         {/* =========================================================

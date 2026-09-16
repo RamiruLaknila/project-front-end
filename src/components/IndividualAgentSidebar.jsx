@@ -5,6 +5,7 @@ import {
   ShoppingBag,
   Gavel,
   Package,
+  Bell,
   Gear,
   List,
   Moon,
@@ -16,6 +17,9 @@ import {
 } from "@phosphor-icons/react";
 
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
+import { useUnreadNotifications } from "../hooks/useUnreadNotifications";
+import NotificationBanner from "./ui/NotificationBanner";
 
 const getStoredAgent = () => {
   try {
@@ -51,6 +55,8 @@ const getStoredAgent = () => {
 
 function IndividualAgentSidebar() {
   const { darkMode, toggleDarkMode } = useTheme();
+  const { user } = useAuth();
+  const unreadCount = useUnreadNotifications(user?.id);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [agent, setAgent] = useState(getStoredAgent);
 
@@ -115,6 +121,12 @@ function IndividualAgentSidebar() {
       label: "Shipments",
       path: "/individual-agent-shipments",
       icon: Package,
+    },
+    {
+      label: "Notifications",
+      path: "/individual-agent-notifications",
+      icon: Bell,
+      badge: unreadCount > 0,
     },
   ];
 
@@ -190,6 +202,10 @@ function IndividualAgentSidebar() {
                     />
 
                     <span className="flex-1">{item.label}</span>
+
+                    {item.badge && !isActive && (
+                      <span className="h-2 w-2 shrink-0 rounded-full bg-red-500" />
+                    )}
 
                     {isActive && (
                       <CaretRight className="h-4 w-4 text-white/80" />
@@ -273,6 +289,12 @@ function IndividualAgentSidebar() {
 
   return (
     <>
+      <NotificationBanner
+        userId={user?.id}
+        count={unreadCount}
+        notificationsPath="/individual-agent-notifications"
+      />
+
       {/* Desktop Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[260px] border-r border-slate-200 bg-white lg:block">
         <SidebarContent />

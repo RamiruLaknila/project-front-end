@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Bell, CheckCircle, Clock, Warning } from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
@@ -31,7 +31,20 @@ function timeAgo(iso) {
   return date.toLocaleDateString();
 }
 
+// Where a click on a notification should take the SME, based on its `type`.
+function notificationLink(item) {
+  switch (item.type) {
+    case "new_bid":
+      return item.tenderId ? `/find-agent?tenderId=${item.tenderId}` : "/find-agent";
+    case "stage_update":
+      return "/track-shipment";
+    default:
+      return null;
+  }
+}
+
 function Notifications() {
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -71,20 +84,25 @@ function Notifications() {
     return items;
   }, [items, filter]);
 
-  const markRead = async (id) => {
-    const target = items.find((item) => item.id === id);
-    if (!target || target.read) return;
+  const markRead = async (item) => {
+    if (item.read) return;
 
     setActionError("");
-    setItems((current) => current.map((item) => (item.id === id ? { ...item, read: true } : item)));
+    setItems((current) => current.map((i) => (i.id === item.id ? { ...i, read: true } : i)));
 
     try {
-      await api.put(`/notifications/${id}/read`);
+      await api.put(`/notifications/${item.id}/read`);
       window.dispatchEvent(new Event("notificationsUpdated"));
     } catch (err) {
-      setItems((current) => current.map((item) => (item.id === id ? { ...item, read: false } : item)));
+      setItems((current) => current.map((i) => (i.id === item.id ? { ...i, read: false } : i)));
       setActionError(err instanceof ApiError ? err.message : "Could not update this notification.");
     }
+  };
+
+  const handleItemClick = (item) => {
+    markRead(item);
+    const link = notificationLink(item);
+    if (link) navigate(link);
   };
 
   const markAllRead = async () => {
@@ -208,7 +226,7 @@ function Notifications() {
                 <li key={item.id}>
                   <button
                     type="button"
-                    onClick={() => markRead(item.id)}
+                    onClick={() => handleItemClick(item)}
                     className={`flex w-full items-start gap-3.5 px-4 py-4 text-left transition hover:bg-slate-50 sm:px-5 ${
                       !item.read ? "bg-blue-50/30" : ""
                     }`}

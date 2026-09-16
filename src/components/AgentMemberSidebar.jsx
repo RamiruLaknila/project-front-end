@@ -5,6 +5,7 @@ import {
   ShoppingBag,
   Gavel,
   Package,
+  Bell,
   Gear,
   List,
   Moon,
@@ -16,10 +17,14 @@ import {
 import { useEffect, useState } from "react";
 
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
+import { useUnreadNotifications } from "../hooks/useUnreadNotifications";
+import NotificationBanner from "./ui/NotificationBanner";
 
 function SidebarContent({
   agent,
   agencyName,
+  unreadCount,
   closeMobileSidebar,
 }) {
   const { darkMode, toggleDarkMode } = useTheme();
@@ -65,6 +70,12 @@ function SidebarContent({
       name: "Shipments",
       path: "/agent-shipments",
       icon: Package,
+    },
+    {
+      name: "Notifications",
+      path: "/agent-notifications",
+      icon: Bell,
+      badge: unreadCount > 0,
     },
   ];
 
@@ -150,6 +161,10 @@ function SidebarContent({
                     <span className="flex-1">
                       {item.name}
                     </span>
+
+                    {item.badge && !isActive && (
+                      <span className="h-2 w-2 shrink-0 rounded-full bg-red-500" />
+                    )}
 
                     {isActive && (
                       <CaretRight className="h-4 w-4 shrink-0 text-white/80" />
@@ -279,6 +294,8 @@ const getStoredAgency = () => {
 
 function AgentMemberSidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user } = useAuth();
+  const unreadCount = useUnreadNotifications(user?.id);
 
   const [agent, setAgent] = useState(getStoredAgent);
   const [agency, setAgency] = useState(getStoredAgency);
@@ -323,11 +340,18 @@ function AgentMemberSidebar() {
 
   return (
     <>
+      <NotificationBanner
+        userId={user?.id}
+        count={unreadCount}
+        notificationsPath="/agent-notifications"
+      />
+
       {/* Desktop Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[260px] border-r border-slate-200 bg-white lg:block">
         <SidebarContent
           agent={agent}
           agencyName={agencyName}
+          unreadCount={unreadCount}
           closeMobileSidebar={closeMobileSidebar}
         />
       </aside>
@@ -394,6 +418,7 @@ function AgentMemberSidebar() {
         <SidebarContent
           agent={agent}
           agencyName={agencyName}
+          unreadCount={unreadCount}
           closeMobileSidebar={closeMobileSidebar}
         />
       </aside>

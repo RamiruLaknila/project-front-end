@@ -9,14 +9,15 @@ import {
   MagnifyingGlass,
   ShieldCheck,
   Users,
-  TrendUp,
 } from "@phosphor-icons/react";
 import IndividualAgentSidebar from "../components/IndividualAgentSidebar";
+import { api } from "../lib/api";
 
 function IndividualAgentDashboard() {
   const navigate = useNavigate();
   const [agent, setAgent] = useState(null);
-  const [requests, setRequests] = useState([]);
+  const [openTenders, setOpenTenders] = useState([]);
+  const [myBids, setMyBids] = useState([]);
 
   useEffect(() => {
     const savedAgent = localStorage.getItem("clearingAgent");
@@ -28,48 +29,34 @@ function IndividualAgentDashboard() {
         setAgent(null);
       }
     }
-
-    const savedRequests = localStorage.getItem("smeRequests");
-
-    if (savedRequests) {
-      try {
-        setRequests(JSON.parse(savedRequests));
-      } catch {
-        setRequests([]);
-      }
-    }
   }, []);
 
-  const demoRequests = [
-    {
-      id: "REQ-1001",
-      product: "Solar Panels",
-      category: "Electronics",
-      destination: "Colombo Port",
-      value: "USD 12,500",
-      status: "Open",
-    },
-    {
-      id: "REQ-1002",
-      product: "Cotton T-Shirts",
-      category: "Textiles",
-      destination: "Colombo Port",
-      value: "USD 8,200",
-      status: "Open",
-    },
-    {
-      id: "REQ-1003",
-      product: "Industrial Machinery",
-      category: "Machinery",
-      destination: "Hambantota Port",
-      value: "USD 25,000",
-      status: "Open",
-    },
-  ];
+  useEffect(() => {
+    let active = true;
 
-  const availableRequests = useMemo(() => {
-    return requests.length > 0 ? requests : demoRequests;
-  }, [requests]);
+    (async () => {
+      try {
+        const [tenders, bids] = await Promise.all([
+          api.get("/tenders?status=open"),
+          api.get("/bids/mine"),
+        ]);
+        if (!active) return;
+        setOpenTenders(tenders);
+        setMyBids(bids);
+      } catch {
+        /* Dashboard widgets just stay empty -- Requests/My Bids show the real error. */
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const availableRequests = useMemo(
+    () => [...openTenders].sort((a, b) => new Date(b.postedAt) - new Date(a.postedAt)),
+    [openTenders]
+  );
 
   const displayName =
     agent?.fullName ||
@@ -174,7 +161,7 @@ function IndividualAgentDashboard() {
               <StatCard
                 icon={<FileText size={20} />}
                 title="My Bids"
-                value="5"
+                value={myBids.length}
                 description="Bids submitted"
               />
 
@@ -256,8 +243,8 @@ function IndividualAgentDashboard() {
               </div>
 
               <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_10px_rgba(15,23,42,.02)]">
-                {availableRequests.slice(0, 3).map((request) => (
-                  <RequestRow key={request.id} request={request} />
+                {availableRequests.slice(0, 3).map((tender) => (
+                  <RequestRow key={tender.id} tender={tender} />
                 ))}
 
                 {availableRequests.length === 0 && (
@@ -396,7 +383,7 @@ function QuickAction({ icon, title, description, to }) {
 /* ============================================================
    REQUEST ROW
 ============================================================ */
-function RequestRow({ request }) {
+function RequestRow({ tender }) {
   return (
     <div className="flex flex-col gap-4 border-b border-slate-100 px-5 py-5 transition last:border-b-0 hover:bg-blue-50/20 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex min-w-0 items-start gap-3">
@@ -407,30 +394,28 @@ function RequestRow({ request }) {
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="truncate text-sm font-bold text-[#173563]">
-              {request.product}
+              {tender.description || "Shipment request"}
             </h3>
 
             <span className="rounded-full bg-green-50 px-2 py-0.5 text-[11px] font-semibold text-green-600">
-              {request.status || "Open"}
+              Open
             </span>
           </div>
 
           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[12px] text-slate-400">
-            <span>{request.id}</span>
-            <span>{request.category}</span>
-            <span>{request.destination}</span>
+            <span>{tender.hsCode ? `HS Code ${tender.hsCode}` : "No HS code provided"}</span>
+            <span>{tender.origin || "-"}</span>
+            <span>{tender.port || "-"}</span>
           </div>
         </div>
       </div>
 
       <div className="flex items-center justify-between gap-4 sm:justify-end">
         <div className="text-left sm:text-right">
-          <p className="text-[11px] font-medium text-slate-400">
-            Estimated Value
-          </p>
+          <p className="text-[11px] font-medium text-slate-400">CIF Value</p>
 
           <p className="mt-0.5 text-sm font-bold text-[#173563]">
-            {request.value}
+            USD {Number(tender.declaredValue || 0).toLocaleString()}
           </p>
         </div>
 

@@ -13,63 +13,20 @@ import {
   User,
 } from "@phosphor-icons/react";
 import AgentMemberSidebar from "../components/AgentMemberSidebar";
+import { api } from "../lib/api";
 
-const demoRequests = [
-  {
-    id: "SME-2048",
-    company: "ABC Trading",
-    product: "Electronic Components",
-    origin: "China",
-    destination: "Colombo",
-    value: "LKR 2,450,000",
-    posted: "2 hours ago",
-    status: "New",
-  },
-  {
-    id: "SME-2047",
-    company: "Lanka Home Supplies",
-    product: "Kitchen Equipment",
-    origin: "India",
-    destination: "Colombo",
-    value: "LKR 1,820,000",
-    posted: "5 hours ago",
-    status: "New",
-  },
-  {
-    id: "SME-2046",
-    company: "Island Retailers",
-    product: "Textile Products",
-    origin: "Vietnam",
-    destination: "Colombo",
-    value: "LKR 3,100,000",
-    posted: "Yesterday",
-    status: "New",
-  },
-];
-
-const demoBids = [
-  {
-    id: "BID-1008",
-    request: "SME-2045",
-    company: "Global Merchants",
-    amount: "LKR 82,500",
-    status: "Under Review",
-  },
-  {
-    id: "BID-1007",
-    request: "SME-2041",
-    company: "Metro Supplies",
-    amount: "LKR 65,000",
-    status: "Accepted",
-  },
-  {
-    id: "BID-1006",
-    request: "SME-2038",
-    company: "Prime Retail",
-    amount: "LKR 91,000",
-    status: "Submitted",
-  },
-];
+function timeAgo(iso) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const diffSec = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diffSec < 60) return "Just now";
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} minute${diffMin === 1 ? "" : "s"} ago`;
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return `${diffHour} hour${diffHour === 1 ? "" : "s"} ago`;
+  const diffDay = Math.floor(diffHour / 24);
+  return diffDay === 1 ? "Yesterday" : `${diffDay} days ago`;
+}
 
 const demoShipments = [
   {
@@ -132,16 +89,62 @@ function AgentDashboard() {
     return agentName.split(" ")[0];
   }, [agentName]);
 
+  const [openTenders, setOpenTenders] = useState([]);
+  const [myBids, setMyBids] = useState([]);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+
+    (async () => {
+      try {
+        const [tenders, bids] = await Promise.all([
+          api.get("/tenders?status=open"),
+          api.get("/bids/mine"),
+        ]);
+        if (!active) return;
+        setOpenTenders(tenders);
+        setMyBids(bids);
+      } catch {
+        /* Dashboard widgets just stay empty -- Marketplace/My Bids show the real error. */
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [reloadKey]);
+
+  const recentTenders = useMemo(
+    () =>
+      [...openTenders]
+        .sort((a, b) => new Date(b.postedAt) - new Date(a.postedAt))
+        .slice(0, 3),
+    [openTenders]
+  );
+
+  const recentBids = useMemo(
+    () =>
+      [...myBids]
+        .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt))
+        .slice(0, 3),
+    [myBids]
+  );
+
+  const activeBidsCount = myBids.filter((bid) => bid.status === "pending").length;
+  const wonBidsCount = myBids.filter((bid) => bid.status === "accepted").length;
+
   const handleRefresh = () => {
     setRefreshing(true);
+    setReloadKey((key) => key + 1);
 
     window.setTimeout(() => {
       setRefreshing(false);
     }, 700);
   };
 
-  const goToAgentRequests = () => {
-    navigate("/agent-requests");
+  const goToMarketplace = () => {
+    navigate("/agent-marketplace");
   };
 
   const goToAgentShipments = () => {
@@ -225,7 +228,7 @@ function AgentDashboard() {
 
               <button
                 type="button"
-                onClick={goToAgentRequests}
+                onClick={goToMarketplace}
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#10294d]"
               >
                 <MagnifyingGlass size={17} />
@@ -237,22 +240,22 @@ function AgentDashboard() {
           <section className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <SummaryCard
               icon={MagnifyingGlass}
-              label="New SME Requests"
-              value="12"
+              label="Open SME Requests"
+              value={String(openTenders.length)}
               iconStyle="bg-blue-50 text-blue-600"
             />
 
             <SummaryCard
               icon={FileText}
               label="Active Bids"
-              value="8"
+              value={String(activeBidsCount)}
               iconStyle="bg-violet-50 text-violet-600"
             />
 
             <SummaryCard
               icon={CheckCircle}
               label="Won Requests"
-              value="24"
+              value={String(wonBidsCount)}
               iconStyle="bg-emerald-50 text-emerald-600"
             />
 
@@ -278,7 +281,7 @@ function AgentDashboard() {
                 </div>
 
                 <Link
-                  to="/agent-requests"
+                  to="/agent-marketplace"
                   className="inline-flex items-center gap-1 text-xs font-bold text-[#173563] hover:text-blue-700"
                 >
                   View all
@@ -287,13 +290,13 @@ function AgentDashboard() {
               </div>
 
               <div className="divide-y divide-slate-100">
-                {demoRequests.map((request) => (
-                  <RequestRow
-                    key={request.id}
-                    request={request}
-                    onClick={goToAgentRequests}
-                  />
-                ))}
+                {recentTenders.length === 0 ? (
+                  <p className="px-5 py-8 text-center text-sm text-slate-400">No open requests right now.</p>
+                ) : (
+                  recentTenders.map((tender) => (
+                    <RequestRow key={tender.id} tender={tender} onClick={goToMarketplace} />
+                  ))
+                )}
               </div>
             </section>
 
@@ -311,7 +314,7 @@ function AgentDashboard() {
                   icon={MagnifyingGlass}
                   title="Browse SME Requests"
                   description="Find new import opportunities"
-                  onClick={goToAgentRequests}
+                  onClick={goToMarketplace}
                   iconStyle="bg-blue-50 text-blue-600"
                 />
 
@@ -365,12 +368,11 @@ function AgentDashboard() {
               </div>
 
               <div className="divide-y divide-slate-100">
-                {demoBids.map((bid) => (
-                  <BidRow
-                    key={bid.id}
-                    bid={bid}
-                  />
-                ))}
+                {recentBids.length === 0 ? (
+                  <p className="px-5 py-8 text-center text-sm text-slate-400">No bids submitted yet.</p>
+                ) : (
+                  recentBids.map((bid) => <BidRow key={bid.id} bid={bid} />)
+                )}
               </div>
             </section>
 
@@ -447,10 +449,7 @@ function SummaryCard({
   );
 }
 
-function RequestRow({
-  request,
-  onClick,
-}) {
+function RequestRow({ tender, onClick }) {
   return (
     <button
       type="button"
@@ -463,32 +462,28 @@ function RequestRow({
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-sm font-bold text-slate-800">
-            {request.product}
+          <p className="truncate text-sm font-bold text-slate-800">
+            {tender.description || "Shipment request"}
           </p>
 
           <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600">
-            NEW
+            OPEN
           </span>
         </div>
 
         <p className="mt-1 text-xs text-slate-500">
-          {request.company} · {request.origin} → {request.destination}
+          {tender.hsCode ? `HS Code ${tender.hsCode}` : "No HS code provided"} · {tender.origin || "-"} → {tender.port || "-"}
         </p>
 
-        <p className="mt-1 text-[11px] text-slate-400">
-          {request.id} · {request.posted}
-        </p>
+        <p className="mt-1 text-[11px] text-slate-400">Posted {timeAgo(tender.postedAt)}</p>
       </div>
 
       <div className="hidden text-right sm:block">
         <p className="text-xs font-bold text-slate-700">
-          {request.value}
+          USD {Number(tender.declaredValue || 0).toLocaleString()}
         </p>
 
-        <p className="mt-1 text-[11px] text-slate-400">
-          Cargo value
-        </p>
+        <p className="mt-1 text-[11px] text-slate-400">CIF value</p>
       </div>
 
       <CaretRight
@@ -540,9 +535,14 @@ function QuickAction({
 
 function BidRow({ bid }) {
   const statusStyles = {
-    Accepted: "bg-emerald-50 text-emerald-700",
-    "Under Review": "bg-amber-50 text-amber-700",
-    Submitted: "bg-blue-50 text-blue-700",
+    accepted: "bg-emerald-50 text-emerald-700",
+    pending: "bg-amber-50 text-amber-700",
+    rejected: "bg-red-50 text-red-600",
+  };
+  const statusLabel = {
+    accepted: "Accepted",
+    pending: "Under Review",
+    rejected: "Rejected",
   };
 
   return (
@@ -552,26 +552,20 @@ function BidRow({ bid }) {
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-bold text-slate-800">
-          {bid.company}
-        </p>
+        <p className="text-sm font-bold text-slate-800">Tender {bid.tenderId}</p>
 
-        <p className="mt-1 text-[11px] text-slate-400">
-          {bid.id} · {bid.request}
-        </p>
+        <p className="mt-1 text-[11px] text-slate-400">{bid.clearanceTimelineHours} hours clearance</p>
       </div>
 
       <div className="text-right">
-        <p className="text-xs font-bold text-slate-700">
-          {bid.amount}
-        </p>
+        <p className="text-xs font-bold text-slate-700">Rs. {Number(bid.feeLkr || 0).toLocaleString()}</p>
 
         <span
           className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${
             statusStyles[bid.status] || "bg-slate-100 text-slate-500"
           }`}
         >
-          {bid.status}
+          {statusLabel[bid.status] || bid.status}
         </span>
       </div>
     </div>

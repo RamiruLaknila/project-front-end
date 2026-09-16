@@ -18,7 +18,6 @@ import NewImport from "./pages/NewImport";
 import HSCodeSearch from "./pages/HSCodeSearch";
 import Calculator from "./pages/Calculator";
 import FindAgent from "./pages/FindAgent";
-import ShipmentConfirmation from "./pages/ShipmentConfirmation";
 import Shipments from "./pages/Shipments";
 import TrackShipment from "./pages/TrackShipment";
 import Documents from "./pages/Documents";
@@ -57,11 +56,8 @@ import AgencyWaitingApproval from "./pages/AgencyWaitingApproval";
 // =====================================================
 // AGENT FEATURES
 // =====================================================
-import AgentRequests from "./pages/AgentRequests";
 import AgentMarketplace from "./pages/AgentMarketplace";
 import AgentMyBids from "./pages/AgentMyBids";
-import AgentBids from "./pages/AgentBids";
-import ReviewBids from "./pages/ReviewBids";
 import IndividualAgentRequests from "./pages/IndividualAgentRequests";
 // =====================================================
 // AGENT SHIPMENTS
@@ -234,14 +230,6 @@ function App() {
           }
         />
 
-        <Route
-          path="/shipment-confirmation"
-          element={
-            <RequireSmeAccess pageName="Shipment confirmation">
-              <ShipmentConfirmation />
-            </RequireSmeAccess>
-          }
-        />
 
 
         {/* =====================================================
@@ -439,16 +427,6 @@ function App() {
 
 
         {/* =====================================================
-            AGENT SME REQUESTS
-        ===================================================== */}
-
-        <Route
-          path="/agent-requests"
-          element={<AgentRequests />}
-        />
-
-
-        {/* =====================================================
             AGENT MARKETPLACE
         ===================================================== */}
 
@@ -465,16 +443,6 @@ function App() {
         <Route
           path="/agent-my-bids"
           element={<AgentMyBids />}
-        />
-
-        <Route
-          path="/agent-bids"
-          element={<AgentBids />}
-        />
-
-        <Route
-          path="/review-bids"
-          element={<ReviewBids />}
         />
 
 

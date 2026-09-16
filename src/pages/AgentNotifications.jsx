@@ -1,93 +1,118 @@
-import { useMemo, useState } from "react";
-import {
-  Bell,
-  CheckCircle,
-  ChatCircle,
-  Clock,
-  FileText,
-  Gavel,
-  Package,
-} from "@phosphor-icons/react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Bell, CheckCircle, Clock, Warning } from "@phosphor-icons/react";
 
 import AgentMemberSidebar from "../components/AgentMemberSidebar";
-
-const NOTIFICATIONS = [
-  {
-    id: "a1",
-    type: "request",
-    title: "New shipment request",
-    description: "ABC Trading posted a new clearing request for Electronic Components.",
-    time: "8 minutes ago",
-    unread: true,
-  },
-  {
-    id: "a2",
-    type: "bid",
-    title: "Your bid was accepted",
-    description: "Lanka Home Supplies accepted your bid for REQ-2026-018.",
-    time: "45 minutes ago",
-    unread: true,
-  },
-  {
-    id: "a3",
-    type: "message",
-    title: "New message from an SME",
-    description: "Metro Supplies sent a message about shipment IMP-1021.",
-    time: "2 hours ago",
-    unread: true,
-  },
-  {
-    id: "a4",
-    type: "document",
-    title: "Document uploaded",
-    description: "Global Merchants uploaded the commercial invoice for IMP-1022.",
-    time: "Yesterday",
-    unread: false,
-  },
-  {
-    id: "a5",
-    type: "shipment",
-    title: "Shipment marked complete",
-    description: "IMP-1020 has been marked as completed and archived.",
-    time: "3 days ago",
-    unread: false,
-  },
-];
-
-const TYPE_META = {
-  request: { icon: Package, style: "bg-blue-50 text-[#2563EB]" },
-  bid: { icon: Gavel, style: "bg-amber-50 text-amber-600" },
-  message: { icon: ChatCircle, style: "bg-violet-50 text-violet-600" },
-  document: { icon: FileText, style: "bg-slate-100 text-slate-600" },
-  shipment: { icon: CheckCircle, style: "bg-emerald-50 text-emerald-600" },
-};
+import { api, ApiError } from "../lib/api";
 
 const FILTERS = [
   { key: "all", label: "All" },
   { key: "unread", label: "Unread" },
 ];
 
-function AgentNotifications() {
-  const [items, setItems] = useState(NOTIFICATIONS);
-  const [filter, setFilter] = useState("all");
+function timeAgo(iso) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const diffSec = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diffSec < 60) return "Just now";
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} minute${diffMin === 1 ? "" : "s"} ago`;
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return `${diffHour} hour${diffHour === 1 ? "" : "s"} ago`;
+  const diffDay = Math.floor(diffHour / 24);
+  if (diffDay === 1) return "Yesterday";
+  if (diffDay < 7) return `${diffDay} days ago`;
+  return date.toLocaleDateString();
+}
 
-  const unreadCount = useMemo(() => items.filter((item) => item.unread).length, [items]);
+// Where a click on a notification should take an agency member, based on its `type`.
+function notificationLink(item) {
+  switch (item.type) {
+    case "direct_request":
+      return item.tenderId ? `/agent-marketplace?tenderId=${item.tenderId}` : "/agent-marketplace";
+    case "bid_accepted":
+      return "/agent-shipments";
+    case "bid_rejected":
+    case "tender_withdrawn":
+      return "/agent-my-bids";
+    default:
+      return null;
+  }
+}
+
+function AgentNotifications() {
+  const navigate = useNavigate();
+
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+
+    (async () => {
+      try {
+        const data = await api.get("/notifications");
+        if (active) setItems(data);
+      } catch (err) {
+        if (active) {
+          setLoadError(err instanceof ApiError ? err.message : "Could not load notifications.");
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [reloadKey]);
+
+  const unreadCount = useMemo(() => items.filter((item) => !item.read).length, [items]);
 
   const visibleItems = useMemo(() => {
-    if (filter === "unread") {
-      return items.filter((item) => item.unread);
-    }
+    if (filter === "unread") return items.filter((item) => !item.read);
     return items;
   }, [items, filter]);
 
-  const markAllRead = () => {
-    setItems((current) => current.map((item) => ({ ...item, unread: false })));
+  const markRead = async (item) => {
+    if (item.read) return;
+
+    setActionError("");
+    setItems((current) => current.map((i) => (i.id === item.id ? { ...i, read: true } : i)));
+
+    try {
+      await api.put(`/notifications/${item.id}/read`);
+      window.dispatchEvent(new Event("notificationsUpdated"));
+    } catch (err) {
+      setItems((current) => current.map((i) => (i.id === item.id ? { ...i, read: false } : i)));
+      setActionError(err instanceof ApiError ? err.message : "Could not update this notification.");
+    }
   };
 
-  const markRead = (id) => {
-    setItems((current) =>
-      current.map((item) => (item.id === id ? { ...item, unread: false } : item))
-    );
+  const handleItemClick = (item) => {
+    markRead(item);
+    const link = notificationLink(item);
+    if (link) navigate(link);
+  };
+
+  const markAllRead = async () => {
+    const unreadIds = items.filter((item) => !item.read).map((item) => item.id);
+    if (unreadIds.length === 0) return;
+
+    setActionError("");
+    setItems((current) => current.map((item) => ({ ...item, read: true })));
+
+    try {
+      await Promise.all(unreadIds.map((id) => api.put(`/notifications/${id}/read`)));
+      window.dispatchEvent(new Event("notificationsUpdated"));
+    } catch (err) {
+      setActionError(err instanceof ApiError ? err.message : "Could not mark everything as read.");
+      setReloadKey((key) => key + 1);
+    }
   };
 
   return (
@@ -116,6 +141,13 @@ function AgentNotifications() {
         </header>
 
         <div className="mx-auto max-w-[880px] px-5 py-7 sm:px-8 lg:py-9">
+          {actionError && (
+            <div className="mb-5 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[14px] font-semibold text-red-600">
+              <Warning size={17} />
+              {actionError}
+            </div>
+          )}
+
           <section className="rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,.025)]">
             <div className="flex items-center gap-1.5 border-b border-slate-100 px-4 py-3 sm:px-5">
               {FILTERS.map((item) => (
@@ -133,9 +165,7 @@ function AgentNotifications() {
                   {item.key === "unread" && unreadCount > 0 && (
                     <span
                       className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold ${
-                        filter === item.key
-                          ? "bg-white/20 text-white"
-                          : "bg-blue-50 text-[#2563EB]"
+                        filter === item.key ? "bg-white/20 text-white" : "bg-blue-50 text-[#2563EB]"
                       }`}
                     >
                       {unreadCount}
@@ -145,58 +175,68 @@ function AgentNotifications() {
               ))}
             </div>
 
-            {visibleItems.length === 0 ? (
+            {loading ? (
+              <div className="flex items-center justify-center px-6 py-16">
+                <div
+                  className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-[#2563EB]"
+                  aria-label="Loading"
+                />
+              </div>
+            ) : loadError ? (
+              <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+                <Warning size={26} className="text-slate-300" />
+                <p className="text-sm font-semibold text-slate-700">{loadError}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoading(true);
+                    setLoadError("");
+                    setReloadKey((key) => key + 1);
+                  }}
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-[#173563] px-4 text-[13px] font-semibold text-white transition hover:bg-[#214777]"
+                >
+                  Try again
+                </button>
+              </div>
+            ) : visibleItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
                 <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-50 text-slate-300">
                   <Bell size={26} />
                 </div>
                 <p className="text-sm font-semibold text-slate-700">You're all caught up</p>
                 <p className="mt-1 max-w-xs text-[13px] leading-5 text-slate-400">
-                  New requests, bids and messages will show up here.
+                  New requests, bids and pitches will show up here.
                 </p>
               </div>
             ) : (
               <ul className="divide-y divide-slate-100">
-                {visibleItems.map((item) => {
-                  const meta = TYPE_META[item.type] || TYPE_META.shipment;
-                  const Icon = meta.icon;
+                {visibleItems.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      onClick={() => handleItemClick(item)}
+                      className={`flex w-full items-start gap-3.5 px-4 py-4 text-left transition hover:bg-slate-50 sm:px-5 ${
+                        !item.read ? "bg-blue-50/30" : ""
+                      }`}
+                    >
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
+                        <Bell size={18} />
+                      </div>
 
-                  return (
-                    <li key={item.id}>
-                      <button
-                        type="button"
-                        onClick={() => markRead(item.id)}
-                        className={`flex w-full items-start gap-3.5 px-4 py-4 text-left transition hover:bg-slate-50 sm:px-5 ${
-                          item.unread ? "bg-blue-50/30" : ""
-                        }`}
-                      >
-                        <div
-                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${meta.style}`}
-                        >
-                          <Icon size={18} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="text-[14px] font-semibold text-slate-800">{item.message}</p>
+                          {!item.read && <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#2563EB]" />}
                         </div>
 
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-start justify-between gap-3">
-                            <p className="text-[14px] font-bold text-slate-800">{item.title}</p>
-                            {item.unread && (
-                              <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#2563EB]" />
-                            )}
-                          </div>
-
-                          <p className="mt-1 text-[13px] leading-5 text-slate-500">
-                            {item.description}
-                          </p>
-
-                          <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-slate-400">
-                            <Clock size={12} />
-                            {item.time}
-                          </div>
+                        <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-slate-400">
+                          <Clock size={12} />
+                          {timeAgo(item.createdAt)}
                         </div>
-                      </button>
-                    </li>
-                  );
-                })}
+                      </div>
+                    </button>
+                  </li>
+                ))}
               </ul>
             )}
           </section>
