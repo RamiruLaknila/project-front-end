@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -23,12 +23,39 @@ function AppNavbar() {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [photo, setPhoto] = useState("");
+
+  // Profile photos have no backend field -- Profile.jsx stores them in
+  // localStorage keyed by user id and fires "profilePhotoUpdated" whenever it
+  // changes, so the navbar (mounted separately on every page) can pick up the
+  // latest one, including a same-page update made on the Profile page itself.
+  useEffect(() => {
+    const loadPhoto = () => {
+      if (!user?.id) {
+        setPhoto("");
+        return;
+      }
+      try {
+        setPhoto(localStorage.getItem(`profilePhoto:${user.id}`) || "");
+      } catch {
+        setPhoto("");
+      }
+    };
+
+    const timer = setTimeout(loadPhoto, 0);
+    window.addEventListener("profilePhotoUpdated", loadPhoto);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("profilePhotoUpdated", loadPhoto);
+    };
+  }, [user?.id]);
 
   const profile = {
     fullName: user?.name || "User",
     businessName: user?.businessName || "",
     email: user?.email || "",
-    photo: "",
+    photo,
   };
 
   const handleLogout = async () => {
