@@ -14,6 +14,7 @@ import {
 
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
+import { api } from "../../lib/api";
 
 function AppNavbar() {
   const navigate = useNavigate();
@@ -24,6 +25,36 @@ function AppNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [photo, setPhoto] = useState("");
+  const [hasUnread, setHasUnread] = useState(false);
+
+  // Re-checked on mount (so every page load reflects the current state) and
+  // whenever Notifications.jsx marks something read, via the
+  // "notificationsUpdated" event -- same cross-component pattern as the
+  // profile photo above.
+  useEffect(() => {
+    if (!user?.id) {
+      return;
+    }
+
+    let active = true;
+
+    const loadUnread = async () => {
+      try {
+        const data = await api.get("/notifications?unreadOnly=true");
+        if (active) setHasUnread(data.length > 0);
+      } catch {
+        if (active) setHasUnread(false);
+      }
+    };
+
+    loadUnread();
+    window.addEventListener("notificationsUpdated", loadUnread);
+
+    return () => {
+      active = false;
+      window.removeEventListener("notificationsUpdated", loadUnread);
+    };
+  }, [user?.id]);
 
   // Profile photos have no backend field -- Profile.jsx stores them in
   // localStorage keyed by user id and fires "profilePhotoUpdated" whenever it
@@ -273,8 +304,10 @@ function AppNavbar() {
           >
             <Bell className="h-[19px] w-[19px]" />
 
-            {/* Notification Dot */}
-            <span className="absolute right-[8px] top-[7px] h-2 w-2 rounded-full bg-[#2563EB] ring-2 ring-white" />
+            {/* Notification Dot -- only shown while there's a real unread notification */}
+            {hasUnread && (
+              <span className="absolute right-[8px] top-[7px] h-2 w-2 rounded-full bg-[#2563EB] ring-2 ring-white" />
+            )}
           </button>
 
           {/* =====================================================
