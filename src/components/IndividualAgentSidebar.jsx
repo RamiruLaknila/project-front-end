@@ -6,6 +6,7 @@ import {
   Gavel,
   Package,
   Bell,
+  ChatCircle,
   Gear,
   List,
   Moon,
@@ -121,6 +122,11 @@ function IndividualAgentSidebar() {
       label: "Shipments",
       path: "/individual-agent-shipments",
       icon: Package,
+    },
+    {
+      label: "Messages",
+      path: "/individual-agent-messages",
+      icon: ChatCircle,
     },
     {
       label: "Notifications",

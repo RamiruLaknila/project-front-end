@@ -85,6 +85,9 @@ import AgentSettings from "./pages/AgentSettings";
 import AgentNotifications from "./pages/AgentNotifications";
 import IndividualAgentNotifications from "./pages/IndividualAgentNotifications";
 import AgentAdminNotifications from "./pages/AgentAdminNotifications";
+import AgentMessages from "./pages/AgentMessages";
+import IndividualAgentMessages from "./pages/IndividualAgentMessages";
+import AgentAdminMessages from "./pages/AgentAdminMessages";
 
 function App() {
   return (
@@ -509,6 +512,25 @@ function App() {
         <Route
           path="/agent-admin-notifications"
           element={<AgentAdminNotifications />}
+        />
+
+        {/* =====================================================
+            MESSAGES (CLEARING AGENT SIDE)
+        ===================================================== */}
+
+        <Route
+          path="/agent-messages"
+          element={<AgentMessages />}
+        />
+
+        <Route
+          path="/individual-agent-messages"
+          element={<IndividualAgentMessages />}
+        />
+
+        <Route
+          path="/agent-admin-messages"
+          element={<AgentAdminMessages />}
         />
 
         </Routes>

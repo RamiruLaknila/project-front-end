@@ -4,6 +4,7 @@ import {
   SquaresFour,
   Users,
   UserPlus,
+  ChatCircle,
   Gear,
   List,
   Moon,
@@ -102,6 +103,11 @@ function AgentAdminSidebar() {
       label: "Invite Agent",
       path: "/agency-invite",
       icon: UserPlus,
+    },
+    {
+      label: "Messages",
+      path: "/agent-admin-messages",
+      icon: ChatCircle,
     },
   ];
 

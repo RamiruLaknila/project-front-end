@@ -299,8 +299,8 @@ function ShipmentCard({ shipment, expanded, onToggle, delayClass }) {
                       </div>
                     )}
                     <Link
-                      to="/messages"
-                      className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2.5 text-[13px] font-bold text-slate-700 transition hover:bg-slate-50 hover:text-[#173563]"
+                      to={`/messages?shipment=${shipment.id}`}
+                      className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-[#173563] py-2.5 text-[13px] font-bold text-white transition hover:bg-[#214777]"
                     >
                       <ChatText size={14} />
                       Contact agent
