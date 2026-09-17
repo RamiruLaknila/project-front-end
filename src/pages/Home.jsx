@@ -3,11 +3,11 @@ import {
   Package,
   ShieldCheck,
   ArrowRight,
-  Search,
+  MagnifyingGlass,
   Calculator,
   Handshake,
-  PackageCheck,
-} from "lucide-react";
+  Archive,
+} from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -86,7 +86,7 @@ function Home() {
       <div className="grid min-h-screen lg:grid-cols-[42%_58%]">
 
         {/* ===================== LEFT SIDE ===================== */}
-        <section className="relative flex min-h-[560px] flex-col bg-[#173563] px-8 py-8 text-white sm:px-10 lg:min-h-screen lg:px-12">
+        <section className="relative order-2 flex min-h-[560px] flex-col bg-[#173563] px-8 py-8 text-white sm:px-10 lg:order-1 lg:min-h-screen lg:px-12">
 
           {/* Logo */}
           <Link to="/" className="flex w-fit items-center">
@@ -97,7 +97,8 @@ function Home() {
                 duration: 0.4,
                 ease: "easeOut",
               }}
-              className="font-sans text-[34px] tracking-tight sm:text-[38px]"
+              style={{ fontFamily: '"Fraunces", Georgia, serif' }}
+              className="text-[37px] font-semibold tracking-tight sm:text-[41px]"
             >
               Import
               <span className="text-[#F5C518]">Ease</span>
@@ -116,7 +117,8 @@ function Home() {
               {/* Headline */}
               <motion.h1
                 variants={leftItem}
-                className="font-sans text-[32px] leading-[1.25] tracking-tight text-white sm:text-[38px]"
+                style={{ fontFamily: '"Fraunces", Georgia, serif' }}
+                className="text-[35px] font-semibold leading-[1.25] tracking-tight text-white sm:text-[41px]"
               >
                 Import clearing,
                 <br />
@@ -135,10 +137,10 @@ function Home() {
                   className="flex items-start gap-3.5"
                 >
                   <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/10">
-                    <Search className="h-3.5 w-3.5 text-blue-100" />
+                    <MagnifyingGlass className="h-3.5 w-3.5 text-blue-100" />
                   </div>
 
-                  <p className="text-[14px] leading-6 text-blue-100">
+                  <p className="text-[15px] leading-6 text-blue-100">
                     Search HS codes and duty rates instantly
                   </p>
                 </motion.div>
@@ -152,7 +154,7 @@ function Home() {
                     <Calculator className="h-3.5 w-3.5 text-blue-100" />
                   </div>
 
-                  <p className="text-[14px] leading-6 text-blue-100">
+                  <p className="text-[15px] leading-6 text-blue-100">
                     Calculate your full landed cost before you buy
                   </p>
                 </motion.div>
@@ -166,7 +168,7 @@ function Home() {
                     <Handshake className="h-3.5 w-3.5 text-blue-100" />
                   </div>
 
-                  <p className="text-[14px] leading-6 text-blue-100">
+                  <p className="text-[15px] leading-6 text-blue-100">
                     Get competitive bids from licensed agents
                   </p>
                 </motion.div>
@@ -177,10 +179,10 @@ function Home() {
                   className="flex items-start gap-3.5"
                 >
                   <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/10">
-                    <PackageCheck className="h-3.5 w-3.5 text-blue-100" />
+                    <Archive className="h-3.5 w-3.5 text-blue-100" />
                   </div>
 
-                  <p className="text-[14px] leading-6 text-blue-100">
+                  <p className="text-[15px] leading-6 text-blue-100">
                     Track every step of your clearance live
                   </p>
                 </motion.div>
@@ -200,25 +202,35 @@ function Home() {
             }}
             className="pt-8"
           >
-            <p className="text-[12px] text-blue-300/50">
+            <p className="text-[13px] text-blue-300/50">
               © 2026 ImportEase. All rights reserved.
             </p>
           </motion.div>
         </section>
 
         {/* ===================== RIGHT SIDE ===================== */}
-        <section className="flex min-h-[560px] items-center justify-center bg-[#F7F9FC] px-6 py-14 sm:px-10 lg:min-h-screen">
+        <section className="relative order-1 flex min-h-[560px] items-center justify-center overflow-hidden bg-[#F7F9FC] px-6 py-14 sm:px-10 lg:order-2 lg:min-h-screen">
+
+          {/* Decorative blurred orbs */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-blue-100/60 blur-3xl"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -bottom-28 -left-24 h-80 w-80 rounded-full bg-[#F5C518]/[0.08] blur-3xl"
+          />
 
           <motion.div
             variants={rightContainer}
             initial="hidden"
             animate="visible"
-            className="flex w-full max-w-[380px] flex-col items-center text-center"
+            className="relative z-10 flex w-full max-w-[380px] flex-col items-center text-center"
           >
 
             {/* Logo */}
             <motion.img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase Logo"
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -227,7 +239,7 @@ function Home() {
                 delay: 0.3,
                 ease: "easeOut",
               }}
-              className="mb-2 h-30 w-auto object-contain mix-blend-multiply sm:h-24"
+              className="mb-2 h-30 w-auto object-contain sm:h-24"
             />
 
             {/* Heading */}
@@ -239,10 +251,24 @@ function Home() {
                 delay: 0.35,
                 ease: "easeOut",
               }}
-              className="mt-4 font-sans text-[28px] text-[#173563] sm:text-[40px] font-bold"
+              style={{ fontFamily: '"Fraunces", Georgia, serif' }}
+              className="mt-4 text-[32px] font-semibold text-[#173563] sm:text-[44px]"
             >
               Welcome
             </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.42,
+                ease: "easeOut",
+              }}
+              className="mt-1.5 text-[14px] text-gray-500"
+            >
+              Choose how you&apos;d like to continue
+            </motion.p>
 
             {/* User Type Cards */}
             <div className="mt-8 w-full space-y-3.5">
@@ -278,11 +304,11 @@ function Home() {
 
                   {/* Text */}
                   <div className="flex-1 text-left">
-                    <h3 className="text-[15px] font-semibold text-[#173563]">
+                    <h3 className="text-[16px] font-semibold text-[#173563]">
                       Importer / SME
                     </h3>
 
-                    <p className="mt-0.5 text-[13px] leading-snug text-gray-500">
+                    <p className="mt-0.5 text-[14px] leading-snug text-gray-500">
                       I want to import goods and manage my clearance
                     </p>
                   </div>
@@ -331,11 +357,11 @@ function Home() {
 
                   {/* Text */}
                   <div className="flex-1 text-left">
-                    <h3 className="text-[15px] font-semibold text-[#173563]">
+                    <h3 className="text-[16px] font-semibold text-[#173563]">
                       Clearing Agent
                     </h3>
 
-                    <p className="mt-0.5 text-[13px] leading-snug text-gray-500">
+                    <p className="mt-0.5 text-[14px] leading-snug text-gray-500">
                       I want to bid on shipments and manage clearances
                     </p>
                   </div>
@@ -372,6 +398,24 @@ function Home() {
                   className="font-semibold text-[#173563] transition-colors hover:text-blue-600 hover:underline"
                 >
                   Create an account
+                </Link>
+              </p>
+
+              <p className="mt-2 text-[13.5px] text-gray-500">
+                <Link
+                  to="/sme-guest"
+                  className="font-semibold text-[#173563] transition-colors hover:text-blue-600 hover:underline"
+                >
+                  Continue as Guest
+                </Link>
+              </p>
+
+              <p className="mt-2 text-[12px] text-gray-400">
+                <Link
+                  to="/admin/agent-approvals"
+                  className="font-semibold text-gray-400 transition-colors hover:text-[#173563] hover:underline"
+                >
+                  Admin login
                 </Link>
               </p>
             </motion.div>

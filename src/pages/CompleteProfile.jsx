@@ -1,21 +1,28 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft,
-  Building2,
+  Buildings,
   Check,
-  ChevronRight,
-  UserRound,
-} from "lucide-react";
+  CaretRight,
+  UserCircle,
+} from "@phosphor-icons/react";
+
+import { useAuth } from "../context/AuthContext";
+import { api } from "../lib/api";
+import { authErrorMessage } from "../lib/authErrors";
 
 function CompleteProfile() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user, refreshProfile } = useAuth();
+  const prefill = location.state?.prefill || {};
 
   const [accountType, setAccountType] = useState("business");
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     phone: "",
-    country: "Sri Lanka",
 
     businessName: "",
     businessRegistrationNumber: "",
@@ -29,45 +36,31 @@ function CompleteProfile() {
   const [userName, setUserName] = useState("");
 
   /* =========================================================
-     LOAD EXISTING USER
+     LOAD EXISTING PROFILE (from GET /auth/me, via AuthContext)
   ========================================================= */
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("importease_user");
+    if (!user) return;
 
-    if (!savedUser) {
-      navigate("/signup", { replace: true });
-      return;
+    setUserName(user.name || "");
+
+    if (user.isRegisteredBusiness === false) {
+      setAccountType("individual");
+    } else if (user.isRegisteredBusiness || user.businessName) {
+      setAccountType("business");
     }
 
-    try {
-      const user = JSON.parse(savedUser);
-
-      setUserName(user.fullName || "");
-
-      if (user.accountType) {
-        setAccountType(user.accountType);
-      } else {
-        setAccountType("business");
-      }
-
-      setFormData((prev) => ({
-        ...prev,
-        phone: user.phone || "",
-        country: user.country || "Sri Lanka",
-
-        businessName: user.business?.name || user.businessName || "",
-        businessRegistrationNumber:
-          user.business?.registrationNumber || "",
-        businessType: user.business?.type || "",
-        businessAddress: user.business?.address || "",
-        city: user.business?.city || "",
-      }));
-    } catch (error) {
-      console.error("Unable to load user:", error);
-      navigate("/signup", { replace: true });
-    }
-  }, [navigate]);
+    setFormData((prev) => ({
+      ...prev,
+      phone: user.phone || prefill.phone || prev.phone,
+      businessName: user.businessName || prefill.businessName || "",
+      businessRegistrationNumber: user.businessRegNumber || "",
+      businessType: user.businessCategory || "",
+      businessAddress: user.businessAddress || "",
+      city: "",
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   /* =========================================================
      HANDLE INPUT
@@ -97,165 +90,91 @@ function CompleteProfile() {
      SAVE PROFILE
   ========================================================= */
 
+  /* =========================================================
+     Build the PUT /users/{id}/profile body from the form.
+     Fields must match the backend's ProfileUpdateRequest.
+  ========================================================= */
+
+  const buildProfilePayload = () => {
+    const isBusiness = accountType === "business";
+    const address = [formData.businessAddress.trim(), formData.city.trim()]
+      .filter(Boolean)
+      .join(", ");
+
+    const payload = {
+      phone: formData.phone.trim() || null,
+      isRegisteredBusiness: isBusiness,
+    };
+
+    if (isBusiness) {
+      payload.businessName = formData.businessName.trim() || null;
+      payload.businessRegNumber =
+        formData.businessRegistrationNumber.trim() || null;
+      payload.businessCategory = formData.businessType || null;
+      payload.businessAddress = address || null;
+    }
+
+    return payload;
+  };
+
+  const saveProfile = async () => {
+    if (!user?.id) {
+      navigate("/signin", { replace: true });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await api.put(`/users/${user.id}/profile`, buildProfilePayload());
+      await refreshProfile();
+      navigate("/dashboard", { replace: true });
+    } catch (err) {
+      setError(authErrorMessage(err, "Could not save your profile."));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
-
-    const savedUser = localStorage.getItem("importease_user");
-
-    if (!savedUser) {
-      navigate("/signup", { replace: true });
-      return;
-    }
-
-    let user;
-
-    try {
-      user = JSON.parse(savedUser);
-    } catch (error) {
-      console.error("Invalid stored user:", error);
-      navigate("/signup", { replace: true });
-      return;
-    }
-
-    /* =========================================================
-       PHONE VALIDATION
-    ========================================================= */
 
     if (!formData.phone.trim()) {
       setError("Please enter your phone number.");
       return;
     }
 
-    const phoneDigits = formData.phone.replace(/\D/g, "");
-
-    if (phoneDigits.length < 9) {
+    if (formData.phone.replace(/\D/g, "").length < 9) {
       setError("Please enter a valid phone number.");
       return;
     }
-
-    /* =========================================================
-       BUSINESS VALIDATION
-    ========================================================= */
 
     if (accountType === "business") {
       if (!formData.businessName.trim()) {
         setError("Please enter your business name.");
         return;
       }
-
       if (!formData.businessType) {
         setError("Please select your business type.");
         return;
       }
-
       if (!formData.businessAddress.trim()) {
         setError("Please enter your business address.");
         return;
       }
-
       if (!formData.city.trim()) {
         setError("Please enter your city.");
         return;
       }
     }
 
-    /* =========================================================
-       UPDATED USER
-    ========================================================= */
-
-    const updatedUser = {
-      ...user,
-
-      phone: formData.phone.trim(),
-      country: formData.country.trim(),
-
-      accountType,
-
-      profileComplete: true,
-
-      business:
-        accountType === "business"
-          ? {
-              name: formData.businessName.trim(),
-              registrationNumber:
-                formData.businessRegistrationNumber.trim(),
-              type: formData.businessType,
-              address: formData.businessAddress.trim(),
-              city: formData.city.trim(),
-            }
-          : {
-              name: "",
-              registrationNumber: "",
-              type: "",
-              address: "",
-              city: "",
-            },
-    };
-
-    localStorage.setItem(
-      "importease_user",
-      JSON.stringify(updatedUser)
-    );
-
-    navigate("/dashboard", { replace: true });
+    saveProfile();
   };
 
-  /* =========================================================
-     SKIP PROFILE
-  ========================================================= */
-
+  /* Skip -- still saves whatever was filled in; the backend leaves
+     profileComplete false while phone is empty. */
   const handleSkip = () => {
-    const savedUser = localStorage.getItem("importease_user");
-
-    if (!savedUser) {
-      navigate("/signup", { replace: true });
-      return;
-    }
-
-    try {
-      const user = JSON.parse(savedUser);
-
-      const updatedUser = {
-        ...user,
-
-        accountType,
-
-        profileComplete: false,
-
-        phone: formData.phone.trim(),
-
-        country: formData.country.trim(),
-
-        business:
-          accountType === "business"
-            ? {
-                name: formData.businessName.trim(),
-                registrationNumber:
-                  formData.businessRegistrationNumber.trim(),
-                type: formData.businessType,
-                address: formData.businessAddress.trim(),
-                city: formData.city.trim(),
-              }
-            : {
-                name: "",
-                registrationNumber: "",
-                type: "",
-                address: "",
-                city: "",
-              },
-      };
-
-      localStorage.setItem(
-        "importease_user",
-        JSON.stringify(updatedUser)
-      );
-
-      navigate("/dashboard", { replace: true });
-    } catch (error) {
-      console.error("Unable to save profile:", error);
-      navigate("/dashboard", { replace: true });
-    }
+    setError("");
+    saveProfile();
   };
 
   return (
@@ -286,7 +205,7 @@ function CompleteProfile() {
             className="flex items-center gap-3"
           >
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-16 w-16 rounded-xl object-contain"
             />
@@ -314,10 +233,10 @@ function CompleteProfile() {
           <div className="mb-7 text-center">
 
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-[#173563]">
-              <UserRound size={26} />
+              <UserCircle size={26} />
             </div>
 
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
               Complete your profile
             </h1>
 
@@ -337,7 +256,7 @@ function CompleteProfile() {
             <div className="flex items-start gap-3">
 
               <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
-                <Check size={14} strokeWidth={3} />
+                <Check size={14} />
               </div>
 
               <div>
@@ -434,10 +353,10 @@ function CompleteProfile() {
                     id="country"
                     name="country"
                     type="text"
-                    value={formData.country}
-                    onChange={handleChange}
-                    placeholder="Sri Lanka"
-                    className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                    value="Sri Lanka"
+                    disabled
+                    readOnly
+                    className="h-11 w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-3.5 text-sm text-slate-500 outline-none"
                   />
 
                 </div>
@@ -482,7 +401,7 @@ function CompleteProfile() {
 
                   {accountType === "individual" && (
                     <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white">
-                      <Check size={12} strokeWidth={3} />
+                      <Check size={12} />
                     </div>
                   )}
 
@@ -493,7 +412,7 @@ function CompleteProfile() {
                         : "bg-blue-50 text-blue-600"
                     }`}
                   >
-                    <UserRound size={19} />
+                    <UserCircle size={19} />
                   </div>
 
                   <h3 className="mt-3 text-sm font-semibold text-slate-900">
@@ -522,7 +441,7 @@ function CompleteProfile() {
 
                   {accountType === "business" && (
                     <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white">
-                      <Check size={12} strokeWidth={3} />
+                      <Check size={12} />
                     </div>
                   )}
 
@@ -533,7 +452,7 @@ function CompleteProfile() {
                         : "bg-blue-50 text-blue-600"
                     }`}
                   >
-                    <Building2 size={19} />
+                    <Buildings size={19} />
                   </div>
 
                   <h3 className="mt-3 text-sm font-semibold text-slate-900">
@@ -732,16 +651,18 @@ function CompleteProfile() {
 
               <button
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#173563] py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-[#102547] focus:outline-none focus:ring-4 focus:ring-blue-500/20"
+                disabled={submitting}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#173563] py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-[#102547] focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Save & Continue
-                <ChevronRight size={17} />
+                {submitting ? "Saving…" : "Save & Continue"}
+                <CaretRight size={17} />
               </button>
 
               <button
                 type="button"
                 onClick={handleSkip}
-                className="mt-3 w-full rounded-xl border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                disabled={submitting}
+                className="mt-3 w-full rounded-xl border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Skip for now
               </button>

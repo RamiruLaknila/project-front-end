@@ -3,21 +3,21 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Eye,
-  EyeOff,
+  EyeSlash,
   ShieldCheck,
-  UserRound,
-  Building2,
-  BriefcaseBusiness,
-  CheckCircle2,
-  Mail,
-  LockKeyhole,
-} from "lucide-react";
+  EnvelopeSimple,
+  LockKey,
+} from "@phosphor-icons/react";
+
+import { useAuth } from "../context/AuthContext";
+import { api } from "../lib/api";
+import { authErrorMessage, landingPathForProfile } from "../lib/authErrors";
 
 function AgentSignIn() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const [selectedAgentType, setSelectedAgentType] =
-    useState("agency-member");
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -39,14 +39,7 @@ function AgentSignIn() {
     setError("");
   };
 
-  const handleAgentTypeChange = (type) => {
-    setSelectedAgentType(type);
-    setError("");
-
-    localStorage.setItem("agentType", type);
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -58,46 +51,83 @@ function AgentSignIn() {
       return;
     }
 
-    localStorage.setItem("agentType", selectedAgentType);
-    localStorage.setItem("agentAuthenticated", "true");
+    setSubmitting(true);
+    try {
+      const profile = await login(email, password, rememberMe);
 
-    localStorage.setItem(
-      "clearingAgent",
-      JSON.stringify({
-        email,
-        agentType: selectedAgentType,
-        authenticated: true,
-      })
-    );
+      if (profile?.role !== "clearing_agent") {
+        setError(
+          "This is not a clearing-agent account. Use the SME sign in instead."
+        );
+        return;
+      }
 
-    if (rememberMe) {
-      localStorage.setItem("rememberAgent", "true");
-    } else {
-      localStorage.removeItem("rememberAgent");
+      // The clearing-agent dashboards/sidebars read their agent (and, for
+      // admins, agency) details from localStorage rather than this auth
+      // context. Nothing else in the app ever wrote that key for a real
+      // sign-in, so those pages found it missing and bounced straight back
+      // to /agent-signin. Populate it here from the real profile so the
+      // destination dashboard actually renders instead of redirecting away.
+      const agentType = profile.isIndependent
+        ? "individual-agent"
+        : profile.isAgencyAdmin
+        ? "agency-admin"
+        : "agency-member";
+
+      localStorage.setItem(
+        "clearingAgent",
+        JSON.stringify({
+          fullName: profile.name || "",
+          name: profile.name || "",
+          email: profile.email || "",
+          agentType,
+        })
+      );
+
+      if (agentType !== "individual-agent") {
+        if (!localStorage.getItem("clearingAgency")) {
+          localStorage.setItem(
+            "clearingAgency",
+            JSON.stringify({
+              id: profile.agencyId || "",
+              code: profile.agencyId || "",
+              agencyName: profile.agencyName || profile.businessName || "Your Agency",
+              name: profile.agencyName || profile.businessName || "Your Agency",
+            })
+          );
+        }
+
+        // Neither branch above ever carries the agency's REAL join code --
+        // the agencyCode field on the agencies doc, which is the only thing
+        // /agencies/register -> find_agency_by_code actually recognizes.
+        // Refresh it here from the backend every sign-in so pages that read
+        // it (AgencyInvite, AgentAdminDashboard, AgentAdminSettings) can't
+        // drift out of sync or show a fabricated/stale code.
+        if (profile.agencyId) {
+          try {
+            const agencyDoc = await api.get(`/agencies/${profile.agencyId}`);
+            const stored = JSON.parse(localStorage.getItem("clearingAgency") || "{}");
+            localStorage.setItem(
+              "clearingAgency",
+              JSON.stringify({
+                ...stored,
+                code: agencyDoc.agencyCode || stored.code || "",
+                agencyCode: agencyDoc.agencyCode || "",
+              })
+            );
+          } catch {
+            /* keep whatever was already cached */
+          }
+        }
+      }
+
+      // The backend profile tied to this email/password decides the destination.
+      navigate(landingPathForProfile(profile), { replace: true });
+    } catch (err) {
+      setError(authErrorMessage(err, "Could not sign you in."));
+    } finally {
+      setSubmitting(false);
     }
-
-    if (selectedAgentType === "agency-admin") {
-      navigate("/agent-admin-dashboard", {
-        replace: true,
-      });
-      return;
-    }
-
-    if (selectedAgentType === "agency-member") {
-      navigate("/agent-dashboard", {
-        replace: true,
-      });
-      return;
-    }
-
-    if (selectedAgentType === "individual-agent") {
-      navigate("/individual-agent-dashboard", {
-        replace: true,
-      });
-      return;
-    }
-
-    setError("Please select an account type.");
   };
 
   return (
@@ -137,7 +167,7 @@ function AgentSignIn() {
                 className="inline-flex items-center"
               >
                 <img
-                  src="/logo.jpeg"
+                  src="/logo.png"
                   alt="ImportEase"
                   className="h-14 w-auto object-contain sm:h-16"
                 />
@@ -148,152 +178,14 @@ function AgentSignIn() {
 
             <div className="mb-7 text-center">
 
-              <h1 className="text-[26px] font-bold tracking-tight text-[#173563] sm:text-[29px]">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                 Clearing Agent Sign In
               </h1>
 
-              <p className="mx-auto mt-2 max-w-md text-[15px] leading-6 text-slate-500">
-                Choose your account type and sign in to manage your
-                clearing activities.
+              <p className="mx-auto mt-2 max-w-md text-[16px] leading-6 text-slate-500">
+                Sign in to manage your clearing activities.
               </p>
 
-            </div>
-
-            {/* ACCOUNT TYPE */}
-
-            <div className="mb-6">
-
-              <div className="mb-3 flex items-center justify-between">
-
-                <label className="block text-[15px] font-semibold text-slate-700">
-                  Account Type
-                </label>
-
-                <span className="text-xs text-slate-400">
-                  Select one
-                </span>
-
-              </div>
-
-              {/* THREE SMALLER CARDS */}
-
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-
-                {/* AGENCY ADMIN */}
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleAgentTypeChange("agency-admin")
-                  }
-                  className={`relative rounded-2xl border px-3.5 py-3.5 text-left transition-all duration-200 ${
-                    selectedAgentType === "agency-admin"
-                      ? "border-[#2563EB] bg-blue-50/70 shadow-sm ring-1 ring-[#2563EB]"
-                      : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm"
-                  }`}
-                >
-                  {selectedAgentType === "agency-admin" && (
-                    <CheckCircle2
-                      className="absolute right-2.5 top-2.5 h-4 w-4 text-[#2563EB]"
-                    />
-                  )}
-
-                  <div
-                    className={`mb-2.5 flex h-9 w-9 items-center justify-center rounded-xl ${
-                      selectedAgentType === "agency-admin"
-                        ? "bg-[#2563EB] text-white"
-                        : "bg-slate-100 text-slate-600"
-                    }`}
-                  >
-                    <Building2 className="h-[18px] w-[18px]" />
-                  </div>
-
-                  <p className="text-[14px] font-bold text-slate-800">
-                    Agency Admin
-                  </p>
-
-                  <p className="mt-1 text-[12px] leading-5 text-slate-500">
-                    Manage your agency
-                  </p>
-                </button>
-
-                {/* AGENCY MEMBER */}
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleAgentTypeChange("agency-member")
-                  }
-                  className={`relative rounded-2xl border px-3.5 py-3.5 text-left transition-all duration-200 ${
-                    selectedAgentType === "agency-member"
-                      ? "border-[#2563EB] bg-blue-50/70 shadow-sm ring-1 ring-[#2563EB]"
-                      : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm"
-                  }`}
-                >
-                  {selectedAgentType === "agency-member" && (
-                    <CheckCircle2
-                      className="absolute right-2.5 top-2.5 h-4 w-4 text-[#2563EB]"
-                    />
-                  )}
-
-                  <div
-                    className={`mb-2.5 flex h-9 w-9 items-center justify-center rounded-xl ${
-                      selectedAgentType === "agency-member"
-                        ? "bg-[#2563EB] text-white"
-                        : "bg-slate-100 text-slate-600"
-                    }`}
-                  >
-                    <BriefcaseBusiness className="h-[18px] w-[18px]" />
-                  </div>
-
-                  <p className="text-[14px] font-bold text-slate-800">
-                    Agency Member
-                  </p>
-
-                  <p className="mt-1 text-[12px] leading-5 text-slate-500">
-                    Work under an agency
-                  </p>
-                </button>
-
-                {/* INDIVIDUAL AGENT */}
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleAgentTypeChange("individual-agent")
-                  }
-                  className={`relative rounded-2xl border px-3.5 py-3.5 text-left transition-all duration-200 ${
-                    selectedAgentType === "individual-agent"
-                      ? "border-[#2563EB] bg-blue-50/70 shadow-sm ring-1 ring-[#2563EB]"
-                      : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm"
-                  }`}
-                >
-                  {selectedAgentType === "individual-agent" && (
-                    <CheckCircle2
-                      className="absolute right-2.5 top-2.5 h-4 w-4 text-[#2563EB]"
-                    />
-                  )}
-
-                  <div
-                    className={`mb-2.5 flex h-9 w-9 items-center justify-center rounded-xl ${
-                      selectedAgentType === "individual-agent"
-                        ? "bg-[#2563EB] text-white"
-                        : "bg-slate-100 text-slate-600"
-                    }`}
-                  >
-                    <UserRound className="h-[18px] w-[18px]" />
-                  </div>
-
-                  <p className="text-[14px] font-bold text-slate-800">
-                    Individual Agent
-                  </p>
-
-                  <p className="mt-1 text-[12px] leading-5 text-slate-500">
-                    Work independently
-                  </p>
-                </button>
-
-              </div>
             </div>
 
             {/* ERROR */}
@@ -318,14 +210,14 @@ function AgentSignIn() {
 
                 <label
                   htmlFor="agent-email"
-                  className="mb-2 block text-[15px] font-semibold text-slate-700"
+                  className="mb-2 block text-[16px] font-semibold text-slate-700"
                 >
                   Email Address
                 </label>
 
                 <div className="relative">
 
-                  <Mail
+                  <EnvelopeSimple
                     className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400"
                   />
 
@@ -339,7 +231,7 @@ function AgentSignIn() {
                     autoComplete="off"
                     autoCapitalize="none"
                     spellCheck="false"
-                    className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-[15px] text-slate-800 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-50"
+                    className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-[16px] text-slate-800 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-50"
                   />
 
                 </div>
@@ -354,7 +246,7 @@ function AgentSignIn() {
 
                   <label
                     htmlFor="agent-password"
-                    className="block text-[15px] font-semibold text-slate-700"
+                    className="block text-[16px] font-semibold text-slate-700"
                   >
                     Password
                   </label>
@@ -370,7 +262,7 @@ function AgentSignIn() {
 
                 <div className="relative">
 
-                  <LockKeyhole
+                  <LockKey
                     className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400"
                   />
 
@@ -382,7 +274,7 @@ function AgentSignIn() {
                     onChange={handleChange}
                     placeholder="Enter your password"
                     autoComplete="new-password"
-                    className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-11 text-[15px] text-slate-800 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-50"
+                    className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-11 text-[16px] text-slate-800 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-50"
                   />
 
                   <button
@@ -398,7 +290,7 @@ function AgentSignIn() {
                     }
                   >
                     {showPassword ? (
-                      <EyeOff className="h-[18px] w-[18px]" />
+                      <EyeSlash className="h-[18px] w-[18px]" />
                     ) : (
                       <Eye className="h-[18px] w-[18px]" />
                     )}
@@ -433,9 +325,10 @@ function AgentSignIn() {
 
               <button
                 type="submit"
-                className="w-full rounded-xl bg-[#173563] px-4 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-[#173563]/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#122b50] hover:shadow-xl hover:shadow-[#173563]/15 focus:outline-none focus:ring-4 focus:ring-[#173563]/15 active:translate-y-0"
+                disabled={submitting}
+                className="w-full rounded-xl bg-[#173563] px-4 py-3.5 text-[16px] font-semibold text-white shadow-lg shadow-[#173563]/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#122b50] hover:shadow-xl hover:shadow-[#173563]/15 focus:outline-none focus:ring-4 focus:ring-[#173563]/15 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Sign In
+                {submitting ? "Signing in…" : "Sign In"}
               </button>
 
             </form>

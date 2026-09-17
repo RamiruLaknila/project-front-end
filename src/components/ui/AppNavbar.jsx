@@ -2,109 +2,74 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Bell,
-  ChevronDown,
-  LogOut,
-  Menu,
-  Settings,
-  UserRound,
+  CaretDown,
+  Moon,
+  SignOut,
+  List,
+  Gear,
+  Sun,
+  UserCircle,
   X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
+
+import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
+import { useUnreadNotifications } from "../../hooks/useUnreadNotifications";
+import NotificationBanner from "./NotificationBanner";
 
 function AppNavbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
+  const { darkMode, toggleDarkMode } = useTheme();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [photo, setPhoto] = useState("");
+  const unreadCount = useUnreadNotifications(user?.id);
+  const hasUnread = unreadCount > 0;
 
-  const getProfileFromStorage = () => {
-    try {
-      const savedProfile = localStorage.getItem("smeProfile");
-      const savedUser = localStorage.getItem("smeUser");
-
-      let profileData = {};
-      let userData = {};
-
-      if (savedProfile) {
-        profileData = JSON.parse(savedProfile);
-      }
-
-      if (savedUser) {
-        userData = JSON.parse(savedUser);
-      }
-
-      return {
-        fullName:
-          profileData.fullName ||
-          userData.fullName ||
-          userData.name ||
-          "User",
-
-        businessName:
-          profileData.businessName ||
-          userData.businessName ||
-          "",
-
-        email:
-          profileData.email ||
-          userData.email ||
-          "",
-
-        photo:
-          profileData.photo ||
-          userData.photo ||
-          "",
-      };
-    } catch (error) {
-      console.error("Failed to load navbar profile:", error);
-
-      return {
-        fullName: "User",
-        businessName: "",
-        email: "",
-        photo: "",
-      };
-    }
-  };
-
-  // Lazy initializer runs synchronously on first render,
-  // so the correct profile is already there on first paint
-  // (this is what removes the shaky flash when switching tabs).
-  const [profile, setProfile] = useState(getProfileFromStorage);
-
-  const loadProfile = () => {
-    setProfile(getProfileFromStorage());
-  };
-
+  // Profile photos have no backend field -- Profile.jsx stores them in
+  // localStorage keyed by user id and fires "profilePhotoUpdated" whenever it
+  // changes, so the navbar (mounted separately on every page) can pick up the
+  // latest one, including a same-page update made on the Profile page itself.
   useEffect(() => {
-    const handleProfileUpdated = () => {
-      loadProfile();
+    const loadPhoto = () => {
+      if (!user?.id) {
+        setPhoto("");
+        return;
+      }
+      try {
+        setPhoto(localStorage.getItem(`profilePhoto:${user.id}`) || "");
+      } catch {
+        setPhoto("");
+      }
     };
 
-    window.addEventListener("profileUpdated", handleProfileUpdated);
-    window.addEventListener("storage", handleProfileUpdated);
+    const timer = setTimeout(loadPhoto, 0);
+    window.addEventListener("profilePhotoUpdated", loadPhoto);
 
     return () => {
-      window.removeEventListener(
-        "profileUpdated",
-        handleProfileUpdated
-      );
-
-      window.removeEventListener(
-        "storage",
-        handleProfileUpdated
-      );
+      clearTimeout(timer);
+      window.removeEventListener("profilePhotoUpdated", loadPhoto);
     };
-  }, []);
+  }, [user?.id]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("smeProfile");
+  const profile = {
+    fullName: user?.name || "User",
+    businessName: user?.businessName || "",
+    email: user?.email || "",
+    photo,
+  };
 
+  const handleLogout = async () => {
     setIsProfileOpen(false);
     setIsMenuOpen(false);
-
-    navigate("/signin");
+    try {
+      await logout();
+    } finally {
+      navigate("/", { replace: true });
+    }
   };
 
   const getInitials = (name) => {
@@ -145,7 +110,7 @@ function AppNavbar() {
 
     return `
       relative flex h-[72px] items-center
-      text-[15px] font-semibold
+      text-[16px] font-semibold
       transition-colors duration-200
       ${
         active
@@ -179,7 +144,7 @@ function AppNavbar() {
       flex items-center
       rounded-xl
       px-4 py-3
-      text-[15px] font-semibold
+      text-[16px] font-semibold
       transition-all duration-200
       ${
         active
@@ -191,6 +156,11 @@ function AppNavbar() {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
+      <NotificationBanner
+        userId={user?.id}
+        count={unreadCount}
+        notificationsPath="/notifications"
+      />
       <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-6 lg:px-10">
 
         {/* =========================================================
@@ -207,7 +177,7 @@ function AppNavbar() {
           {/* Logo Container */}
           <div className="flex h-[48px] w-[48px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-full w-full object-contain"
             />
@@ -215,11 +185,11 @@ function AppNavbar() {
 
           {/* Brand Name */}
           <div className="hidden sm:block">
-            <div className="text-[18px] font-bold leading-tight tracking-tight text-[#173563] transition-colors group-hover:text-[#2563EB]">
+            <div className="text-[19px] font-bold leading-tight tracking-tight text-[#173563] transition-colors group-hover:text-[#2563EB]">
               ImportEase
             </div>
 
-            <div className="mt-0.5 text-[11px] font-medium leading-tight text-slate-500">
+            <div className="mt-0.5 text-[12px] font-medium leading-tight text-slate-500">
               Import smarter. Trade easier.
             </div>
           </div>
@@ -264,8 +234,8 @@ function AppNavbar() {
 
           {/* Shipments */}
           <Link
-            to="/shipments"
-            className={desktopNavClass("/shipments")}
+            to="/track-shipment"
+            className={desktopNavClass("/track-shipment")}
           >
             Shipments
           </Link>
@@ -275,6 +245,22 @@ function AppNavbar() {
             RIGHT SIDE
         ========================================================== */}
         <div className="flex items-center gap-2 sm:gap-3">
+
+          {/* =====================================================
+              DARK MODE TOGGLE
+          ====================================================== */}
+          <button
+            type="button"
+            onClick={toggleDarkMode}
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-[#2563EB]"
+            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {darkMode ? (
+              <Sun className="h-[19px] w-[19px]" />
+            ) : (
+              <Moon className="h-[19px] w-[19px]" />
+            )}
+          </button>
 
           {/* =====================================================
               NOTIFICATIONS
@@ -296,8 +282,10 @@ function AppNavbar() {
           >
             <Bell className="h-[19px] w-[19px]" />
 
-            {/* Notification Dot */}
-            <span className="absolute right-[8px] top-[7px] h-2 w-2 rounded-full bg-[#2563EB] ring-2 ring-white" />
+            {/* Notification Dot -- only shown while there's a real unread notification */}
+            {hasUnread && (
+              <span className="absolute right-[8px] top-[7px] h-2 w-2 rounded-full bg-[#2563EB] ring-2 ring-white" />
+            )}
           </button>
 
           {/* =====================================================
@@ -338,16 +326,16 @@ function AppNavbar() {
 
               {/* Profile Details */}
               <div className="hidden text-left lg:block">
-                <p className="max-w-[150px] truncate text-[14px] font-bold text-slate-800">
+                <p className="max-w-[150px] truncate text-[15px] font-bold text-slate-800">
                   {profile?.fullName || "User"}
                 </p>
 
-                <p className="max-w-[150px] truncate text-[12px] text-slate-500">
+                <p className="max-w-[150px] truncate text-[13px] text-slate-500">
                   {profile?.businessName || "SME Account"}
                 </p>
               </div>
 
-              <ChevronDown
+              <CaretDown
                 className={`
                   h-4 w-4
                   text-slate-500
@@ -388,11 +376,11 @@ function AppNavbar() {
                       )}
 
                       <div className="min-w-0">
-                        <p className="truncate text-[14px] font-bold text-slate-900">
+                        <p className="truncate text-[15px] font-bold text-slate-900">
                           {profile?.fullName || "User"}
                         </p>
 
-                        <p className="truncate text-[12px] text-slate-500">
+                        <p className="truncate text-[13px] text-slate-500">
                           {profile?.email || ""}
                         </p>
                       </div>
@@ -413,7 +401,7 @@ function AppNavbar() {
                       className={`
                         flex w-full items-center gap-3
                         rounded-xl px-3 py-3
-                        text-left text-[14px] font-semibold
+                        text-left text-[15px] font-semibold
                         transition
                         ${
                           isActive("/profile")
@@ -422,7 +410,7 @@ function AppNavbar() {
                         }
                       `}
                     >
-                      <UserRound className="h-[18px] w-[18px]" />
+                      <UserCircle className="h-[18px] w-[18px]" />
                       Profile
                     </button>
 
@@ -436,7 +424,7 @@ function AppNavbar() {
                       className={`
                         flex w-full items-center gap-3
                         rounded-xl px-3 py-3
-                        text-left text-[14px] font-semibold
+                        text-left text-[15px] font-semibold
                         transition
                         ${
                           isActive("/settings")
@@ -445,7 +433,7 @@ function AppNavbar() {
                         }
                       `}
                     >
-                      <Settings className="h-[18px] w-[18px]" />
+                      <Gear className="h-[18px] w-[18px]" />
                       Settings
                     </button>
 
@@ -457,9 +445,9 @@ function AppNavbar() {
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[14px] font-semibold text-red-600 transition hover:bg-red-50"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[15px] font-semibold text-red-600 transition hover:bg-red-50"
                     >
-                      <LogOut className="h-[18px] w-[18px]" />
+                      <SignOut className="h-[18px] w-[18px]" />
                       Sign out
                     </button>
 
@@ -493,7 +481,7 @@ function AppNavbar() {
             {isMenuOpen ? (
               <X className="h-5 w-5" />
             ) : (
-              <Menu className="h-5 w-5" />
+              <List className="h-5 w-5" />
             )}
           </button>
         </div>
@@ -545,9 +533,9 @@ function AppNavbar() {
 
             {/* Shipments */}
             <Link
-              to="/shipments"
+              to="/track-shipment"
               onClick={closeMobileMenu}
-              className={mobileNavClass("/shipments")}
+              className={mobileNavClass("/track-shipment")}
             >
               Shipments
             </Link>
@@ -561,7 +549,7 @@ function AppNavbar() {
               onClick={closeMobileMenu}
               className={mobileNavClass("/profile")}
             >
-              <UserRound className="h-5 w-5" />
+              <UserCircle className="h-5 w-5" />
               Profile
             </Link>
 
@@ -571,7 +559,7 @@ function AppNavbar() {
               onClick={closeMobileMenu}
               className={mobileNavClass("/settings")}
             >
-              <Settings className="h-5 w-5" />
+              <Gear className="h-5 w-5" />
               Settings
             </Link>
 
@@ -579,9 +567,9 @@ function AppNavbar() {
             <button
               type="button"
               onClick={handleLogout}
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[15px] font-semibold text-red-600 transition hover:bg-red-50"
+              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[16px] font-semibold text-red-600 transition hover:bg-red-50"
             >
-              <LogOut className="h-5 w-5" />
+              <SignOut className="h-5 w-5" />
               Sign out
             </button>
 

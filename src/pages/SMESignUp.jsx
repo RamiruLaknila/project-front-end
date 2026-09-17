@@ -1,21 +1,26 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Eye,
-  EyeOff,
-  LockKeyhole,
-  Mail,
+  EyeSlash,
+  LockKey,
+  EnvelopeSimple,
   Phone,
-  Store,
-  UserRound,
-} from "lucide-react";
+  Storefront,
+  UserCircle,
+} from "@phosphor-icons/react";
+
+import { useAuth } from "../context/AuthContext";
+import { authErrorMessage } from "../lib/authErrors";
 
 function SMESignUp() {
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -28,6 +33,16 @@ function SMESignUp() {
   });
 
   const [error, setError] = useState("");
+  const errorRef = useRef(null);
+
+  // Whenever an error appears, bring it into view -- the field that caused
+  // it (e.g. the Terms checkbox) can be well below the error banner, so a
+  // scrolled-down user would otherwise never see why submission failed.
+  useEffect(() => {
+    if (error) {
+      errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [error]);
 
   /* =========================================================
       HANDLE INPUT
@@ -50,7 +65,7 @@ function SMESignUp() {
       SUBMIT
   ========================================================= */
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     setError("");
@@ -83,27 +98,31 @@ function SMESignUp() {
       return;
     }
 
-    /* =======================================================
-        FRONTEND-ONLY USER DATA
-    ======================================================= */
+    setSubmitting(true);
+    try {
+      // Creates the Firebase user + Firestore profile (role "importer") and
+      // signs in. Phone/business go to PUT /users/{id}/profile on the next step.
+      await register({
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        role: "importer",
+      });
 
-    const smeUser = {
-      role: "sme",
-      fullName: formData.fullName.trim(),
-      businessName: formData.businessName.trim(),
-      email: formData.email.trim(),
-      phone: formData.phone.trim(),
-      profileStatus: "incomplete",
-      accountStatus: "active",
-      createdAt: new Date().toISOString(),
-    };
-
-    localStorage.setItem("smeUser", JSON.stringify(smeUser));
-    localStorage.setItem("signupRole", "sme");
-    localStorage.setItem("smeSignupComplete", "true");
-    localStorage.setItem("smeRegisteredEmail", formData.email.trim());
-
-    navigate("/sme-signup-success");
+      navigate("/complete-profile", {
+        replace: true,
+        state: {
+          prefill: {
+            phone: formData.phone.trim(),
+            businessName: formData.businessName.trim(),
+          },
+        },
+      });
+    } catch (err) {
+      setError(authErrorMessage(err, "Could not create your account."));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -129,7 +148,7 @@ function SMESignUp() {
         <div className="mb-8 flex justify-center">
           <Link to="/" className="flex items-center gap-3">
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
             />
@@ -151,7 +170,7 @@ function SMESignUp() {
           ================================================= */}
 
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
               Create an account
             </h1>
             <p className="mt-2 text-base text-slate-500">
@@ -164,7 +183,10 @@ function SMESignUp() {
           ================================================= */}
 
           {error && (
-            <div className="mb-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3.5">
+            <div
+              ref={errorRef}
+              className="mb-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3.5"
+            >
               <p className="text-sm font-medium leading-5 text-red-600">
                 {error}
               </p>
@@ -183,7 +205,7 @@ function SMESignUp() {
 
             <section>
               <div className="mb-4 flex items-center gap-2.5">
-                <UserRound size={19} className="text-[#173563]" />
+                <UserCircle size={19} className="text-[#173563]" />
                 <div>
                   <h2 className="text-base font-bold text-slate-900">
                     Personal information
@@ -208,7 +230,7 @@ function SMESignUp() {
 
             <section>
               <div className="mb-4 flex items-center gap-2.5">
-                <Mail size={19} className="text-[#173563]" />
+                <EnvelopeSimple size={19} className="text-[#173563]" />
                 <div>
                   <h2 className="text-base font-bold text-slate-900">
                     Contact information
@@ -245,7 +267,7 @@ function SMESignUp() {
 
             <section>
               <div className="mb-4 flex items-center gap-2.5">
-                <LockKeyhole size={19} className="text-[#173563]" />
+                <LockKey size={19} className="text-[#173563]" />
                 <div>
                   <h2 className="text-base font-bold text-slate-900">
                     Account security
@@ -308,9 +330,10 @@ function SMESignUp() {
 
             <button
               type="submit"
-              className="group flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#173563] px-6 py-4 text-base font-bold text-white shadow-lg shadow-[#173563]/20 transition hover:bg-[#10294d] hover:shadow-xl"
+              disabled={submitting}
+              className="group flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#173563] px-6 py-4 text-base font-bold text-white shadow-lg shadow-[#173563]/20 transition hover:bg-[#10294d] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Create SME Account
+              {submitting ? "Creating account…" : "Create SME Account"}
               <ArrowRight
                 size={19}
                 className="transition-transform group-hover:translate-x-1"
@@ -369,7 +392,7 @@ function InputField({
 
       <div className="relative">
         {type === "email" && (
-          <Mail
+          <EnvelopeSimple
             size={18}
             className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
           />
@@ -381,13 +404,13 @@ function InputField({
           />
         )}
         {type === "text" && name === "fullName" && (
-          <UserRound
+          <UserCircle
             size={18}
             className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
           />
         )}
         {type === "text" && name === "businessName" && (
-          <Store
+          <Storefront
             size={18}
             className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
           />
@@ -447,7 +470,7 @@ function PasswordField({
       </label>
 
       <div className="relative">
-        <LockKeyhole
+        <LockKey
           size={18}
           className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
         />
@@ -470,7 +493,7 @@ function PasswordField({
           className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
           aria-label={showPassword ? "Hide password" : "Show password"}
         >
-          {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+          {showPassword ? <EyeSlash size={19} /> : <Eye size={19} />}
         </button>
       </div>
 

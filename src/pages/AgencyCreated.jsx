@@ -1,12 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  Building2,
-  CheckCircle2,
-  Clock3,
-  FileBadge2,
+  Buildings,
+  CheckCircle,
+  Clock,
+  Certificate,
   ShieldCheck,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 function AgencyCreated() {
   const navigate = useNavigate();
@@ -61,12 +61,12 @@ function AgencyCreated() {
             className="flex items-center gap-3"
           >
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
             />
 
-            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
               Import
               <span className="text-[#173563]">
                 Ease
@@ -80,15 +80,14 @@ function AgencyCreated() {
 
           {/* Success icon */}
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
-            <CheckCircle2
+            <CheckCircle
               size={34}
               className="text-emerald-600"
-              strokeWidth={1.8}
             />
           </div>
 
           {/* Heading */}
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[30px]">
             Application Submitted
           </h1>
 
@@ -102,7 +101,7 @@ function AgencyCreated() {
           <div className="mx-auto mt-7 flex max-w-md items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-left">
 
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
-              <Clock3
+              <Clock
                 size={22}
                 className="text-amber-600"
               />
@@ -117,7 +116,7 @@ function AgencyCreated() {
                 Pending Review
               </p>
 
-              <p className="mt-1 text-[11px] leading-5 text-amber-700">
+              <p className="mt-1 text-[12px] leading-5 text-amber-700">
                 Your account will remain pending until your application
                 is approved.
               </p>
@@ -137,19 +136,19 @@ function AgencyCreated() {
             <div className="grid gap-5 p-4 sm:grid-cols-2">
 
               <InfoItem
-                icon={Building2}
+                icon={Buildings}
                 label="Agency"
                 value={agencyName}
               />
 
               <InfoItem
-                icon={FileBadge2}
+                icon={Certificate}
                 label="Application ID"
                 value={applicationId}
               />
 
               <InfoItem
-                icon={Clock3}
+                icon={Clock}
                 label="Submitted"
                 value={submittedDate}
               />
@@ -255,7 +254,7 @@ function InfoItem({
 
       <div className="min-w-0">
 
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
           {label}
         </p>
 
@@ -279,11 +278,11 @@ function Step({ number, text }) {
   return (
     <div className="flex items-start gap-2">
 
-      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold text-white">
+      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
         {number}
       </div>
 
-      <p className="text-[11px] leading-5 text-blue-800">
+      <p className="text-[12px] leading-5 text-blue-800">
         {text}
       </p>
 

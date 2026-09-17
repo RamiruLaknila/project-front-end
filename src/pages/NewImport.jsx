@@ -4,19 +4,18 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
-  CheckCircle2,
-  DollarSign,
+  CheckCircle,
+  CurrencyDollar,
   FileText,
   Info,
   MapPin,
   Package,
-  PackagePlus,
-  Upload,
+  Cube,
+  UploadSimple,
   X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
-import BackButton from "../components/ui/BackButton";
 
 function NewImport() {
   const navigate = useNavigate();
@@ -191,9 +190,6 @@ function NewImport() {
             BACK
         ======================================================== */}
 
-        <div className="page-fade mb-6">
-          <BackButton current="New Import" />
-        </div>
 
         {/* =======================================================
             HEADER
@@ -209,21 +205,20 @@ function NewImport() {
 
                 <Package
                   size={13}
-                  strokeWidth={2}
                   className="text-[#2563EB]"
                 />
 
-                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#173B6C]">
+                <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#173B6C]">
                   Import workspace
                 </span>
 
               </div>
 
-              <h1 className="text-[28px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[32px]">
+              <h1 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
                 Start a new import
               </h1>
 
-              <p className="mt-2 max-w-[650px] text-[13px] leading-6 text-slate-500 sm:text-sm">
+              <p className="mt-2 max-w-[650px] text-[14px] leading-6 text-slate-500 sm:text-[16px]">
                 Tell us about the product you want to import. ImportEase
                 will help identify the HS code, estimate costs, and connect
                 you with suitable clearing agents.
@@ -233,13 +228,12 @@ function NewImport() {
 
             <div className="hidden shrink-0 items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3.5 py-2 sm:flex">
 
-              <CheckCircle2
+              <CheckCircle
                 size={14}
-                strokeWidth={2}
                 className="text-emerald-600"
               />
 
-              <span className="text-[11px] font-semibold text-emerald-700">
+              <span className="text-[12px] font-semibold text-emerald-700">
                 Secure workspace
               </span>
 
@@ -377,7 +371,7 @@ function NewImport() {
                 <div className="flex items-center gap-3">
 
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
-                    <Package size={17} strokeWidth={1.9} />
+                    <Package size={17} />
                   </div>
 
                   <div>
@@ -386,7 +380,7 @@ function NewImport() {
                       Product information
                     </h2>
 
-                    <p className="mt-0.5 text-[11px] text-slate-400">
+                    <p className="mt-0.5 text-[12px] text-slate-400">
                       Tell us what you're planning to import.
                     </p>
 
@@ -419,7 +413,7 @@ function NewImport() {
                     className={inputClass}
                   />
 
-                  <p className="mt-1.5 text-[10px] text-slate-400">
+                  <p className="mt-1.5 text-[11px] text-slate-400">
                     Use a clear commercial name for the product.
                   </p>
 
@@ -446,7 +440,7 @@ function NewImport() {
                     className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-300 focus:border-[#173B6C] focus:ring-4 focus:ring-[#173B6C]/[0.07]"
                   />
 
-                  <p className="mt-1.5 text-[10px] text-slate-400">
+                  <p className="mt-1.5 text-[11px] text-slate-400">
                     A detailed description helps identify the correct HS code.
                   </p>
 
@@ -576,7 +570,7 @@ function NewImport() {
                 <div className="flex items-center gap-3">
 
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
-                    <MapPin size={17} strokeWidth={1.9} />
+                    <MapPin size={17} />
                   </div>
 
                   <div>
@@ -585,7 +579,7 @@ function NewImport() {
                       Supplier & origin
                     </h2>
 
-                    <p className="mt-0.5 text-[11px] text-slate-400">
+                    <p className="mt-0.5 text-[12px] text-slate-400">
                       Tell us where your goods are coming from.
                     </p>
 
@@ -684,7 +678,7 @@ function NewImport() {
                 <div className="flex items-center gap-3">
 
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
-                    <DollarSign size={17} strokeWidth={1.9} />
+                    <CurrencyDollar size={17} />
                   </div>
 
                   <div>
@@ -693,7 +687,7 @@ function NewImport() {
                       Import value
                     </h2>
 
-                    <p className="mt-0.5 text-[11px] text-slate-400">
+                    <p className="mt-0.5 text-[12px] text-slate-400">
                       Give us an estimated value for your shipment.
                     </p>
 
@@ -719,7 +713,7 @@ function NewImport() {
 
                     <div className="relative">
 
-                      <DollarSign
+                      <CurrencyDollar
                         size={15}
                         className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
                       />
@@ -800,7 +794,7 @@ function NewImport() {
                     className={inputClass}
                   />
 
-                  <p className="mt-1.5 text-[10px] text-slate-400">
+                  <p className="mt-1.5 text-[11px] text-slate-400">
                     You can update this later when the exact shipping amount
                     is available.
                   </p>
@@ -822,7 +816,7 @@ function NewImport() {
                 <div className="flex items-center gap-3">
 
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-700">
-                    <FileText size={17} strokeWidth={1.9} />
+                    <FileText size={17} />
                   </div>
 
                   <div>
@@ -831,7 +825,7 @@ function NewImport() {
                       Supporting documents
                     </h2>
 
-                    <p className="mt-0.5 text-[11px] text-slate-400">
+                    <p className="mt-0.5 text-[12px] text-slate-400">
                       Optional now. You can add documents later.
                     </p>
 
@@ -859,7 +853,7 @@ function NewImport() {
                 >
 
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm transition-all duration-300 group-hover:-translate-y-0.5 group-hover:text-[#2563EB]">
-                    <Upload size={18} />
+                    <UploadSimple size={18} />
                   </div>
 
                   <p className="mt-3 text-sm font-semibold text-slate-700">
@@ -898,7 +892,7 @@ function NewImport() {
                             {file.name}
                           </p>
 
-                          <p className="mt-0.5 text-[10px] text-slate-400">
+                          <p className="mt-0.5 text-[11px] text-slate-400">
                             {(file.size / 1024).toFixed(1)} KB
                           </p>
 
@@ -973,7 +967,7 @@ function NewImport() {
               className="mt-0.5 shrink-0 text-blue-600"
             />
 
-            <p className="text-[11px] leading-5 text-blue-700">
+            <p className="text-[12px] leading-5 text-blue-700">
               Your information helps ImportEase identify the appropriate
               HS code, estimate import costs, and connect you with suitable
               clearing agents.
@@ -989,15 +983,14 @@ function NewImport() {
 
         <div className="mt-8 flex items-center justify-between border-t border-slate-200/80 pt-5">
 
-          <p className="text-[9px] text-slate-400">
+          <p className="text-[10px] text-slate-400">
             ImportEase · SME Import Platform
           </p>
 
-          <div className="flex items-center gap-1.5 text-[9px] text-slate-400">
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
 
             <Check
               size={11}
-              strokeWidth={2.5}
               className="text-emerald-500"
             />
 

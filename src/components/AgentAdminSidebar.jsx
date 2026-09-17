@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import {
-  LayoutDashboard,
+  SquaresFour,
   Users,
   UserPlus,
-  Settings,
-  LogOut,
-  Menu,
+  Gear,
+  List,
+  Moon,
+  Sun,
   X,
   ShieldCheck,
-  ChevronRight,
-} from "lucide-react";
+  CaretRight,
+} from "@phosphor-icons/react";
+
+import { useTheme } from "../context/ThemeContext";
 
 const getStoredAdmin = () => {
   try {
@@ -45,8 +48,7 @@ const getStoredAdmin = () => {
 };
 
 function AgentAdminSidebar() {
-  const navigate = useNavigate();
-
+  const { darkMode, toggleDarkMode } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [admin, setAdmin] = useState(getStoredAdmin);
 
@@ -81,15 +83,6 @@ function AgentAdminSidebar() {
     ).toUpperCase();
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("clearingAgent");
-    localStorage.removeItem("agentOnboardingType");
-    localStorage.removeItem("agentOnboardingComplete");
-
-    setSidebarOpen(false);
-    navigate("/agent-signin");
-  };
-
   const closeMobileSidebar = () => {
     setSidebarOpen(false);
   };
@@ -98,7 +91,7 @@ function AgentAdminSidebar() {
     {
       label: "Dashboard",
       path: "/agent-admin-dashboard",
-      icon: LayoutDashboard,
+      icon: SquaresFour,
     },
     {
       label: "Agency Agents",
@@ -115,31 +108,44 @@ function AgentAdminSidebar() {
   const SidebarContent = () => (
     <div className="flex h-full flex-col">
       {/* Brand */}
-      <div className="flex h-[76px] shrink-0 items-center border-b border-slate-200 px-6">
+      <div className="flex h-[70px] shrink-0 items-center justify-between border-b border-slate-200 px-6">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white">
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-full w-full object-contain"
             />
           </div>
 
           <div>
-            <p className="text-[17px] font-extrabold tracking-tight text-[#173563]">
+            <p className="text-[18px] font-extrabold tracking-tight text-[#173563]">
               ImportEase
             </p>
 
-            <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+            <p className="mt-0.5 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
               Admin Portal
             </p>
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={toggleDarkMode}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-[#173563]"
+          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {darkMode ? (
+            <Sun className="h-[18px] w-[18px]" />
+          ) : (
+            <Moon className="h-[18px] w-[18px]" />
+          )}
+        </button>
       </div>
 
       {/* Main Navigation */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
-        <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+        <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
           Main Menu
         </p>
 
@@ -173,7 +179,7 @@ function AgentAdminSidebar() {
                     <span className="flex-1">{item.label}</span>
 
                     {isActive && (
-                      <ChevronRight className="h-4 w-4 text-white/80" />
+                      <CaretRight className="h-4 w-4 text-white/80" />
                     )}
                   </>
                 )}
@@ -231,7 +237,7 @@ function AgentAdminSidebar() {
           >
             {({ isActive }) => (
               <>
-                <Settings
+                <Gear
                   className={`h-[18px] w-[18px] shrink-0 ${
                     isActive
                       ? "text-white"
@@ -242,24 +248,11 @@ function AgentAdminSidebar() {
                 <span className="flex-1">Settings</span>
 
                 {isActive && (
-                  <ChevronRight className="h-4 w-4 text-white/80" />
+                  <CaretRight className="h-4 w-4 text-white/80" />
                 )}
               </>
             )}
           </NavLink>
-        </div>
-
-        {/* Logout */}
-        <div className="border-t border-slate-200 p-4">
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-red-50 hover:text-red-600"
-          >
-            <LogOut className="h-[18px] w-[18px]" />
-
-            <span>Log Out</span>
-          </button>
         </div>
       </div>
     </div>
@@ -277,7 +270,7 @@ function AgentAdminSidebar() {
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg">
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-full w-full object-contain"
             />
@@ -288,7 +281,7 @@ function AgentAdminSidebar() {
               ImportEase
             </p>
 
-            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
               Admin Portal
             </p>
           </div>
@@ -300,7 +293,7 @@ function AgentAdminSidebar() {
           className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50"
           aria-label="Open menu"
         >
-          <Menu className="h-5 w-5" />
+          <List className="h-5 w-5" />
         </button>
       </div>
 

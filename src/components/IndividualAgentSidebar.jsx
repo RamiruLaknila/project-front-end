@@ -1,18 +1,25 @@
 import { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import {
-  LayoutDashboard,
+  SquaresFour,
   ShoppingBag,
   Gavel,
   Package,
-  Settings,
-  LogOut,
-  Menu,
+  Bell,
+  Gear,
+  List,
+  Moon,
+  Sun,
   X,
-  UserRound,
-  ChevronRight,
+  UserCircle,
+  CaretRight,
   ShieldCheck,
-} from "lucide-react";
+} from "@phosphor-icons/react";
+
+import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
+import { useUnreadNotifications } from "../hooks/useUnreadNotifications";
+import NotificationBanner from "./ui/NotificationBanner";
 
 const getStoredAgent = () => {
   try {
@@ -47,8 +54,9 @@ const getStoredAgent = () => {
 };
 
 function IndividualAgentSidebar() {
-  const navigate = useNavigate();
-
+  const { darkMode, toggleDarkMode } = useTheme();
+  const { user } = useAuth();
+  const unreadCount = useUnreadNotifications(user?.id);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [agent, setAgent] = useState(getStoredAgent);
 
@@ -89,18 +97,6 @@ function IndividualAgentSidebar() {
     ).toUpperCase();
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("clearingAgent");
-    localStorage.removeItem("agentOnboardingType");
-    localStorage.removeItem("agentOnboardingComplete");
-    localStorage.removeItem("agentAuthenticated");
-    localStorage.removeItem("agentType");
-    localStorage.removeItem("rememberAgent");
-
-    setSidebarOpen(false);
-    navigate("/agent-signin");
-  };
-
   const closeMobileSidebar = () => {
     setSidebarOpen(false);
   };
@@ -109,7 +105,7 @@ function IndividualAgentSidebar() {
     {
       label: "Dashboard",
       path: "/individual-agent-dashboard",
-      icon: LayoutDashboard,
+      icon: SquaresFour,
     },
     {
       label: "Marketplace",
@@ -126,36 +122,55 @@ function IndividualAgentSidebar() {
       path: "/individual-agent-shipments",
       icon: Package,
     },
+    {
+      label: "Notifications",
+      path: "/individual-agent-notifications",
+      icon: Bell,
+      badge: unreadCount > 0,
+    },
   ];
 
   const SidebarContent = () => (
     <div className="flex h-full flex-col">
       {/* Brand */}
-      <div className="flex h-[76px] shrink-0 items-center border-b border-slate-200 px-6">
+      <div className="flex h-[70px] shrink-0 items-center justify-between border-b border-slate-200 px-6">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white">
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-full w-full object-contain"
             />
           </div>
 
           <div>
-            <p className="text-[17px] font-extrabold tracking-tight text-[#173563]">
+            <p className="text-[18px] font-extrabold tracking-tight text-[#173563]">
               ImportEase
             </p>
 
-            <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+            <p className="mt-0.5 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
               Individual Agent
             </p>
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={toggleDarkMode}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-[#173563]"
+          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {darkMode ? (
+            <Sun className="h-[18px] w-[18px]" />
+          ) : (
+            <Moon className="h-[18px] w-[18px]" />
+          )}
+        </button>
       </div>
 
       {/* Main Navigation */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
-        <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+        <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
           Main Menu
         </p>
 
@@ -188,8 +203,12 @@ function IndividualAgentSidebar() {
 
                     <span className="flex-1">{item.label}</span>
 
+                    {item.badge && !isActive && (
+                      <span className="h-2 w-2 shrink-0 rounded-full bg-red-500" />
+                    )}
+
                     {isActive && (
-                      <ChevronRight className="h-4 w-4 text-white/80" />
+                      <CaretRight className="h-4 w-4 text-white/80" />
                     )}
                   </>
                 )}
@@ -247,7 +266,7 @@ function IndividualAgentSidebar() {
           >
             {({ isActive }) => (
               <>
-                <Settings
+                <Gear
                   className={`h-[18px] w-[18px] shrink-0 ${
                     isActive
                       ? "text-white"
@@ -258,24 +277,11 @@ function IndividualAgentSidebar() {
                 <span className="flex-1">Settings</span>
 
                 {isActive && (
-                  <ChevronRight className="h-4 w-4 text-white/80" />
+                  <CaretRight className="h-4 w-4 text-white/80" />
                 )}
               </>
             )}
           </NavLink>
-        </div>
-
-        {/* Logout */}
-        <div className="border-t border-slate-200 p-4">
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-red-50 hover:text-red-600"
-          >
-            <LogOut className="h-[18px] w-[18px]" />
-
-            <span>Log Out</span>
-          </button>
         </div>
       </div>
     </div>
@@ -283,6 +289,12 @@ function IndividualAgentSidebar() {
 
   return (
     <>
+      <NotificationBanner
+        userId={user?.id}
+        count={unreadCount}
+        notificationsPath="/individual-agent-notifications"
+      />
+
       {/* Desktop Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[260px] border-r border-slate-200 bg-white lg:block">
         <SidebarContent />
@@ -293,7 +305,7 @@ function IndividualAgentSidebar() {
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg">
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-full w-full object-contain"
             />
@@ -304,7 +316,7 @@ function IndividualAgentSidebar() {
               ImportEase
             </p>
 
-            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
               Individual Agent
             </p>
           </div>
@@ -316,7 +328,7 @@ function IndividualAgentSidebar() {
           className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50"
           aria-label="Open menu"
         >
-          <Menu className="h-5 w-5" />
+          <List className="h-5 w-5" />
         </button>
       </div>
 

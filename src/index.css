@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;0,900;1,500;1,600&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -20,6 +21,18 @@ body {
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: "Geist Variable", "Inter", sans-serif;
+
+  /* Slightly larger base type scale for a more professional feel.
+     Line-heights stay as ratios, so they scale with these automatically. */
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.1875rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.625rem;
+  --text-3xl: 2rem;
+  --text-4xl: 2.4375rem;
+  --text-5xl: 3.25rem;
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -551,6 +564,59 @@ html.dark .bg-white {
   background-color: #111827 !important;
 }
 
+/* =========================================================
+   DARK MODE — OPACITY-SUFFIXED VARIANTS
+   Tailwind emits a distinct class per opacity value (e.g.
+   bg-slate-50/70, bg-blue-50/30, border-slate-200/80), so the
+   exact-class overrides elsewhere in this file don't catch
+   them. Attribute selectors catch every opacity suffix for a
+   given base color in one rule.
+========================================================= */
+
+html.dark [class*="bg-white/9"] {
+  background-color: rgba(17, 24, 39, 0.95) !important;
+}
+
+html.dark [class*="bg-slate-50/"] {
+  background-color: rgba(15, 23, 42, 0.6) !important;
+}
+
+html.dark [class*="bg-slate-100/"] {
+  background-color: rgba(30, 41, 59, 0.6) !important;
+}
+
+html.dark [class*="bg-slate-200/"] {
+  background-color: rgba(38, 50, 68, 0.6) !important;
+}
+
+html.dark [class*="bg-blue-50/"] {
+  background-color: rgba(37, 99, 235, 0.14) !important;
+}
+
+html.dark [class*="bg-blue-100/"] {
+  background-color: rgba(37, 99, 235, 0.2) !important;
+}
+
+html.dark [class*="bg-emerald-50/"] {
+  background-color: rgba(16, 185, 129, 0.14) !important;
+}
+
+html.dark [class*="bg-amber-50/"] {
+  background-color: rgba(245, 158, 11, 0.14) !important;
+}
+
+html.dark [class*="bg-red-50/"] {
+  background-color: rgba(239, 68, 68, 0.14) !important;
+}
+
+html.dark [class*="bg-violet-50/"] {
+  background-color: rgba(139, 92, 246, 0.14) !important;
+}
+
+html.dark [class*="border-slate-200/"] {
+  border-color: rgba(38, 50, 68, 0.8) !important;
+}
+
 html.dark .bg-slate-50 {
   background-color: #0f172a !important;
 }
@@ -569,6 +635,20 @@ html.dark .bg-\[\#F7F9FC\] {
 
 html.dark .bg-\[\#F5F7FA\] {
   background-color: #0b1120 !important;
+}
+
+html.dark .bg-\[\#F8FAFC\],
+html.dark .bg-\[\#F4F7FB\],
+html.dark .bg-\[\#EEF3F9\],
+html.dark .bg-\[\#FBFCFE\],
+html.dark .bg-\[\#F4F8FF\],
+html.dark .bg-\[\#E5EDF8\],
+html.dark .bg-\[\#f6f8fb\] {
+  background-color: #0b1120 !important;
+}
+
+html.dark .bg-slate-200 {
+  background-color: #263244 !important;
 }
 
 /* =========================================================
@@ -603,6 +683,96 @@ html.dark .text-slate-400 {
   color: #64748b !important;
 }
 
+html.dark .text-slate-300 {
+  color: #94a3b8 !important;
+}
+
+/* Brand navy heading text -- unreadable on a dark page unless lightened */
+html.dark .text-\[\#173563\],
+html.dark .text-\[\#173B6C\],
+html.dark .text-\[\#14213D\],
+html.dark .text-\[\#14233d\],
+html.dark .text-\[\#172033\] {
+  color: #f8fafc !important;
+}
+
+html.dark .text-\[\#2563EB\],
+html.dark .text-\[\#2563eb\] {
+  color: #60a5fa !important;
+}
+
+html.dark .text-\[\#1D4ED8\] {
+  color: #93c5fd !important;
+}
+
+/* Pastel accent text -- lightened so it stays readable on dark badges/cards */
+html.dark .text-blue-700,
+html.dark .text-blue-600 {
+  color: #93c5fd !important;
+}
+
+html.dark .text-emerald-700,
+html.dark .text-emerald-600 {
+  color: #6ee7b7 !important;
+}
+
+html.dark .text-amber-700,
+html.dark .text-amber-600 {
+  color: #fcd34d !important;
+}
+
+html.dark .text-red-700,
+html.dark .text-red-600 {
+  color: #fca5a5 !important;
+}
+
+html.dark .text-violet-700,
+html.dark .text-violet-600 {
+  color: #c4b5fd !important;
+}
+
+html.dark .text-indigo-700,
+html.dark .text-indigo-600 {
+  color: #a5b4fc !important;
+}
+
+/* =========================================================
+   DARK MODE BADGES / PASTEL ACCENT SURFACES
+========================================================= */
+
+html.dark .bg-blue-50,
+html.dark .hover\:bg-blue-50:hover,
+html.dark .hover\:bg-blue-100:hover {
+  background-color: rgba(37, 99, 235, 0.16) !important;
+}
+
+html.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.16) !important;
+}
+
+html.dark .bg-amber-50 {
+  background-color: rgba(245, 158, 11, 0.16) !important;
+}
+
+html.dark .bg-red-50,
+html.dark .hover\:bg-red-50:hover,
+html.dark .hover\:bg-red-100:hover {
+  background-color: rgba(239, 68, 68, 0.16) !important;
+}
+
+html.dark .bg-violet-50 {
+  background-color: rgba(139, 92, 246, 0.16) !important;
+}
+
+html.dark .bg-indigo-50 {
+  background-color: rgba(99, 102, 241, 0.16) !important;
+}
+
+html.dark .ring-blue-50,
+html.dark .ring-blue-100 {
+  --tw-ring-color: rgba(37, 99, 235, 0.25) !important;
+}
+
 /* =========================================================
    DARK MODE BORDERS
 ========================================================= */
@@ -617,6 +787,30 @@ html.dark .border-slate-100 {
 
 html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
   border-color: #1e293b !important;
+}
+
+html.dark .border-blue-100,
+html.dark .border-blue-200 {
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+html.dark .border-emerald-100,
+html.dark .border-emerald-200 {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+html.dark .border-red-100,
+html.dark .border-red-200 {
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+html.dark .border-amber-100,
+html.dark .border-amber-200 {
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+html.dark .border-violet-100 {
+  border-color: rgba(139, 92, 246, 0.3) !important;
 }
 
 /* =========================================================

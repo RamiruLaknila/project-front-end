@@ -3,16 +3,16 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Check,
-  CheckCircle2,
+  CheckCircle,
   Clipboard,
-  Clock3,
-  Mail,
+  Clock,
+  EnvelopeSimple,
   ShieldCheck,
   User,
   UserCheck,
-  UserX,
+  UserMinus,
   X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 function ManageAgents() {
   const navigate = useNavigate();
@@ -189,14 +189,14 @@ function ManageAgents() {
               </h3>
 
               <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
-                <Mail size={13} />
+                <EnvelopeSimple size={13} />
                 <span className="truncate">
                   {agent.email || "No email"}
                 </span>
               </div>
 
               {agent.licenseNumber && (
-                <p className="mt-1 text-[10px] text-slate-400">
+                <p className="mt-1 text-[11px] text-slate-400">
                   License: {agent.licenseNumber}
                 </p>
               )}
@@ -211,15 +211,15 @@ function ManageAgents() {
 
             {type === "pending" && (
               <>
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-700">
-                  <Clock3 size={11} />
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
+                  <Clock size={11} />
                   Pending
                 </span>
 
                 <button
                   type="button"
                   onClick={() => handleApprove(agent.id)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-emerald-700"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-[12px] font-semibold text-white transition hover:bg-emerald-700"
                 >
                   <Check size={14} />
                   Approve
@@ -228,7 +228,7 @@ function ManageAgents() {
                 <button
                   type="button"
                   onClick={() => handleReject(agent.id)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-semibold text-red-600 transition hover:bg-red-100"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[12px] font-semibold text-red-600 transition hover:bg-red-100"
                 >
                   <X size={14} />
                   Reject
@@ -238,17 +238,17 @@ function ManageAgents() {
 
             {type === "approved" && (
               <>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">
-                  <CheckCircle2 size={11} />
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                  <CheckCircle size={11} />
                   Approved
                 </span>
 
                 <button
                   type="button"
                   onClick={() => handleRemove(agent.id)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-[12px] font-semibold text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
                 >
-                  <UserX size={14} />
+                  <UserMinus size={14} />
                   Remove
                 </button>
               </>
@@ -256,15 +256,15 @@ function ManageAgents() {
 
             {type === "rejected" && (
               <>
-                <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-[10px] font-semibold text-red-600">
-                  <UserX size={11} />
+                <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-600">
+                  <UserMinus size={11} />
                   Rejected
                 </span>
 
                 <button
                   type="button"
                   onClick={() => handleApprove(agent.id)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#173563] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#102547]"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#173563] px-3 py-2 text-[12px] font-semibold text-white transition hover:bg-[#102547]"
                 >
                   <UserCheck size={14} />
                   Approve
@@ -304,7 +304,7 @@ function ManageAgents() {
           <div className="flex items-center gap-2">
 
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-9 w-9 object-contain mix-blend-multiply"
             />
@@ -314,7 +314,7 @@ function ManageAgents() {
                 Import<span className="text-slate-900">Ease</span>
               </p>
 
-              <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                 Agency Administration
               </p>
             </div>
@@ -344,17 +344,17 @@ function ManageAgents() {
                   className="text-blue-600"
                 />
 
-                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-700">
+                <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-blue-700">
                   Agency management
                 </span>
 
               </div>
 
-              <h1 className="text-3xl font-bold tracking-tight text-[#14213D] sm:text-4xl">
+              <h1 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
                 Manage Agents
               </h1>
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+              <p className="mt-2 max-w-2xl text-[14px] leading-6 text-slate-500 sm:text-[16px]">
                 Review your agency members, approve new agents, and
                 manage access to your clearing workspace.
               </p>
@@ -388,7 +388,7 @@ function ManageAgents() {
 
               <div>
 
-                <p className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">
+                <p className="text-[11px] font-bold uppercase tracking-[0.13em] text-slate-400">
                   Agency join code
                 </p>
 
@@ -446,7 +446,7 @@ function ManageAgents() {
         <section className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
 
           <StatCard
-            icon={Clock3}
+            icon={Clock}
             label="Pending"
             value={pendingAgents.length}
             description="Waiting for approval"
@@ -491,7 +491,7 @@ function ManageAgents() {
 
             </div>
 
-            <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700">
+            <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700">
               {pendingAgents.length}
             </span>
 
@@ -511,7 +511,7 @@ function ManageAgents() {
             </div>
           ) : (
             <EmptyState
-              icon={Clock3}
+              icon={Clock}
               title="No pending agents"
               description="New agent requests will appear here."
             />
@@ -539,7 +539,7 @@ function ManageAgents() {
 
             </div>
 
-            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">
+            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
               {approvedAgents.length}
             </span>
 
@@ -603,9 +603,9 @@ function ManageAgents() {
 
         {/* FOOTER */}
 
-        <div className="mt-10 flex items-center justify-center gap-2 border-t border-slate-200 pt-6 text-center text-[10px] text-slate-400">
+        <div className="mt-10 flex items-center justify-center gap-2 border-t border-slate-200 pt-6 text-center text-[11px] text-slate-400">
 
-          <CheckCircle2 size={12} />
+          <CheckCircle size={12} />
 
           <span>
             ImportEase · Agency Administration
@@ -651,7 +651,7 @@ function StatCard({
         {label}
       </p>
 
-      <p className="mt-1 text-[10px] text-slate-400">
+      <p className="mt-1 text-[11px] text-slate-400">
         {description}
       </p>
 

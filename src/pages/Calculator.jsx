@@ -1,69 +1,198 @@
-import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
   Calculator,
-  CircleHelp,
+  Question,
   Info,
   Package,
-  RefreshCcw,
+  ArrowsCounterClockwise,
   ShieldCheck,
-  Sparkles,
+  Sparkle,
   Truck,
-  CheckCircle2,
-} from "lucide-react";
+  Globe,
+  WarningCircle,
+  Tag,
+  CheckCircle,
+  CurrencyDollar,
+} from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
-import BackButton from "../components/ui/BackButton";
+import { api, ApiError } from "../lib/api";
+
+// Labels for every levy the backend's duty_calculator.py can return, in the
+// order they're applied: CID -> SCD -> PAL -> Cess -> Excise -> SCL -> SSCL
+// -> VAT. SCL, when present on a code, replaces CID only -- every other
+// layer still applies normally on top.
+const LEVY_LABELS = {
+  cid: "Customs Import Duty (CID)",
+  scd: "Surcharge on Customs Duty (SCD)",
+  pal: "Ports & Airports Levy (PAL)",
+  cess: "Cess",
+  excise: "Excise (Special Provisions Duty)",
+  scl: "Special Commodity Levy (SCL)",
+  sscl: "Social Security Contribution Levy (SSCL)",
+  vat: "VAT",
+  luxuryTax: "Luxury Tax",
+};
+
+// The origin dropdown only offers this curated set, in this order, rather
+// than every country in duty_calculator.py's full PREFERENTIAL_AGREEMENTS
+// data. Thailand is deliberately excluded: it only qualifies under GSTP (the
+// broad, weaker catch-all agreement), not APTA -- the backend still checks
+// every agreement a selected country qualifies for and uses whichever rate
+// is cheapest, this list just curates what's offered here.
+const ORIGIN_COUNTRY_ORDER = [
+  "India",
+  "Pakistan",
+  "Singapore",
+  "China",
+  "South Korea",
+  "Bangladesh",
+  "Nepal",
+];
 
 function ImportCalculator() {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    productValue: "",
-    freight: "",
-    dutyRate: "10",
-    vatRate: "18",
-    otherCharges: "",
-  });
-
-  const [calculated, setCalculated] = useState(false);
-
   /* =========================================================
-     CALCULATIONS
+     LOAD THE HS CODE PICKED IN THE PREVIOUS STEP
+     Read once, lazily, as the initial state -- no effect needed, and
+     hsCodeMissing is just derived from whether we got a usable hsCode.
   ========================================================= */
 
-  const values = useMemo(() => {
-    const product = Number(form.productValue) || 0;
-    const freight = Number(form.freight) || 0;
-    const dutyRate = Number(form.dutyRate) || 0;
-    const vatRate = Number(form.vatRate) || 0;
-    const other = Number(form.otherCharges) || 0;
+  const [importData, setImportData] = useState(() => {
+    try {
+      const saved = localStorage.getItem("currentImport");
+      if (!saved) return null;
+      const parsed = JSON.parse(saved);
+      return parsed.hsCode ? parsed : null;
+    } catch (error) {
+      console.error("Unable to read import data:", error);
+      return null;
+    }
+  });
 
-    const customsValue = product + freight;
+  const hsCodeMissing = !importData?.hsCode;
 
-    const customsDuty = customsValue * (dutyRate / 100);
+  // A calculation from an earlier visit is only good for restoring the form
+  // if it was run for THIS same HS code -- picking a different code in HS
+  // Code Search leaves the old `calculator` snapshot sitting on the carried
+  // import data, and showing its numbers next to a different code's summary
+  // would be actively wrong, not just stale.
+  const savedCalc =
+    importData?.calculator?.hsCode === importData?.hsCode ? importData.calculator : null;
 
-    const vatBase = customsValue + customsDuty;
-    const vat = vatBase * (vatRate / 100);
+  const [form, setForm] = useState(() =>
+    savedCalc
+      ? {
+          cifUsd: savedCalc.form?.cifUsd ?? "",
+          origin: savedCalc.form?.origin ?? "",
+          otherCharges: savedCalc.form?.otherCharges ?? "",
+        }
+      : { cifUsd: "", origin: "", otherCharges: "" }
+  );
 
-    const totalTaxes = customsDuty + vat;
+  const [result, setResult] = useState(() => savedCalc?.result ?? null);
+  const [calculating, setCalculating] = useState(false);
+  const [calcError, setCalcError] = useState("");
 
-    const totalImportCost =
-      customsValue + totalTaxes + other;
+  /* =========================================================
+     FULL HS CODE DETAIL -- fetched fresh from Firestore (via the backend),
+     not trusted from the localStorage snapshot the search step left behind.
+  ========================================================= */
 
-    return {
-      product,
-      freight,
-      customsValue,
-      customsDuty,
-      vat,
-      totalTaxes,
-      other,
-      totalImportCost,
+  const [codeDetail, setCodeDetail] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(true);
+  const [detailError, setDetailError] = useState("");
+
+  useEffect(() => {
+    if (!importData?.hsCode) return;
+    let active = true;
+
+    (async () => {
+      try {
+        const detail = await api.get(
+          `/hscodes/${encodeURIComponent(importData.hsCode)}`,
+          { auth: false }
+        );
+        if (active) setCodeDetail(detail);
+      } catch (err) {
+        if (active) {
+          setDetailError(
+            err instanceof ApiError ? err.message : "Could not load this HS code."
+          );
+        }
+      } finally {
+        if (active) setDetailLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
     };
-  }, [form]);
+  }, [importData?.hsCode]);
+
+  /* =========================================================
+     ORIGIN-COUNTRY DROPDOWN + LIVE USD -> LKR EXCHANGE RATE
+  ========================================================= */
+
+  const [countries, setCountries] = useState([]);
+  const [exchangeRate, setExchangeRate] = useState(null); // { rate, asOf }
+  const [rateError, setRateError] = useState("");
+  const [manualRate, setManualRate] = useState(() => savedCalc?.manualRate ?? "");
+  const [editingRate, setEditingRate] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    (async () => {
+      try {
+        const list = await api.get("/hscodes/preferential-countries", { auth: false });
+        if (!active) return;
+        const byCountry = new Map(list.map((c) => [c.country, c]));
+        const curated = ORIGIN_COUNTRY_ORDER.map((name) => byCountry.get(name)).filter(Boolean);
+        setCountries(curated);
+      } catch {
+        /* dropdown just falls back to "General (no FTA)" only */
+      }
+    })();
+
+    (async () => {
+      try {
+        const rate = await api.get("/exchange-rate", { auth: false });
+        if (active) setExchangeRate(rate);
+      } catch (err) {
+        if (active) {
+          setRateError(
+            err instanceof ApiError
+              ? err.message
+              : "Live exchange rate unavailable -- enter it manually below."
+          );
+        }
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // A manual override always wins once set, regardless of whether the live
+  // fetch succeeded -- "Edit" is available any time, not just as a fallback.
+  const effectiveRate =
+    manualRate.trim() !== "" ? Number(manualRate) || null : exchangeRate?.rate ?? null;
+
+  /* =========================================================
+     LOCAL SUB-TOTALS (client-side only, before the real duty call)
+  ========================================================= */
+
+  const cifUsd = Number(form.cifUsd) || 0;
+  const cifLkr = effectiveRate ? cifUsd * effectiveRate : 0;
+  const other = Number(form.otherCharges) || 0;
+
+  const totalImportCost = result ? result.totalLandedCost + other : 0;
 
   /* =========================================================
      HANDLE CHANGE
@@ -77,56 +206,60 @@ function ImportCalculator() {
       [name]: value,
     }));
 
-    setCalculated(false);
+    setResult(null);
   };
 
   /* =========================================================
-     CALCULATE
+     CALCULATE -- GET /hscodes/{code}/landed-cost (public)
   ========================================================= */
 
-  const calculate = (e) => {
+  const calculate = async (e) => {
     e.preventDefault();
+    setCalcError("");
 
-    if (
-      !form.productValue ||
-      Number(form.productValue) <= 0
-    ) {
-      setCalculated(false);
+    if (!importData?.hsCode) {
       return;
     }
 
-    setCalculated(true);
+    if (!effectiveRate) {
+      setCalcError("Exchange rate unavailable. Enter one manually below.");
+      return;
+    }
 
-    const savedImport =
-      localStorage.getItem("currentImport");
+    if (cifUsd <= 0) {
+      setCalcError("Enter a CIF value greater than zero.");
+      return;
+    }
 
-    if (savedImport) {
-      try {
-        const importData = JSON.parse(savedImport);
+    setCalculating(true);
+    try {
+      const params = new URLSearchParams({ value: String(cifLkr) });
+      if (form.origin.trim()) params.set("origin", form.origin.trim());
 
-        const updatedImport = {
-          ...importData,
-          calculator: {
-            ...form,
-            customsValue: values.customsValue,
-            customsDuty: values.customsDuty,
-            vat: values.vat,
-            totalTaxes: values.totalTaxes,
-            totalImportCost: values.totalImportCost,
-          },
-          status: "Cost Estimated",
-        };
+      const data = await api.get(
+        `/hscodes/${encodeURIComponent(importData.hsCode)}/landed-cost?${params}`,
+        { auth: false }
+      );
+      setResult(data);
 
-        localStorage.setItem(
-          "currentImport",
-          JSON.stringify(updatedImport)
-        );
-      } catch (error) {
-        console.error(
-          "Unable to save calculator data:",
-          error
-        );
-      }
+      const updatedImport = {
+        ...importData,
+        // Tagged with the HS code it was calculated for, so a later visit
+        // only restores this if the carried HS code hasn't changed since.
+        calculator: { hsCode: importData.hsCode, form: { ...form }, result: data, manualRate },
+        status: "Cost Estimated",
+      };
+      localStorage.setItem("currentImport", JSON.stringify(updatedImport));
+      setImportData(updatedImport);
+    } catch (err) {
+      setResult(null);
+      setCalcError(
+        err instanceof ApiError
+          ? err.message
+          : "Could not calculate the landed cost. Is the backend running?"
+      );
+    } finally {
+      setCalculating(false);
     }
   };
 
@@ -136,14 +269,23 @@ function ImportCalculator() {
 
   const reset = () => {
     setForm({
-      productValue: "",
-      freight: "",
-      dutyRate: "10",
-      vatRate: "18",
+      cifUsd: "",
+      origin: "",
       otherCharges: "",
     });
 
-    setCalculated(false);
+    setResult(null);
+    setCalcError("");
+    setManualRate("");
+
+    // Also drop the persisted snapshot -- otherwise navigating away and
+    // back would restore the very numbers Reset just cleared.
+    if (importData?.calculator) {
+      const rest = { ...importData };
+      delete rest.calculator;
+      localStorage.setItem("currentImport", JSON.stringify(rest));
+      setImportData(rest);
+    }
   };
 
   /* =========================================================
@@ -151,40 +293,12 @@ function ImportCalculator() {
   ========================================================= */
 
   const continueToAgent = () => {
-    const savedImport =
-      localStorage.getItem("currentImport");
-
-    if (savedImport) {
-      try {
-        const importData = JSON.parse(savedImport);
-
-        const updatedImport = {
-          ...importData,
-          calculator: {
-            ...form,
-            customsValue: values.customsValue,
-            customsDuty: values.customsDuty,
-            vat: values.vat,
-            totalTaxes: values.totalTaxes,
-            totalImportCost: values.totalImportCost,
-          },
-          status: "Cost Estimated",
-        };
-
-        localStorage.setItem(
-          "currentImport",
-          JSON.stringify(updatedImport)
-        );
-      } catch (error) {
-        console.error(
-          "Unable to save calculator data:",
-          error
-        );
-      }
-    }
-
     navigate("/find-agent");
   };
+
+  if (hsCodeMissing) {
+    return <Navigate to="/hs-code-search" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
@@ -309,9 +423,6 @@ function ImportCalculator() {
             BACK BUTTON
         ==================================================== */}
 
-        <div className="fade-up mb-6">
-          <BackButton current="Import Calculator" />
-        </div>
 
         {/* ===================================================
             PAGE HEADER
@@ -321,15 +432,109 @@ function ImportCalculator() {
 
           <div className="flex flex-col items-center justify-center text-center">
 
-            <h1 className="text-[30px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[40px]">
+            <h1 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
               Estimate your import cost
             </h1>
 
-            <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+            <p className="mx-auto mt-2 max-w-2xl text-[14px] leading-6 text-slate-500 sm:text-[16px]">
               Estimate customs duty, VAT, freight, and other
               import costs before placing your order.
             </p>
 
+          </div>
+
+        </section>
+
+        {/* ===================================================
+            HS CODE SUMMARY
+        ==================================================== */}
+
+        <section className="fade-up mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,.025)]">
+
+          <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-3">
+            <div className="flex items-center gap-2">
+              <Tag size={15} className="text-blue-600" />
+              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                Calculating for this HS code
+              </p>
+            </div>
+            <Link
+              to="/hs-code-search"
+              className="shrink-0 text-[12px] font-semibold text-[#173B6C] hover:underline"
+            >
+              Change
+            </Link>
+          </div>
+
+          <div className="p-5">
+            {detailLoading ? (
+              <div className="flex items-center gap-2">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-[#173B6C]" />
+                <p className="text-[12px] text-slate-400">Loading HS code details…</p>
+              </div>
+            ) : detailError ? (
+              <div className="flex items-start gap-2">
+                <WarningCircle size={16} className="mt-0.5 shrink-0 text-red-600" />
+                <p className="text-[12px] leading-5 text-red-700">{detailError}</p>
+              </div>
+            ) : codeDetail ? (
+              <div className="flex flex-wrap items-start justify-between gap-4">
+
+                <div className="min-w-0">
+                  <span className="font-mono text-base font-bold tracking-tight text-[#173B6C]">
+                    {codeDetail.code}
+                  </span>
+
+                  <h3 className="mt-1 text-[14px] font-bold leading-5 text-slate-800">
+                    {codeDetail.description || codeDetail.headingDescription}
+                  </h3>
+
+                  {codeDetail.classificationPath?.length > 0 && (
+                    <p className="mt-1 text-[11px] font-semibold text-slate-400">
+                      {codeDetail.classificationPath.join(" › ")}
+                    </p>
+                  )}
+
+                  {codeDetail.chapterTitle && (
+                    <div className="mt-2 inline-block rounded-lg border border-slate-200 bg-slate-50/60 px-2.5 py-1 text-[11px] text-slate-500">
+                      Ch. {codeDetail.chapter} · {codeDetail.chapterTitle}
+                    </div>
+                  )}
+
+                  {codeDetail.headingDescription &&
+                    codeDetail.headingDescription !== codeDetail.description && (
+                      <p className="mt-2 max-w-xl text-[10px] leading-4 text-slate-400">
+                        {codeDetail.headingDescription}
+                      </p>
+                    )}
+                </div>
+
+                {/* ICL/SLSI status */}
+                {codeDetail.iclSlsi ? (
+                  <div className="flex shrink-0 items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 sm:max-w-[420px]">
+                    <WarningCircle size={16} className="mt-0.5 shrink-0 text-amber-600" />
+                    <div>
+                      <p className="text-[11px] font-bold text-amber-800">
+                        Import Control License (ICL) and SLSI certification required
+                      </p>
+                      <p className="mt-0.5 text-[10px] leading-4 text-amber-700">
+                        Marking: {codeDetail.iclSlsi} — verify exact requirements
+                        with Sri Lanka Customs / the Import &amp; Export Control
+                        Department before importing.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex shrink-0 items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-3">
+                    <CheckCircle size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+                    <p className="text-[11px] font-semibold text-emerald-700">
+                      No Import Control License (ICL) or SLSI certification required
+                    </p>
+                  </div>
+                )}
+
+              </div>
+            ) : null}
           </div>
 
         </section>
@@ -356,7 +561,6 @@ function ImportCalculator() {
 
                   <Package
                     size={18}
-                    strokeWidth={1.8}
                   />
 
                 </div>
@@ -367,7 +571,7 @@ function ImportCalculator() {
                     Import information
                   </h2>
 
-                  <p className="mt-1 text-[13px] text-slate-500">
+                  <p className="mt-1 text-[14px] text-slate-500">
                     Enter the estimated costs for your shipment.
                   </p>
 
@@ -384,75 +588,171 @@ function ImportCalculator() {
               className="space-y-5 p-5 sm:p-6"
             >
 
-              {/* PRODUCT VALUE */}
+              {/* CIF VALUE (USD) */}
 
-              <InputField
-                label="Product value"
-                name="productValue"
-                value={form.productValue}
-                onChange={handleChange}
-                placeholder="e.g. 5000"
-                suffix="LKR"
-                required
-                help="Purchase price of the goods."
-              />
+              <div>
 
-              {/* FREIGHT */}
+                <div className="mb-1.5 flex items-center justify-between gap-3">
+                  <label htmlFor="cifUsd" className="text-sm font-semibold text-slate-700">
+                    CIF value <span className="ml-1 text-red-500">*</span>
+                  </label>
+                  <span className="hidden text-[11px] text-slate-400 sm:block">
+                    Cost + Insurance + Freight, as declared to Customs.
+                  </span>
+                </div>
 
-              <InputField
-                label="Freight / shipping"
-                name="freight"
-                value={form.freight}
-                onChange={handleChange}
-                placeholder="e.g. 500"
-                suffix="LKR"
-                help="Estimated cost of transporting the goods."
-              />
+                <div className="relative">
+                  <CurrencyDollar
+                    size={16}
+                    className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    id="cifUsd"
+                    name="cifUsd"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.cifUsd}
+                    onChange={handleChange}
+                    placeholder="e.g. 500"
+                    required
+                    className="h-12 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-14 text-sm font-medium text-slate-800 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
+                  />
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">
+                    USD
+                  </span>
+                </div>
 
-              {/* TAX ASSUMPTIONS */}
+                <p className="mt-1.5 text-[11px] text-slate-400 sm:hidden">
+                  Cost + Insurance + Freight, as declared to Customs.
+                </p>
+
+                {/* EXCHANGE RATE -- always editable, not just as a fallback */}
+                <div className="mt-2.5 rounded-lg bg-slate-50 px-3 py-2">
+                  {editingRate ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-slate-500">1 USD =</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        autoFocus
+                        value={manualRate}
+                        onChange={(e) => setManualRate(e.target.value)}
+                        placeholder="e.g. 300"
+                        className="h-7 w-24 rounded-md border border-slate-300 px-2 text-[11px] outline-none focus:border-[#173B6C]"
+                      />
+                      <span className="text-[11px] text-slate-500">LKR</span>
+                      <button
+                        type="button"
+                        onClick={() => setEditingRate(false)}
+                        className="ml-auto text-[10px] font-semibold text-[#173B6C] hover:underline"
+                      >
+                        Done
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-3">
+                      {manualRate.trim() !== "" ? (
+                        <p className="text-[11px] text-slate-500">
+                          1 USD = <span className="font-semibold text-slate-700">
+                            {Number(manualRate).toFixed(2)} LKR
+                          </span>{" "}
+                          <span className="text-slate-400">(manual)</span>
+                        </p>
+                      ) : exchangeRate ? (
+                        <p className="text-[11px] text-slate-500">
+                          1 USD = <span className="font-semibold text-slate-700">
+                            {exchangeRate.rate.toFixed(2)} LKR
+                          </span>{" "}
+                          <span className="text-slate-400">
+                            ({exchangeRate.cached ? "cached" : "live"})
+                          </span>
+                        </p>
+                      ) : rateError ? (
+                        <p className="text-[11px] text-red-600">{rateError}</p>
+                      ) : (
+                        <span className="flex items-center gap-2 text-[11px] text-slate-400">
+                          <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-[#173B6C]" />
+                          Fetching live USD → LKR rate…
+                        </span>
+                      )}
+
+                      <div className="flex shrink-0 items-center gap-3">
+                        {manualRate.trim() !== "" && (
+                          <button
+                            type="button"
+                            onClick={() => setManualRate("")}
+                            className="text-[10px] font-semibold text-slate-500 hover:underline"
+                          >
+                            Use live rate
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setEditingRate(true)}
+                          className="text-[10px] font-semibold text-[#173B6C] hover:underline"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {cifUsd > 0 && effectiveRate && (
+                  <p className="mt-1.5 text-[11px] leading-5 text-slate-500">
+                    ≈ <span className="font-semibold text-slate-700">
+                      LKR {formatCurrency(cifLkr)}
+                    </span>{" "}
+                    at this rate
+                  </p>
+                )}
+
+              </div>
+
+              {/* ORIGIN */}
 
               <div className="border-t border-slate-100 pt-5">
 
-                <div className="mb-4">
-
-                  <h3 className="text-sm font-bold text-slate-800">
-                    Tax assumptions
-                  </h3>
-
-                  <p className="mt-1 text-[11px] leading-5 text-slate-400">
-                    Adjust these values based on the applicable
-                    tariff information.
-                  </p>
-
+                <div className="mb-1.5 flex items-center justify-between gap-3">
+                  <label htmlFor="origin" className="text-sm font-semibold text-slate-700">
+                    Country of origin
+                  </label>
+                  <span className="hidden text-[11px] text-slate-400 sm:block">
+                    Optional — may lower the duty rate.
+                  </span>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-
-                  {/* DUTY */}
-
-                  <InputField
-                    label="Customs duty"
-                    name="dutyRate"
-                    value={form.dutyRate}
-                    onChange={handleChange}
-                    placeholder="0"
-                    suffix="%"
-                    help="Estimated customs duty rate."
+                <div className="relative">
+                  <Globe
+                    size={16}
+                    className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
                   />
-
-                  {/* VAT */}
-
-                  <InputField
-                    label="VAT"
-                    name="vatRate"
-                    value={form.vatRate}
+                  <select
+                    id="origin"
+                    name="origin"
+                    value={form.origin}
                     onChange={handleChange}
-                    placeholder="0"
-                    suffix="%"
-                    help="Estimated VAT rate."
-                  />
-
+                    className="h-12 w-full appearance-none rounded-xl border border-slate-300 bg-white pl-10 pr-3.5 text-sm font-medium text-slate-800 outline-none transition-all duration-200 hover:border-slate-400 focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
+                  >
+                    <option value="">General (no FTA)</option>
+                    {countries.map((c) => (
+                      <option key={c.country} value={c.country}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+
+                <p className="mt-1.5 text-[11px] text-slate-400 sm:hidden">
+                  Optional — may lower the duty rate.
+                </p>
+                <p className="mt-1.5 text-[11px] leading-5 text-slate-400">
+                  If this HS code qualifies for a trade agreement with your
+                  declared origin (e.g. ISFTA, SAFTA, APTA), the cheaper rate
+                  is used automatically.
+                </p>
 
               </div>
 
@@ -465,8 +765,15 @@ function ImportCalculator() {
                 onChange={handleChange}
                 placeholder="Optional"
                 suffix="LKR"
-                help="Port, handling, or other estimated costs."
+                help="Port, handling, or other costs -- not part of Customs duty, added on top of the estimate."
               />
+
+              {calcError && (
+                <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                  <WarningCircle size={16} className="mt-0.5 shrink-0 text-red-600" />
+                  <p className="text-[12px] leading-5 text-red-700">{calcError}</p>
+                </div>
+              )}
 
               {/* ACTIONS */}
 
@@ -474,15 +781,20 @@ function ImportCalculator() {
 
                 <button
                   type="submit"
-                  className="group flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#173B6C] py-3.5 text-sm font-bold text-white shadow-[0_6px_18px_rgba(23,59,108,.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#12315B] hover:shadow-[0_10px_24px_rgba(23,59,108,.18)]"
+                  disabled={calculating}
+                  className="group flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#173B6C] py-3.5 text-sm font-bold text-white shadow-[0_6px_18px_rgba(23,59,108,.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#12315B] hover:shadow-[0_10px_24px_rgba(23,59,108,.18)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                 >
 
-                  <Calculator
-                    size={17}
-                    className="transition-transform duration-300 group-hover:scale-105"
-                  />
+                  {calculating ? (
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  ) : (
+                    <Calculator
+                      size={17}
+                      className="transition-transform duration-300 group-hover:scale-105"
+                    />
+                  )}
 
-                  Calculate import cost
+                  {calculating ? "Calculating…" : "Calculate import cost"}
 
                 </button>
 
@@ -492,7 +804,7 @@ function ImportCalculator() {
                   className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-600 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
                 >
 
-                  <RefreshCcw size={15} />
+                  <ArrowsCounterClockwise size={15} />
 
                   Reset
 
@@ -522,28 +834,25 @@ function ImportCalculator() {
 
                   <div>
 
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-blue-200">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-200">
                       Estimated total
                     </p>
 
-                    <h2 className="mt-2 text-[26px] font-bold tracking-[-0.03em]">
-                      LKR{" "}
-                      {formatCurrency(
-                        values.totalImportCost
-                      )}
+                    <h2 className="mt-2 text-[28px] font-bold tracking-[-0.03em]">
+                      LKR {formatCurrency(totalImportCost)}
                     </h2>
 
                   </div>
 
                   <div className="pulse-soft flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
 
-                    <Sparkles size={19} />
+                    <Sparkle size={19} />
 
                   </div>
 
                 </div>
 
-                <p className="mt-2 text-[11px] leading-4 text-blue-100">
+                <p className="mt-2 text-[12px] leading-4 text-blue-100">
                   Estimated landed import cost
                 </p>
 
@@ -555,32 +864,52 @@ function ImportCalculator() {
 
                 <div className="space-y-3.5">
 
-                  <ResultRow
-                    label="Product value"
-                    value={values.product}
-                  />
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-[12px] text-slate-500">CIF value</span>
+                    <span className="text-[12px] font-semibold text-slate-700">
+                      USD {formatCurrency(cifUsd)}
+                    </span>
+                  </div>
 
                   <ResultRow
-                    label="Freight"
-                    value={values.freight}
+                    label="CIF value (LKR)"
+                    value={result ? result.declaredValue : cifLkr}
                   />
 
-                  <div className="my-3 border-t border-slate-100" />
+                  {result && (
+                    <>
+                      <div className="my-3 border-t border-slate-100" />
 
-                  <ResultRow
-                    label={`Customs duty (${form.dutyRate}%)`}
-                    value={values.customsDuty}
-                  />
+                      <ResultRow
+                        label={LEVY_LABELS.cid}
+                        value={result.cid}
+                        rate={result.rates?.cid}
+                        note={
+                          result.cidBasis === "replaced_by_scl"
+                            ? "Replaced by the Special Commodity Levy (SCL) for this code"
+                            : result.cidBasis?.startsWith("preferential")
+                              ? result.cidBasis.replace("preferential:", "Preferential: ")
+                              : null
+                        }
+                      />
+                      {Object.entries(LEVY_LABELS)
+                        .filter(([key]) => key !== "cid")
+                        .map(([key, label]) =>
+                          result[key] ? (
+                            <ResultRow
+                              key={key}
+                              label={label}
+                              value={result[key]}
+                              rate={result.rates?.[key]}
+                            />
+                          ) : null
+                        )}
+                    </>
+                  )}
 
-                  <ResultRow
-                    label={`VAT (${form.vatRate}%)`}
-                    value={values.vat}
-                  />
-
-                  <ResultRow
-                    label="Other charges"
-                    value={values.other}
-                  />
+                  {other > 0 && (
+                    <ResultRow label="Other charges (your estimate)" value={other} />
+                  )}
 
                   <div className="border-t border-slate-200 pt-4">
 
@@ -591,10 +920,7 @@ function ImportCalculator() {
                       </span>
 
                       <span className="text-base font-bold text-[#173B6C]">
-                        LKR{" "}
-                        {formatCurrency(
-                          values.totalImportCost
-                        )}
+                        LKR {formatCurrency(totalImportCost)}
                       </span>
 
                     </div>
@@ -605,11 +931,11 @@ function ImportCalculator() {
 
                 {/* NOT CALCULATED */}
 
-                {!calculated && (
+                {!result && !calculating && (
 
                   <div className="slide-down mt-5 rounded-xl border border-slate-100 bg-slate-50 p-4 text-center">
 
-                    <p className="text-[11px] leading-5 text-slate-400">
+                    <p className="text-[12px] leading-5 text-slate-400">
                       Enter your values and calculate to
                       generate your estimate.
                     </p>
@@ -618,21 +944,45 @@ function ImportCalculator() {
 
                 )}
 
+                {/* CALCULATING */}
+
+                {calculating && (
+                  <div className="slide-down mt-5 flex items-center justify-center gap-2 rounded-xl border border-slate-100 bg-slate-50 p-4">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-[#173B6C]" />
+                    <p className="text-[12px] leading-5 text-slate-400">
+                      Calculating your estimate…
+                    </p>
+                  </div>
+                )}
+
                 {/* CALCULATED */}
 
-                {calculated && (
+                {result && !calculating && (
 
-                  <div className="scale-in mt-5 flex items-start gap-2 rounded-xl border border-emerald-100 bg-emerald-50 p-4">
+                  <div className="scale-in mt-5 space-y-3">
 
-                    <ShieldCheck
-                      size={15}
-                      className="mt-0.5 shrink-0 text-emerald-600"
-                    />
+                    <div className="flex items-start gap-2 rounded-xl border border-emerald-100 bg-emerald-50 p-4">
 
-                    <p className="text-[11px] leading-5 text-emerald-700">
-                      Estimate generated successfully. Review
-                      the result before continuing.
-                    </p>
+                      <ShieldCheck
+                        size={15}
+                        className="mt-0.5 shrink-0 text-emerald-600"
+                      />
+
+                      <p className="text-[12px] leading-5 text-emerald-700">
+                        Estimate generated successfully. Review
+                        the result before continuing.
+                      </p>
+
+                    </div>
+
+                    {result.disclaimer && (
+                      <div className="flex items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                        <Info size={14} className="mt-0.5 shrink-0 text-slate-400" />
+                        <p className="text-[11px] leading-5 text-slate-500">
+                          {result.disclaimer}
+                        </p>
+                      </div>
+                    )}
 
                   </div>
 
@@ -665,20 +1015,32 @@ function ImportCalculator() {
 
                 <Formula
                   number="01"
-                  title="Customs value"
+                  title="CIF value"
                   text="Product + freight"
                 />
 
                 <Formula
                   number="02"
-                  title="Customs duty"
-                  text="Customs value × duty rate"
+                  title="Customs Import Duty (CID)"
+                  text="On CIF -- uses a trade-agreement rate instead of the general rate if your declared origin qualifies and it's cheaper"
                 />
 
                 <Formula
                   number="03"
-                  title="VAT estimate"
-                  text="(Customs value + duty) × VAT rate"
+                  title="SCD, PAL, Cess, Excise"
+                  text="Additional levies, each applied on top of CIF and/or CID where they apply to this code"
+                />
+
+                <Formula
+                  number="04"
+                  title="VAT & SSCL"
+                  text="Charged on CIF + CID + every levy above"
+                />
+
+                <Formula
+                  number="05"
+                  title="SCL override"
+                  text="If this code carries a Special Commodity Levy, it replaces the entire stack above"
                 />
 
               </div>
@@ -696,17 +1058,17 @@ function ImportCalculator() {
 
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-blue-700 shadow-sm">
 
-                <CircleHelp size={17} />
+                <Question size={17} />
 
               </div>
 
               <div className="min-w-0 flex-1">
 
-                <p className="text-[11px] font-bold text-blue-900">
+                <p className="text-[12px] font-bold text-blue-900">
                   Not sure about your duty rate?
                 </p>
 
-                <p className="mt-1 text-[10px] leading-4 text-blue-700">
+                <p className="mt-1 text-[11px] leading-4 text-blue-700">
                   Search your product to review its HS code
                   and applicable tariff information.
                 </p>
@@ -743,10 +1105,10 @@ function ImportCalculator() {
 
           <button
             type="button"
-            disabled={!calculated}
+            disabled={!result}
             onClick={continueToAgent}
             className={`group flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold transition-all duration-300 ${
-              calculated
+              result
                 ? "bg-[#173B6C] text-white shadow-[0_6px_18px_rgba(23,59,108,.12)] hover:-translate-y-0.5 hover:bg-[#12315B] hover:shadow-[0_10px_24px_rgba(23,59,108,.18)]"
                 : "cursor-not-allowed bg-slate-200 text-slate-400"
             }`}
@@ -757,7 +1119,7 @@ function ImportCalculator() {
             <ArrowRight
               size={18}
               className={`transition-transform duration-300 ${
-                calculated
+                result
                   ? "group-hover:translate-x-0.5"
                   : ""
               }`}
@@ -771,7 +1133,7 @@ function ImportCalculator() {
             FOOTER NOTE
         ==================================================== */}
 
-        <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[11px] text-slate-400">
+        <div className="fade-up mt-6 flex items-center justify-center gap-2 text-center text-[12px] text-slate-400">
 
           <ShieldCheck
             size={14}
@@ -824,7 +1186,7 @@ function InputField({
 
         </label>
 
-        <span className="hidden text-[10px] text-slate-400 sm:block">
+        <span className="hidden text-[11px] text-slate-400 sm:block">
           {help}
         </span>
 
@@ -845,13 +1207,13 @@ function InputField({
           className="h-12 w-full rounded-xl border border-slate-300 bg-white px-3.5 pr-14 text-sm font-medium text-slate-800 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-400 focus:border-[#173B6C] focus:ring-2 focus:ring-[#173B6C]/10"
         />
 
-        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">
+        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">
           {suffix}
         </span>
 
       </div>
 
-      <p className="mt-1.5 text-[10px] text-slate-400 sm:hidden">
+      <p className="mt-1.5 text-[11px] text-slate-400 sm:hidden">
         {help}
       </p>
 
@@ -863,18 +1225,29 @@ function InputField({
    RESULT ROW
 ========================================================= */
 
-function ResultRow({ label, value }) {
+function ResultRow({ label, value, rate, note }) {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div>
+      <div className="flex items-center justify-between gap-4">
 
-      <span className="text-[11px] text-slate-500">
-        {label}
-      </span>
+        <span className="min-w-0 flex-1 text-[12px] text-slate-500">
+          {label}
+          {rate && (
+            <span className="ml-1.5 whitespace-nowrap rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+              {rate}
+            </span>
+          )}
+        </span>
 
-      <span className="text-[11px] font-semibold text-slate-700">
-        LKR {formatCurrency(value)}
-      </span>
+        <span className="shrink-0 whitespace-nowrap text-[12px] font-semibold text-slate-700">
+          LKR {formatCurrency(value)}
+        </span>
 
+      </div>
+
+      {note && (
+        <p className="mt-0.5 text-[10px] leading-4 text-slate-400">{note}</p>
+      )}
     </div>
   );
 }
@@ -891,17 +1264,17 @@ function Formula({
   return (
     <div className="flex gap-3">
 
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[9px] font-bold text-slate-500">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[10px] font-bold text-slate-500">
         {number}
       </div>
 
       <div>
 
-        <p className="text-[10px] font-bold text-slate-700">
+        <p className="text-[11px] font-bold text-slate-700">
           {title}
         </p>
 
-        <p className="mt-0.5 text-[9px] text-slate-400">
+        <p className="mt-0.5 text-[10px] text-slate-400">
           {text}
         </p>
 

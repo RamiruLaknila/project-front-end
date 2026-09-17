@@ -2,24 +2,29 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft,
-  CheckCircle2,
+  CheckCircle,
   ShieldCheck,
-  Upload,
+  UploadSimple,
   FileText,
-  UserCheck,
-  AlertCircle,
-} from "lucide-react";
+  WarningCircle,
+} from "@phosphor-icons/react";
+
+import { useAuth } from "../context/AuthContext";
+import { api } from "../lib/api";
+import { authErrorMessage } from "../lib/authErrors";
 
 function IndividualAgentVerification() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [documents, setDocuments] = useState({
     license: null,
     identity: null,
-    certificate: null,
   });
 
   const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const [declaration, setDeclaration] = useState(false);
 
@@ -59,11 +64,6 @@ function IndividualAgentVerification() {
         "Please upload an identity document.";
     }
 
-    if (!documents.certificate) {
-      newErrors.certificate =
-        "Please upload your professional certificate.";
-    }
-
     if (!declaration) {
       newErrors.declaration =
         "You must confirm the declaration before submitting.";
@@ -74,57 +74,38 @@ function IndividualAgentVerification() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError("");
 
     if (!validate()) {
       return;
     }
 
-    const existingAgent = JSON.parse(
-      localStorage.getItem("individualAgent") || "{}"
-    );
+    if (!user?.id) {
+      navigate("/agent-signin", { replace: true });
+      return;
+    }
 
-    const verificationData = {
-      ...existingAgent,
+    setSubmitting(true);
+    try {
+      // Upload each file to the backend one at a time -- each write is
+      // independent, so a failure partway through leaves the earlier ones saved.
+      for (const [documentType, file] of Object.entries(documents)) {
+        const body = new FormData();
+        body.append("file", file);
+        body.append("documentType", documentType);
+        await api.post(`/users/${user.id}/verification-documents`, body);
+      }
 
-      verificationStatus: "pending",
-
-      documents: {
-        license: documents.license
-          ? documents.license.name
-          : null,
-
-        identity: documents.identity
-          ? documents.identity.name
-          : null,
-
-        certificate: documents.certificate
-          ? documents.certificate.name
-          : null,
-      },
-
-      declarationAccepted: true,
-
-      submittedAt: new Date().toISOString(),
-    };
-
-    localStorage.setItem(
-      "individualAgent",
-      JSON.stringify(verificationData)
-    );
-
-    localStorage.setItem(
-      "individualAgentStatus",
-      "pending"
-    );
-
-    localStorage.setItem(
-      "agentOnboardingComplete",
-      "true"
-    );
-
-    navigate("/agent-pending");
+      navigate("/agent-pending", { replace: true });
+    } catch (err) {
+      setFormError(
+        authErrorMessage(err, "Could not upload your documents. Please try again.")
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -144,12 +125,12 @@ function IndividualAgentVerification() {
             className="flex items-center gap-3"
           >
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
             />
 
-            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
               Import
               <span className="text-[#173563]">
                 Ease
@@ -173,7 +154,7 @@ function IndividualAgentVerification() {
               </div>
             </div>
 
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[27px]">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
               Verification
             </h1>
 
@@ -243,6 +224,12 @@ function IndividualAgentVerification() {
 
           </div>
 
+          {formError && (
+            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+              {formError}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit}>
 
             {/* Documents */}
@@ -265,17 +252,6 @@ function IndividualAgentVerification() {
                 documentType="identity"
                 file={documents.identity}
                 error={errors.identity}
-                onChange={handleFileChange}
-                onRemove={removeFile}
-                required
-              />
-
-              <DocumentUpload
-                title="Professional Certificate"
-                description="Upload your professional qualification or relevant certificate."
-                documentType="certificate"
-                file={documents.certificate}
-                error={errors.certificate}
                 onChange={handleFileChange}
                 onRemove={removeFile}
                 required
@@ -324,7 +300,7 @@ function IndividualAgentVerification() {
 
               {errors.declaration && (
                 <p className="mt-1.5 flex items-center gap-1 text-xs text-red-500">
-                  <AlertCircle size={13} />
+                  <WarningCircle size={13} />
                   {errors.declaration}
                 </p>
               )}
@@ -334,7 +310,7 @@ function IndividualAgentVerification() {
             {/* Submission notice */}
             <div className="mt-6 flex items-start gap-3 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3">
 
-              <AlertCircle
+              <WarningCircle
                 size={17}
                 className="mt-0.5 shrink-0 text-amber-600"
               />
@@ -353,21 +329,21 @@ function IndividualAgentVerification() {
 
               <button
                 type="button"
-                onClick={() =>
-                  navigate("/individual-agent-signup")
-                }
-                className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                disabled={submitting}
+                onClick={() => navigate("/agent-pending")}
+                className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
               >
                 <ArrowLeft size={16} />
-                Back
+                Do this later
               </button>
 
               <button
                 type="submit"
-                className="flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition hover:bg-[#122b50]"
+                disabled={submitting}
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition hover:bg-[#122b50] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Submit Application
-                <CheckCircle2 size={17} />
+                {submitting ? "Uploading…" : "Submit Application"}
+                <CheckCircle size={17} />
               </button>
 
             </div>
@@ -438,7 +414,7 @@ function DocumentUpload({
               }`}
             >
               {file ? (
-                <CheckCircle2 size={20} />
+                <CheckCircle size={20} />
               ) : (
                 <FileText size={20} />
               )}
@@ -486,9 +462,9 @@ function DocumentUpload({
             ) : (
               <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#173563] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#122b50]">
 
-                <Upload size={15} />
+                <UploadSimple size={15} />
 
-                Upload
+                UploadSimple
 
                 <input
                   type="file"
@@ -510,7 +486,7 @@ function DocumentUpload({
         {!file && (
           <div className="mt-4 border-t border-slate-100 pt-3">
 
-            <p className="text-[10px] text-slate-400">
+            <p className="text-[11px] text-slate-400">
               Accepted formats: PDF, JPG, JPEG, PNG
             </p>
 
@@ -521,7 +497,7 @@ function DocumentUpload({
 
       {error && (
         <p className="mt-1.5 flex items-center gap-1 text-xs text-red-500">
-          <AlertCircle size={13} />
+          <WarningCircle size={13} />
           {error}
         </p>
       )}
@@ -552,14 +528,14 @@ function ProgressStep({
         }`}
       >
         {completed ? (
-          <CheckCircle2 size={16} />
+          <CheckCircle size={16} />
         ) : (
           number
         )}
       </div>
 
       <span
-        className={`mt-2 hidden text-[10px] font-semibold sm:block ${
+        className={`mt-2 hidden text-[11px] font-semibold sm:block ${
           active || completed
             ? "text-[#173563]"
             : "text-slate-400"

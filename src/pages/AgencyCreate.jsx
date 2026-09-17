@@ -3,19 +3,26 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
-  Building2,
-  CheckCircle2,
+  Buildings,
+  CheckCircle,
   Eye,
-  EyeOff,
+  EyeSlash,
   FileText,
-  UserRound,
+  UserCircle,
   ShieldCheck,
-} from "lucide-react";
+} from "@phosphor-icons/react";
+
+import { useAuth } from "../context/AuthContext";
+import { api } from "../lib/api";
+import { authErrorMessage } from "../lib/authErrors";
 
 function AgencyCreate() {
   const navigate = useNavigate();
+  const { registerAgency } = useAuth();
 
   const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const [formData, setFormData] = useState({
     agencyName: "",
@@ -26,7 +33,6 @@ function AgencyCreate() {
     email: "",
 
     licenseNumber: "",
-    licenseType: "",
     licenseExpiry: "",
 
     ownerName: "",
@@ -55,6 +61,11 @@ function AgencyCreate() {
     }));
   };
 
+  const updateDigitsField = (field, value, maxLength) => {
+    const digits = value.replace(/\D/g, "").slice(0, maxLength);
+    updateField(field, digits);
+  };
+
   const validateStep = () => {
     const newErrors = {};
 
@@ -76,8 +87,8 @@ function AgencyCreate() {
         newErrors.city = "City is required";
       }
 
-      if (!formData.phone.trim()) {
-        newErrors.phone = "Agency phone number is required";
+      if (formData.phone.length !== 10) {
+        newErrors.phone = "Phone number must be 10 digits";
       }
 
       if (!formData.email.trim()) {
@@ -90,12 +101,10 @@ function AgencyCreate() {
         newErrors.licenseNumber = "License number is required";
       }
 
-      if (!formData.licenseType) {
-        newErrors.licenseType = "Please select a license type";
-      }
-
       if (!formData.licenseExpiry) {
         newErrors.licenseExpiry = "License expiry date is required";
+      } else if (formData.licenseExpiry < new Date().toISOString().slice(0, 10)) {
+        newErrors.licenseExpiry = "This license has expired. Please provide a valid license.";
       }
     }
 
@@ -108,8 +117,8 @@ function AgencyCreate() {
         newErrors.ownerEmail = "Owner email is required";
       }
 
-      if (!formData.ownerPhone.trim()) {
-        newErrors.ownerPhone = "Owner phone number is required";
+      if (formData.ownerPhone.length !== 10) {
+        newErrors.ownerPhone = "Phone number must be 10 digits";
       }
 
       if (!formData.ownerNic.trim()) {
@@ -135,6 +144,7 @@ function AgencyCreate() {
   };
 
   const handleNext = () => {
+    if (submitting) return;
     if (!validateStep()) return;
 
     if (step < 3) {
@@ -148,12 +158,44 @@ function AgencyCreate() {
       return;
     }
 
-    localStorage.setItem(
-      "agencyRegistrationDraft",
-      JSON.stringify(formData)
-    );
+    handleSubmit();
+  };
 
-    navigate("/agency-review");
+  const handleSubmit = async () => {
+    setFormError("");
+    setSubmitting(true);
+    try {
+      // 1. Create the agency + its admin account. Sign-in email is the owner's.
+      const { agency } = await registerAgency({
+        companyName: formData.agencyName,
+        email: formData.ownerEmail,
+        password: formData.password,
+      });
+
+      // 2. Complete the agency profile -- this moves it from "incomplete" to
+      //    "pending", awaiting a platform admin's review (agents can only
+      //    bid once profileStatus is "active", set on approval).
+      const address = [formData.agencyAddress.trim(), formData.city.trim()]
+        .filter(Boolean)
+        .join(", ");
+      try {
+        await api.put(`/agencies/${agency.id}/profile`, {
+          licenseNumber: formData.licenseNumber.trim(),
+          businessAddress: address,
+          businessPhone: formData.phone.trim(),
+          businessRegNumber: formData.businessRegistrationNumber.trim(),
+        });
+      } catch {
+        /* profile can be finished later from agency settings */
+      }
+
+      navigate("/agent-pending", { replace: true });
+    } catch (err) {
+      setFormError(authErrorMessage(err, "Could not create the agency."));
+      if (/email/i.test(err?.message || "")) setStep(3);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleBack = () => {
@@ -182,7 +224,7 @@ function AgencyCreate() {
 
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#173563]">
-              <Building2
+              <Buildings
                 size={21}
                 className="text-white"
               />
@@ -238,7 +280,7 @@ function AgencyCreate() {
           {step === 1 && (
             <div>
               <SectionHeader
-                icon={Building2}
+                icon={Buildings}
                 title="Agency Details"
                 description="Enter the basic information about your clearing agency."
               />
@@ -296,11 +338,12 @@ function AgencyCreate() {
 
                 <InputField
                   label="Phone Number"
+                  type="tel"
                   value={formData.phone}
                   onChange={(value) =>
-                    updateField("phone", value)
+                    updateDigitsField("phone", value, 10)
                   }
-                  placeholder="+94 77 123 4567"
+                  placeholder="0771234567"
                   error={errors.phone}
                   required
                 />
@@ -342,30 +385,6 @@ function AgencyCreate() {
                   required
                 />
 
-                <SelectField
-                  label="License Type"
-                  value={formData.licenseType}
-                  onChange={(value) =>
-                    updateField("licenseType", value)
-                  }
-                  error={errors.licenseType}
-                  required
-                >
-                  <option value="">Select license type</option>
-
-                  <option value="clearing-agent">
-                    Clearing Agent License
-                  </option>
-
-                  <option value="customs-broker">
-                    Customs Broker License
-                  </option>
-
-                  <option value="other">
-                    Other
-                  </option>
-                </SelectField>
-
                 <InputField
                   label="License Expiry Date"
                   type="date"
@@ -398,7 +417,7 @@ function AgencyCreate() {
           {step === 3 && (
             <div>
               <SectionHeader
-                icon={UserRound}
+                icon={UserCircle}
                 title="Owner Details"
                 description="Tell us about the person responsible for this agency."
               />
@@ -430,11 +449,12 @@ function AgencyCreate() {
 
                 <InputField
                   label="Owner Phone"
+                  type="tel"
                   value={formData.ownerPhone}
                   onChange={(value) =>
-                    updateField("ownerPhone", value)
+                    updateDigitsField("ownerPhone", value, 10)
                   }
-                  placeholder="+94 77 123 4567"
+                  placeholder="0771234567"
                   error={errors.ownerPhone}
                   required
                 />
@@ -443,7 +463,7 @@ function AgencyCreate() {
                   label="NIC / ID Number"
                   value={formData.ownerNic}
                   onChange={(value) =>
-                    updateField("ownerNic", value)
+                    updateDigitsField("ownerNic", value, 12)
                   }
                   placeholder="Enter NIC / ID number"
                   error={errors.ownerNic}
@@ -498,7 +518,7 @@ function AgencyCreate() {
               {/* Review Information */}
               <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
                 <div className="flex gap-3">
-                  <CheckCircle2
+                  <CheckCircle
                     size={18}
                     className="mt-0.5 shrink-0 text-emerald-600"
                   />
@@ -512,13 +532,20 @@ function AgencyCreate() {
             </div>
           )}
 
+          {formError && (
+            <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+              {formError}
+            </div>
+          )}
+
           {/* Actions */}
           <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-6">
 
             <button
               type="button"
               onClick={handleBack}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              disabled={submitting}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-60"
             >
               <ArrowLeft size={16} />
               Back
@@ -527,9 +554,14 @@ function AgencyCreate() {
             <button
               type="button"
               onClick={handleNext}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#173563] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#10294d]"
+              disabled={submitting}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#173563] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#10294d] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {step === 3 ? "Review Application" : "Continue"}
+              {submitting
+                ? "Creating agency…"
+                : step === 3
+                ? "Create Agency"
+                : "Continue"}
 
               <ArrowRight size={16} />
             </button>
@@ -569,7 +601,7 @@ function StepIndicator({
         }`}
       >
         {completed ? (
-          <CheckCircle2 size={15} />
+          <CheckCircle size={15} />
         ) : (
           number
         )}
@@ -654,7 +686,7 @@ function InputField({
       />
 
       {error && (
-        <p className="mt-1.5 text-[11px] text-red-500">
+        <p className="mt-1.5 text-[12px] text-red-500">
           {error}
         </p>
       )}
@@ -716,7 +748,7 @@ function PasswordField({
           }
         >
           {showPassword ? (
-            <EyeOff size={18} />
+            <EyeSlash size={18} />
           ) : (
             <Eye size={18} />
           )}
@@ -724,52 +756,7 @@ function PasswordField({
       </div>
 
       {error && (
-        <p className="mt-1.5 text-[11px] text-red-500">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
-
-/* =========================================================
-   SELECT
-========================================================= */
-
-function SelectField({
-  label,
-  value,
-  onChange,
-  children,
-  error,
-  required = false,
-}) {
-  return (
-    <div>
-      <label className="mb-2 block text-xs font-semibold text-slate-700">
-        {label}
-
-        {required && (
-          <span className="ml-1 text-red-500">*</span>
-        )}
-      </label>
-
-      <select
-        value={value}
-        onChange={(event) =>
-          onChange(event.target.value)
-        }
-        className={`w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition focus:ring-2 ${
-          error
-            ? "border-red-300 focus:border-red-500 focus:ring-red-100"
-            : "border-slate-200 focus:border-blue-500 focus:ring-blue-100"
-        }`}
-      >
-        {children}
-      </select>
-
-      {error && (
-        <p className="mt-1.5 text-[11px] text-red-500">
+        <p className="mt-1.5 text-[12px] text-red-500">
           {error}
         </p>
       )}

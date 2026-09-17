@@ -3,26 +3,30 @@ import { useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
-  BriefcaseBusiness,
+  Briefcase,
   User,
-  Mail,
+  EnvelopeSimple,
   Phone,
   MapPin,
-  CreditCard,
   ShieldCheck,
-  CheckCircle2,
+  CheckCircle,
   Lock,
-} from "lucide-react";
+} from "@phosphor-icons/react";
+
+import { useAuth } from "../context/AuthContext";
+import { authErrorMessage } from "../lib/authErrors";
 
 function IndividualAgentSignup() {
   const navigate = useNavigate();
+  const { register } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     phone: "",
     address: "",
-    agentId: "",
     licenseNumber: "",
     licenseExpiry: "",
     experience: "",
@@ -67,16 +71,14 @@ function IndividualAgentSignup() {
       newErrors.address = "Address is required";
     }
 
-    if (!formData.agentId.trim()) {
-      newErrors.agentId = "Agent ID is required";
-    }
-
     if (!formData.licenseNumber.trim()) {
       newErrors.licenseNumber = "License number is required";
     }
 
     if (!formData.licenseExpiry) {
       newErrors.licenseExpiry = "License expiry date is required";
+    } else if (formData.licenseExpiry < new Date().toISOString().slice(0, 10)) {
+      newErrors.licenseExpiry = "This license has expired. Please provide a valid license.";
     }
 
     if (!formData.experience) {
@@ -100,37 +102,40 @@ function IndividualAgentSignup() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError("");
 
     if (!validate()) {
       return;
     }
 
-    const individualAgent = {
-      ...formData,
-      registrationType: "individual",
-      status: "pending",
-      verificationStatus: "pending",
-      createdAt: new Date().toISOString(),
-    };
+    setSubmitting(true);
+    try {
+      // No agency code -> the backend auto-creates a solo/independent agency.
+      // The professional details are stored on the account and the agent starts
+      // as "pending" until an ImportEase platform admin approves them.
+      await register({
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        role: "clearing_agent",
+        phone: formData.phone,
+        licenseNumber: formData.licenseNumber,
+        licenseExpiry: formData.licenseExpiry,
+        experience: formData.experience,
+        address: formData.address,
+      });
 
-    localStorage.setItem(
-      "individualAgent",
-      JSON.stringify(individualAgent)
-    );
-
-    localStorage.setItem(
-      "agentRegistrationType",
-      "individual"
-    );
-
-    localStorage.setItem(
-      "individualAgentStatus",
-      "pending"
-    );
-
-    navigate("/individual-agent-verification");
+      // Account exists now, status "pending" -- that's this agent's real home
+      // until they're reviewed. Uploading verification documents is an action
+      // offered from that page, not a forced hop before reaching it.
+      navigate("/agent-pending", { replace: true });
+    } catch (err) {
+      setFormError(authErrorMessage(err, "Could not create your account."));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -150,12 +155,12 @@ function IndividualAgentSignup() {
             className="flex items-center gap-3"
           >
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="ImportEase"
               className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
             />
 
-            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
               Import
               <span className="text-[#173563]">
                 Ease
@@ -172,14 +177,14 @@ function IndividualAgentSignup() {
 
             <div className="mb-4 flex justify-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#173563] shadow-md shadow-[#173563]/15">
-                <BriefcaseBusiness
+                <Briefcase
                   size={23}
                   className="text-white"
                 />
               </div>
             </div>
 
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[27px]">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
               Individual Agent Registration
             </h1>
 
@@ -218,6 +223,12 @@ function IndividualAgentSignup() {
           </div>
 
           <form onSubmit={handleSubmit} autoComplete="off">
+
+            {formError && (
+              <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+                {formError}
+              </div>
+            )}
 
             {/* Personal Details */}
             <section>
@@ -262,7 +273,7 @@ function IndividualAgentSignup() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="you@example.com"
-                  icon={<Mail size={17} />}
+                  icon={<EnvelopeSimple size={17} />}
                   error={errors.email}
                   required
                   autoComplete="off"
@@ -277,18 +288,6 @@ function IndividualAgentSignup() {
                   placeholder="+94 7X XXX XXXX"
                   icon={<Phone size={17} />}
                   error={errors.phone}
-                  required
-                />
-
-                {/* Agent ID */}
-                <InputField
-                  label="Agent ID / Registration ID"
-                  name="agentId"
-                  value={formData.agentId}
-                  onChange={handleChange}
-                  placeholder="Enter your agent ID"
-                  icon={<CreditCard size={17} />}
-                  error={errors.agentId}
                   required
                 />
 
@@ -518,9 +517,10 @@ function IndividualAgentSignup() {
 
               <button
                 type="submit"
-                className="flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition hover:bg-[#122b50]"
+                disabled={submitting}
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#173563]/15 transition hover:bg-[#122b50] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Continue to Verification
+                {submitting ? "Creating account…" : "Create Agent Account"}
                 <ArrowRight size={16} />
               </button>
 
@@ -636,14 +636,14 @@ function Step({
         }`}
       >
         {active ? (
-          <CheckCircle2 size={16} />
+          <CheckCircle size={16} />
         ) : (
           number
         )}
       </div>
 
       <span
-        className={`mt-2 hidden text-[10px] font-semibold sm:block ${
+        className={`mt-2 hidden text-[11px] font-semibold sm:block ${
           active
             ? "text-[#173563]"
             : "text-slate-400"

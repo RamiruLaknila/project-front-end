@@ -2,91 +2,32 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Bell,
-  CheckCircle2,
-  ChevronRight,
-  DollarSign,
+  CheckCircle,
+  CaretRight,
+  CurrencyDollar,
   FileText,
   Package,
-  RefreshCw,
-  Search,
-  TrendingUp,
+  ArrowsClockwise,
+  MagnifyingGlass,
+  TrendUp,
   User,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import AgentMemberSidebar from "../components/AgentMemberSidebar";
+import { api } from "../lib/api";
+import { STAGE_LABELS, STAGE_ORDER, stageIndex } from "../lib/shipmentStages";
 
-const demoRequests = [
-  {
-    id: "SME-2048",
-    company: "ABC Trading",
-    product: "Electronic Components",
-    origin: "China",
-    destination: "Colombo",
-    value: "LKR 2,450,000",
-    posted: "2 hours ago",
-    status: "New",
-  },
-  {
-    id: "SME-2047",
-    company: "Lanka Home Supplies",
-    product: "Kitchen Equipment",
-    origin: "India",
-    destination: "Colombo",
-    value: "LKR 1,820,000",
-    posted: "5 hours ago",
-    status: "New",
-  },
-  {
-    id: "SME-2046",
-    company: "Island Retailers",
-    product: "Textile Products",
-    origin: "Vietnam",
-    destination: "Colombo",
-    value: "LKR 3,100,000",
-    posted: "Yesterday",
-    status: "New",
-  },
-];
-
-const demoBids = [
-  {
-    id: "BID-1008",
-    request: "SME-2045",
-    company: "Global Merchants",
-    amount: "LKR 82,500",
-    status: "Under Review",
-  },
-  {
-    id: "BID-1007",
-    request: "SME-2041",
-    company: "Metro Supplies",
-    amount: "LKR 65,000",
-    status: "Accepted",
-  },
-  {
-    id: "BID-1006",
-    request: "SME-2038",
-    company: "Prime Retail",
-    amount: "LKR 91,000",
-    status: "Submitted",
-  },
-];
-
-const demoShipments = [
-  {
-    id: "IMP-1024",
-    company: "Metro Supplies",
-    product: "Industrial Equipment",
-    status: "Customs Clearance",
-    progress: 68,
-  },
-  {
-    id: "IMP-1021",
-    company: "Global Merchants",
-    product: "Electronic Goods",
-    status: "Documents Verified",
-    progress: 42,
-  },
-];
+function timeAgo(iso) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const diffSec = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diffSec < 60) return "Just now";
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} minute${diffMin === 1 ? "" : "s"} ago`;
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return `${diffHour} hour${diffHour === 1 ? "" : "s"} ago`;
+  const diffDay = Math.floor(diffHour / 24);
+  return diffDay === 1 ? "Yesterday" : `${diffDay} days ago`;
+}
 
 function AgentDashboard() {
   const navigate = useNavigate();
@@ -132,16 +73,70 @@ function AgentDashboard() {
     return agentName.split(" ")[0];
   }, [agentName]);
 
+  const [openTenders, setOpenTenders] = useState([]);
+  const [myBids, setMyBids] = useState([]);
+  const [shipments, setShipments] = useState([]);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+
+    (async () => {
+      try {
+        const [tenders, bids, shipmentsData] = await Promise.all([
+          api.get("/tenders?status=open"),
+          api.get("/bids/mine"),
+          api.get("/shipments"),
+        ]);
+        if (!active) return;
+        setOpenTenders(tenders);
+        setMyBids(bids);
+        setShipments(shipmentsData);
+      } catch {
+        /* Dashboard widgets just stay empty -- Marketplace/My Bids/Shipments show the real error. */
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [reloadKey]);
+
+  const activeShipments = useMemo(
+    () => shipments.filter((s) => s.currentStage !== "cargo_released"),
+    [shipments]
+  );
+
+  const recentTenders = useMemo(
+    () =>
+      [...openTenders]
+        .sort((a, b) => new Date(b.postedAt) - new Date(a.postedAt))
+        .slice(0, 3),
+    [openTenders]
+  );
+
+  const recentBids = useMemo(
+    () =>
+      [...myBids]
+        .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt))
+        .slice(0, 3),
+    [myBids]
+  );
+
+  const activeBidsCount = myBids.filter((bid) => bid.status === "pending").length;
+  const wonBidsCount = myBids.filter((bid) => bid.status === "accepted").length;
+
   const handleRefresh = () => {
     setRefreshing(true);
+    setReloadKey((key) => key + 1);
 
     window.setTimeout(() => {
       setRefreshing(false);
     }, 700);
   };
 
-  const goToAgentRequests = () => {
-    navigate("/agent-requests");
+  const goToMarketplace = () => {
+    navigate("/agent-marketplace");
   };
 
   const goToAgentShipments = () => {
@@ -167,7 +162,7 @@ function AgentDashboard() {
 <main className="min-h-screen pt-[68px] lg:ml-[260px] lg:pt-0 border-l border-slate-200 lg:border-l-0">        <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6">
           <div className="flex items-center">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
                 Agency Member Workspace
               </p>
 
@@ -184,7 +179,7 @@ function AgentDashboard() {
               className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50"
               aria-label="Refresh dashboard"
             >
-              <RefreshCw
+              <ArrowsClockwise
                 size={17}
                 className={refreshing ? "animate-spin" : ""}
               />
@@ -192,6 +187,7 @@ function AgentDashboard() {
 
             <button
               type="button"
+              onClick={() => navigate("/agent-notifications")}
               className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50"
               aria-label="Notifications"
             >
@@ -211,11 +207,11 @@ function AgentDashboard() {
                  
                 </div>
 
-                <h2 className="text-[32px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[42px]">
+                <h2 className="text-[35px] font-bold tracking-[-0.04em] text-[#14213D] sm:text-[45px]">
                   Welcome back, {firstName}
                 </h2>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[16px]">
                   Manage SME import requests, submit competitive bids and
                   track your assigned clearing work from your agency
                   workspace.
@@ -224,10 +220,10 @@ function AgentDashboard() {
 
               <button
                 type="button"
-                onClick={goToAgentRequests}
+                onClick={goToMarketplace}
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#173563] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#10294d]"
               >
-                <Search size={17} />
+                <MagnifyingGlass size={17} />
                 Browse Requests
               </button>
             </div>
@@ -235,30 +231,30 @@ function AgentDashboard() {
 
           <section className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <SummaryCard
-              icon={Search}
-              label="New SME Requests"
-              value="12"
+              icon={MagnifyingGlass}
+              label="Open SME Requests"
+              value={String(openTenders.length)}
               iconStyle="bg-blue-50 text-blue-600"
             />
 
             <SummaryCard
               icon={FileText}
               label="Active Bids"
-              value="8"
+              value={String(activeBidsCount)}
               iconStyle="bg-violet-50 text-violet-600"
             />
 
             <SummaryCard
-              icon={CheckCircle2}
+              icon={CheckCircle}
               label="Won Requests"
-              value="24"
+              value={String(wonBidsCount)}
               iconStyle="bg-emerald-50 text-emerald-600"
             />
 
             <SummaryCard
               icon={Package}
               label="Active Shipments"
-              value="6"
+              value={String(activeShipments.length)}
               iconStyle="bg-amber-50 text-amber-600"
             />
           </section>
@@ -277,22 +273,22 @@ function AgentDashboard() {
                 </div>
 
                 <Link
-                  to="/agent-requests"
+                  to="/agent-marketplace"
                   className="inline-flex items-center gap-1 text-xs font-bold text-[#173563] hover:text-blue-700"
                 >
                   View all
-                  <ChevronRight size={15} />
+                  <CaretRight size={15} />
                 </Link>
               </div>
 
               <div className="divide-y divide-slate-100">
-                {demoRequests.map((request) => (
-                  <RequestRow
-                    key={request.id}
-                    request={request}
-                    onClick={goToAgentRequests}
-                  />
-                ))}
+                {recentTenders.length === 0 ? (
+                  <p className="px-5 py-8 text-center text-sm text-slate-400">No open requests right now.</p>
+                ) : (
+                  recentTenders.map((tender) => (
+                    <RequestRow key={tender.id} tender={tender} onClick={goToMarketplace} />
+                  ))
+                )}
               </div>
             </section>
 
@@ -307,10 +303,10 @@ function AgentDashboard() {
 
               <div className="mt-5 space-y-2">
                 <QuickAction
-                  icon={Search}
+                  icon={MagnifyingGlass}
                   title="Browse SME Requests"
                   description="Find new import opportunities"
-                  onClick={goToAgentRequests}
+                  onClick={goToMarketplace}
                   iconStyle="bg-blue-50 text-blue-600"
                 />
 
@@ -359,17 +355,16 @@ function AgentDashboard() {
                   className="inline-flex items-center gap-1 text-xs font-bold text-[#173563] hover:text-blue-700"
                 >
                   View all
-                  <ChevronRight size={15} />
+                  <CaretRight size={15} />
                 </Link>
               </div>
 
               <div className="divide-y divide-slate-100">
-                {demoBids.map((bid) => (
-                  <BidRow
-                    key={bid.id}
-                    bid={bid}
-                  />
-                ))}
+                {recentBids.length === 0 ? (
+                  <p className="px-5 py-8 text-center text-sm text-slate-400">No bids submitted yet.</p>
+                ) : (
+                  recentBids.map((bid) => <BidRow key={bid.id} bid={bid} />)
+                )}
               </div>
             </section>
 
@@ -391,22 +386,34 @@ function AgentDashboard() {
                   className="inline-flex items-center gap-1 text-xs font-bold text-[#173563] hover:text-blue-700"
                 >
                   View all
-                  <ChevronRight size={15} />
+                  <CaretRight size={15} />
                 </button>
               </div>
 
               <div className="divide-y divide-slate-100">
-                {demoShipments.map((shipment) => (
-                  <ShipmentRow
-                    key={shipment.id}
-                    shipment={shipment}
-                  />
-                ))}
+                {activeShipments.length === 0 ? (
+                  <p className="px-5 py-8 text-center text-sm text-slate-400">No active shipments right now.</p>
+                ) : (
+                  activeShipments.slice(0, 3).map((shipment) => (
+                    <ShipmentRow
+                      key={shipment.id}
+                      shipment={{
+                        id: shipment.reference || shipment.id,
+                        company: shipment.importerName || "—",
+                        product: shipment.description || "Shipment",
+                        status: STAGE_LABELS[shipment.currentStage] || shipment.currentStage,
+                        progress: Math.round(
+                          ((stageIndex(shipment.currentStage) + 1) / STAGE_ORDER.length) * 100
+                        ),
+                      }}
+                    />
+                  ))
+                )}
               </div>
             </section>
           </div>
 
-          <div className="mt-9 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-[10px] text-slate-400">
+          <div className="mt-9 flex items-center justify-center border-t border-slate-200 pt-6 text-center text-[11px] text-slate-400">
             ImportEase · Agency Member Platform
           </div>
         </div>
@@ -425,7 +432,7 @@ function SummaryCard({
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)]">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-semibold text-slate-400">
+          <p className="text-[11px] font-semibold text-slate-400">
             {label}
           </p>
 
@@ -439,7 +446,6 @@ function SummaryCard({
         >
           <Icon
             size={19}
-            strokeWidth={1.8}
           />
         </div>
       </div>
@@ -447,10 +453,7 @@ function SummaryCard({
   );
 }
 
-function RequestRow({
-  request,
-  onClick,
-}) {
+function RequestRow({ tender, onClick }) {
   return (
     <button
       type="button"
@@ -463,35 +466,31 @@ function RequestRow({
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-sm font-bold text-slate-800">
-            {request.product}
+          <p className="truncate text-sm font-bold text-slate-800">
+            {tender.description || "Shipment request"}
           </p>
 
-          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-bold text-blue-600">
-            NEW
+          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600">
+            OPEN
           </span>
         </div>
 
         <p className="mt-1 text-xs text-slate-500">
-          {request.company} · {request.origin} → {request.destination}
+          {tender.hsCode ? `HS Code ${tender.hsCode}` : "No HS code provided"} · {tender.origin || "-"} → {tender.port || "-"}
         </p>
 
-        <p className="mt-1 text-[10px] text-slate-400">
-          {request.id} · {request.posted}
-        </p>
+        <p className="mt-1 text-[11px] text-slate-400">Posted {timeAgo(tender.postedAt)}</p>
       </div>
 
       <div className="hidden text-right sm:block">
         <p className="text-xs font-bold text-slate-700">
-          {request.value}
+          USD {Number(tender.declaredValue || 0).toLocaleString()}
         </p>
 
-        <p className="mt-1 text-[10px] text-slate-400">
-          Cargo value
-        </p>
+        <p className="mt-1 text-[11px] text-slate-400">CIF value</p>
       </div>
 
-      <ChevronRight
+      <CaretRight
         size={17}
         className="shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-[#173563]"
       />
@@ -517,7 +516,6 @@ function QuickAction({
       >
         <Icon
           size={17}
-          strokeWidth={1.8}
         />
       </div>
 
@@ -526,12 +524,12 @@ function QuickAction({
           {title}
         </p>
 
-        <p className="mt-0.5 text-[10px] text-slate-400">
+        <p className="mt-0.5 text-[11px] text-slate-400">
           {description}
         </p>
       </div>
 
-      <ChevronRight
+      <CaretRight
         size={15}
         className="text-slate-300 transition group-hover:translate-x-1"
       />
@@ -541,38 +539,37 @@ function QuickAction({
 
 function BidRow({ bid }) {
   const statusStyles = {
-    Accepted: "bg-emerald-50 text-emerald-700",
-    "Under Review": "bg-amber-50 text-amber-700",
-    Submitted: "bg-blue-50 text-blue-700",
+    accepted: "bg-emerald-50 text-emerald-700",
+    pending: "bg-amber-50 text-amber-700",
+    rejected: "bg-red-50 text-red-600",
+  };
+  const statusLabel = {
+    accepted: "Accepted",
+    pending: "Under Review",
+    rejected: "Rejected",
   };
 
   return (
     <div className="flex items-center gap-4 p-5">
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
-        <DollarSign size={19} />
+        <CurrencyDollar size={19} />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-bold text-slate-800">
-          {bid.company}
-        </p>
+        <p className="text-sm font-bold text-slate-800">Tender {bid.tenderId}</p>
 
-        <p className="mt-1 text-[10px] text-slate-400">
-          {bid.id} · {bid.request}
-        </p>
+        <p className="mt-1 text-[11px] text-slate-400">{bid.clearanceTimelineHours} hours clearance</p>
       </div>
 
       <div className="text-right">
-        <p className="text-xs font-bold text-slate-700">
-          {bid.amount}
-        </p>
+        <p className="text-xs font-bold text-slate-700">Rs. {Number(bid.feeLkr || 0).toLocaleString()}</p>
 
         <span
-          className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[9px] font-semibold ${
+          className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${
             statusStyles[bid.status] || "bg-slate-100 text-slate-500"
           }`}
         >
-          {bid.status}
+          {statusLabel[bid.status] || bid.status}
         </span>
       </div>
     </div>
@@ -594,30 +591,30 @@ function ShipmentRow({ shipment }) {
                 {shipment.product}
               </p>
 
-              <p className="mt-1 text-[10px] text-slate-400">
+              <p className="mt-1 text-[11px] text-slate-400">
                 {shipment.id} · {shipment.company}
               </p>
             </div>
 
-            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-semibold text-blue-700">
+            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
               {shipment.status}
             </span>
           </div>
 
           <div className="mt-4">
             <div className="mb-1.5 flex justify-between">
-              <span className="text-[10px] font-medium text-slate-400">
+              <span className="text-[11px] font-medium text-slate-400">
                 Progress
               </span>
 
-              <span className="text-[10px] font-bold text-slate-600">
+              <span className="text-[11px] font-bold text-slate-600">
                 {shipment.progress}%
               </span>
             </div>
 
             <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
               <div
-                className="h-full rounded-full bg-[#173563]"
+                className="h-full rounded-full bg-emerald-600"
                 style={{
                   width: `${shipment.progress}%`,
                 }}

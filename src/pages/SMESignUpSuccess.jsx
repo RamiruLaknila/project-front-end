@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Check,
-  Mail,
+  EnvelopeSimple,
   ShieldCheck,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 function SMESignUpSuccess() {
   return (
@@ -30,7 +30,7 @@ function SMESignUpSuccess() {
               className="flex items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#173563] focus-visible:ring-offset-2"
             >
               <img
-                src="/logo.jpeg"
+                src="/logo.png"
                 alt="ImportEase"
                
                 className="h-16 w-16 object-contain mix-blend-multiply sm:h-[72px] sm:w-[72px]"
@@ -59,7 +59,6 @@ function SMESignUpSuccess() {
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500">
                   <Check
                     className="h-6 w-6 text-white"
-                    strokeWidth={3}
                   />
                 </div>
               </div>
@@ -71,7 +70,7 @@ function SMESignUpSuccess() {
             <div className="mt-7 text-center">
 
               <div className="mb-2 flex justify-center">
-                <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
+                <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
                   Account created
                 </span>
               </div>
@@ -97,7 +96,7 @@ function SMESignUpSuccess() {
               <div className="flex items-start gap-3">
 
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white border border-slate-200">
-                  <Mail className="h-4 w-4 text-[#173563]" />
+                  <EnvelopeSimple className="h-4 w-4 text-[#173563]" />
                 </div>
 
                 <div>
@@ -138,7 +137,7 @@ function SMESignUpSuccess() {
 
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
 
-              <p className="text-[11px] leading-5 text-slate-400">
+              <p className="text-[12px] leading-5 text-slate-400">
                 Your account information is securely handled
                 within ImportEase.
               </p>
