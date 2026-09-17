@@ -97,8 +97,8 @@ function Home() {
                 duration: 0.4,
                 ease: "easeOut",
               }}
-              style={{ fontFamily: '"Fraunces", Georgia, serif' }}
-              className="text-[37px] font-semibold tracking-tight sm:text-[41px]"
+              style={{ fontFamily: '"Inter", sans-serif' }}
+              className="text-[32px] font-bold tracking-tight sm:text-[37px] lg:text-[41px]"
             >
               Import
               <span className="text-[#F5C518]">Ease</span>
@@ -117,10 +117,10 @@ function Home() {
               {/* Headline */}
               <motion.h1
                 variants={leftItem}
-                style={{ fontFamily: '"Fraunces", Georgia, serif' }}
-                className="text-[35px] font-semibold leading-[1.25] tracking-tight text-white sm:text-[41px]"
+                style={{ fontFamily: '"Inter", sans-serif' }}
+                className="text-[28px] font-bold leading-[1.25] tracking-tight text-white sm:text-[35px] lg:text-[41px]"
               >
-                Import clearing,
+                Import clearing
                 <br />
                 simplified for everyone.
               </motion.h1>
@@ -239,7 +239,7 @@ function Home() {
                 delay: 0.3,
                 ease: "easeOut",
               }}
-              className="mb-2 h-30 w-auto object-contain sm:h-24"
+              className="mb-2 h-14 w-auto max-w-[45%] object-contain sm:h-20 md:h-24"
             />
 
             {/* Heading */}
@@ -251,8 +251,8 @@ function Home() {
                 delay: 0.35,
                 ease: "easeOut",
               }}
-              style={{ fontFamily: '"Fraunces", Georgia, serif' }}
-              className="mt-4 text-[32px] font-semibold text-[#173563] sm:text-[44px]"
+              style={{ fontFamily: '"Inter", sans-serif' }}
+              className="mt-4 text-[28px] font-bold text-[#173563] sm:text-[36px] lg:text-[44px]"
             >
               Welcome
             </motion.h2>

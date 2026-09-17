@@ -96,22 +96,22 @@ function SidebarContent({
   return (
     <div className="flex h-full flex-col">
       {/* Brand */}
-      <div className="flex h-[70px] shrink-0 items-center justify-between border-b border-slate-200 px-6">
+      <div className="flex h-[70px] shrink-0 items-center justify-between border-b border-slate-200 px-6 dark:border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white">
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white dark:bg-slate-800">
             <img
-              src="/logo.png"
+              src={darkMode ? "/image.png" : "/logo.png"}
               alt="ImportEase"
               className="h-full w-full object-contain"
             />
           </div>
 
           <div>
-            <p className="text-[18px] font-extrabold tracking-tight text-[#173563]">
+            <p className="text-[18px] font-extrabold tracking-tight text-[#173563] dark:text-white">
               ImportEase
             </p>
 
-            <p className="mt-0.5 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+            <p className="mt-0.5 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
               Clearing Agent
             </p>
           </div>
@@ -120,7 +120,7 @@ function SidebarContent({
         <button
           type="button"
           onClick={toggleDarkMode}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-[#173563]"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-[#173563] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
           aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
           {darkMode ? (
@@ -133,7 +133,7 @@ function SidebarContent({
 
       {/* Main Navigation */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
-        <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+        <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
           Workspace
         </p>
 
@@ -150,7 +150,7 @@ function SidebarContent({
                   `group flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold transition-all ${
                     isActive
                       ? "bg-[#173563] text-white shadow-sm"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-[#173563]"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-[#173563] dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                   }`
                 }
               >
@@ -160,7 +160,7 @@ function SidebarContent({
                       className={`h-[18px] w-[18px] shrink-0 ${
                         isActive
                           ? "text-white"
-                          : "text-slate-400 group-hover:text-[#173563]"
+                          : "text-slate-400 group-hover:text-[#173563] dark:text-slate-500 dark:group-hover:text-white"
                       }`}
                     />
 
@@ -184,10 +184,10 @@ function SidebarContent({
       </div>
 
       {/* Agent Info + Settings */}
-      <div className="shrink-0 border-t border-slate-200">
+      <div className="shrink-0 border-t border-slate-200 dark:border-slate-800">
         {/* Agent Info */}
         <div className="px-5 py-4">
-          <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
+          <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-800">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#173563] text-sm font-bold text-white shadow-sm">
               {agent?.photo ||
               agent?.profilePhoto ||
@@ -207,14 +207,14 @@ function SidebarContent({
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold text-slate-800">
+              <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
                 {agentName}
               </p>
 
               <div className="mt-0.5 flex items-center gap-1.5">
                 <ShieldCheck className="h-3.5 w-3.5 text-[#2563EB]" />
 
-                <p className="truncate text-xs font-medium text-slate-500">
+                <p className="truncate text-xs font-medium text-slate-500 dark:text-slate-400">
                   Agency Member
                 </p>
               </div>
@@ -237,7 +237,7 @@ function SidebarContent({
                     `group flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold transition-all ${
                       isActive
                         ? "bg-[#173563] text-white"
-                        : "text-slate-600 hover:bg-slate-100 hover:text-[#173563]"
+                        : "text-slate-600 hover:bg-slate-100 hover:text-[#173563] dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                     }`
                   }
                 >
@@ -247,7 +247,7 @@ function SidebarContent({
                         className={`h-[18px] w-[18px] shrink-0 ${
                           isActive
                             ? "text-white"
-                            : "text-slate-400 group-hover:text-[#173563]"
+                            : "text-slate-400 group-hover:text-[#173563] dark:text-slate-500 dark:group-hover:text-white"
                         }`}
                       />
 
@@ -299,6 +299,7 @@ const getStoredAgency = () => {
 };
 
 function AgentMemberSidebar() {
+  const { darkMode } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user } = useAuth();
   const unreadCount = useUnreadNotifications(user?.id);
@@ -353,7 +354,7 @@ function AgentMemberSidebar() {
       />
 
       {/* Desktop Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[260px] border-r border-slate-200 bg-white lg:block">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[260px] border-r border-slate-200 bg-white lg:block dark:border-slate-800 dark:bg-slate-900">
         <SidebarContent
           agent={agent}
           agencyName={agencyName}
@@ -363,22 +364,22 @@ function AgentMemberSidebar() {
       </aside>
 
       {/* Mobile Header */}
-      <div className="fixed left-0 right-0 top-0 z-30 flex h-[68px] items-center justify-between border-b border-slate-200 bg-white px-4 lg:hidden">
+      <div className="fixed left-0 right-0 top-0 z-30 flex h-[68px] items-center justify-between border-b border-slate-200 bg-white px-4 lg:hidden dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg bg-white">
+          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg bg-white dark:bg-slate-800">
             <img
-              src="/logo.png"
+              src={darkMode ? "/image.png" : "/logo.png"}
               alt="ImportEase"
               className="h-full w-full object-contain"
             />
           </div>
 
           <div>
-            <p className="text-base font-extrabold text-[#173563]">
+            <p className="text-base font-extrabold text-[#173563] dark:text-white">
               ImportEase
             </p>
 
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500">
               Clearing Agent
             </p>
           </div>
@@ -387,7 +388,7 @@ function AgentMemberSidebar() {
         <button
           type="button"
           onClick={() => setSidebarOpen(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
           aria-label="Open menu"
         >
           <List className="h-5 w-5" />
@@ -404,7 +405,7 @@ function AgentMemberSidebar() {
 
       {/* Mobile Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-[60] w-[280px] bg-white shadow-2xl transition-transform duration-300 lg:hidden ${
+        className={`fixed inset-y-0 left-0 z-[60] w-[280px] bg-white shadow-2xl transition-transform duration-300 lg:hidden dark:bg-slate-900 ${
           sidebarOpen
             ? "translate-x-0"
             : "-translate-x-full"
@@ -414,7 +415,7 @@ function AgentMemberSidebar() {
           <button
             type="button"
             onClick={closeMobileSidebar}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />
