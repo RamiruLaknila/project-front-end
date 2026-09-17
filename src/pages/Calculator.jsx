@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
@@ -82,7 +82,9 @@ function ImportCalculator() {
   // import data, and showing its numbers next to a different code's summary
   // would be actively wrong, not just stale.
   const savedCalc =
-    importData?.calculator?.hsCode === importData?.hsCode ? importData.calculator : null;
+    importData?.calculator && importData.calculator.hsCode === importData.hsCode
+      ? importData.calculator
+      : null;
 
   const [form, setForm] = useState(() =>
     savedCalc
@@ -104,7 +106,7 @@ function ImportCalculator() {
   ========================================================= */
 
   const [codeDetail, setCodeDetail] = useState(null);
-  const [detailLoading, setDetailLoading] = useState(true);
+  const [detailLoading, setDetailLoading] = useState(() => Boolean(importData?.hsCode));
   const [detailError, setDetailError] = useState("");
 
   useEffect(() => {
@@ -218,6 +220,7 @@ function ImportCalculator() {
     setCalcError("");
 
     if (!importData?.hsCode) {
+      setCalcError("Select an HS code first to calculate your import cost.");
       return;
     }
 
@@ -295,10 +298,6 @@ function ImportCalculator() {
   const continueToAgent = () => {
     navigate("/find-agent");
   };
-
-  if (hsCodeMissing) {
-    return <Navigate to="/hs-code-search" replace />;
-  }
 
   return (
     <div className="min-h-screen bg-[#F6F8FB] text-slate-900">
@@ -462,12 +461,27 @@ function ImportCalculator() {
               to="/hs-code-search"
               className="shrink-0 text-[12px] font-semibold text-[#173B6C] hover:underline"
             >
-              Change
+              {hsCodeMissing ? "Select HS code" : "Change"}
             </Link>
           </div>
 
           <div className="p-5">
-            {detailLoading ? (
+            {hsCodeMissing ? (
+              <div className="flex items-start gap-2">
+                <Info size={16} className="mt-0.5 shrink-0 text-slate-400" />
+                <p className="text-[12px] leading-5 text-slate-500">
+                  No HS code selected yet. You can still enter values below,
+                  or{" "}
+                  <Link
+                    to="/hs-code-search"
+                    className="font-semibold text-[#173B6C] hover:underline"
+                  >
+                    search for your product's HS code
+                  </Link>{" "}
+                  to get an accurate duty breakdown.
+                </p>
+              </div>
+            ) : detailLoading ? (
               <div className="flex items-center gap-2">
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-[#173B6C]" />
                 <p className="text-[12px] text-slate-400">Loading HS code details…</p>

@@ -114,8 +114,8 @@ function AppNavbar() {
       transition-colors duration-200
       ${
         active
-          ? "text-[#173563]"
-          : "text-slate-600 hover:text-[#2563EB]"
+          ? "text-[#173563] dark:text-white"
+          : "text-slate-600 hover:text-[#2563EB] dark:text-slate-300 dark:hover:text-blue-400"
       }
 
       after:absolute
@@ -148,14 +148,14 @@ function AppNavbar() {
       transition-all duration-200
       ${
         active
-          ? "bg-blue-50 text-[#173563] shadow-sm"
-          : "text-slate-700 hover:bg-slate-50 hover:text-[#2563EB]"
+          ? "bg-blue-50 text-[#173563] shadow-sm dark:bg-blue-950/40 dark:text-white"
+          : "text-slate-700 hover:bg-slate-50 hover:text-[#2563EB] dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-400"
       }
     `;
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/95">
       <NotificationBanner
         userId={user?.id}
         count={unreadCount}
@@ -175,9 +175,9 @@ function AppNavbar() {
           }}
         >
           {/* Logo Container */}
-          <div className="flex h-[48px] w-[48px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white sm:h-11 sm:w-11 lg:h-12 lg:w-12 dark:bg-slate-800">
             <img
-              src="/logo.png"
+              src={darkMode ? "/image.png" : "/logo.png"}
               alt="ImportEase"
               className="h-full w-full object-contain"
             />
@@ -185,11 +185,11 @@ function AppNavbar() {
 
           {/* Brand Name */}
           <div className="hidden sm:block">
-            <div className="text-[19px] font-bold leading-tight tracking-tight text-[#173563] transition-colors group-hover:text-[#2563EB]">
+            <div className="text-[17px] font-bold leading-tight tracking-tight text-[#173563] transition-colors group-hover:text-[#2563EB] lg:text-[19px] dark:text-white dark:group-hover:text-blue-400">
               ImportEase
             </div>
 
-            <div className="mt-0.5 text-[12px] font-medium leading-tight text-slate-500">
+            <div className="mt-0.5 text-[12px] font-medium leading-tight text-slate-500 dark:text-slate-400">
               Import smarter. Trade easier.
             </div>
           </div>
@@ -200,12 +200,12 @@ function AppNavbar() {
         ========================================================== */}
         <div className="hidden items-center gap-7 md:flex lg:gap-8">
 
-          {/* Dashboard */}
+          {/* Home */}
           <Link
             to="/dashboard"
             className={desktopNavClass("/dashboard")}
           >
-            Dashboard
+            Home
           </Link>
 
           {/* HS Code */}
@@ -252,7 +252,7 @@ function AppNavbar() {
           <button
             type="button"
             onClick={toggleDarkMode}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-[#2563EB]"
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-[#2563EB] dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-400"
             aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
           >
             {darkMode ? (
@@ -274,8 +274,8 @@ function AppNavbar() {
               transition-all duration-200
               ${
                 isActive("/notifications")
-                  ? "bg-blue-50 text-[#2563EB]"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-[#2563EB]"
+                  ? "bg-blue-50 text-[#2563EB] dark:bg-blue-950/40 dark:text-blue-400"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-[#2563EB] dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-400"
               }
             `}
             aria-label="Notifications"
@@ -284,7 +284,7 @@ function AppNavbar() {
 
             {/* Notification Dot -- only shown while there's a real unread notification */}
             {hasUnread && (
-              <span className="absolute right-[8px] top-[7px] h-2 w-2 rounded-full bg-[#2563EB] ring-2 ring-white" />
+              <span className="absolute right-[8px] top-[7px] h-2 w-2 rounded-full bg-[#2563EB] ring-2 ring-white dark:ring-slate-900" />
             )}
           </button>
 
@@ -305,8 +305,8 @@ function AppNavbar() {
                 transition-all duration-200
                 ${
                   isProfileOpen
-                    ? "bg-slate-100"
-                    : "hover:bg-slate-50"
+                    ? "bg-slate-100 dark:bg-slate-800"
+                    : "hover:bg-slate-50 dark:hover:bg-slate-800"
                 }
               `}
             >
@@ -316,7 +316,7 @@ function AppNavbar() {
                 <img
                   src={profile.photo}
                   alt={profile.fullName || "Profile"}
-                  className="h-10 w-10 rounded-full object-cover ring-2 ring-white shadow-sm"
+                  className="h-10 w-10 rounded-full object-cover ring-2 ring-white shadow-sm dark:ring-slate-800"
                 />
               ) : (
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#173563] text-sm font-bold text-white shadow-sm">
@@ -326,11 +326,11 @@ function AppNavbar() {
 
               {/* Profile Details */}
               <div className="hidden text-left lg:block">
-                <p className="max-w-[150px] truncate text-[15px] font-bold text-slate-800">
+                <p className="max-w-[150px] truncate text-[15px] font-bold text-slate-800 dark:text-slate-100">
                   {profile?.fullName || "User"}
                 </p>
 
-                <p className="max-w-[150px] truncate text-[13px] text-slate-500">
+                <p className="max-w-[150px] truncate text-[13px] text-slate-500 dark:text-slate-400">
                   {profile?.businessName || "SME Account"}
                 </p>
               </div>
@@ -340,6 +340,7 @@ function AppNavbar() {
                   h-4 w-4
                   text-slate-500
                   transition-transform duration-200
+                  dark:text-slate-400
                   ${isProfileOpen ? "rotate-180" : ""}
                 `}
               />
@@ -357,10 +358,10 @@ function AppNavbar() {
                 />
 
                 {/* Dropdown */}
-                <div className="absolute right-0 top-[58px] z-50 w-[280px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+                <div className="absolute right-0 top-[58px] z-50 w-[280px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900">
 
                   {/* Profile Header */}
-                  <div className="border-b border-slate-100 px-4 py-4">
+                  <div className="border-b border-slate-100 px-4 py-4 dark:border-slate-800">
                     <div className="flex items-center gap-3">
 
                       {profile?.photo ? (
@@ -376,11 +377,11 @@ function AppNavbar() {
                       )}
 
                       <div className="min-w-0">
-                        <p className="truncate text-[15px] font-bold text-slate-900">
+                        <p className="truncate text-[15px] font-bold text-slate-900 dark:text-slate-100">
                           {profile?.fullName || "User"}
                         </p>
 
-                        <p className="truncate text-[13px] text-slate-500">
+                        <p className="truncate text-[13px] text-slate-500 dark:text-slate-400">
                           {profile?.email || ""}
                         </p>
                       </div>
@@ -405,8 +406,8 @@ function AppNavbar() {
                         transition
                         ${
                           isActive("/profile")
-                            ? "bg-blue-50 text-[#2563EB]"
-                            : "text-slate-700 hover:bg-slate-50 hover:text-[#2563EB]"
+                            ? "bg-blue-50 text-[#2563EB] dark:bg-blue-950/40 dark:text-blue-400"
+                            : "text-slate-700 hover:bg-slate-50 hover:text-[#2563EB] dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-400"
                         }
                       `}
                     >
@@ -428,8 +429,8 @@ function AppNavbar() {
                         transition
                         ${
                           isActive("/settings")
-                            ? "bg-blue-50 text-[#2563EB]"
-                            : "text-slate-700 hover:bg-slate-50 hover:text-[#2563EB]"
+                            ? "bg-blue-50 text-[#2563EB] dark:bg-blue-950/40 dark:text-blue-400"
+                            : "text-slate-700 hover:bg-slate-50 hover:text-[#2563EB] dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-400"
                         }
                       `}
                     >
@@ -440,12 +441,12 @@ function AppNavbar() {
                   </div>
 
                   {/* Logout */}
-                  <div className="border-t border-slate-100 p-2">
+                  <div className="border-t border-slate-100 p-2 dark:border-slate-800">
 
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[15px] font-semibold text-red-600 transition hover:bg-red-50"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[15px] font-semibold text-red-600 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
                     >
                       <SignOut className="h-[18px] w-[18px]" />
                       Sign out
@@ -471,8 +472,8 @@ function AppNavbar() {
               transition-all duration-200
               ${
                 isMenuOpen
-                  ? "bg-slate-100 text-[#173563]"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-[#2563EB]"
+                  ? "bg-slate-100 text-[#173563] dark:bg-slate-800 dark:text-white"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-[#2563EB] dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-400"
               }
               md:hidden
             `}
@@ -491,17 +492,17 @@ function AppNavbar() {
           MOBILE MENU
       ========================================================== */}
       {isMenuOpen && (
-        <div className="border-t border-slate-200 bg-white md:hidden">
+        <div className="border-t border-slate-200 bg-white md:hidden dark:border-slate-800 dark:bg-slate-900">
 
           <div className="space-y-1 px-5 py-4">
 
-            {/* Dashboard */}
+            {/* Home */}
             <Link
               to="/dashboard"
               onClick={closeMobileMenu}
               className={mobileNavClass("/dashboard")}
             >
-              Dashboard
+              Home
             </Link>
 
             {/* HS Code */}
@@ -541,7 +542,7 @@ function AppNavbar() {
             </Link>
 
             {/* Divider */}
-            <div className="my-3 border-t border-slate-100" />
+            <div className="my-3 border-t border-slate-100 dark:border-slate-800" />
 
             {/* Profile */}
             <Link
@@ -567,7 +568,7 @@ function AppNavbar() {
             <button
               type="button"
               onClick={handleLogout}
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[16px] font-semibold text-red-600 transition hover:bg-red-50"
+              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[16px] font-semibold text-red-600 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
             >
               <SignOut className="h-5 w-5" />
               Sign out
