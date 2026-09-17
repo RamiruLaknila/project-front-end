@@ -18,13 +18,19 @@ import { authErrorMessage } from "../lib/authErrors";
 
 function AgencyCreate() {
   const navigate = useNavigate();
-  const { registerAgency } = useAuth();
+  const { registerAgency, completeGoogleAgency, firebaseUser, user } = useAuth();
+  // Signed in via Google but no backend profile yet -- finishing a Google
+  // signup here, so no new account/password needs to be created.
+  const isGoogleFlow = !!firebaseUser && !user;
 
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
 
-  const [formData, setFormData] = useState({
+  // firebaseUser/user are already resolved by the time this page mounts (no
+  // reload happens between the Google popup and reaching here), so the
+  // Google-flow prefill can be a lazy initial value instead of an effect.
+  const [formData, setFormData] = useState(() => ({
     agencyName: "",
     businessRegistrationNumber: "",
     agencyAddress: "",
@@ -35,14 +41,14 @@ function AgencyCreate() {
     licenseNumber: "",
     licenseExpiry: "",
 
-    ownerName: "",
-    ownerEmail: "",
+    ownerName: isGoogleFlow ? firebaseUser.displayName || "" : "",
+    ownerEmail: isGoogleFlow ? firebaseUser.email || "" : "",
     ownerPhone: "",
     ownerNic: "",
 
     password: "",
     confirmPassword: "",
-  });
+  }));
 
   const [errors, setErrors] = useState({});
 
@@ -125,16 +131,18 @@ function AgencyCreate() {
         newErrors.ownerNic = "NIC / ID number is required";
       }
 
-      if (!formData.password) {
-        newErrors.password = "Password is required";
-      } else if (formData.password.length < 8) {
-        newErrors.password = "Password must be at least 8 characters";
-      }
+      if (!isGoogleFlow) {
+        if (!formData.password) {
+          newErrors.password = "Password is required";
+        } else if (formData.password.length < 8) {
+          newErrors.password = "Password must be at least 8 characters";
+        }
 
-      if (!formData.confirmPassword) {
-        newErrors.confirmPassword = "Please confirm your password";
-      } else if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = "Passwords do not match";
+        if (!formData.confirmPassword) {
+          newErrors.confirmPassword = "Please confirm your password";
+        } else if (formData.password !== formData.confirmPassword) {
+          newErrors.confirmPassword = "Passwords do not match";
+        }
       }
     }
 
@@ -166,11 +174,13 @@ function AgencyCreate() {
     setSubmitting(true);
     try {
       // 1. Create the agency + its admin account. Sign-in email is the owner's.
-      const { agency } = await registerAgency({
-        companyName: formData.agencyName,
-        email: formData.ownerEmail,
-        password: formData.password,
-      });
+      const { agency } = isGoogleFlow
+        ? await completeGoogleAgency({ companyName: formData.agencyName })
+        : await registerAgency({
+            companyName: formData.agencyName,
+            email: formData.ownerEmail,
+            password: formData.password,
+          });
 
       // 2. Complete the agency profile -- this moves it from "incomplete" to
       //    "pending", awaiting a platform admin's review (agents can only
@@ -445,6 +455,7 @@ function AgencyCreate() {
                   placeholder="owner@example.com"
                   error={errors.ownerEmail}
                   required
+                  disabled={isGoogleFlow}
                 />
 
                 <InputField
@@ -470,50 +481,56 @@ function AgencyCreate() {
                   required
                 />
 
-                {/* Create Password */}
-                <PasswordField
-                  label="Create Password"
-                  value={formData.password}
-                  onChange={(value) =>
-                    updateField("password", value)
-                  }
-                  placeholder="Create a password"
-                  error={errors.password}
-                  showPassword={showPassword}
-                  setShowPassword={setShowPassword}
-                  required
-                />
+                {/* Password fields (email/password signup only -- a
+                    Google account has no password to set here) */}
+                {!isGoogleFlow && (
+                  <>
+                    <PasswordField
+                      label="Create Password"
+                      value={formData.password}
+                      onChange={(value) =>
+                        updateField("password", value)
+                      }
+                      placeholder="Create a password"
+                      error={errors.password}
+                      showPassword={showPassword}
+                      setShowPassword={setShowPassword}
+                      required
+                    />
 
-                {/* Confirm Password */}
-                <PasswordField
-                  label="Confirm Password"
-                  value={formData.confirmPassword}
-                  onChange={(value) =>
-                    updateField("confirmPassword", value)
-                  }
-                  placeholder="Re-enter your password"
-                  error={errors.confirmPassword}
-                  showPassword={showConfirmPassword}
-                  setShowPassword={setShowConfirmPassword}
-                  required
-                />
+                    <PasswordField
+                      label="Confirm Password"
+                      value={formData.confirmPassword}
+                      onChange={(value) =>
+                        updateField("confirmPassword", value)
+                      }
+                      placeholder="Re-enter your password"
+                      error={errors.confirmPassword}
+                      showPassword={showConfirmPassword}
+                      setShowPassword={setShowConfirmPassword}
+                      required
+                    />
+                  </>
+                )}
               </div>
 
               {/* Password Information */}
-              <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
-                <div className="flex gap-3">
-                  <ShieldCheck
-                    size={18}
-                    className="mt-0.5 shrink-0 text-blue-600"
-                  />
+              {!isGoogleFlow && (
+                <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+                  <div className="flex gap-3">
+                    <ShieldCheck
+                      size={18}
+                      className="mt-0.5 shrink-0 text-blue-600"
+                    />
 
-                  <p className="text-xs leading-5 text-blue-800">
-                    Your password must be at least 8 characters long.
-                    Keep it secure because you will use it to sign in
-                    to your clearing agency account.
-                  </p>
+                    <p className="text-xs leading-5 text-blue-800">
+                      Your password must be at least 8 characters long.
+                      Keep it secure because you will use it to sign in
+                      to your clearing agency account.
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Review Information */}
               <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
@@ -660,6 +677,7 @@ function InputField({
   type = "text",
   error,
   required = false,
+  disabled = false,
 }) {
   return (
     <div>
@@ -678,7 +696,8 @@ function InputField({
           onChange(event.target.value)
         }
         placeholder={placeholder}
-        className={`w-full rounded-xl border px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-2 ${
+        disabled={disabled}
+        className={`w-full rounded-xl border px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 ${
           error
             ? "border-red-300 focus:border-red-500 focus:ring-red-100"
             : "border-slate-200 focus:border-blue-500 focus:ring-blue-100"

@@ -6,6 +6,7 @@ import {
   Gavel,
   Package,
   Bell,
+  ChatCircle,
   Gear,
   List,
   Moon,
@@ -70,6 +71,11 @@ function SidebarContent({
       name: "Shipments",
       path: "/agent-shipments",
       icon: Package,
+    },
+    {
+      name: "Messages",
+      path: "/agent-messages",
+      icon: ChatCircle,
     },
     {
       name: "Notifications",

@@ -12,9 +12,12 @@ import {
   FloppyDisk,
   ShieldCheck,
   SignOut,
+  Trash,
   UserCircle,
 } from "@phosphor-icons/react";
 import IndividualAgentSidebar from "../components/IndividualAgentSidebar";
+import { useAuth } from "../context/AuthContext";
+import { authErrorMessage } from "../lib/authErrors";
 
 function getStoredAgent() {
   try {
@@ -68,8 +71,25 @@ function getInitials(name) {
 
 function IndividualAgentSettings() {
   const navigate = useNavigate();
+  const { deleteAccount } = useAuth();
 
   const [agent, setAgent] = useState(getStoredAgent);
+
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      await deleteAccount();
+      navigate("/", { replace: true });
+    } catch (err) {
+      setDeleteError(authErrorMessage(err, "Could not delete your account."));
+      setDeleting(false);
+    }
+  };
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -805,11 +825,70 @@ function IndividualAgentSettings() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-50"
+                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-bold text-red-600 transition hover:bg-red-50"
               >
-                <SignOut size={16} />
+                <SignOut size={13} />
                 Log Out
               </button>
+            </div>
+          </section>
+
+          {/* =====================================================
+              DELETE ACCOUNT
+          ===================================================== */}
+          <section className="mt-6 rounded-2xl border border-red-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)] sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                  <Trash size={19} />
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-bold text-slate-800">
+                    Delete Account
+                  </h3>
+
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    Permanently delete your account. This cannot be undone.
+                  </p>
+
+                  {deleteError && (
+                    <p className="mt-2 text-xs font-medium text-red-600">
+                      {deleteError}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {!confirmingDelete ? (
+                <button
+                  type="button"
+                  onClick={() => setConfirmingDelete(true)}
+                  className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-bold text-red-600 transition hover:bg-red-50"
+                >
+                  <Trash size={13} />
+                  Delete Account
+                </button>
+              ) : (
+                <div className="flex shrink-0 items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleDeleteAccount}
+                    disabled={deleting}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {deleting ? "Deleting..." : "Yes, delete"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingDelete(false)}
+                    disabled={deleting}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
             </div>
           </section>
         </div>

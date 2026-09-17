@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
@@ -17,82 +17,75 @@ import {
 } from "@phosphor-icons/react";
 
 import AppNavbar from "../components/ui/AppNavbar";
+import { useAuth } from "../context/AuthContext";
+import { api } from "../lib/api";
+import { formatChatTime } from "../lib/utils";
+
+// Polling instead of a live socket/Firestore listener -- consistent with
+// how the rest of the app (Notifications) works: plain REST, no streaming
+// infrastructure exists yet. Messages re-fetch on this interval while a
+// conversation is open so replies show up without a manual refresh.
+const MESSAGE_POLL_MS = 4000;
+const CONVERSATION_POLL_MS = 10000;
+
+function getInitials(name) {
+  if (!name) return "CA";
+  const words = name.trim().split(/\s+/);
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
+}
 
 function Messages() {
+  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+
   const [search, setSearch] = useState("");
   const [message, setMessage] = useState("");
 
-  const [conversations, setConversations] = useState([
-    {
-      id: 1,
-      agentName: "Nimal Perera",
-      agency: "Colombo Customs Solutions",
-      initials: "NP",
-      status: "Online",
-      shipmentId: "IMP-204821",
-      product: "Laptop computers - 50 units",
-      lastMessage:
-        "I have reviewed your shipment details. We can proceed with the clearance.",
-      lastTime: "10:42 AM",
-      unread: 2,
-    },
-    {
-      id: 2,
-      agentName: "John doe",
-      agency: "LankaClear Logistics",
-      initials: "KF",
-      status: "Offline",
-      shipmentId: "IMP-204615",
-      product: "Automotive spare parts",
-      lastMessage:
-        "Please send the commercial invoice when available.",
-      lastTime: "Yesterday",
-      unread: 0,
-    },
-  ]);
+  // A "conversation" is just a shipment that already has an agent assigned --
+  // there's no separate conversation entity on the backend.
+  const [shipments, setShipments] = useState([]);
+  const [conversationsError, setConversationsError] = useState("");
 
-  const [selectedConversationId, setSelectedConversationId] =
-    useState(1);
-
-  const [messages, setMessages] = useState({
-    1: [
-      {
-        id: 1,
-        sender: "agent",
-        text: "Hello! Thank you for selecting Colombo Customs Solutions.",
-        time: "10:31 AM",
-      },
-      {
-        id: 2,
-        sender: "me",
-        text: "Hi Nimal. I wanted to confirm whether you need any additional documents for this shipment.",
-        time: "10:34 AM",
-      },
-      {
-        id: 3,
-        sender: "agent",
-        text: "I have reviewed your shipment details. We can proceed with the clearance.",
-        time: "10:42 AM",
-      },
-    ],
-
-    2: [
-      {
-        id: 1,
-        sender: "agent",
-        text: "Please send the commercial invoice when available.",
-        time: "Yesterday",
-      },
-    ],
-  });
-
-  const selectedConversation = conversations.find(
-    (conversation) =>
-      conversation.id === selectedConversationId
+  const [selectedConversationId, setSelectedConversationId] = useState(
+    searchParams.get("shipment") || null
   );
 
-  const selectedMessages =
-    messages[selectedConversationId] || [];
+  const [messages, setMessages] = useState([]);
+  const [messagesError, setMessagesError] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const conversations = useMemo(
+    () =>
+      shipments
+        .filter((s) => s.agentId)
+        .map((s) => ({
+          id: s.id,
+          agentName: s.agentName || "Clearing Agent",
+          agency: s.agencyName || "",
+          initials: getInitials(s.agentName),
+          shipmentId: s.reference || s.id,
+          product: s.description || "",
+          lastMessage: s.lastMessage || "No messages yet",
+          lastTime: formatChatTime(s.lastMessageAt || s.createdAt),
+          unread: 0,
+          sortKey: s.lastMessageAt || s.createdAt || "",
+        }))
+        .sort((a, b) => (a.sortKey < b.sortKey ? 1 : -1)),
+    [shipments]
+  );
+
+  // Default to the first conversation when nothing has been explicitly
+  // picked yet -- derived instead of set from an effect, so there's no
+  // extra render or risk of it drifting out of sync with `conversations`.
+  const effectiveConversationId =
+    selectedConversationId || conversations[0]?.id || null;
+
+  const selectedConversation = conversations.find(
+    (conversation) => conversation.id === effectiveConversationId
+  );
+
+  const selectedMessages = messages;
 
   const filteredConversations = useMemo(() => {
     const value = search.toLowerCase().trim();
@@ -115,61 +108,101 @@ function Messages() {
     });
   }, [conversations, search]);
 
+  // Load + keep the conversation list fresh (new agent assignments, other
+  // side's last-message preview).
+  useEffect(() => {
+    let active = true;
+
+    const load = async () => {
+      try {
+        const data = await api.get("/shipments");
+        if (active) {
+          setShipments(data);
+          setConversationsError("");
+        }
+      } catch (err) {
+        if (active) {
+          setConversationsError(err.message || "Could not load conversations.");
+        }
+      }
+    };
+
+    load();
+    const interval = setInterval(load, CONVERSATION_POLL_MS);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Load + poll messages for whichever conversation is selected.
+  useEffect(() => {
+    if (!effectiveConversationId) {
+      return;
+    }
+
+    let active = true;
+
+    const load = async () => {
+      try {
+        const data = await api.get(`/shipments/${effectiveConversationId}/messages`);
+        if (active) {
+          setMessages(data);
+          setMessagesError("");
+        }
+      } catch (err) {
+        if (active) {
+          setMessagesError(err.message || "Could not load messages.");
+        }
+      }
+    };
+
+    load();
+    const interval = setInterval(load, MESSAGE_POLL_MS);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [effectiveConversationId]);
+
   const selectConversation = (id) => {
     setSelectedConversationId(id);
-
-    setConversations((current) =>
-      current.map((conversation) =>
-        conversation.id === id
-          ? {
-              ...conversation,
-              unread: 0,
-            }
-          : conversation
-      )
-    );
+    setMessages([]); // avoid flashing the previous conversation's messages
   };
 
-  const sendMessage = (e) => {
+  const sendMessage = async (e) => {
     e.preventDefault();
 
     const cleanMessage = message.trim();
 
-    if (!cleanMessage || !selectedConversation) {
+    if (!cleanMessage || !selectedConversation || sending) {
       return;
     }
 
-    const newMessage = {
-      id: Date.now(),
-      sender: "me",
-      text: cleanMessage,
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
+    setSending(true);
+    try {
+      const sent = await api.post(
+        `/shipments/${effectiveConversationId}/messages`,
+        { text: cleanMessage }
+      );
 
-    setMessages((current) => ({
-      ...current,
-      [selectedConversationId]: [
-        ...(current[selectedConversationId] || []),
-        newMessage,
-      ],
-    }));
+      setMessages((current) => [...current, sent]);
 
-    setConversations((current) =>
-      current.map((conversation) =>
-        conversation.id === selectedConversationId
-          ? {
-              ...conversation,
-              lastMessage: cleanMessage,
-              lastTime: "Just now",
-            }
-          : conversation
-      )
-    );
+      setShipments((current) =>
+        current.map((s) =>
+          s.id === effectiveConversationId
+            ? { ...s, lastMessage: cleanMessage, lastMessageAt: sent.createdAt }
+            : s
+        )
+      );
 
-    setMessage("");
+      setMessage("");
+      setMessagesError("");
+    } catch (err) {
+      setMessagesError(err.message || "Could not send your message.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -435,6 +468,12 @@ function Messages() {
 
               {/* CONVERSATION LIST */}
 
+              {conversationsError && (
+                <div className="mx-4 mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[10px] font-medium text-red-600">
+                  {conversationsError}
+                </div>
+              )}
+
               <div className="max-h-[540px] overflow-y-auto">
 
                 {filteredConversations.length > 0 ? (
@@ -444,7 +483,7 @@ function Messages() {
 
                       const isSelected =
                         conversation.id ===
-                        selectedConversationId;
+                        effectiveConversationId;
 
                       return (
 
@@ -545,11 +584,15 @@ function Messages() {
                     </div>
 
                     <p className="mt-3 text-xs font-bold text-slate-700">
-                      No conversations found
+                      {conversations.length === 0
+                        ? "No conversations yet"
+                        : "No conversations found"}
                     </p>
 
                     <p className="mt-1 text-[10px] text-slate-400">
-                      Try another search.
+                      {conversations.length === 0
+                        ? "Once a clearing agent is assigned to one of your shipments, you can message them here."
+                        : "Try another search."}
                     </p>
 
                   </div>
@@ -684,13 +727,22 @@ function Messages() {
 
                 <div className="flex-1 overflow-y-auto bg-[#FBFCFE] px-4 py-5 sm:px-6">
 
-                  <div className="mb-5 flex items-center justify-center">
-
-                    <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[9px] font-semibold text-slate-400">
-                      Today
+                  {messagesError && (
+                    <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-medium text-red-600">
+                      {messagesError}
                     </div>
+                  )}
 
-                  </div>
+                  {selectedMessages.length === 0 && !messagesError && (
+                    <div className="flex flex-col items-center justify-center py-10 text-center">
+                      <p className="text-xs font-semibold text-slate-500">
+                        No messages yet
+                      </p>
+                      <p className="mt-1 text-[11px] text-slate-400">
+                        Say hello to get the conversation started.
+                      </p>
+                    </div>
+                  )}
 
                   <div className="space-y-4">
 
@@ -698,7 +750,7 @@ function Messages() {
                       (item) => {
 
                         const isMe =
-                          item.sender === "me";
+                          item.senderId === user?.id;
 
                         return (
 
@@ -750,7 +802,7 @@ function Messages() {
                                       : "text-left"
                                   }`}
                                 >
-                                  {item.time}
+                                  {formatChatTime(item.createdAt)}
                                 </p>
 
                               </div>
@@ -812,7 +864,7 @@ function Messages() {
 
                     <button
                       type="submit"
-                      disabled={!message.trim()}
+                      disabled={!message.trim() || sending}
                       className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#173563] text-white shadow-sm transition hover:bg-[#102A4D] disabled:cursor-not-allowed disabled:opacity-40"
                       title="Send message"
                     >
