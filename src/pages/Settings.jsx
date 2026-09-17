@@ -7,7 +7,9 @@ import {
   SignOut,
   Moon,
   Sun,
+  Trash,
   User,
+  Warning,
 } from "@phosphor-icons/react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
@@ -19,12 +21,16 @@ function Settings() {
   const navigate = useNavigate();
 
   const { darkMode, toggleDarkMode } = useTheme();
-  const { user, resetPassword } = useAuth();
+  const { user, resetPassword, deleteAccount } = useAuth();
 
   const [notifications, setNotifications] = useState(true);
   const [emailUpdates, setEmailUpdates] = useState(true);
   const [pwStatus, setPwStatus] = useState("idle"); // idle | sending | sent | error
   const [pwError, setPwError] = useState("");
+
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   const handleChangePassword = async () => {
     if (!user?.email || pwStatus === "sending") return;
@@ -45,6 +51,18 @@ function Settings() {
     localStorage.removeItem("selectedAgent");
 
     navigate("/");
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      await deleteAccount();
+      navigate("/", { replace: true });
+    } catch (err) {
+      setDeleteError(authErrorMessage(err, "Could not delete your account."));
+      setDeleting(false);
+    }
   };
 
   return (
@@ -252,15 +270,64 @@ function Settings() {
               </p>
             </div>
 
-            <div className="p-5">
+            <div className="space-y-3 p-5">
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-bold text-red-700 transition hover:bg-red-100 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/60"
+                className="flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-bold text-red-700 transition hover:bg-red-100 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/60"
               >
-                <SignOut size={15} />
+                <SignOut size={13} />
                 Sign out
               </button>
+
+              <div className="border-t border-red-100 pt-3 dark:border-red-950/60">
+                {deleteError && (
+                  <p className="mb-2 text-[11px] font-medium text-red-600 dark:text-red-400">
+                    {deleteError}
+                  </p>
+                )}
+
+                {!confirmingDelete ? (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingDelete(true)}
+                    className="flex items-center gap-1.5 rounded-lg border border-red-300 bg-white px-3 py-1.5 text-[11px] font-bold text-red-700 transition hover:bg-red-50 dark:border-red-900 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-950/30"
+                  >
+                    <Trash size={13} />
+                    Delete account
+                  </button>
+                ) : (
+                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/60 dark:bg-red-950/30">
+                    <div className="flex items-start gap-2">
+                      <Warning size={16} className="mt-0.5 shrink-0 text-red-600 dark:text-red-400" />
+                      <p className="text-xs leading-5 text-red-700 dark:text-red-400">
+                        This permanently deletes your account and profile.
+                        This cannot be undone.
+                      </p>
+                    </div>
+
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleDeleteAccount}
+                        disabled={deleting}
+                        className="rounded-lg bg-red-600 px-3 py-1.5 text-[11px] font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {deleting ? "Deleting..." : "Yes, delete my account"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingDelete(false)}
+                        disabled={deleting}
+                        className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-bold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-transparent dark:text-slate-300 dark:hover:bg-slate-800"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </section>
         </div>

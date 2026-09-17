@@ -5,59 +5,57 @@ import {
   ArrowRight,
   Buildings,
   CheckCircle,
-  ShieldCheck,
   Storefront,
 } from "@phosphor-icons/react";
 
 import { useAuth } from "../context/AuthContext";
-import { authErrorMessage, landingPathForProfile } from "../lib/authErrors";
+import { authErrorMessage } from "../lib/authErrors";
 
-function SignUp() {
+/**
+ * Shown right after a brand-new Google sign-in (no `users/{uid}` doc yet).
+ * Mirrors SignUp.jsx's two account-type cards, but the SME choice creates
+ * the minimal profile immediately (same shape /auth/register would have
+ * produced) and the agent choice hands off to the existing multi-step agent
+ * signup flow, which detects the signed-in-but-no-profile state itself.
+ */
+function GoogleRoleSelect() {
   const navigate = useNavigate();
-  const { loginWithGoogle } = useAuth();
-  const [googleError, setGoogleError] = useState("");
-  const [googleSubmitting, setGoogleSubmitting] = useState(false);
+  const { completeGoogleProfile, logout } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSME = () => {
-    localStorage.setItem("signupRole", "sme");
-    navigate("/sme-signup");
+  const handleSME = async () => {
+    setError("");
+    setSubmitting(true);
+    try {
+      await completeGoogleProfile({ role: "importer" });
+      navigate("/complete-profile", { replace: true });
+    } catch (err) {
+      setError(authErrorMessage(err, "Could not set up your account."));
+      setSubmitting(false);
+    }
   };
 
   const handleClearingAgent = () => {
-    localStorage.setItem("signupRole", "clearing-agent");
+    // Agent onboarding needs an agency-choice step before the profile is
+    // created, so it's handled by the existing signup pages, not here.
     navigate("/agent-signup");
   };
 
-  const handleGoogleSignUp = async () => {
-    setGoogleError("");
-    setGoogleSubmitting(true);
-    try {
-      const { isNewUser, profile } = await loginWithGoogle();
-      if (isNewUser) {
-        navigate("/google-role", { replace: true });
-        return;
-      }
-      // Already has an account -- Google acts as sign-in here too, same as
-      // clicking "Continue with Google" from the sign-in page would.
-      navigate(landingPathForProfile(profile), { replace: true });
-    } catch (err) {
-      if (err?.code === "auth/popup-closed-by-user" || err?.code === "auth/cancelled-popup-request") {
-        return;
-      }
-      setGoogleError(authErrorMessage(err, "Could not sign you up with Google."));
-    } finally {
-      setGoogleSubmitting(false);
-    }
+  const handleCancel = async () => {
+    // They backed out of picking a role -- sign the half-created Google
+    // session back out rather than leaving them stuck signed in with no
+    // profile (which would just 404-loop them back here on next visit).
+    await logout();
+    navigate("/signin", { replace: true });
   };
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#F8FAFC] px-4 py-8 font-sans antialiased sm:px-6 sm:py-10 lg:px-8">
-      {/* BACKGROUND DECORATION */}
       <div className="pointer-events-none absolute -left-40 -top-40 h-96 w-96 rounded-full bg-blue-100/40 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-slate-200/50 blur-3xl" />
 
       <div className="relative mx-auto w-full max-w-5xl">
-        {/* LOGO */}
         <div className="mb-7 flex justify-center">
           <Link
             to="/"
@@ -68,7 +66,6 @@ function SignUp() {
               alt="ImportEase"
               className="h-11 w-11 object-contain mix-blend-multiply sm:h-12 sm:w-12"
             />
-
             <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[30px]">
               Import
               <span className="text-[#173563]">Ease</span>
@@ -76,45 +73,43 @@ function SignUp() {
           </Link>
         </div>
 
-        {/* PAGE INTRO */}
         <div className="mx-auto mb-8 max-w-2xl text-center">
-          <div className="mb-3 flex justify-center">
-
-          </div>
-
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-            Create your ImportEase account
+            One last thing -- who are you?
           </h1>
-
-
+          <p className="mt-2 text-sm text-slate-500">
+            We couldn't find an ImportEase account for this Google account.
+            Tell us how you'll use ImportEase to finish setting it up.
+          </p>
         </div>
 
-        {/* ACCOUNT TYPE CARDS */}
+        {error && (
+          <div className="mx-auto mb-6 max-w-2xl rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600">
+            {error}
+          </div>
+        )}
+
         <div className="grid gap-5 md:grid-cols-2">
-          {/* SME CARD */}
           <button
             type="button"
             onClick={handleSME}
-            className="group flex min-h-[390px] flex-col rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#173563]/30 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#173563] focus-visible:ring-offset-2 sm:p-7"
+            disabled={submitting}
+            className="group flex min-h-[390px] flex-col rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#173563]/30 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#173563] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:p-7"
           >
             <div className="flex flex-1 flex-col">
-              {/* ICON + ARROW */}
               <div className="flex items-center justify-between">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-[#173563] transition-all duration-200 group-hover:border-[#173563] group-hover:bg-[#173563] group-hover:text-white">
                   <Storefront className="h-5 w-5" />
                 </div>
-
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 transition-all duration-200 group-hover:bg-blue-50">
                   <ArrowRight className="h-4 w-4 text-slate-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-[#173563]" />
                 </div>
               </div>
 
-              {/* TITLE */}
               <div className="mt-6">
                 <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-[24px]">
                   SME / Importer
                 </h2>
-
                 <p className="mt-2 text-sm leading-6 text-slate-500">
                   Register your business to simplify your importing process,
                   manage shipments, calculate costs and connect with clearing
@@ -122,12 +117,10 @@ function SignUp() {
                 </p>
               </div>
 
-              {/* FEATURES */}
               <div className="mt-6 border-t border-slate-100 pt-5">
                 <p className="mb-3 text-[12px] font-semibold uppercase tracking-wider text-slate-400">
                   With your SME account
                 </p>
-
                 <div className="space-y-3">
                   <RoleFeature text="Manage your import shipments" />
                   <RoleFeature text="Search HS codes and estimate costs" />
@@ -136,52 +129,44 @@ function SignUp() {
               </div>
             </div>
 
-            {/* FOOTER */}
             <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-5">
               <span className="text-sm font-semibold text-[#173563]">
-                Continue as SME
+                {submitting ? "Setting up..." : "Continue as SME"}
               </span>
-
-
             </div>
           </button>
 
-          {/* CLEARING AGENT CARD */}
           <button
             type="button"
             onClick={handleClearingAgent}
-            className="group flex min-h-[390px] flex-col rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#173563]/30 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#173563] focus-visible:ring-offset-2 sm:p-7"
+            disabled={submitting}
+            className="group flex min-h-[390px] flex-col rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#173563]/30 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#173563] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:p-7"
           >
             <div className="flex flex-1 flex-col">
-              {/* ICON + ARROW */}
               <div className="flex items-center justify-between">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-[#173563] transition-all duration-200 group-hover:border-[#173563] group-hover:bg-[#173563] group-hover:text-white">
                   <Buildings className="h-5 w-5" />
                 </div>
-
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 transition-all duration-200 group-hover:bg-blue-50">
                   <ArrowRight className="h-4 w-4 text-slate-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-[#173563]" />
                 </div>
               </div>
 
-              {/* TITLE */}
               <div className="mt-6">
                 <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-[24px]">
                   Clearing Agent
                 </h2>
-
                 <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Register as a professional clearing agent to work with SMEs,
-                  manage requests and grow your business through ImportEase.
+                  Register as a professional clearing agent to work with
+                  SMEs, manage requests and grow your business through
+                  ImportEase.
                 </p>
               </div>
 
-              {/* FEATURES */}
               <div className="mt-6 border-t border-slate-100 pt-5">
                 <p className="mb-3 text-[12px] font-semibold uppercase tracking-wider text-slate-400">
                   With your agent account
                 </p>
-
                 <div className="space-y-3">
                   <RoleFeature text="Create or join a clearing agency" />
                   <RoleFeature text="Manage your professional credentials" />
@@ -190,102 +175,36 @@ function SignUp() {
               </div>
             </div>
 
-            {/* FOOTER */}
             <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-5">
               <span className="text-sm font-semibold text-[#173563]">
                 Continue as Clearing Agent
               </span>
-
-
             </div>
           </button>
         </div>
 
-        {/* GOOGLE SIGN UP */}
-        <div className="mx-auto mt-6 max-w-md">
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-slate-200" />
-            <span className="text-xs font-medium text-slate-400">
-              OR CONTINUE WITH
-            </span>
-            <div className="h-px flex-1 bg-slate-200" />
-          </div>
-
-          {googleError && (
-            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600">
-              {googleError}
-            </div>
-          )}
-
+        <div className="mt-6 text-center">
           <button
             type="button"
-            onClick={handleGoogleSignUp}
-            disabled={googleSubmitting}
-            className="mt-4 flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white text-sm font-medium text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-400 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <svg className="h-5 w-5" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-              />
-            </svg>
-            <span>
-              {googleSubmitting ? "Connecting..." : "Continue with Google"}
-            </span>
-          </button>
-        </div>
-
-        {/* SIGN IN */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-slate-500">
-            Already have an account?{" "}
-            <Link
-              to="/"
-              className="font-semibold text-[#173563] underline decoration-[#173563]/30 underline-offset-4 transition-colors hover:text-blue-700 hover:decoration-blue-700"
-            >
-              Sign in
-            </Link>
-          </p>
-        </div>
-
-        {/* BACK HOME */}
-        <div className="mt-3 flex justify-center">
-          <Link
-            to="/"
+            onClick={handleCancel}
             className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium text-slate-400 transition-colors hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#173563] focus-visible:ring-offset-2"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Back to ImportEase
-          </Link>
+            Not you? Sign out and use a different account
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-/* FEATURE ITEM */
 function RoleFeature({ text }) {
   return (
     <div className="flex items-center gap-2.5">
       <CheckCircle className="h-4 w-4 shrink-0 text-emerald-600" />
-
-      <span className="text-sm font-medium text-slate-600">
-        {text}
-      </span>
+      <span className="text-sm font-medium text-slate-600">{text}</span>
     </div>
   );
 }
 
-export default SignUp;
+export default GoogleRoleSelect;

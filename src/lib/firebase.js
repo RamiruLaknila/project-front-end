@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 // Values come from .env.local (see .env.example). A Firebase Web API key is not
 // a secret -- it ships in the client bundle of every Firebase web app. Access is
@@ -24,3 +24,4 @@ if (!firebaseConfig.apiKey || !firebaseConfig.appId) {
 
 export const firebaseApp = initializeApp(firebaseConfig);
 export const auth = getAuth(firebaseApp);
+export const googleProvider = new GoogleAuthProvider();

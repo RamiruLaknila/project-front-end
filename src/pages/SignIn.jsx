@@ -16,7 +16,7 @@ import { authErrorMessage, landingPathForProfile } from "../lib/authErrors";
 function SignIn() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, loginWithGoogle, logout } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -58,6 +58,17 @@ function SignIn() {
     setSubmitting(true);
     try {
       const profile = await login(formData.email, formData.password, formData.remember);
+
+      if (profile?.role !== "importer") {
+        // Wrong page for this account -- sign back out instead of leaving
+        // them authenticated-but-blocked, and send them to the right one.
+        await logout();
+        setError(
+          "This is a Clearing Agent account. Please use the Clearing Agent sign in instead."
+        );
+        return;
+      }
+
       // If the guard sent them here, go back where they wanted; otherwise route
       // by the profile the backend just returned.
       const from = location.state?.from;
@@ -73,12 +84,37 @@ function SignIn() {
       GOOGLE SIGN IN CONNECTOR
   ========================================================= */
 
-  const handleGoogleSignIn = () => {
-    /* 
-      Integrate your actual OAuth/Firebase/Backend endpoint here:
-      e.g., window.location.href = `${process.env.REACT_APP_API_URL}/auth/google`;
-    */
-    setError("Google sign-in is not connected yet.");
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setSubmitting(true);
+    try {
+      const { isNewUser, profile } = await loginWithGoogle();
+      if (isNewUser) {
+        // No backend profile yet -- this Google account has never signed up.
+        // Send them to pick a role instead of a dead-end landing page.
+        navigate("/google-role", { replace: true });
+        return;
+      }
+
+      if (profile?.role !== "importer") {
+        await logout();
+        setError(
+          "This is a Clearing Agent account. Please use the Clearing Agent sign in instead."
+        );
+        return;
+      }
+
+      const from = location.state?.from;
+      navigate(from || landingPathForProfile(profile), { replace: true });
+    } catch (err) {
+      // A cancelled popup isn't a real error -- don't show it as one.
+      if (err?.code === "auth/popup-closed-by-user" || err?.code === "auth/cancelled-popup-request") {
+        return;
+      }
+      setError(authErrorMessage(err, "Could not sign you in with Google."));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -333,7 +369,8 @@ function SignIn() {
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white text-sm font-medium text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-400 active:scale-[0.99]"
+            disabled={submitting}
+            className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white text-sm font-medium text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-400 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path

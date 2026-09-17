@@ -23,11 +23,30 @@ import {
 } from "@phosphor-icons/react";
 
 import AgentAdminSidebar from "../components/AgentAdminSidebar";
+import { useAuth } from "../context/AuthContext";
+import { authErrorMessage } from "../lib/authErrors";
 
 function AgentAdminSettings() {
   const navigate = useNavigate();
+  const { deleteAccount } = useAuth();
   const [agency, setAgency] = useState(null);
   const [admin, setAdmin] = useState(null);
+
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      await deleteAccount();
+      navigate("/", { replace: true });
+    } catch (err) {
+      setDeleteError(authErrorMessage(err, "Could not delete your account."));
+      setDeleting(false);
+    }
+  };
 
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -1217,7 +1236,7 @@ function AgentAdminSettings() {
                     window.location.href =
                       "/";
                   }}
-                  className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                  className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 text-xs font-semibold text-red-600 transition hover:bg-red-50"
                 >
 
                   <span>Sign Out</span>
@@ -1225,6 +1244,58 @@ function AgentAdminSettings() {
                 </button>
 
               </div>
+
+              <div className="mt-4 flex flex-col gap-4 rounded-xl border border-red-100 bg-red-50/50 p-4 sm:flex-row sm:items-center sm:justify-between">
+
+                <div>
+
+                  <p className="text-sm font-bold text-slate-800">
+                    Delete account
+                  </p>
+
+                  <p className="mt-1 text-sm text-slate-500">
+                    Permanently delete your account. This cannot be undone.
+                  </p>
+
+                </div>
+
+                {!confirmingDelete ? (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingDelete(true)}
+                    className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+                  >
+                    <Trash size={13} />
+                    <span>Delete Account</span>
+                  </button>
+                ) : (
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleDeleteAccount}
+                      disabled={deleting}
+                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 text-xs font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {deleting ? "Deleting..." : "Yes, delete"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingDelete(false)}
+                      disabled={deleting}
+                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+
+              </div>
+
+              {deleteError && (
+                <p className="mt-3 text-sm font-medium text-red-600">
+                  {deleteError}
+                </p>
+              )}
 
             </div>
 

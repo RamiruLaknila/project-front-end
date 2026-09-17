@@ -14,10 +14,11 @@ import {
   setPersistence,
   signInWithCustomToken,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut,
 } from "firebase/auth";
 
-import { auth } from "../lib/firebase";
+import { auth, googleProvider } from "../lib/firebase";
 import { api, ApiError } from "../lib/api";
 
 /**
@@ -140,10 +141,54 @@ export function AuthProvider({ children }) {
     [refreshProfile]
   );
 
+  const loginWithGoogle = useCallback(async () => {
+    // Same persistence choice as login() -- Google sign-in has no
+    // "remember me" checkbox, so always persist across browser restarts.
+    await setPersistence(auth, browserLocalPersistence);
+    const cred = await signInWithPopup(auth, googleProvider);
+    setFirebaseUser(cred.user); // see note in login() above
+    try {
+      const profileData = await refreshProfile();
+      return { isNewUser: false, profile: profileData };
+    } catch (err) {
+      // 404 means this Google account has no `users/{uid}` doc yet -- a
+      // brand-new signup that still needs to pick a role (see
+      // GoogleRoleSelect / completeGoogleProfile / completeGoogleAgency).
+      if (err instanceof ApiError && err.status === 404) {
+        return { isNewUser: true, profile: null };
+      }
+      throw err;
+    }
+  }, [refreshProfile]);
+
+  const completeGoogleProfile = useCallback(
+    async (body) => {
+      await api.post("/auth/register-profile", body);
+      return refreshProfile();
+    },
+    [refreshProfile]
+  );
+
+  const completeGoogleAgency = useCallback(
+    async (body) => {
+      const res = await api.post("/agencies/register-profile", body);
+      const profileData = await refreshProfile();
+      return { user: profileData, agency: res.agency };
+    },
+    [refreshProfile]
+  );
+
   const logout = useCallback(async () => {
     await signOut(auth);
     setProfile(null);
   }, []);
+
+  const deleteAccount = useCallback(async () => {
+    if (!profile?.id) throw new ApiError("You are not signed in.", 401, null);
+    await api.del(`/users/${profile.id}`);
+    await signOut(auth);
+    setProfile(null);
+  }, [profile]);
 
   const resetPassword = useCallback(
     (email) => sendPasswordResetEmail(auth, email.trim()),
@@ -161,7 +206,11 @@ export function AuthProvider({ children }) {
       login,
       register,
       registerAgency,
+      loginWithGoogle,
+      completeGoogleProfile,
+      completeGoogleAgency,
       logout,
+      deleteAccount,
       resetPassword,
       refreshProfile,
     }),
@@ -173,7 +222,11 @@ export function AuthProvider({ children }) {
       login,
       register,
       registerAgency,
+      loginWithGoogle,
+      completeGoogleProfile,
+      completeGoogleAgency,
       logout,
+      deleteAccount,
       resetPassword,
       refreshProfile,
     ]

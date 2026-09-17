@@ -18,13 +18,20 @@ import { authErrorMessage } from "../lib/authErrors";
 
 function IndividualAgentSignup() {
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, completeGoogleProfile, firebaseUser, user } = useAuth();
+  // Signed in via Google (session exists) but no backend profile yet --
+  // this form is being used to finish a Google signup, not a fresh
+  // email/password one, so no account/password needs to be created here.
+  const isGoogleFlow = !!firebaseUser && !user;
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
 
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
+  // firebaseUser/user are already resolved by the time this page mounts (no
+  // reload happens between the Google popup and reaching here), so the
+  // Google-flow prefill can be a lazy initial value instead of an effect.
+  const [formData, setFormData] = useState(() => ({
+    fullName: isGoogleFlow ? firebaseUser.displayName || "" : "",
+    email: isGoogleFlow ? firebaseUser.email || "" : "",
     phone: "",
     address: "",
     licenseNumber: "",
@@ -32,7 +39,7 @@ function IndividualAgentSignup() {
     experience: "",
     password: "",
     confirmPassword: "",
-  });
+  }));
 
   const [errors, setErrors] = useState({});
 
@@ -57,10 +64,12 @@ function IndividualAgentSignup() {
       newErrors.fullName = "Full name is required";
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = "Email address is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Enter a valid email address";
+    if (!isGoogleFlow) {
+      if (!formData.email.trim()) {
+        newErrors.email = "Email address is required";
+      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        newErrors.email = "Enter a valid email address";
+      }
     }
 
     if (!formData.phone.trim()) {
@@ -85,16 +94,18 @@ function IndividualAgentSignup() {
       newErrors.experience = "Please select your experience";
     }
 
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
+    if (!isGoogleFlow) {
+      if (!formData.password) {
+        newErrors.password = "Password is required";
+      } else if (formData.password.length < 6) {
+        newErrors.password = "Password must be at least 6 characters";
+      }
 
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Confirm password is required";
-    } else if (formData.confirmPassword !== formData.password) {
-      newErrors.confirmPassword = "Passwords do not match";
+      if (!formData.confirmPassword) {
+        newErrors.confirmPassword = "Confirm password is required";
+      } else if (formData.confirmPassword !== formData.password) {
+        newErrors.confirmPassword = "Passwords do not match";
+      }
     }
 
     setErrors(newErrors);
@@ -115,17 +126,28 @@ function IndividualAgentSignup() {
       // No agency code -> the backend auto-creates a solo/independent agency.
       // The professional details are stored on the account and the agent starts
       // as "pending" until an ImportEase platform admin approves them.
-      await register({
-        name: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-        role: "clearing_agent",
-        phone: formData.phone,
-        licenseNumber: formData.licenseNumber,
-        licenseExpiry: formData.licenseExpiry,
-        experience: formData.experience,
-        address: formData.address,
-      });
+      if (isGoogleFlow) {
+        await completeGoogleProfile({
+          role: "clearing_agent",
+          phone: formData.phone,
+          licenseNumber: formData.licenseNumber,
+          licenseExpiry: formData.licenseExpiry,
+          experience: formData.experience,
+          address: formData.address,
+        });
+      } else {
+        await register({
+          name: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          role: "clearing_agent",
+          phone: formData.phone,
+          licenseNumber: formData.licenseNumber,
+          licenseExpiry: formData.licenseExpiry,
+          experience: formData.experience,
+          address: formData.address,
+        });
+      }
 
       // Account exists now, status "pending" -- that's this agent's real home
       // until they're reviewed. Uploading verification documents is an action
@@ -277,6 +299,7 @@ function IndividualAgentSignup() {
                   error={errors.email}
                   required
                   autoComplete="off"
+                  disabled={isGoogleFlow}
                 />
 
                 {/* Phone */}
@@ -291,33 +314,37 @@ function IndividualAgentSignup() {
                   required
                 />
 
-                {/* Password */}
-                <InputField
-                  label="Create Password"
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Create a password"
-                  icon={<Lock size={17} />}
-                  error={errors.password}
-                  required
-                  autoComplete="new-password"
-                />
+                {/* Password (email/password signup only -- a Google
+                    account has no password to set here) */}
+                {!isGoogleFlow && (
+                  <>
+                    <InputField
+                      label="Create Password"
+                      name="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Create a password"
+                      icon={<Lock size={17} />}
+                      error={errors.password}
+                      required
+                      autoComplete="new-password"
+                    />
 
-                {/* Confirm Password */}
-                <InputField
-                  label="Confirm Password"
-                  name="confirmPassword"
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="Confirm your password"
-                  icon={<Lock size={17} />}
-                  error={errors.confirmPassword}
-                  required
-                  autoComplete="new-password"
-                />
+                    <InputField
+                      label="Confirm Password"
+                      name="confirmPassword"
+                      type="password"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="Confirm your password"
+                      icon={<Lock size={17} />}
+                      error={errors.confirmPassword}
+                      required
+                      autoComplete="new-password"
+                    />
+                  </>
+                )}
 
               </div>
 
@@ -567,6 +594,7 @@ function InputField({
   error,
   required = false,
   autoComplete,
+  disabled = false,
 }) {
   return (
     <div>
@@ -596,11 +624,12 @@ function InputField({
           onChange={onChange}
           placeholder={placeholder}
           autoComplete={autoComplete}
+          disabled={disabled}
           className={`w-full rounded-xl border ${
             error
               ? "border-red-400"
               : "border-slate-200"
-          } bg-white py-3 pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10`}
+          } bg-white py-3 pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500`}
         />
 
       </div>

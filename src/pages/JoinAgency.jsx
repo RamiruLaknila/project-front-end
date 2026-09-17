@@ -20,24 +20,30 @@ import { authErrorMessage } from "../lib/authErrors";
 
 function JoinAgency() {
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, completeGoogleProfile, firebaseUser, user } = useAuth();
+  // Signed in via Google but no backend profile yet -- finishing a Google
+  // signup here, so no new account/password needs to be created.
+  const isGoogleFlow = !!firebaseUser && !user;
 
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [checkingCode, setCheckingCode] = useState(false);
   const [formError, setFormError] = useState("");
 
-  const [formData, setFormData] = useState({
+  // firebaseUser/user are already resolved by the time this page mounts (no
+  // reload happens between the Google popup and reaching here), so the
+  // Google-flow prefill can be a lazy initial value instead of an effect.
+  const [formData, setFormData] = useState(() => ({
     agencyCode: "",
-    fullName: "",
-    email: "",
+    fullName: isGoogleFlow ? firebaseUser.displayName || "" : "",
+    email: isGoogleFlow ? firebaseUser.email || "" : "",
     phone: "",
     address: "",
     licenseNumber: "",
     licenseExpiry: "",
     password: "",
     confirmPassword: "",
-  });
+  }));
 
   const [errors, setErrors] = useState({});
 
@@ -74,7 +80,7 @@ function JoinAgency() {
         newErrors.fullName = "Full name is required.";
       }
 
-      if (!formData.email.trim()) {
+      if (!isGoogleFlow && !formData.email.trim()) {
         newErrors.email = "Email is required.";
       }
 
@@ -87,14 +93,16 @@ function JoinAgency() {
           "Address is required.";
       }
 
-      if (!formData.password) {
-        newErrors.password = "Password is required.";
-      } else if (formData.password.length < 6) {
-        newErrors.password = "Password must be at least 6 characters.";
-      }
+      if (!isGoogleFlow) {
+        if (!formData.password) {
+          newErrors.password = "Password is required.";
+        } else if (formData.password.length < 6) {
+          newErrors.password = "Password must be at least 6 characters.";
+        }
 
-      if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = "Passwords do not match.";
+        if (formData.password !== formData.confirmPassword) {
+          newErrors.confirmPassword = "Passwords do not match.";
+        }
       }
     }
 
@@ -173,14 +181,25 @@ function JoinAgency() {
     try {
       // Registering with an agency code creates the account as a PENDING member
       // of that agency (agentStatus "pending") -- the agency admin approves it.
-      await register({
-        name: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-        role: "clearing_agent",
-        agencyCode: formData.agencyCode,
-        phone: formData.phone,
-      });
+      if (isGoogleFlow) {
+        // Matches register()'s own behavior for a joining agent: license
+        // details are collected above but not stored on the user doc --
+        // the agency admin reviews/approves this agent directly.
+        await completeGoogleProfile({
+          role: "clearing_agent",
+          agencyCode: formData.agencyCode,
+          phone: formData.phone,
+        });
+      } else {
+        await register({
+          name: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          role: "clearing_agent",
+          agencyCode: formData.agencyCode,
+          phone: formData.phone,
+        });
+      }
 
       navigate("/agent-pending", { replace: true });
     } catch (err) {
@@ -353,6 +372,7 @@ function JoinAgency() {
                   placeholder="john@example.com"
                   error={errors.email}
                   required
+                  disabled={isGoogleFlow}
                 />
 
                 <InputField
@@ -380,29 +400,33 @@ function JoinAgency() {
                   />
                 </div>
 
-                <PasswordField
-                  label="Password"
-                  autoComplete="new-password"
-                  value={formData.password}
-                  onChange={(value) =>
-                    updateField("password", value)
-                  }
-                  placeholder="Create a password"
-                  error={errors.password}
-                  required
-                />
+                {!isGoogleFlow && (
+                  <>
+                    <PasswordField
+                      label="Password"
+                      autoComplete="new-password"
+                      value={formData.password}
+                      onChange={(value) =>
+                        updateField("password", value)
+                      }
+                      placeholder="Create a password"
+                      error={errors.password}
+                      required
+                    />
 
-                <PasswordField
-                  label="Confirm Password"
-                  autoComplete="new-password"
-                  value={formData.confirmPassword}
-                  onChange={(value) =>
-                    updateField("confirmPassword", value)
-                  }
-                  placeholder="Confirm your password"
-                  error={errors.confirmPassword}
-                  required
-                />
+                    <PasswordField
+                      label="Confirm Password"
+                      autoComplete="new-password"
+                      value={formData.confirmPassword}
+                      onChange={(value) =>
+                        updateField("confirmPassword", value)
+                      }
+                      placeholder="Confirm your password"
+                      error={errors.confirmPassword}
+                      required
+                    />
+                  </>
+                )}
               </div>
 
               <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
@@ -608,6 +632,7 @@ function InputField({
   autoComplete = "on",
   error,
   required = false,
+  disabled = false,
 }) {
   return (
     <div>
@@ -622,7 +647,8 @@ function InputField({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className={`w-full rounded-xl border px-3.5 py-3 text-sm outline-none transition placeholder:text-slate-400 ${
+        disabled={disabled}
+        className={`w-full rounded-xl border px-3.5 py-3 text-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 ${
           error
             ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100"
             : "border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"

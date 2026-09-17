@@ -11,18 +11,38 @@ import {
   Gear,
   ShieldCheck,
   SignOut,
+  Trash,
   User,
   Users,
   UploadSimple,
   Image,
 } from "@phosphor-icons/react";
 import AgentMemberSidebar from "../components/AgentMemberSidebar";
+import { useAuth } from "../context/AuthContext";
+import { authErrorMessage } from "../lib/authErrors";
 
 function AgentSettings() {
   const navigate = useNavigate();
+  const { deleteAccount } = useAuth();
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      await deleteAccount();
+      navigate("/", { replace: true });
+    } catch (err) {
+      setDeleteError(authErrorMessage(err, "Could not delete your account."));
+      setDeleting(false);
+    }
+  };
 
   const [agent, setAgent] = useState(null);
 
@@ -837,11 +857,68 @@ function AgentSettings() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-5 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50"
+                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-bold text-red-600 transition hover:bg-red-50"
               >
-                <SignOut size={17} />
+                <SignOut size={14} />
                 Log Out
               </button>
+            </div>
+          </section>
+
+          {/* Delete Account */}
+          <section className="mb-8 rounded-2xl border border-red-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,.02)] sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                  <Trash size={20} />
+                </div>
+
+                <div>
+                  <h3 className="text-base font-bold text-slate-800">
+                    Delete Account
+                  </h3>
+
+                  <p className="mt-1 max-w-xl text-sm leading-5 text-slate-500">
+                    Permanently delete your account. This cannot be undone.
+                  </p>
+
+                  {deleteError && (
+                    <p className="mt-2 text-sm font-medium text-red-600">
+                      {deleteError}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {!confirmingDelete ? (
+                <button
+                  type="button"
+                  onClick={() => setConfirmingDelete(true)}
+                  className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-bold text-red-600 transition hover:bg-red-50"
+                >
+                  <Trash size={14} />
+                  Delete Account
+                </button>
+              ) : (
+                <div className="flex shrink-0 items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleDeleteAccount}
+                    disabled={deleting}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {deleting ? "Deleting..." : "Yes, delete"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingDelete(false)}
+                    disabled={deleting}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
             </div>
           </section>
 

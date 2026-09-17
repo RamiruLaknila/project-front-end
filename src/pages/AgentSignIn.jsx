@@ -15,7 +15,7 @@ import { authErrorMessage, landingPathForProfile } from "../lib/authErrors";
 
 function AgentSignIn() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -56,6 +56,9 @@ function AgentSignIn() {
       const profile = await login(email, password, rememberMe);
 
       if (profile?.role !== "clearing_agent") {
+        // Wrong page for this account -- sign back out instead of leaving
+        // them authenticated-but-blocked, and send them to the right one.
+        await logout();
         setError(
           "This is not a clearing-agent account. Use the SME sign in instead."
         );

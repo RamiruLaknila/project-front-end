@@ -12,6 +12,7 @@ import AdminAgentApprovals from "./pages/AdminAgentApprovals";
 import Home from "./pages/Home";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
+import GoogleRoleSelect from "./pages/GoogleRoleSelect";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import NewImport from "./pages/NewImport";
@@ -166,6 +167,15 @@ function App() {
         <Route
           path="/forgot-password"
           element={<ForgotPassword />}
+        />
+
+        <Route
+          path="/google-role"
+          element={
+            <RequireAuth>
+              <GoogleRoleSelect />
+            </RequireAuth>
+          }
         />
 
         <Route
